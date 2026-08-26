@@ -71,6 +71,7 @@
         <div class="lname" id="rSaveState" style="font-size:14px"></div>
       </div>
       <div class="card-actions">
+        <button class="btn teal" id="rReview" style="display:none">🔁 مراجعة الأخطاء</button>
         <button class="btn" id="rAgain">🔄 اختبار جديد</button>
         <a class="btn ghost" href="/">🏠 الرئيسية</a>
       </div>
@@ -82,6 +83,22 @@
             <tbody id="rDetails"></tbody>
           </table>
         </div>
+      </div>
+    </div>
+
+    <!-- شاشة مراجعة الأخطاء -->
+    <div id="reviewView" style="display:none">
+      <div class="progress-chip" id="rvProgress"></div>
+      <div class="big-card" style="padding:24px">
+        <div class="quiz-question">استمعي للحرف — الإجابة الصحيحة بالأخضر ✅</div>
+        <div class="quiz-big-letter en" id="rvLetter" style="min-height:60px"></div>
+        <div class="lname" id="rvInfo"></div>
+        <button class="btn" id="rvHear" style="margin-top:6px">🔊 اسمعي الحرف</button>
+      </div>
+      <div class="quiz-options" id="rvOptions"></div>
+      <div class="card-actions">
+        <button class="btn teal" id="rvNext">التالي ←</button>
+        <button class="btn ghost" id="rvClose">إنهاء المراجعة</button>
       </div>
     </div>
 
@@ -197,7 +214,7 @@ function startQuiz() {
   quiz = {
     tier,
     questions: chosen.map((L) => buildQuestion(L, tier)),
-    idx: 0, correct: 0, details: [], startedAt: Date.now()
+    idx: 0, correct: 0, details: [], wrongQs: [], startedAt: Date.now()
   };
   $("pickView").style.display = "none";
   $("resultView").style.display = "none";
@@ -262,6 +279,7 @@ async function answer(btn, chosen) {
     speakAr(PRAISES[Math.floor(Math.random() * PRAISES.length)]);
   } else {
     requeue(q.L);
+    quiz.wrongQs.push({ q, chosenText: chosen.text });
     if (q.qType === "case") {
       speakAr(`للأسف — هذا حرف ${q.answerText}`);
     } else {
@@ -310,6 +328,10 @@ async function finish() {
       <td>${d.correct ? "✅" : "❌"}</td>
     </tr>`).join("");
 
+  const nWrong = quiz.wrongQs.length;
+  $("rReview").style.display = nWrong ? "" : "none";
+  $("rReview").textContent = `🔁 مراجعة الأخطاء (${nWrong})`;
+
   $("rSaveState").textContent = "جارٍ حفظ النتيجة…";
   try {
     await saveQuizResult(session, {
@@ -329,6 +351,54 @@ async function finish() {
     $("rSaveState").textContent = "تعذر حفظ النتيجة — تأكدي من الاتصال";
   }
 }
+
+// ---------- مراجعة الأخطاء: تسمع الحرف والإجابة الصحيحة بالأخضر ----------
+
+let rvIdx = 0;
+
+function showReview() {
+  const { q, chosenText } = quiz.wrongQs[rvIdx];
+  $("rvProgress").textContent = `مراجعة ${rvIdx + 1} من ${quiz.wrongQs.length}`;
+  // نكشف الحرف بحالتيه حتى ترسخ صورته مع صوته
+  $("rvLetter").textContent = q.qType === "case" ? q.shown : `${q.L.u} ${q.L.l}`;
+  $("rvInfo").innerHTML = q.qType === "case"
+    ? `هذا حرف <b>${q.answerText}</b> — حرف «${q.L.name}»`
+    : `حرف «${q.L.name}» — ${q.L.word} ${q.L.emoji}`;
+  const box = $("rvOptions");
+  box.innerHTML = "";
+  q.options.forEach((opt) => {
+    const b = document.createElement("button");
+    b.className = "quiz-opt" + (q.qType === "case" ? " word" : "");
+    b.textContent = opt.text;
+    b.disabled = true;
+    if (opt.correct) b.classList.add("correct");
+    else if (opt.text === chosenText) b.classList.add("wrong");
+    box.appendChild(b);
+  });
+  $("rvNext").textContent = rvIdx + 1 < quiz.wrongQs.length ? "التالي ←" : "🎉 خلصت المراجعة";
+  skills.recordSeen(q.L.u);
+  tracker?.addLetters(1);
+  speakSound(q.L);
+}
+
+function endReview() {
+  $("reviewView").style.display = "none";
+  $("resultView").style.display = "block";
+  speakAr("برافو عليك! راجعتي أخطاءك");
+}
+
+$("rReview").addEventListener("click", () => {
+  rvIdx = 0;
+  $("resultView").style.display = "none";
+  $("reviewView").style.display = "block";
+  showReview();
+});
+$("rvNext").addEventListener("click", () => {
+  rvIdx++;
+  if (rvIdx < quiz.wrongQs.length) showReview(); else endReview();
+});
+$("rvClose").addEventListener("click", endReview);
+$("rvHear").addEventListener("click", () => speakSound(quiz.wrongQs[rvIdx].q.L));
 
 $("startBtn").addEventListener("click", startQuiz);
 $("qHear").addEventListener("click", () => {
