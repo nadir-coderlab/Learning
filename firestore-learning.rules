@@ -52,4 +52,13 @@
       allow delete: if isEduAdmin();
     }
 
+    // ذاكرة المهارات التكيفية (إتقان كل حرف) — مستند واحد لكل طالبة
+    match /eduSkills/{uid} {
+      allow read: if isEduAdmin() || (signedIn() && request.auth.uid == uid);
+      allow create, update: if (isEduMember() || isBootstrapAdmin())
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid;
+      allow delete: if isEduAdmin();
+    }
+
     // ===== نهاية قواعد موقع تعليم الإنجليزية =====

@@ -199,6 +199,12 @@ export async function listAllQuizzes() {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
+// خرائط إتقان الحروف لكل الطالبات (للوحة المدير)
+export async function listAllSkills() {
+  const snap = await getDocs(collection(db, "eduSkills"));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
 export async function listMyQuizzes(uid) {
   const snap = await getDocs(query(collection(db, "eduQuizzes"), where("uid", "==", uid)));
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));

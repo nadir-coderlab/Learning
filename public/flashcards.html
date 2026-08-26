@@ -56,22 +56,26 @@ import { requireSession } from "/assets/js/auth.js";
 import { LETTERS, shuffled } from "/assets/js/letters.js";
 import { speakSound, speakLetter, speakAr } from "/assets/js/speech.js";
 import { startTracking } from "/assets/js/tracker.js";
+import { openSkills } from "/assets/js/skills.js";
 
 const $ = (id) => document.getElementById(id);
-let tracker = null;
-let deck = [];       // ترتيب عشوائي بلا تكرار حتى تكتمل الـ26
+let tracker = null, skills = null;
+let deck = [];       // كل الحروف + تكرار إضافي للحروف الضعيفة
 let pos = -1;
 let currentCase = "u";
 
-requireSession((session) => {
+requireSession(async (session) => {
+  tracker = startTracking(session, "flashcards");
+  skills = await openSkills(session);
   $("loading").style.display = "none";
   $("page").style.display = "block";
-  tracker = startTracking(session, "flashcards");
   restart();
 });
 
 function restart() {
-  deck = shuffled(LETTERS);
+  // الحروف الضعيفة (إتقان منخفض) تدخل مرتين حتى تتكرر أكثر
+  const weak = new Set(skills.weakLetters(6).filter((L) => skills.boxOf(L.u) < 4).map((L) => L.u));
+  deck = shuffled([...LETTERS, ...LETTERS.filter((L) => weak.has(L.u))]);
   pos = -1;
   next();
 }
@@ -89,6 +93,7 @@ function next() {
   $("fcWord").innerHTML = "";
   $("progress").textContent = `البطاقة ${pos + 1} من ${deck.length}`;
   tracker?.addLetters(1);
+  skills?.recordSeen(L.u);
   speakSound(L);
 }
 
