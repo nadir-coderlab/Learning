@@ -104,6 +104,15 @@
     <div class="stat-cards" id="dCards"></div>
 
     <div class="panel" style="box-shadow:none; border:2px solid var(--line)">
+      <h2>🧠 خريطة إتقان الحروف (0–5)</h2>
+      <div style="font-size:13px; color:var(--muted); font-weight:700; margin-bottom:10px">
+        🟩 متقن (4–5) · 🟨 يتحسن (2–3) · 🟥 يحتاج تركيزًا (0–1 مع أخطاء) — النظام يكرر الأحمر تلقائيًا في الأسئلة والبطاقات
+      </div>
+      <div class="mastery-grid" id="dMastery"></div>
+      <div class="empty-state" id="dNoMastery" style="display:none">لم تبدأ التدرب بعد</div>
+    </div>
+
+    <div class="panel" style="box-shadow:none; border:2px solid var(--line)">
       <h2>📈 تطور نتائج الاختبارات</h2>
       <div id="dTrendMsg" style="font-weight:800; margin-bottom:8px"></div>
       <div id="dChart" style="direction:ltr"></div>
@@ -153,12 +162,13 @@
 <script type="module">
 import {
   requireSession, listStudents, createStudent, updateStudent, deleteStudentProfile,
-  listAllSessions, listAllQuizzes, friendlyError
+  listAllSessions, listAllQuizzes, listAllSkills, friendlyError
 } from "/assets/js/auth.js";
 import { fmtDuration } from "/assets/js/tracker.js";
+import { LETTERS } from "/assets/js/letters.js";
 
 const $ = (id) => document.getElementById(id);
-let students = [], sessions = [], quizzes = [];
+let students = [], sessions = [], quizzes = [], skillsDocs = [];
 
 const ACTIVITY_NAMES = { letters: "تعلم الحروف", flashcards: "استعراض", quiz: "اختبار" };
 
@@ -190,7 +200,7 @@ requireSession(async () => {
 
 async function loadAll() {
   try {
-    [students, sessions, quizzes] = await Promise.all([listStudents(), listAllSessions(), listAllQuizzes()]);
+    [students, sessions, quizzes, skillsDocs] = await Promise.all([listStudents(), listAllSessions(), listAllQuizzes(), listAllSkills()]);
   } catch (e) {
     toast("تعذر تحميل البيانات: " + friendlyError(e), true);
     return;
@@ -348,6 +358,18 @@ function openDetail(u, st) {
     <div class="stat-card"><div class="v">${st.letters}</div><div class="k">حروف</div></div>
     <div class="stat-card"><div class="v">${best == null ? "—" : best + "%"}</div><div class="k">أفضل نتيجة</div></div>`;
 
+  // خريطة إتقان الحروف من ذاكرة المهارات (eduSkills)
+  const skl = skillsDocs.find((s) => s.id === u.id)?.letters || {};
+  const anySkill = Object.keys(skl).length > 0;
+  $("dNoMastery").style.display = anySkill ? "none" : "block";
+  $("dMastery").innerHTML = !anySkill ? "" : LETTERS.map((L) => {
+    const e = skl[L.u];
+    const box = e?.box || 0;
+    const cls = !e || !e.seen ? "" : box >= 4 ? " m-high" : box >= 2 ? " m-mid" : " m-low";
+    const errs = e?.no ? ` · ✗${e.no}` : "";
+    return `<div class="mastery-cell${cls}" title="صحيح: ${e?.ok || 0} · خطأ: ${e?.no || 0}">${L.u} ${L.l}<small>${!e || !e.seen ? "—" : box + "/5" + errs}</small></div>`;
+  }).join("");
+
   // منحنى التطور + وصفه
   const trend = trendOf(st.qq);
   $("dTrendMsg").innerHTML = trend ? `<span class="${trend.cls}">${trend.text}</span>` : "";
@@ -386,7 +408,7 @@ function openDetail(u, st) {
     const wrong = (q.details || []).filter((d) => !d.correct).map((d) => d.letter).join(" ، ");
     return `<tr>
       <td style="font-size:12px">${fmtDate(tsMs(q.ts))}</td>
-      <td>${q.type === "match" ? "🔗 مطابقة" : "🔊 استماع"}</td>
+      <td>${q.type === "match" ? "🔗 مطابقة" : q.type === "sound" ? "🔊 استماع" : "🧠 ذكي"}</td>
       <td><span class="${scoreClass(pct)}">${q.correct}/${q.total} (${pct}%)</span></td>
       <td>${fmtDuration(q.durationSec)}</td>
       <td class="en" style="font-weight:800">${esc(wrong) || "—"}</td>

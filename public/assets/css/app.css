@@ -167,6 +167,23 @@ body {
 .quiz-opt.correct { border-color: var(--ok); background: #dcfce7; }
 .quiz-opt.wrong { border-color: var(--err); background: #fee2e2; }
 .quiz-opt:disabled { cursor: default; opacity: .9; }
+.quiz-opt.word { font-family: "Cairo", sans-serif; font-size: 30px; direction: rtl; }
+
+/* شارات الإتقان على بلاطات الحروف */
+.letter-tile.weak { border-color: #fca5a5; background: #fff7f7; }
+.letter-tile.master { border-color: #86efac; background: #f0fdf4; }
+.letter-tile .mark { font-size: 13px; height: 16px; line-height: 1; }
+
+/* شبكة إتقان الحروف في لوحة المدير */
+.mastery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 8px; direction: ltr; }
+.mastery-cell {
+  border-radius: 12px; text-align: center; padding: 8px 2px; font-weight: 800; font-size: 18px;
+  font-family: "Baloo 2", "Comic Sans MS", sans-serif; border: 2px solid var(--line); background: #faf7ff; color: var(--ink);
+}
+.mastery-cell small { display: block; font-size: 10px; font-weight: 700; color: var(--muted); }
+.mastery-cell.m-high { background: #dcfce7; border-color: #86efac; }
+.mastery-cell.m-mid { background: #fef3c7; border-color: #fcd34d; }
+.mastery-cell.m-low { background: #fee2e2; border-color: #fca5a5; }
 .quiz-question { font-size: 20px; font-weight: 900; margin-bottom: 6px; }
 .quiz-big-letter {
   font-size: clamp(90px, 26vw, 150px); font-weight: 800; line-height: 1.1;

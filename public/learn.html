@@ -61,15 +61,17 @@ import { requireSession } from "/assets/js/auth.js";
 import { LETTERS } from "/assets/js/letters.js";
 import { speakSound, speakLetter, speechSupported } from "/assets/js/speech.js";
 import { startTracking } from "/assets/js/tracker.js";
+import { openSkills } from "/assets/js/skills.js";
 
 const $ = (id) => document.getElementById(id);
-let tracker = null;
+let tracker = null, skills = null;
 let current = 0;
 
-requireSession((session) => {
+requireSession(async (session) => {
+  tracker = startTracking(session, "letters");
+  skills = await openSkills(session);
   $("loading").style.display = "none";
   $("page").style.display = "block";
-  tracker = startTracking(session, "letters");
   render();
   if (!speechSupported()) {
     const t = $("toast");
@@ -84,8 +86,13 @@ function render() {
   grid.innerHTML = "";
   LETTERS.forEach((L, i) => {
     const tile = document.createElement("div");
-    tile.className = "letter-tile";
-    tile.innerHTML = `<div class="pair en">${L.u} ${L.l}</div><div class="emoji">${L.emoji}</div>`;
+    const e = skills?.letters?.[L.u];
+    const box = e?.box || 0;
+    // 🎯 حرف يحتاج تدريبًا (أخطأت فيه) · ⭐ حرف متقن
+    const cls = e && e.no > 0 && box < 4 ? " weak" : box >= 4 ? " master" : "";
+    const mark = cls === " weak" ? "🎯" : cls === " master" ? "⭐" : "";
+    tile.className = "letter-tile" + cls;
+    tile.innerHTML = `<div class="pair en">${L.u} ${L.l}</div><div class="emoji">${L.emoji}</div><div class="mark">${mark}</div>`;
     tile.addEventListener("click", () => open(i));
     grid.appendChild(tile);
   });
@@ -99,6 +106,7 @@ function open(i) {
   $("mWord").innerHTML = `<span class="emoji">${L.emoji}</span> ${L.word} <span class="ar">${L.ar}</span>`;
   $("letterModal").classList.add("show");
   tracker?.addLetters(1);
+  skills?.recordSeen(L.u);
   speakSound(L);
 }
 
