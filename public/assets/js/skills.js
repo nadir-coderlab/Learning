@@ -35,9 +35,15 @@ export async function openSkills(session) {
   const uid = session.user.uid;
   const ref = doc(db, "eduSkills", uid);
   let letters = {};
+  // سلة التغطية: ترتيب عشوائي لبقية الحروف التي لم تظهر بعد في الاختبارات —
+  // تضمن المرور على كل الحروف الـ26 قبل إعادة أي حرف، وبترتيب جديد كل دورة
+  let bag = [];
   try {
     const snap = await getDoc(ref);
-    if (snap.exists()) letters = snap.data().letters || {};
+    if (snap.exists()) {
+      letters = snap.data().letters || {};
+      bag = Array.isArray(snap.data().bag) ? snap.data().bag : [];
+    }
   } catch (e) { console.warn("تعذر تحميل المهارات:", e); }
 
   let saveTimer = null;
@@ -48,6 +54,7 @@ export async function openSkills(session) {
       username: session.profile?.username || "",
       displayName: session.profile?.displayName || "",
       letters,
+      bag,
       updatedAt: serverTimestamp()
     }, { merge: true }).catch((e) => console.warn("تعذر حفظ المهارات:", e));
     if (now) doSave(); else saveTimer = setTimeout(doSave, 2500);
@@ -121,6 +128,20 @@ export async function openSkills(session) {
       if (e && e.no > e.ok) w *= 1.6;         // أخطاؤه أكثر من صوابه
       if (!e || e.seen === 0) w *= 1.2;       // لم يُجرَّب بعد
       return w;
+    },
+
+    // سحب n حروف من سلة التغطية — كل الحروف تظهر قبل أن يتكرر أي حرف،
+    // وعند فراغ السلة يعاد خلطها بترتيب عشوائي جديد
+    drawCoverage(n) {
+      const out = [];
+      while (out.length < n) {
+        if (!bag.length) {
+          bag = shuffled(LETTERS.map((L) => L.u).filter((u) => !out.includes(u)));
+        }
+        out.push(bag.shift());
+      }
+      save();
+      return out.map((u) => LETTERS.find((x) => x.u === u));
     },
 
     // اختيار n حروف بالأوزان (بلا تكرار)
