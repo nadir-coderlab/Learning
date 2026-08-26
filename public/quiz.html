@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اختبار الحروف — مدرسة البنات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<body>
+
+<div class="loading-screen" id="loading">
+  <div class="spinner"></div>
+  <div>لحظة… 📝</div>
+</div>
+
+<div id="page" style="display:none">
+  <div class="top">
+    <div class="wrap">
+      <div>
+        <div class="brand">📝 اختبار الحروف</div>
+        <h1>هيا نختبر معلوماتك!</h1>
+        <div class="sub">حروف عشوائية — بعضها كبير وبعضها صغير</div>
+      </div>
+      <div class="topbtns">
+        <a class="tbtn" href="/">🏠 الرئيسية</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="text-align:center; max-width:640px">
+
+    <!-- اختيار نوع الاختبار -->
+    <div id="pickView">
+      <div class="activities" style="grid-template-columns:1fr; max-width:420px; margin:0 auto">
+        <div class="activity-card" id="startSound">
+          <div class="ic">🔊</div>
+          <h3>استمعي واختاري</h3>
+          <p>اسمعي الحرف ثم اختاري الحرف الصحيح من ٤ خيارات</p>
+        </div>
+        <div class="activity-card" id="startMatch">
+          <div class="ic">🔗</div>
+          <h3>طابقي الكبير مع الصغير</h3>
+          <p>يظهر حرف كبير أو صغير — اختاري شكله الآخر</p>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:22px; text-align:right">
+        <h2>🏅 نتائجي السابقة</h2>
+        <div id="myResults" class="empty-state">جارٍ التحميل…</div>
+      </div>
+    </div>
+
+    <!-- شاشة السؤال -->
+    <div id="quizView" style="display:none">
+      <div class="progress-chip" id="qProgress"></div>
+      <div class="big-card" style="padding:24px">
+        <div class="quiz-question" id="qText"></div>
+        <div class="quiz-big-letter en" id="qLetter" style="min-height:60px"></div>
+        <button class="btn" id="qHear" style="margin-top:6px">🔊 أعيدي السماع</button>
+      </div>
+      <div class="quiz-options" id="qOptions"></div>
+    </div>
+
+    <!-- شاشة النتيجة -->
+    <div id="resultView" style="display:none">
+      <div class="big-card">
+        <div style="font-size:70px" id="rEmoji"></div>
+        <div class="stars" id="rStars"></div>
+        <div class="word" id="rScore"></div>
+        <div class="lname" id="rMsg"></div>
+        <div class="lname" id="rSaveState" style="font-size:14px"></div>
+      </div>
+      <div class="card-actions">
+        <button class="btn" id="rAgain">🔄 اختبار جديد</button>
+        <a class="btn ghost" href="/">🏠 الرئيسية</a>
+      </div>
+      <div class="panel" style="margin-top:22px; text-align:right">
+        <h2>📋 تفاصيل الإجابات</h2>
+        <div class="table-wrap">
+          <table class="data" style="min-width:420px">
+            <thead><tr><th>#</th><th>الحرف</th><th>إجابتك</th><th>النتيجة</th></tr></thead>
+            <tbody id="rDetails"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+import { requireSession, saveQuizResult, listMyQuizzes } from "/assets/js/auth.js";
+import { LETTERS, shuffled, randomOf } from "/assets/js/letters.js";
+import { speak } from "/assets/js/speech.js";
+import { startTracking } from "/assets/js/tracker.js";
+
+const $ = (id) => document.getElementById(id);
+const TOTAL = 10;
+let session = null, tracker = null;
+let quiz = null; // { type, questions:[], idx, correct, details:[], startedAt }
+
+requireSession((s) => {
+  session = s;
+  $("loading").style.display = "none";
+  $("page").style.display = "block";
+  tracker = startTracking(s, "quiz");
+  loadMyResults();
+});
+
+function fmtDate(ts) {
+  const d = ts?.toDate ? ts.toDate() : (ts ? new Date(ts) : null);
+  return d ? d.toLocaleDateString("ar-SA", { day: "numeric", month: "long" }) : "—";
+}
+
+async function loadMyResults() {
+  try {
+    const list = await listMyQuizzes(session.user.uid);
+    list.sort((a, b) => (b.ts?.seconds || 0) - (a.ts?.seconds || 0));
+    const el = $("myResults");
+    if (!list.length) { el.textContent = "لا توجد اختبارات بعد — جربي أول اختبار! 💪"; return; }
+    el.className = "";
+    el.innerHTML = list.slice(0, 8).map((q) => {
+      const pct = Math.round((q.correct / q.total) * 100);
+      const cls = pct >= 80 ? "score-good" : pct >= 50 ? "score-mid" : "score-bad";
+      const type = q.type === "match" ? "🔗 مطابقة" : "🔊 استماع";
+      return `<div style="display:flex; justify-content:space-between; padding:8px 4px; border-bottom:1px solid var(--line); font-weight:700">
+        <span>${type} — ${fmtDate(q.ts)}</span>
+        <span class="${cls}">${q.correct}/${q.total} (${pct}%)</span>
+      </div>`;
+    }).join("");
+  } catch (e) {
+    $("myResults").textContent = "تعذر تحميل النتائج";
+  }
+}
+
+// ---------- توليد الأسئلة ----------
+
+function buildQuestions(type) {
+  // حروف عشوائية بلا تكرار، وحالة عشوائية (كبير/صغير) لكل سؤال
+  return shuffled(LETTERS).slice(0, TOTAL).map((L) => {
+    const qCase = Math.random() < 0.5 ? "u" : "l";
+    const distractors = shuffled(LETTERS.filter((x) => x.u !== L.u)).slice(0, 3);
+    if (type === "sound") {
+      // خيارات بنفس الحالة — المطلوب معرفة الحرف من صوته
+      const options = shuffled([L, ...distractors]).map((x) => x[qCase]);
+      return { L, qCase, options, answer: L[qCase] };
+    }
+    // مطابقة: يظهر الحرف بحالة، والخيارات بالحالة الأخرى
+    const otherCase = qCase === "u" ? "l" : "u";
+    const options = shuffled([L, ...distractors]).map((x) => x[otherCase]);
+    return { L, qCase, otherCase, options, answer: L[otherCase] };
+  });
+}
+
+function startQuiz(type) {
+  quiz = { type, questions: buildQuestions(type), idx: 0, correct: 0, details: [], startedAt: Date.now() };
+  $("pickView").style.display = "none";
+  $("resultView").style.display = "none";
+  $("quizView").style.display = "block";
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = quiz.questions[quiz.idx];
+  $("qProgress").textContent = `السؤال ${quiz.idx + 1} من ${TOTAL} ⭐ ${quiz.correct}`;
+  if (quiz.type === "sound") {
+    $("qText").textContent = "استمعي جيدًا ثم اختاري الحرف الصحيح";
+    $("qLetter").textContent = "❓";
+    $("qHear").style.display = "";
+    speak(q.L.u, { rate: 0.6 });
+  } else {
+    const shown = q.qCase === "u" ? q.L.u : q.L.l;
+    $("qText").textContent = q.qCase === "u"
+      ? "هذا حرف كبير — اختاري شكله الصغير"
+      : "هذا حرف صغير — اختاري شكله الكبير";
+    $("qLetter").textContent = shown;
+    $("qHear").style.display = "";
+    speak(q.L.u, { rate: 0.6 });
+  }
+  const box = $("qOptions");
+  box.innerHTML = "";
+  q.options.forEach((opt) => {
+    const b = document.createElement("button");
+    b.className = "quiz-opt";
+    b.textContent = opt;
+    b.addEventListener("click", () => answer(b, opt));
+    box.appendChild(b);
+  });
+  tracker?.addLetters(1);
+}
+
+async function answer(btn, chosen) {
+  const q = quiz.questions[quiz.idx];
+  const buttons = [...$("qOptions").children];
+  buttons.forEach((b) => (b.disabled = true));
+  const ok = chosen === q.answer;
+  btn.classList.add(ok ? "correct" : "wrong");
+  if (!ok) buttons.find((b) => b.textContent === q.answer)?.classList.add("correct");
+  if (ok) { quiz.correct++; speak("Correct! Great job!", { rate: 0.9 }); }
+  else speak(`No, this is ${q.L.u}`, { rate: 0.8 });
+  quiz.details.push({
+    letter: q.L.u,
+    shownCase: q.qCase === "u" ? "كبير" : "صغير",
+    answer: q.answer,
+    chosen,
+    correct: ok
+  });
+  await new Promise((r) => setTimeout(r, 1400));
+  quiz.idx++;
+  if (quiz.idx < TOTAL) showQuestion(); else finish();
+}
+
+async function finish() {
+  $("quizView").style.display = "none";
+  $("resultView").style.display = "block";
+  const pct = Math.round((quiz.correct / TOTAL) * 100);
+  const stars = pct >= 90 ? 5 : pct >= 70 ? 4 : pct >= 50 ? 3 : pct >= 30 ? 2 : 1;
+  $("rEmoji").textContent = pct >= 70 ? "🏆" : pct >= 50 ? "😊" : "💪";
+  $("rStars").textContent = "⭐".repeat(stars) + "☆".repeat(5 - stars);
+  $("rScore").textContent = `${quiz.correct} من ${TOTAL} (${pct}%)`;
+  $("rMsg").textContent = pct >= 90 ? "ممتازة! ما شاء الله عليك 🎉"
+    : pct >= 70 ? "رائعة جدًا! استمري 👏"
+    : pct >= 50 ? "جيد! تدربي أكثر وستصبحين بطلة"
+    : "لا بأس — كل بطلة تبدأ بالتدريب! جربي مرة أخرى";
+  if (pct >= 70) speak("Excellent! You are a star!", { rate: 0.9 });
+  $("rDetails").innerHTML = quiz.details.map((d, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td class="en" style="font-weight:800">${d.answer} <span style="color:var(--muted); font-size:12px">(${d.shownCase})</span></td>
+      <td class="en" style="font-weight:800">${d.chosen}</td>
+      <td>${d.correct ? "✅" : "❌"}</td>
+    </tr>`).join("");
+
+  $("rSaveState").textContent = "جارٍ حفظ النتيجة…";
+  try {
+    await saveQuizResult(session, {
+      type: quiz.type,
+      total: TOTAL,
+      correct: quiz.correct,
+      pct,
+      durationSec: Math.round((Date.now() - quiz.startedAt) / 1000),
+      details: quiz.details
+    });
+    $("rSaveState").textContent = "تم حفظ النتيجة ✅";
+    loadMyResults();
+  } catch (e) {
+    console.error(e);
+    $("rSaveState").textContent = "تعذر حفظ النتيجة — تأكدي من الاتصال";
+  }
+}
+
+$("startSound").addEventListener("click", () => startQuiz("sound"));
+$("startMatch").addEventListener("click", () => startQuiz("match"));
+$("qHear").addEventListener("click", () => {
+  const q = quiz?.questions[quiz.idx];
+  if (q) speak(q.L.u, { rate: 0.6 });
+});
+$("rAgain").addEventListener("click", () => {
+  $("resultView").style.display = "none";
+  $("pickView").style.display = "block";
+});
+window.addEventListener("pagehide", () => tracker?.stop());
+</script>
+</body>
+</html>

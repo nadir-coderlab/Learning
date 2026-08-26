@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>استعراض عشوائي — مدرسة البنات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<body>
+
+<div class="loading-screen" id="loading">
+  <div class="spinner"></div>
+  <div>لحظة… 🎲</div>
+</div>
+
+<div id="page" style="display:none">
+  <div class="top">
+    <div class="wrap">
+      <div>
+        <div class="brand">🎲 استعراض عشوائي</div>
+        <h1>بطاقات الحروف</h1>
+        <div class="sub">يظهر الحرف عشوائيًا — أحيانًا كبير وأحيانًا صغير</div>
+      </div>
+      <div class="topbtns">
+        <a class="tbtn" href="/">🏠 الرئيسية</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="text-align:center">
+    <div class="progress-chip" id="progress"></div>
+
+    <div class="big-card" id="card">
+      <div class="pair single en" id="fcLetter"></div>
+      <div class="lname" id="fcHint" style="min-height:30px"></div>
+      <div class="word en" id="fcWord" style="min-height:44px"></div>
+    </div>
+
+    <div class="card-actions">
+      <button class="btn" id="hearBtn">🔊 اسمعي</button>
+      <button class="btn teal" id="revealBtn">👀 الاسم والكلمة</button>
+      <button class="btn" id="nextBtn" style="background:linear-gradient(135deg,#f59e0b,#db2777)">التالي 🎲</button>
+    </div>
+    <div class="card-actions">
+      <button class="btn ghost small" id="restartBtn">🔄 إعادة من جديد</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+import { requireSession } from "/assets/js/auth.js";
+import { LETTERS, shuffled } from "/assets/js/letters.js";
+import { speak, speakLetter } from "/assets/js/speech.js";
+import { startTracking } from "/assets/js/tracker.js";
+
+const $ = (id) => document.getElementById(id);
+let tracker = null;
+let deck = [];       // ترتيب عشوائي بلا تكرار حتى تكتمل الـ26
+let pos = -1;
+let currentCase = "u";
+
+requireSession((session) => {
+  $("loading").style.display = "none";
+  $("page").style.display = "block";
+  tracker = startTracking(session, "flashcards");
+  restart();
+});
+
+function restart() {
+  deck = shuffled(LETTERS);
+  pos = -1;
+  next();
+}
+
+function next() {
+  pos++;
+  if (pos >= deck.length) {
+    celebrate();
+    return;
+  }
+  const L = deck[pos];
+  currentCase = Math.random() < 0.5 ? "u" : "l";
+  $("fcLetter").textContent = currentCase === "u" ? L.u : L.l;
+  $("fcHint").textContent = "";
+  $("fcWord").innerHTML = "";
+  $("progress").textContent = `البطاقة ${pos + 1} من ${deck.length}`;
+  tracker?.addLetters(1);
+  speak(L.u, { rate: 0.6 });
+}
+
+function celebrate() {
+  $("fcLetter").textContent = "🎉";
+  $("fcHint").textContent = "ما شاء الله! خلصتي كل الحروف";
+  $("fcWord").innerHTML = "⭐⭐⭐";
+  $("progress").textContent = `اكتمل الاستعراض — ${deck.length} حرفًا`;
+  speak("Great job! You did it!", { rate: 0.85 });
+}
+
+$("hearBtn").addEventListener("click", () => {
+  if (pos < deck.length) speak(deck[pos].u, { rate: 0.6 });
+});
+$("revealBtn").addEventListener("click", () => {
+  if (pos >= deck.length) return;
+  const L = deck[pos];
+  $("fcHint").textContent = `حرف «${L.name}» — كبير: ${L.u} / صغير: ${L.l}`;
+  $("fcWord").innerHTML = `<span class="emoji">${L.emoji}</span> ${L.word} <span class="ar">${L.ar}</span>`;
+  speakLetter(L);
+});
+$("nextBtn").addEventListener("click", () => {
+  if (pos >= deck.length) restart(); else next();
+});
+$("restartBtn").addEventListener("click", restart);
+window.addEventListener("pagehide", () => tracker?.stop());
+</script>
+</body>
+</html>

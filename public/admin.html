@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة المتابعة — مدرسة البنات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<body>
+
+<div class="loading-screen" id="loading">
+  <div class="spinner"></div>
+  <div>جارٍ تحميل لوحة المتابعة…</div>
+</div>
+
+<div id="page" style="display:none">
+  <div class="top">
+    <div class="wrap">
+      <div>
+        <div class="brand">📊 لوحة متابعة المدير</div>
+        <h1>متابعة تعلم البنات</h1>
+        <div class="sub">وقت المذاكرة، الحروف، ونتائج الاختبارات لكل واحدة</div>
+      </div>
+      <div class="topbtns">
+        <button class="tbtn solid" id="addBtn">➕ إضافة طالبة</button>
+        <button class="tbtn" id="refreshBtn">🔄 تحديث</button>
+        <a class="tbtn" href="/">🏠 الرئيسية</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="stat-cards" id="statCards"></div>
+
+    <div class="panel">
+      <h2>👧 الطالبات</h2>
+      <div class="table-wrap">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>الطالبة</th>
+              <th>اسم المستخدم</th>
+              <th>وقت المذاكرة الكلي</th>
+              <th>أيام النشاط</th>
+              <th>حروف استُعرضت</th>
+              <th>الاختبارات</th>
+              <th>متوسط النتيجة</th>
+              <th>آخر نشاط</th>
+              <th>الحالة</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="studentsBody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="noStudents" style="display:none">
+        لا توجد حسابات طالبات بعد — أضيفي أول حساب من زر «إضافة طالبة»
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- مودال إضافة طالبة -->
+<div class="modal-back" id="addModal">
+  <div class="modal">
+    <h3>➕ إضافة طالبة جديدة</h3>
+    <div id="addMsg"></div>
+    <form id="addForm">
+      <div class="field">
+        <label class="f" for="aName">الاسم (يظهر في الترحيب)</label>
+        <input type="text" id="aName" required>
+      </div>
+      <div class="field">
+        <label class="f" for="aUser">اسم المستخدم (إنجليزي بدون مسافات)</label>
+        <input type="text" id="aUser" autocapitalize="none" spellcheck="false" pattern="[a-zA-Z0-9._-]+" required>
+      </div>
+      <div class="field">
+        <label class="f" for="aPw">كلمة المرور (6 أحرف على الأقل)</label>
+        <input type="text" id="aPw" minlength="6" required>
+      </div>
+      <div class="field">
+        <label class="f" for="aAvatar">الرمز</label>
+        <select id="aAvatar">
+          <option value="👧">👧</option><option value="🦄">🦄</option><option value="🌸">🌸</option>
+          <option value="🐰">🐰</option><option value="🦋">🦋</option><option value="⭐">⭐</option>
+          <option value="🎀">🎀</option><option value="🐱">🐱</option>
+        </select>
+      </div>
+      <div class="actions">
+        <button class="btn" type="submit" id="aSaveBtn">إنشاء الحساب</button>
+        <button class="btn ghost" type="button" id="aCancelBtn">إلغاء</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- مودال تفاصيل طالبة -->
+<div class="modal-back" id="detailModal">
+  <div class="modal wide">
+    <h3 id="dTitle"></h3>
+    <div class="stat-cards" id="dCards"></div>
+
+    <div class="panel" style="box-shadow:none; border:2px solid var(--line)">
+      <h2>🕒 المذاكرة حسب اليوم</h2>
+      <div class="table-wrap">
+        <table class="data" style="min-width:420px">
+          <thead><tr><th>اليوم</th><th>الوقت</th><th>الحروف</th><th>الأنشطة</th></tr></thead>
+          <tbody id="dDays"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="dNoDays" style="display:none">لا توجد جلسات مذاكرة بعد</div>
+    </div>
+
+    <div class="panel" style="box-shadow:none; border:2px solid var(--line)">
+      <h2>📝 نتائج الاختبارات</h2>
+      <div class="table-wrap">
+        <table class="data" style="min-width:420px">
+          <thead><tr><th>التاريخ</th><th>النوع</th><th>النتيجة</th><th>المدة</th><th>الأخطاء</th></tr></thead>
+          <tbody id="dQuizzes"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="dNoQuizzes" style="display:none">لا توجد اختبارات بعد</div>
+    </div>
+
+    <div class="actions">
+      <button class="btn ghost" id="dCloseBtn">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+import {
+  requireSession, listStudents, createStudent, updateStudent, deleteStudentProfile,
+  listAllSessions, listAllQuizzes, friendlyError
+} from "/assets/js/auth.js";
+import { fmtDuration } from "/assets/js/tracker.js";
+
+const $ = (id) => document.getElementById(id);
+let students = [], sessions = [], quizzes = [];
+
+const ACTIVITY_NAMES = { letters: "تعلم الحروف", flashcards: "استعراض", quiz: "اختبار" };
+
+let toastTimer;
+function toast(text, isErr = false) {
+  const t = $("toast");
+  t.textContent = text;
+  t.className = "show" + (isErr ? " err" : "");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => (t.className = ""), 3500);
+}
+function setMsg(el, kind, text) {
+  el.innerHTML = text ? `<div class="alert ${kind}">${text}</div>` : "";
+}
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function tsMs(ts) { return ts?.seconds ? ts.seconds * 1000 : 0; }
+function fmtDate(ms) {
+  return ms ? new Date(ms).toLocaleDateString("ar-SA", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) : "—";
+}
+function scoreClass(pct) { return pct >= 80 ? "score-good" : pct >= 50 ? "score-mid" : "score-bad"; }
+
+requireSession(async () => {
+  await loadAll();
+  $("loading").style.display = "none";
+  $("page").style.display = "block";
+}, { adminOnly: true });
+
+async function loadAll() {
+  try {
+    [students, sessions, quizzes] = await Promise.all([listStudents(), listAllSessions(), listAllQuizzes()]);
+  } catch (e) {
+    toast("تعذر تحميل البيانات: " + friendlyError(e), true);
+    return;
+  }
+  render();
+}
+
+function statsOf(uid) {
+  const ss = sessions.filter((s) => s.uid === uid);
+  const qq = quizzes.filter((q) => q.uid === uid);
+  const totalSec = ss.reduce((a, s) => a + (s.seconds || 0), 0);
+  const letters = ss.reduce((a, s) => a + (s.letters || 0), 0);
+  const days = new Set(ss.filter((s) => (s.seconds || 0) > 0).map((s) => s.date)).size;
+  const avgPct = qq.length ? Math.round(qq.reduce((a, q) => a + (q.pct ?? Math.round(100 * q.correct / q.total)), 0) / qq.length) : null;
+  const lastMs = Math.max(0, ...ss.map((s) => tsMs(s.lastTs)), ...qq.map((q) => tsMs(q.ts)));
+  return { ss, qq, totalSec, letters, days, avgPct, lastMs };
+}
+
+function render() {
+  const girls = students.filter((u) => u.role !== "admin");
+  // البطاقات العامة
+  const totalSec = sessions.reduce((a, s) => a + (s.seconds || 0), 0);
+  $("statCards").innerHTML = `
+    <div class="stat-card"><div class="v">${girls.length}</div><div class="k">طالبات</div></div>
+    <div class="stat-card"><div class="v">${fmtDuration(totalSec)}</div><div class="k">إجمالي وقت المذاكرة</div></div>
+    <div class="stat-card"><div class="v">${sessions.reduce((a, s) => a + (s.letters || 0), 0)}</div><div class="k">حروف استُعرضت</div></div>
+    <div class="stat-card"><div class="v">${quizzes.length}</div><div class="k">اختبارات أُجريت</div></div>`;
+
+  const body = $("studentsBody");
+  body.innerHTML = "";
+  $("noStudents").style.display = girls.length ? "none" : "block";
+  girls.forEach((u) => {
+    const st = statsOf(u.id);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="font-weight:800">${u.avatar || "👧"} ${esc(u.displayName)}</td>
+      <td class="en">${esc(u.username)}</td>
+      <td>${fmtDuration(st.totalSec)}</td>
+      <td>${st.days}</td>
+      <td>${st.letters}</td>
+      <td>${st.qq.length}</td>
+      <td>${st.avgPct == null ? "—" : `<span class="${scoreClass(st.avgPct)}">${st.avgPct}%</span>`}</td>
+      <td style="font-size:12px">${fmtDate(st.lastMs)}</td>
+      <td>${u.disabled ? '<span class="badge off">معطّل</span>' : '<span class="badge ok">نشط</span>'}</td>
+      <td style="white-space:nowrap">
+        <button class="btn small teal" data-act="detail">📈 التفاصيل</button>
+        <button class="btn small ghost" data-act="toggle">${u.disabled ? "تفعيل" : "تعطيل"}</button>
+        <button class="btn small danger" data-act="del">حذف</button>
+      </td>`;
+    tr.querySelector('[data-act="detail"]').addEventListener("click", () => openDetail(u, st));
+    tr.querySelector('[data-act="toggle"]').addEventListener("click", async () => {
+      try {
+        await updateStudent(u.id, { disabled: !u.disabled });
+        toast(u.disabled ? "تم تفعيل الحساب ✅" : "تم تعطيل الحساب");
+        loadAll();
+      } catch (e) { toast(friendlyError(e), true); }
+    });
+    tr.querySelector('[data-act="del"]').addEventListener("click", async () => {
+      if (!confirm(`حذف حساب ${u.displayName}؟ ستفقد الدخول للموقع (تبقى بياناتها للاطلاع).`)) return;
+      try {
+        await deleteStudentProfile(u.id);
+        toast("تم الحذف");
+        loadAll();
+      } catch (e) { toast(friendlyError(e), true); }
+    });
+    body.appendChild(tr);
+  });
+}
+
+function openDetail(u, st) {
+  $("dTitle").textContent = `${u.avatar || "👧"} ${u.displayName} — التفاصيل`;
+  const best = st.qq.length ? Math.max(...st.qq.map((q) => q.pct ?? Math.round(100 * q.correct / q.total))) : null;
+  $("dCards").innerHTML = `
+    <div class="stat-card"><div class="v">${fmtDuration(st.totalSec)}</div><div class="k">وقت المذاكرة</div></div>
+    <div class="stat-card"><div class="v">${st.days}</div><div class="k">أيام نشاط</div></div>
+    <div class="stat-card"><div class="v">${st.letters}</div><div class="k">حروف</div></div>
+    <div class="stat-card"><div class="v">${best == null ? "—" : best + "%"}</div><div class="k">أفضل نتيجة</div></div>`;
+
+  // تجميع الجلسات حسب اليوم
+  const byDay = {};
+  st.ss.forEach((s) => {
+    const d = s.date || "—";
+    byDay[d] = byDay[d] || { sec: 0, letters: 0, acts: new Set() };
+    byDay[d].sec += s.seconds || 0;
+    byDay[d].letters += s.letters || 0;
+    if (s.activity) byDay[d].acts.add(ACTIVITY_NAMES[s.activity] || s.activity);
+  });
+  const days = Object.entries(byDay).sort((a, b) => b[0].localeCompare(a[0]));
+  $("dDays").innerHTML = days.map(([d, v]) =>
+    `<tr><td class="en">${esc(d)}</td><td>${fmtDuration(v.sec)}</td><td>${v.letters}</td><td>${[...v.acts].join("، ") || "—"}</td></tr>`
+  ).join("");
+  $("dNoDays").style.display = days.length ? "none" : "block";
+
+  const qq = [...st.qq].sort((a, b) => tsMs(b.ts) - tsMs(a.ts));
+  $("dQuizzes").innerHTML = qq.map((q) => {
+    const pct = q.pct ?? Math.round(100 * q.correct / q.total);
+    const wrong = (q.details || []).filter((d) => !d.correct).map((d) => d.letter).join(" ، ");
+    return `<tr>
+      <td style="font-size:12px">${fmtDate(tsMs(q.ts))}</td>
+      <td>${q.type === "match" ? "🔗 مطابقة" : "🔊 استماع"}</td>
+      <td><span class="${scoreClass(pct)}">${q.correct}/${q.total} (${pct}%)</span></td>
+      <td>${fmtDuration(q.durationSec)}</td>
+      <td class="en" style="font-weight:800">${esc(wrong) || "—"}</td>
+    </tr>`;
+  }).join("");
+  $("dNoQuizzes").style.display = qq.length ? "none" : "block";
+
+  $("detailModal").classList.add("show");
+}
+
+// إضافة طالبة
+$("addBtn").addEventListener("click", () => {
+  $("addMsg").innerHTML = "";
+  $("addForm").reset();
+  $("addModal").classList.add("show");
+});
+$("aCancelBtn").addEventListener("click", () => $("addModal").classList.remove("show"));
+$("addForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("aSaveBtn").disabled = true;
+  setMsg($("addMsg"), "info", "جارٍ إنشاء الحساب…");
+  try {
+    await createStudent({
+      username: $("aUser").value,
+      displayName: $("aName").value,
+      password: $("aPw").value,
+      avatar: $("aAvatar").value
+    });
+    $("addModal").classList.remove("show");
+    toast("تم إنشاء الحساب 🎉");
+    loadAll();
+  } catch (err) {
+    setMsg($("addMsg"), "err", friendlyError(err));
+  } finally {
+    $("aSaveBtn").disabled = false;
+  }
+});
+
+$("dCloseBtn").addEventListener("click", () => $("detailModal").classList.remove("show"));
+$("refreshBtn").addEventListener("click", () => { toast("جارٍ التحديث…"); loadAll(); });
+[["addModal"], ["detailModal"]].forEach(([id]) => {
+  $(id).addEventListener("click", (e) => { if (e.target === $(id)) $(id).classList.remove("show"); });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تعلم الحروف — مدرسة البنات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<body>
+
+<div class="loading-screen" id="loading">
+  <div class="spinner"></div>
+  <div>لحظة… 🔤</div>
+</div>
+
+<div id="page" style="display:none">
+  <div class="top">
+    <div class="wrap">
+      <div>
+        <div class="brand">🔤 تعلم الحروف</div>
+        <h1>الحروف الإنجليزية</h1>
+        <div class="sub">اضغطي أي حرف لتسمعيه وتشاهديه كبيرًا وصغيرًا</div>
+      </div>
+      <div class="topbtns">
+        <a class="tbtn" href="/">🏠 الرئيسية</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="letters-grid" id="grid"></div>
+  </div>
+</div>
+
+<!-- مودال الحرف الكبير -->
+<div class="modal-back" id="letterModal">
+  <div class="modal" style="max-width:560px; text-align:center">
+    <div class="big-card" style="box-shadow:none; padding:10px 0 0; border:none">
+      <div class="pair en" id="mPair"></div>
+      <div class="lname" id="mName"></div>
+      <div class="word en" id="mWord"></div>
+    </div>
+    <div class="card-actions">
+      <button class="btn" id="mHear">🔊 اسمعي الحرف</button>
+      <button class="btn teal" id="mHearWord">🗣️ الحرف والكلمة</button>
+    </div>
+    <div class="card-actions">
+      <button class="btn ghost small" id="mPrev">→ السابق</button>
+      <button class="btn ghost small" id="mClose">إغلاق</button>
+      <button class="btn ghost small" id="mNext">التالي ←</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+import { requireSession } from "/assets/js/auth.js";
+import { LETTERS } from "/assets/js/letters.js";
+import { speak, speakLetter, speechSupported } from "/assets/js/speech.js";
+import { startTracking } from "/assets/js/tracker.js";
+
+const $ = (id) => document.getElementById(id);
+let tracker = null;
+let current = 0;
+
+requireSession((session) => {
+  $("loading").style.display = "none";
+  $("page").style.display = "block";
+  tracker = startTracking(session, "letters");
+  render();
+  if (!speechSupported()) {
+    const t = $("toast");
+    t.textContent = "المتصفح لا يدعم النطق الصوتي — جربي كروم أو سفاري";
+    t.className = "show err";
+    setTimeout(() => (t.className = ""), 5000);
+  }
+});
+
+function render() {
+  const grid = $("grid");
+  grid.innerHTML = "";
+  LETTERS.forEach((L, i) => {
+    const tile = document.createElement("div");
+    tile.className = "letter-tile";
+    tile.innerHTML = `<div class="pair en">${L.u} ${L.l}</div><div class="emoji">${L.emoji}</div>`;
+    tile.addEventListener("click", () => open(i));
+    grid.appendChild(tile);
+  });
+}
+
+function open(i) {
+  current = (i + LETTERS.length) % LETTERS.length;
+  const L = LETTERS[current];
+  $("mPair").textContent = `${L.u} ${L.l}`;
+  $("mName").textContent = `حرف «${L.name}»`;
+  $("mWord").innerHTML = `<span class="emoji">${L.emoji}</span> ${L.word} <span class="ar">${L.ar}</span>`;
+  $("letterModal").classList.add("show");
+  tracker?.addLetters(1);
+  speak(L.u, { rate: 0.6 });
+}
+
+$("mHear").addEventListener("click", () => { speak(LETTERS[current].u, { rate: 0.6 }); tracker?.addLetters(0); });
+$("mHearWord").addEventListener("click", () => speakLetter(LETTERS[current]));
+$("mNext").addEventListener("click", () => open(current + 1));
+$("mPrev").addEventListener("click", () => open(current - 1));
+$("mClose").addEventListener("click", () => $("letterModal").classList.remove("show"));
+$("letterModal").addEventListener("click", (e) => {
+  if (e.target === $("letterModal")) $("letterModal").classList.remove("show");
+});
+window.addEventListener("pagehide", () => tracker?.stop());
+</script>
+</body>
+</html>

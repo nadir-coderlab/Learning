@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مدرسة البنات — تعلم الإنجليزية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<body>
+
+<!-- شاشة تحميل حتى يتضح وضع الجلسة -->
+<div class="loading-screen" id="loading">
+  <div class="spinner"></div>
+  <div>لحظة… جارٍ التحقق 🌟</div>
+</div>
+
+<!-- ================= شاشة الدخول ================= -->
+<div class="login-wrap" id="loginView" style="display:none">
+  <div class="login-card">
+    <div class="mascot">🦄</div>
+    <h1>مدرسة البنات للإنجليزية</h1>
+    <div class="sub">اكتبي اسمك وكلمة السر وابدئي التعلم!</div>
+    <div id="loginMsg"></div>
+    <form id="loginForm">
+      <div class="field">
+        <label class="f" for="username">اسم المستخدم</label>
+        <input type="text" id="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+      </div>
+      <div class="field">
+        <label class="f" for="password">كلمة المرور</label>
+        <input type="password" id="password" autocomplete="current-password" required>
+      </div>
+      <button class="btn" type="submit" id="loginBtn" style="width:100%">🚀 دخول</button>
+    </form>
+  </div>
+</div>
+
+<!-- ================= الرئيسية ================= -->
+<div id="homeView" style="display:none">
+  <div class="top">
+    <div class="wrap">
+      <div>
+        <div class="brand">✨ مدرسة البنات للإنجليزية ✨</div>
+        <h1 id="greeting">أهلًا!</h1>
+        <div class="sub">اختاري ماذا تريدين أن تتعلمي اليوم</div>
+      </div>
+      <div class="topbtns">
+        <a class="tbtn solid" id="adminLink" href="/admin" style="display:none">📊 لوحة المتابعة</a>
+        <button class="tbtn" id="pwChangeBtn">🔑 كلمة المرور</button>
+        <button class="tbtn" id="logoutBtn">خروج ⎋</button>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="activities">
+      <a class="activity-card" href="/learn">
+        <div class="ic">🔤</div>
+        <h3>تعلم الحروف</h3>
+        <p>الحروف الكبيرة والصغيرة مع النطق والأمثلة</p>
+      </a>
+      <a class="activity-card" href="/flashcards">
+        <div class="ic">🎲</div>
+        <h3>استعراض عشوائي</h3>
+        <p>بطاقات حروف عشوائية — استمعي وكرري</p>
+      </a>
+      <a class="activity-card" href="/quiz">
+        <div class="ic">📝</div>
+        <h3>الاختبار</h3>
+        <p>اختبري نفسك: حروف عشوائية كبيرة وصغيرة</p>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- مودال تغيير كلمة المرور -->
+<div class="modal-back" id="pwModal">
+  <div class="modal">
+    <h3>🔑 تغيير كلمة المرور</h3>
+    <div id="pwMsg"></div>
+    <form id="pwForm">
+      <div class="field">
+        <label class="f" for="newPw">كلمة المرور الجديدة (6 أحرف على الأقل)</label>
+        <input type="password" id="newPw" autocomplete="new-password" minlength="6" required>
+      </div>
+      <div class="field">
+        <label class="f" for="newPw2">تأكيد كلمة المرور</label>
+        <input type="password" id="newPw2" autocomplete="new-password" minlength="6" required>
+      </div>
+      <div class="actions">
+        <button class="btn" type="submit" id="pwSaveBtn">حفظ</button>
+        <button class="btn ghost" type="button" id="pwCancelBtn">إلغاء</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+import {
+  watchSession, isAdminSession, login, logout, changeMyPassword, friendlyError
+} from "/assets/js/auth.js";
+
+const $ = (id) => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+
+const REASON_MSGS = {
+  "login-required": ["info", "سجّلي دخولك أولًا"],
+  "no-access":      ["err",  "هذه الصفحة للمدير فقط"],
+  "disabled":       ["err",  "الحساب معطّل — كلمي بابا 😊"],
+  "no-profile":     ["err",  "الحساب غير مفعّل هنا — كلمي بابا 😊"],
+  "conn":           ["err",  "تعذّر الاتصال — تأكدي من الشبكة ثم أعيدي التحميل"],
+  "timeout":        ["err",  "تعذر التحقق من الجلسة — حاولي مجددًا"]
+};
+
+function setMsg(el, kind, text) {
+  el.innerHTML = text ? `<div class="alert ${kind}">${text}</div>` : "";
+}
+
+let toastTimer;
+function toast(text, isErr = false) {
+  const t = $("toast");
+  t.textContent = text;
+  t.className = "show" + (isErr ? " err" : "");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => (t.className = ""), 3500);
+}
+
+function show(view) {
+  $("loading").style.display = "none";
+  $("loginView").style.display = view === "login" ? "flex" : "none";
+  $("homeView").style.display = view === "home" ? "block" : "none";
+}
+
+let currentSession = null;
+
+watchSession((session) => {
+  currentSession = session;
+  if (!session) {
+    show("login");
+    const r = params.get("reason");
+    if (r && REASON_MSGS[r]) setMsg($("loginMsg"), ...REASON_MSGS[r]);
+    return;
+  }
+  if (session.profileError) {
+    show("login");
+    setMsg($("loginMsg"), ...REASON_MSGS["conn"]);
+    return;
+  }
+  if (!session.profile) {
+    logout();
+    show("login");
+    setMsg($("loginMsg"), ...REASON_MSGS["no-profile"]);
+    return;
+  }
+  if (session.profile.disabled) {
+    logout();
+    show("login");
+    setMsg($("loginMsg"), ...REASON_MSGS["disabled"]);
+    return;
+  }
+  const name = session.profile.displayName || session.profile.username;
+  const avatar = session.profile.avatar || "🌸";
+  $("greeting").textContent = `أهلًا ${name} ${avatar}`;
+  $("adminLink").style.display = isAdminSession(session) ? "" : "none";
+  show("home");
+});
+
+$("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = $("loginBtn");
+  btn.disabled = true;
+  setMsg($("loginMsg"), "info", "جارٍ الدخول…");
+  try {
+    await login($("username").value, $("password").value);
+    setMsg($("loginMsg"), "ok", "تم! 🎉");
+  } catch (err) {
+    setMsg($("loginMsg"), "err", friendlyError(err));
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+$("logoutBtn").addEventListener("click", () => logout());
+
+// تغيير كلمة المرور
+$("pwChangeBtn").addEventListener("click", () => {
+  $("pwMsg").innerHTML = "";
+  $("pwForm").reset();
+  $("pwModal").classList.add("show");
+});
+$("pwCancelBtn").addEventListener("click", () => $("pwModal").classList.remove("show"));
+$("pwForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if ($("newPw").value !== $("newPw2").value) {
+    setMsg($("pwMsg"), "err", "كلمتا المرور غير متطابقتين");
+    return;
+  }
+  $("pwSaveBtn").disabled = true;
+  try {
+    await changeMyPassword($("newPw").value);
+    $("pwModal").classList.remove("show");
+    toast("تم تغيير كلمة المرور ✅");
+  } catch (err) {
+    setMsg($("pwMsg"), "err", friendlyError(err));
+  } finally {
+    $("pwSaveBtn").disabled = false;
+  }
+});
+</script>
+</body>
+</html>

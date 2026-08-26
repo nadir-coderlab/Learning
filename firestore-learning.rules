@@ -1,0 +1,55 @@
+// ============================================================
+// قواعد Firestore الخاصة بموقع تعليم الإنجليزية (مستودع Learning)
+//
+// ⚠️ هذا الملف «مقتطف» وليس ملف قواعد كاملًا:
+// المشروع supportive-med فيه قاعدة بيانات Firestore واحدة، وقواعدها
+// تُدار من مستودع supportive (ملف firestore.rules).
+// انسخ محتوى هذا المقتطف والصقه داخل firestore.rules في مستودع
+// supportive — قبل قاعدة الرفض الأخيرة match /{document=**} —
+// ثم انشر القواعد من هناك:
+//   firebase deploy --only firestore:rules
+// ============================================================
+
+    // ===== موقع تعليم الإنجليزية (Learning) — مجموعات edu* منفصلة =====
+
+    function isEduAdmin() {
+      return isBootstrapAdmin()
+        || (signedIn()
+            && exists(/databases/$(database)/documents/eduUsers/$(request.auth.uid))
+            && get(/databases/$(database)/documents/eduUsers/$(request.auth.uid)).data.role == 'admin');
+    }
+
+    // طالبة (أو مدير) لديها ملف في eduUsers وغير معطّلة
+    function isEduMember() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/eduUsers/$(request.auth.uid))
+        && get(/databases/$(database)/documents/eduUsers/$(request.auth.uid)).data.disabled != true;
+    }
+
+    // حسابات الموقع التعليمي
+    match /eduUsers/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isEduAdmin());
+      allow create, update, delete: if isEduAdmin();
+    }
+
+    // جلسات المذاكرة (وقت + عدد الحروف) — كل طالبة تكتب جلساتها فقط
+    match /eduSessions/{docId} {
+      allow create: if (isEduMember() || isBootstrapAdmin())
+        && request.resource.data.uid == request.auth.uid;
+      allow update: if (isEduMember() || isBootstrapAdmin())
+        && resource.data.uid == request.auth.uid
+        && request.resource.data.uid == request.auth.uid;
+      allow read: if isEduAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow delete: if isEduAdmin();
+    }
+
+    // نتائج اختبارات الحروف — كل طالبة تكتب نتائجها فقط، والمدير يقرأ الكل
+    match /eduQuizzes/{docId} {
+      allow create: if (isEduMember() || isBootstrapAdmin())
+        && request.resource.data.uid == request.auth.uid;
+      allow read: if isEduAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow update: if false;
+      allow delete: if isEduAdmin();
+    }
+
+    // ===== نهاية قواعد موقع تعليم الإنجليزية =====
