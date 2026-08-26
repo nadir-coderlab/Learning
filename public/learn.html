@@ -59,7 +59,7 @@
 <script type="module">
 import { requireSession } from "/assets/js/auth.js";
 import { LETTERS } from "/assets/js/letters.js";
-import { speak, speakLetter, speechSupported } from "/assets/js/speech.js";
+import { speakSound, speakLetter, speechSupported } from "/assets/js/speech.js";
 import { startTracking } from "/assets/js/tracker.js";
 
 const $ = (id) => document.getElementById(id);
@@ -99,10 +99,10 @@ function open(i) {
   $("mWord").innerHTML = `<span class="emoji">${L.emoji}</span> ${L.word} <span class="ar">${L.ar}</span>`;
   $("letterModal").classList.add("show");
   tracker?.addLetters(1);
-  speak(L.u, { rate: 0.6 });
+  speakSound(L);
 }
 
-$("mHear").addEventListener("click", () => { speak(LETTERS[current].u, { rate: 0.6 }); tracker?.addLetters(0); });
+$("mHear").addEventListener("click", () => speakSound(LETTERS[current]));
 $("mHearWord").addEventListener("click", () => speakLetter(LETTERS[current]));
 $("mNext").addEventListener("click", () => open(current + 1));
 $("mPrev").addEventListener("click", () => open(current - 1));
