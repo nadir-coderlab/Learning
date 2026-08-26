@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>كلمات البيت — مدرسة البنات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<body>
+
+<div class="loading-screen" id="loading">
+  <div class="spinner"></div>
+  <div>لحظة… 🏠</div>
+</div>
+
+<div id="page" style="display:none">
+  <div class="top">
+    <div class="wrap">
+      <div>
+        <div class="brand">🏠 كلمات البيت</div>
+        <h1>الإنجليزية من حولنا!</h1>
+        <div class="sub">كلمات الأشياء الموجودة في بيتنا — اسمعيها ثم اختبري نفسك</div>
+      </div>
+      <div class="topbtns">
+        <a class="tbtn" href="/">🏠 الرئيسية</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- اختيار الغرفة -->
+    <div id="roomsView">
+      <div class="activities" id="roomsGrid"></div>
+    </div>
+
+    <!-- كلمات الغرفة -->
+    <div id="wordsView" style="display:none">
+      <div class="back-row" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px">
+        <button class="btn ghost small" id="backBtn">→ رجوع للغرف</button>
+        <button class="btn teal small" id="roomQuizBtn">📝 اختبار الغرفة</button>
+      </div>
+      <h2 id="roomTitle" style="text-align:center; font-size:24px; font-weight:900; margin-bottom:16px"></h2>
+      <div class="activities" id="wordsGrid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))"></div>
+    </div>
+
+    <!-- الاختبار -->
+    <div id="quizView" style="display:none; max-width:640px; margin:0 auto; text-align:center">
+      <div class="progress-chip" id="qProgress"></div>
+      <div class="big-card" style="padding:24px">
+        <div class="quiz-question" id="qText"></div>
+        <div style="font-size:72px; min-height:90px" id="qEmoji"></div>
+        <button class="btn" id="qHear">🔊 أعيدي السماع</button>
+      </div>
+      <div class="quiz-options" id="qOptions"></div>
+    </div>
+
+    <!-- النتيجة -->
+    <div id="resultView" style="display:none; max-width:640px; margin:0 auto; text-align:center">
+      <div class="big-card">
+        <div style="font-size:70px" id="rEmoji"></div>
+        <div class="stars" id="rStars"></div>
+        <div class="word" id="rScore"></div>
+        <div class="lname" id="rSaveState" style="font-size:14px"></div>
+      </div>
+      <div class="card-actions">
+        <button class="btn" id="rAgain">🔄 مرة أخرى</button>
+        <button class="btn ghost" id="rBack">→ رجوع للغرف</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+import { requireSession, saveQuizResult } from "/assets/js/auth.js";
+import { ROOMS, ALL_WORDS } from "/assets/js/vocab.js";
+import { shuffled } from "/assets/js/letters.js";
+import { speak, speakAr } from "/assets/js/speech.js";
+import { startTracking } from "/assets/js/tracker.js";
+
+const $ = (id) => document.getElementById(id);
+const PRAISES = ["ممتاز!", "صح عليك!", "أحسنتِ!", "رائع!", "برافو عليك!"];
+let session = null, tracker = null;
+let currentRoom = null;
+let quiz = null;
+
+requireSession((s) => {
+  session = s;
+  tracker = startTracking(s, "vocab");
+  $("loading").style.display = "none";
+  $("page").style.display = "block";
+  renderRooms();
+});
+
+function show(view) {
+  ["roomsView", "wordsView", "quizView", "resultView"].forEach((v) =>
+    $(v).style.display = v === view ? "" : "none");
+}
+
+function renderRooms() {
+  const grid = $("roomsGrid");
+  grid.innerHTML = "";
+  ROOMS.forEach((r) => {
+    const card = document.createElement("div");
+    card.className = "activity-card";
+    card.innerHTML = `<div class="ic">${r.icon}</div><h3>${r.name}</h3><p>${r.words.length} كلمة — ${r.words.slice(0, 4).map((w) => w.emoji).join(" ")}</p>`;
+    card.addEventListener("click", () => openRoom(r));
+    grid.appendChild(card);
+  });
+}
+
+function openRoom(r) {
+  currentRoom = r;
+  $("roomTitle").textContent = `${r.icon} ${r.name}`;
+  const grid = $("wordsGrid");
+  grid.innerHTML = "";
+  r.words.forEach((w) => {
+    const c = document.createElement("div");
+    c.className = "activity-card";
+    c.style.padding = "16px 10px";
+    c.innerHTML = `<div class="ic">${w.emoji}</div><h3 class="en" style="font-size:17px">${w.en}</h3><p>${w.ar}</p>`;
+    c.addEventListener("click", () => { speak(w.en, { rate: 0.7 }); tracker?.addLetters(1); });
+    grid.appendChild(c);
+  });
+  show("wordsView");
+}
+
+// ---------- اختبار الغرفة: نوعان من الأسئلة ----------
+
+function buildRoomQuiz(room, n = 8) {
+  const words = shuffled(room.words).slice(0, n);
+  return words.map((w) => {
+    const distractors = shuffled(room.words.filter((x) => x.en !== w.en))
+      .concat(shuffled(ALL_WORDS.filter((x) => x.room !== room.id)))
+      .slice(0, 3);
+    // نوعان: اسمعي واختاري الصورة / شوفي الصورة واختاري الكلمة
+    const mode = Math.random() < 0.5 ? "hear" : "see";
+    const pool = shuffled([w, ...distractors]);
+    return {
+      word: w, mode,
+      options: pool.map((x) => ({
+        text: mode === "hear" ? x.emoji : x.en,
+        en: x.en,
+        correct: x.en === w.en
+      }))
+    };
+  });
+}
+
+function startQuiz() {
+  quiz = { room: currentRoom, questions: buildRoomQuiz(currentRoom), idx: 0, correct: 0, details: [], startedAt: Date.now() };
+  show("quizView");
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = quiz.questions[quiz.idx];
+  $("qProgress").textContent = `السؤال ${quiz.idx + 1} من ${quiz.questions.length} ⭐ ${quiz.correct}`;
+  if (q.mode === "hear") {
+    $("qText").textContent = "استمعي للكلمة واختاري صورتها";
+    $("qEmoji").textContent = "🎧";
+    $("qHear").style.display = "";
+    speak(q.word.en, { rate: 0.7 });
+  } else {
+    $("qText").textContent = "ما اسم هذا بالإنجليزي؟";
+    $("qEmoji").textContent = q.word.emoji;
+    $("qHear").style.display = "none";
+  }
+  const box = $("qOptions");
+  box.innerHTML = "";
+  q.options.forEach((opt) => {
+    const b = document.createElement("button");
+    b.className = "quiz-opt";
+    b.style.fontSize = q.mode === "hear" ? "50px" : "24px";
+    b.textContent = opt.text;
+    b.addEventListener("click", () => answer(b, opt));
+    box.appendChild(b);
+  });
+  tracker?.addLetters(1);
+}
+
+async function answer(btn, chosen) {
+  const q = quiz.questions[quiz.idx];
+  const buttons = [...$("qOptions").children];
+  buttons.forEach((b) => (b.disabled = true));
+  const ok = !!chosen.correct;
+  btn.classList.add(ok ? "correct" : "wrong");
+  if (!ok) buttons.find((b, i) => q.options[i].correct)?.classList.add("correct");
+  $("qEmoji").textContent = q.word.emoji;
+  if (ok) {
+    quiz.correct++;
+    speakAr(PRAISES[Math.floor(Math.random() * PRAISES.length)]);
+  } else {
+    await speakAr(`للأسف — ${q.word.ar} بالإنجليزي`);
+    await speak(q.word.en, { rate: 0.7 });
+  }
+  quiz.details.push({
+    qType: "vocab", letter: q.word.en, word: q.word.en, mode: q.mode,
+    chosen: chosen.en, correct: ok
+  });
+  await new Promise((r) => setTimeout(r, ok ? 1300 : 1800));
+  quiz.idx++;
+  if (quiz.idx < quiz.questions.length) showQuestion(); else finish();
+}
+
+async function finish() {
+  show("resultView");
+  const total = quiz.details.length;
+  const pct = Math.round((quiz.correct / total) * 100);
+  const stars = pct >= 90 ? 5 : pct >= 70 ? 4 : pct >= 50 ? 3 : pct >= 30 ? 2 : 1;
+  $("rEmoji").textContent = pct >= 70 ? "🏆" : pct >= 50 ? "😊" : "💪";
+  $("rStars").textContent = "⭐".repeat(stars) + "☆".repeat(5 - stars);
+  $("rScore").textContent = `${quiz.correct} من ${total} (${pct}%)`;
+  speakAr(pct >= 70 ? "ممتاز! تعرفين أشياء البيت" : "جيد! راجعي الكلمات وحاولي مجددًا");
+  $("rSaveState").textContent = "جارٍ حفظ النتيجة…";
+  try {
+    await saveQuizResult(session, {
+      type: "vocab",
+      room: quiz.room.id,
+      roomName: quiz.room.name,
+      total, correct: quiz.correct, pct,
+      durationSec: Math.round((Date.now() - quiz.startedAt) / 1000),
+      details: quiz.details
+    });
+    $("rSaveState").textContent = "تم حفظ النتيجة ✅";
+  } catch (e) {
+    $("rSaveState").textContent = "تعذر حفظ النتيجة";
+  }
+}
+
+$("roomQuizBtn").addEventListener("click", startQuiz);
+$("qHear").addEventListener("click", () => {
+  const q = quiz?.questions[quiz.idx];
+  if (q && q.mode === "hear") speak(q.word.en, { rate: 0.7 });
+});
+$("backBtn").addEventListener("click", () => show("roomsView"));
+$("rBack").addEventListener("click", () => show("roomsView"));
+$("rAgain").addEventListener("click", startQuiz);
+window.addEventListener("pagehide", () => tracker?.stop());
+</script>
+</body>
+</html>

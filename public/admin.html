@@ -103,6 +103,13 @@
     <h3 id="dTitle"></h3>
     <div class="stat-cards" id="dCards"></div>
 
+    <div class="panel" id="dAreasPanel" style="box-shadow:none; border:2px solid var(--line)">
+      <h2>📐 نتيجة قياس المستوى</h2>
+      <div id="dAreas"></div>
+      <div class="alert info" id="dFocus" style="margin-top:10px; display:none"></div>
+      <div class="empty-state" id="dNoAreas" style="display:none">لم تُجرِ اختبار قياس المستوى بعد — اطلب منها فتح «📐 قياس المستوى»</div>
+    </div>
+
     <div class="panel" style="box-shadow:none; border:2px solid var(--line)">
       <h2>🧠 خريطة إتقان الحروف (0–5)</h2>
       <div style="font-size:13px; color:var(--muted); font-weight:700; margin-bottom:10px">
@@ -170,7 +177,9 @@ import { LETTERS } from "/assets/js/letters.js";
 const $ = (id) => document.getElementById(id);
 let students = [], sessions = [], quizzes = [], skillsDocs = [];
 
-const ACTIVITY_NAMES = { letters: "تعلم الحروف", flashcards: "استعراض", quiz: "اختبار" };
+const ACTIVITY_NAMES = { letters: "تعلم الحروف", flashcards: "استعراض", quiz: "اختبار", sounds: "أصوات", vocab: "كلمات البيت", placement: "قياس مستوى" };
+const QUIZ_TYPE_NAMES = { match: "🔗 مطابقة", sound: "🔊 استماع", adaptive: "🧠 ذكي", phonics: "🗣️ أصوات", vocab: "🏠 كلمات", placement: "📐 قياس" };
+const AREA_NAMES = { letters: "🔤 الحروف", casing: "🔠 كبير/صغير", phonics: "🗣️ الأصوات", vocab: "🏠 الكلمات" };
 
 let toastTimer;
 function toast(text, isErr = false) {
@@ -358,8 +367,31 @@ function openDetail(u, st) {
     <div class="stat-card"><div class="v">${st.letters}</div><div class="k">حروف</div></div>
     <div class="stat-card"><div class="v">${best == null ? "—" : best + "%"}</div><div class="k">أفضل نتيجة</div></div>`;
 
+  // نتيجة قياس المستوى (من eduSkills.areas)
+  const sklDoc = skillsDocs.find((s) => s.id === u.id);
+  const areas = sklDoc?.areas;
+  $("dNoAreas").style.display = areas ? "none" : "block";
+  $("dFocus").style.display = "none";
+  $("dAreas").innerHTML = !areas ? "" : Object.entries(areas).map(([k, v]) => {
+    const color = v >= 80 ? "#16a34a" : v >= 50 ? "#f59e0b" : "#dc2626";
+    return `<div style="display:flex; align-items:center; gap:10px; margin-bottom:8px; font-weight:800">
+      <span style="width:120px">${AREA_NAMES[k] || k}</span>
+      <div style="flex:1; background:var(--line); border-radius:99px; height:13px; overflow:hidden">
+        <div style="width:${v}%; height:100%; background:${color}"></div>
+      </div>
+      <span style="width:44px; text-align:left; color:${color}">${v}%</span>
+    </div>`;
+  }).join("");
+  if (areas) {
+    const weakAreas = Object.entries(areas).filter(([, v]) => v < 80).sort((a, b) => a[1] - b[1]).slice(0, 2);
+    if (weakAreas.length) {
+      $("dFocus").style.display = "";
+      $("dFocus").innerHTML = `🎯 <b>ركزوا على:</b> ${weakAreas.map(([k]) => AREA_NAMES[k] || k).join(" · ")}`;
+    }
+  }
+
   // خريطة إتقان الحروف من ذاكرة المهارات (eduSkills)
-  const skl = skillsDocs.find((s) => s.id === u.id)?.letters || {};
+  const skl = sklDoc?.letters || {};
   const anySkill = Object.keys(skl).length > 0;
   $("dNoMastery").style.display = anySkill ? "none" : "block";
   $("dMastery").innerHTML = !anySkill ? "" : LETTERS.map((L) => {
@@ -408,7 +440,7 @@ function openDetail(u, st) {
     const wrong = (q.details || []).filter((d) => !d.correct).map((d) => d.letter).join(" ، ");
     return `<tr>
       <td style="font-size:12px">${fmtDate(tsMs(q.ts))}</td>
-      <td>${q.type === "match" ? "🔗 مطابقة" : q.type === "sound" ? "🔊 استماع" : "🧠 ذكي"}</td>
+      <td>${QUIZ_TYPE_NAMES[q.type] || "🧠 ذكي"}${q.roomName ? ` (${q.roomName})` : ""}${q.focus && q.focus !== "all" ? ` (${q.focus})` : ""}</td>
       <td><span class="${scoreClass(pct)}">${q.correct}/${q.total} (${pct}%)</span></td>
       <td>${fmtDuration(q.durationSec)}</td>
       <td class="en" style="font-weight:800">${esc(wrong) || "—"}</td>
