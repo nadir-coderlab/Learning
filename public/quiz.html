@@ -94,7 +94,9 @@
 <script type="module">
 import { requireSession, saveQuizResult, listMyQuizzes } from "/assets/js/auth.js";
 import { LETTERS, shuffled, randomOf } from "/assets/js/letters.js";
-import { speak } from "/assets/js/speech.js";
+import { speakSound, speakAr } from "/assets/js/speech.js";
+
+const PRAISES = ["ممتاز!", "صح عليك!", "أحسنتِ!", "رائع!", "برافو عليك!"];
 import { startTracking } from "/assets/js/tracker.js";
 
 const $ = (id) => document.getElementById(id);
@@ -170,7 +172,7 @@ function showQuestion() {
     $("qText").textContent = "استمعي جيدًا ثم اختاري الحرف الصحيح";
     $("qLetter").textContent = "❓";
     $("qHear").style.display = "";
-    speak(q.L.u, { rate: 0.6 });
+    speakSound(q.L);
   } else {
     const shown = q.qCase === "u" ? q.L.u : q.L.l;
     $("qText").textContent = q.qCase === "u"
@@ -178,7 +180,7 @@ function showQuestion() {
       : "هذا حرف صغير — اختاري شكله الكبير";
     $("qLetter").textContent = shown;
     $("qHear").style.display = "";
-    speak(q.L.u, { rate: 0.6 });
+    speakSound(q.L);
   }
   const box = $("qOptions");
   box.innerHTML = "";
@@ -199,8 +201,12 @@ async function answer(btn, chosen) {
   const ok = chosen === q.answer;
   btn.classList.add(ok ? "correct" : "wrong");
   if (!ok) buttons.find((b) => b.textContent === q.answer)?.classList.add("correct");
-  if (ok) { quiz.correct++; speak("Correct! Great job!", { rate: 0.9 }); }
-  else speak(`No, this is ${q.L.u}`, { rate: 0.8 });
+  if (ok) {
+    quiz.correct++;
+    speakAr(PRAISES[Math.floor(Math.random() * PRAISES.length)]);
+  } else {
+    speakAr("للأسف — الإجابة الصحيحة هي").then(() => speakSound(q.L));
+  }
   quiz.details.push({
     letter: q.L.u,
     shownCase: q.qCase === "u" ? "كبير" : "صغير",
@@ -208,7 +214,7 @@ async function answer(btn, chosen) {
     chosen,
     correct: ok
   });
-  await new Promise((r) => setTimeout(r, 1400));
+  await new Promise((r) => setTimeout(r, ok ? 1400 : 2000));
   quiz.idx++;
   if (quiz.idx < TOTAL) showQuestion(); else finish();
 }
@@ -225,7 +231,10 @@ async function finish() {
     : pct >= 70 ? "رائعة جدًا! استمري 👏"
     : pct >= 50 ? "جيد! تدربي أكثر وستصبحين بطلة"
     : "لا بأس — كل بطلة تبدأ بالتدريب! جربي مرة أخرى";
-  if (pct >= 70) speak("Excellent! You are a star!", { rate: 0.9 });
+  speakAr(pct >= 90 ? "ممتاز! ما شاء الله عليك، أنتِ نجمة"
+    : pct >= 70 ? "رائع جدًا! استمري يا بطلة"
+    : pct >= 50 ? "جيد! تدربي أكثر وستصبحين بطلة"
+    : "لا بأس، حاولي مرة أخرى وستنجحين");
   $("rDetails").innerHTML = quiz.details.map((d, i) => `
     <tr>
       <td>${i + 1}</td>
@@ -256,7 +265,7 @@ $("startSound").addEventListener("click", () => startQuiz("sound"));
 $("startMatch").addEventListener("click", () => startQuiz("match"));
 $("qHear").addEventListener("click", () => {
   const q = quiz?.questions[quiz.idx];
-  if (q) speak(q.L.u, { rate: 0.6 });
+  if (q) speakSound(q.L);
 });
 $("rAgain").addEventListener("click", () => {
   $("resultView").style.display = "none";

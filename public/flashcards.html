@@ -54,7 +54,7 @@
 <script type="module">
 import { requireSession } from "/assets/js/auth.js";
 import { LETTERS, shuffled } from "/assets/js/letters.js";
-import { speak, speakLetter } from "/assets/js/speech.js";
+import { speakSound, speakLetter, speakAr } from "/assets/js/speech.js";
 import { startTracking } from "/assets/js/tracker.js";
 
 const $ = (id) => document.getElementById(id);
@@ -89,7 +89,7 @@ function next() {
   $("fcWord").innerHTML = "";
   $("progress").textContent = `البطاقة ${pos + 1} من ${deck.length}`;
   tracker?.addLetters(1);
-  speak(L.u, { rate: 0.6 });
+  speakSound(L);
 }
 
 function celebrate() {
@@ -97,11 +97,11 @@ function celebrate() {
   $("fcHint").textContent = "ما شاء الله! خلصتي كل الحروف";
   $("fcWord").innerHTML = "⭐⭐⭐";
   $("progress").textContent = `اكتمل الاستعراض — ${deck.length} حرفًا`;
-  speak("Great job! You did it!", { rate: 0.85 });
+  speakAr("ما شاء الله! ممتاز، خلصتي كل الحروف");
 }
 
 $("hearBtn").addEventListener("click", () => {
-  if (pos < deck.length) speak(deck[pos].u, { rate: 0.6 });
+  if (pos < deck.length) speakSound(deck[pos]);
 });
 $("revealBtn").addEventListener("click", () => {
   if (pos >= deck.length) return;

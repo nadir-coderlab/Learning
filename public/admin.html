@@ -41,12 +41,13 @@
           <thead>
             <tr>
               <th>الطالبة</th>
-              <th>اسم المستخدم</th>
+              <th>المستوى</th>
               <th>وقت المذاكرة الكلي</th>
               <th>أيام النشاط</th>
               <th>حروف استُعرضت</th>
               <th>الاختبارات</th>
               <th>متوسط النتيجة</th>
+              <th>أصعب الحروف</th>
               <th>آخر نشاط</th>
               <th>الحالة</th>
               <th></th>
@@ -101,6 +102,23 @@
   <div class="modal wide">
     <h3 id="dTitle"></h3>
     <div class="stat-cards" id="dCards"></div>
+
+    <div class="panel" style="box-shadow:none; border:2px solid var(--line)">
+      <h2>📈 تطور نتائج الاختبارات</h2>
+      <div id="dTrendMsg" style="font-weight:800; margin-bottom:8px"></div>
+      <div id="dChart" style="direction:ltr"></div>
+    </div>
+
+    <div class="panel" style="box-shadow:none; border:2px solid var(--line)">
+      <h2>🔤 أصعب الحروف (من إجابات الاختبارات)</h2>
+      <div class="table-wrap">
+        <table class="data" style="min-width:420px">
+          <thead><tr><th>الحرف</th><th>مرات الخطأ</th><th>من أصل</th><th>الدقة</th><th>غالبًا تختار بدلًا منه</th></tr></thead>
+          <tbody id="dErrors"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="dNoErrors" style="display:none">لا توجد أخطاء مسجلة بعد 🎉</div>
+    </div>
 
     <div class="panel" style="box-shadow:none; border:2px solid var(--line)">
       <h2>🕒 المذاكرة حسب اليوم</h2>
@@ -180,15 +198,89 @@ async function loadAll() {
   render();
 }
 
+function pctOf(q) { return q.pct ?? Math.round(100 * q.correct / q.total); }
+
 function statsOf(uid) {
   const ss = sessions.filter((s) => s.uid === uid);
   const qq = quizzes.filter((q) => q.uid === uid);
   const totalSec = ss.reduce((a, s) => a + (s.seconds || 0), 0);
   const letters = ss.reduce((a, s) => a + (s.letters || 0), 0);
   const days = new Set(ss.filter((s) => (s.seconds || 0) > 0).map((s) => s.date)).size;
-  const avgPct = qq.length ? Math.round(qq.reduce((a, q) => a + (q.pct ?? Math.round(100 * q.correct / q.total)), 0) / qq.length) : null;
+  const avgPct = qq.length ? Math.round(qq.reduce((a, q) => a + pctOf(q), 0) / qq.length) : null;
   const lastMs = Math.max(0, ...ss.map((s) => tsMs(s.lastTs)), ...qq.map((q) => tsMs(q.ts)));
   return { ss, qq, totalSec, letters, days, avgPct, lastMs };
+}
+
+// المستوى: متوسط آخر 5 اختبارات
+function levelOf(st) {
+  if (!st.qq.length) {
+    return st.letters > 0
+      ? { label: "تتعلم الحروف", icon: "🌱", recentAvg: null }
+      : { label: "لم تبدأ بعد", icon: "💤", recentAvg: null };
+  }
+  const recent = [...st.qq].sort((a, b) => tsMs(b.ts) - tsMs(a.ts)).slice(0, 5);
+  const avg = Math.round(recent.reduce((a, q) => a + pctOf(q), 0) / recent.length);
+  if (avg >= 90) return { label: "بطلة", icon: "🏆", recentAvg: avg };
+  if (avg >= 75) return { label: "متقدمة", icon: "⭐", recentAvg: avg };
+  if (avg >= 50) return { label: "متوسطة", icon: "😊", recentAvg: avg };
+  return { label: "مبتدئة", icon: "🌱", recentAvg: avg };
+}
+
+// إحصاء الأخطاء لكل حرف من تفاصيل الاختبارات
+function errorStats(qq) {
+  const map = {};
+  qq.forEach((q) => (q.details || []).forEach((d) => {
+    const L = d.letter;
+    map[L] = map[L] || { letter: L, wrong: 0, total: 0, choices: {} };
+    map[L].total++;
+    if (!d.correct) {
+      map[L].wrong++;
+      if (d.chosen) map[L].choices[d.chosen] = (map[L].choices[d.chosen] || 0) + 1;
+    }
+  }));
+  return Object.values(map)
+    .filter((r) => r.wrong > 0)
+    .sort((a, b) => b.wrong - a.wrong || a.letter.localeCompare(b.letter))
+    .map((r) => ({
+      ...r,
+      acc: Math.round(100 * (r.total - r.wrong) / r.total),
+      topChoice: Object.entries(r.choices).sort((a, b) => b[1] - a[1])[0]?.[0] || "—"
+    }));
+}
+
+// وصف التطور: مقارنة متوسط النصف الأخير بالنصف الأول
+function trendOf(qq) {
+  if (qq.length < 2) return null;
+  const sorted = [...qq].sort((a, b) => tsMs(a.ts) - tsMs(b.ts));
+  const half = Math.floor(sorted.length / 2);
+  const avg = (list) => list.reduce((a, q) => a + pctOf(q), 0) / list.length;
+  const diff = Math.round(avg(sorted.slice(half)) - avg(sorted.slice(0, half)));
+  if (diff >= 5) return { text: `في تطور مستمر 📈 (+${diff}%)`, cls: "score-good" };
+  if (diff <= -5) return { text: `تراجعت مؤخرًا 📉 (${diff}%) — تحتاج تشجيعًا`, cls: "score-bad" };
+  return { text: "مستقرة ➡️", cls: "score-mid" };
+}
+
+// رسم منحنى النتائج عبر الزمن (SVG بدون مكتبات)
+function progressChart(qq) {
+  const sorted = [...qq].sort((a, b) => tsMs(a.ts) - tsMs(b.ts));
+  if (sorted.length < 2) return '<div class="empty-state">تحتاج اختبارين على الأقل لرسم التطور</div>';
+  const W = 600, H = 180, PAD = 34;
+  const x = (i) => PAD + (i * (W - PAD * 2)) / (sorted.length - 1);
+  const y = (p) => H - 24 - (p * (H - 48)) / 100;
+  const pts = sorted.map((q, i) => `${x(i)},${y(pctOf(q))}`).join(" ");
+  const dots = sorted.map((q, i) => {
+    const p = pctOf(q);
+    const c = p >= 80 ? "#16a34a" : p >= 50 ? "#f59e0b" : "#dc2626";
+    return `<circle cx="${x(i)}" cy="${y(p)}" r="5" fill="${c}"><title>${p}% — ${new Date(tsMs(q.ts)).toLocaleDateString("ar-SA")}</title></circle>`;
+  }).join("");
+  const grid = [0, 50, 100].map((p) =>
+    `<line x1="${PAD}" y1="${y(p)}" x2="${W - PAD}" y2="${y(p)}" stroke="#eadff5" stroke-width="1.5"/>
+     <text x="${PAD - 8}" y="${y(p) + 4}" font-size="11" fill="#8b7aa8" text-anchor="end">${p}</text>`).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%; max-width:640px">
+    ${grid}
+    <polyline points="${pts}" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    ${dots}
+  </svg>`;
 }
 
 function render() {
@@ -206,15 +298,18 @@ function render() {
   $("noStudents").style.display = girls.length ? "none" : "block";
   girls.forEach((u) => {
     const st = statsOf(u.id);
+    const lvl = levelOf(st);
+    const hardest = errorStats(st.qq).slice(0, 3).map((r) => r.letter).join(" ");
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td style="font-weight:800">${u.avatar || "👧"} ${esc(u.displayName)}</td>
-      <td class="en">${esc(u.username)}</td>
+      <td style="font-weight:800">${u.avatar || "👧"} ${esc(u.displayName)}<div class="en" style="font-size:11px; color:var(--muted)">${esc(u.username)}</div></td>
+      <td><span class="badge role">${lvl.icon} ${lvl.label}</span></td>
       <td>${fmtDuration(st.totalSec)}</td>
       <td>${st.days}</td>
       <td>${st.letters}</td>
       <td>${st.qq.length}</td>
       <td>${st.avgPct == null ? "—" : `<span class="${scoreClass(st.avgPct)}">${st.avgPct}%</span>`}</td>
+      <td class="en" style="font-weight:800; color:var(--err)">${hardest || "—"}</td>
       <td style="font-size:12px">${fmtDate(st.lastMs)}</td>
       <td>${u.disabled ? '<span class="badge off">معطّل</span>' : '<span class="badge ok">نشط</span>'}</td>
       <td style="white-space:nowrap">
@@ -244,12 +339,31 @@ function render() {
 
 function openDetail(u, st) {
   $("dTitle").textContent = `${u.avatar || "👧"} ${u.displayName} — التفاصيل`;
-  const best = st.qq.length ? Math.max(...st.qq.map((q) => q.pct ?? Math.round(100 * q.correct / q.total))) : null;
+  const best = st.qq.length ? Math.max(...st.qq.map(pctOf)) : null;
+  const lvl = levelOf(st);
   $("dCards").innerHTML = `
+    <div class="stat-card"><div class="v">${lvl.icon} ${lvl.label}</div><div class="k">المستوى${lvl.recentAvg == null ? "" : ` (متوسط آخر 5: ${lvl.recentAvg}%)`}</div></div>
     <div class="stat-card"><div class="v">${fmtDuration(st.totalSec)}</div><div class="k">وقت المذاكرة</div></div>
     <div class="stat-card"><div class="v">${st.days}</div><div class="k">أيام نشاط</div></div>
     <div class="stat-card"><div class="v">${st.letters}</div><div class="k">حروف</div></div>
     <div class="stat-card"><div class="v">${best == null ? "—" : best + "%"}</div><div class="k">أفضل نتيجة</div></div>`;
+
+  // منحنى التطور + وصفه
+  const trend = trendOf(st.qq);
+  $("dTrendMsg").innerHTML = trend ? `<span class="${trend.cls}">${trend.text}</span>` : "";
+  $("dChart").innerHTML = progressChart(st.qq);
+
+  // أصعب الحروف
+  const errs = errorStats(st.qq);
+  $("dErrors").innerHTML = errs.slice(0, 10).map((r) => `
+    <tr>
+      <td class="en" style="font-weight:800; font-size:18px">${esc(r.letter)} ${esc(r.letter.toLowerCase())}</td>
+      <td class="score-bad">${r.wrong}</td>
+      <td>${r.total}</td>
+      <td><span class="${scoreClass(r.acc)}">${r.acc}%</span></td>
+      <td class="en" style="font-weight:800">${esc(r.topChoice)}</td>
+    </tr>`).join("");
+  $("dNoErrors").style.display = errs.length ? "none" : "block";
 
   // تجميع الجلسات حسب اليوم
   const byDay = {};
