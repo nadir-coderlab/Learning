@@ -179,6 +179,12 @@ export async function openSkills(session) {
       return out;
     },
 
+    // حفظ نتيجة اختبار قياس المستوى (نسبة كل مهارة) في مستند المهارات
+    saveAreas(areas) {
+      return setDoc(ref, { uid, areas, areasTs: serverTimestamp() }, { merge: true })
+        .catch((e) => console.warn("تعذر حفظ نتيجة القياس:", e));
+    },
+
     saveNow: () => save(true)
   };
   return api;

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الأصوات والمقاطع — مدرسة البنات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<body>
+
+<div class="loading-screen" id="loading">
+  <div class="spinner"></div>
+  <div>لحظة… 🗣️</div>
+</div>
+
+<div id="page" style="display:none">
+  <div class="top">
+    <div class="wrap">
+      <div>
+        <div class="brand">🗣️ الأصوات والمقاطع</div>
+        <h1>كيف ننطق sh و ch و th؟</h1>
+        <div class="sub">تعلمي القاعدة، اسمعي الأمثلة، ثم اختبري أذنك</div>
+      </div>
+      <div class="topbtns">
+        <a class="tbtn" href="/">🏠 الرئيسية</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- قائمة الأصوات -->
+    <div id="listView">
+      <div style="text-align:center; margin-bottom:18px">
+        <button class="btn" id="allQuizBtn" style="font-size:17px">🎧 اختبار كل الأصوات (10 أسئلة)</button>
+      </div>
+      <div class="activities" id="soundsGrid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))"></div>
+    </div>
+
+    <!-- درس صوت واحد -->
+    <div id="lessonView" style="display:none; max-width:640px; margin:0 auto; text-align:center">
+      <div class="back-row" style="text-align:right">
+        <button class="btn ghost small" id="backBtn">→ رجوع للأصوات</button>
+      </div>
+      <div class="big-card" style="padding:26px">
+        <div class="pair en" id="lsLabel" style="font-size:clamp(70px,18vw,120px); letter-spacing:2px"></div>
+        <div class="word" id="lsSound"></div>
+        <div class="lname" id="lsRule" style="margin-top:8px"></div>
+      </div>
+      <div class="quiz-question" style="margin-top:20px">👂 اضغطي أي كلمة واسمعيها:</div>
+      <div class="activities" id="lsWords" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); margin-top:10px"></div>
+      <div class="card-actions" style="margin-top:20px">
+        <button class="btn teal" id="lsQuizBtn">📝 اختبار هذا الصوت (6 أسئلة)</button>
+      </div>
+    </div>
+
+    <!-- الاختبار الصوتي -->
+    <div id="quizView" style="display:none; max-width:640px; margin:0 auto; text-align:center">
+      <div class="progress-chip" id="qProgress"></div>
+      <div class="big-card" style="padding:24px">
+        <div class="quiz-question">استمعي للكلمة — أي صوت تسمعين فيها؟</div>
+        <div style="font-size:56px" id="qEmoji">🎧</div>
+        <button class="btn" id="qHear" style="margin-top:6px">🔊 أعيدي السماع</button>
+      </div>
+      <div class="quiz-options" id="qOptions"></div>
+    </div>
+
+    <!-- النتيجة -->
+    <div id="resultView" style="display:none; max-width:640px; margin:0 auto; text-align:center">
+      <div class="big-card">
+        <div style="font-size:70px" id="rEmoji"></div>
+        <div class="stars" id="rStars"></div>
+        <div class="word" id="rScore"></div>
+        <div class="lname" id="rSaveState" style="font-size:14px"></div>
+      </div>
+      <div class="card-actions">
+        <button class="btn" id="rAgain">🔄 اختبار جديد</button>
+        <button class="btn ghost" id="rBack">→ رجوع للأصوات</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+import { requireSession, saveQuizResult } from "/assets/js/auth.js";
+import { SOUNDS } from "/assets/js/phonics.js";
+import { shuffled, randomOf } from "/assets/js/letters.js";
+import { speak, speakAr } from "/assets/js/speech.js";
+import { startTracking } from "/assets/js/tracker.js";
+
+const $ = (id) => document.getElementById(id);
+const PRAISES = ["ممتاز!", "صح عليك!", "أحسنتِ!", "رائع!", "برافو عليك!"];
+let session = null, tracker = null;
+let currentSound = null;
+let quiz = null;
+
+requireSession((s) => {
+  session = s;
+  tracker = startTracking(s, "sounds");
+  $("loading").style.display = "none";
+  $("page").style.display = "block";
+  renderList();
+});
+
+function show(view) {
+  ["listView", "lessonView", "quizView", "resultView"].forEach((v) =>
+    $(v).style.display = v === view ? "" : "none");
+}
+
+function renderList() {
+  const grid = $("soundsGrid");
+  grid.innerHTML = "";
+  SOUNDS.forEach((s) => {
+    const card = document.createElement("div");
+    card.className = "activity-card";
+    card.innerHTML = `<div class="ic en" style="font-size:40px; font-weight:800">${s.label}</div>
+      <h3>صوت «${s.arSound}»</h3>
+      <p>${s.words.slice(0, 3).map((w) => w.emoji).join(" ")}</p>`;
+    card.addEventListener("click", () => openLesson(s));
+    grid.appendChild(card);
+  });
+}
+
+function openLesson(s) {
+  currentSound = s;
+  $("lsLabel").textContent = s.label;
+  $("lsSound").textContent = `ينطق: «${s.arSound}»`;
+  $("lsRule").textContent = s.rule;
+  const box = $("lsWords");
+  box.innerHTML = "";
+  s.words.forEach((w) => {
+    const c = document.createElement("div");
+    c.className = "activity-card";
+    c.style.padding = "16px 10px";
+    c.innerHTML = `<div class="ic">${w.emoji}</div><h3 class="en" style="font-size:17px">${w.en}</h3><p>${w.ar}</p>`;
+    c.addEventListener("click", () => { speak(w.en, { rate: 0.7 }); tracker?.addLetters(1); });
+    box.appendChild(c);
+  });
+  show("lessonView");
+  // نسمعها القاعدة ثم مثالًا
+  speakAr(s.rule).then(() => speak(s.words[0].en, { rate: 0.7 }));
+}
+
+// ---------- الاختبار الصوتي: اسمعي الكلمة واختاري الصوت ----------
+
+function buildSoundQuiz(focus, n) {
+  // نصف الأسئلة من الصوت المركّز عليه (إن وُجد) والباقي من أصوات أخرى
+  const qs = [];
+  const pickWord = (sound) => ({ sound, word: randomOf(sound.words) });
+  for (let i = 0; i < n; i++) {
+    const sound = focus && i < Math.ceil(n / 2) ? focus : randomOf(SOUNDS);
+    qs.push(pickWord(sound));
+  }
+  return shuffled(qs).map(({ sound, word }) => {
+    const others = shuffled(SOUNDS.filter((s) => s.id !== sound.id)).slice(0, 3);
+    return {
+      sound, word,
+      options: shuffled([sound, ...others]).map((s) => ({ label: s.label, ar: s.arSound, correct: s.id === sound.id }))
+    };
+  });
+}
+
+function startQuiz(focus, n) {
+  quiz = { focus, questions: buildSoundQuiz(focus, n), idx: 0, correct: 0, details: [], startedAt: Date.now() };
+  show("quizView");
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = quiz.questions[quiz.idx];
+  $("qProgress").textContent = `السؤال ${quiz.idx + 1} من ${quiz.questions.length} ⭐ ${quiz.correct}`;
+  $("qEmoji").textContent = "🎧";
+  const box = $("qOptions");
+  box.innerHTML = "";
+  q.options.forEach((opt) => {
+    const b = document.createElement("button");
+    b.className = "quiz-opt";
+    b.style.fontSize = "34px";
+    b.innerHTML = `${opt.label}<div style="font-size:14px; font-family:Cairo; color:var(--muted)">${opt.ar}</div>`;
+    b.addEventListener("click", () => answer(b, opt));
+    box.appendChild(b);
+  });
+  tracker?.addLetters(1);
+  speak(q.word.en, { rate: 0.65 });
+}
+
+async function answer(btn, chosen) {
+  const q = quiz.questions[quiz.idx];
+  const buttons = [...$("qOptions").children];
+  buttons.forEach((b) => (b.disabled = true));
+  const ok = !!chosen.correct;
+  btn.classList.add(ok ? "correct" : "wrong");
+  if (!ok) buttons.find((b, i) => q.options[i].correct)?.classList.add("correct");
+  $("qEmoji").textContent = q.word.emoji;
+  if (ok) {
+    quiz.correct++;
+    speakAr(PRAISES[Math.floor(Math.random() * PRAISES.length)]);
+  } else {
+    await speakAr(`للأسف — ${q.word.en} فيها صوت «${q.sound.arSound}»`);
+    await speak(q.word.en, { rate: 0.65 });
+  }
+  quiz.details.push({
+    qType: "phonics", word: q.word.en, sound: q.sound.label,
+    chosen: chosen.label, correct: ok, letter: q.sound.label
+  });
+  await new Promise((r) => setTimeout(r, ok ? 1300 : 1800));
+  quiz.idx++;
+  if (quiz.idx < quiz.questions.length) showQuestion(); else finish();
+}
+
+async function finish() {
+  show("resultView");
+  const total = quiz.details.length;
+  const pct = Math.round((quiz.correct / total) * 100);
+  const stars = pct >= 90 ? 5 : pct >= 70 ? 4 : pct >= 50 ? 3 : pct >= 30 ? 2 : 1;
+  $("rEmoji").textContent = pct >= 70 ? "🏆" : pct >= 50 ? "😊" : "💪";
+  $("rStars").textContent = "⭐".repeat(stars) + "☆".repeat(5 - stars);
+  $("rScore").textContent = `${quiz.correct} من ${total} (${pct}%)`;
+  speakAr(pct >= 70 ? "ممتاز! أذنك قوية" : "جيد! كرري الدروس وحاولي مجددًا");
+  $("rSaveState").textContent = "جارٍ حفظ النتيجة…";
+  try {
+    await saveQuizResult(session, {
+      type: "phonics",
+      focus: quiz.focus?.id || "all",
+      total, correct: quiz.correct, pct,
+      durationSec: Math.round((Date.now() - quiz.startedAt) / 1000),
+      details: quiz.details
+    });
+    $("rSaveState").textContent = "تم حفظ النتيجة ✅";
+  } catch (e) {
+    $("rSaveState").textContent = "تعذر حفظ النتيجة";
+  }
+}
+
+$("allQuizBtn").addEventListener("click", () => startQuiz(null, 10));
+$("lsQuizBtn").addEventListener("click", () => startQuiz(currentSound, 6));
+$("qHear").addEventListener("click", () => {
+  const q = quiz?.questions[quiz.idx];
+  if (q) speak(q.word.en, { rate: 0.65 });
+});
+$("backBtn").addEventListener("click", () => show("listView"));
+$("rBack").addEventListener("click", () => show("listView"));
+$("rAgain").addEventListener("click", () => startQuiz(quiz.focus, quiz.focus ? 6 : 10));
+window.addEventListener("pagehide", () => tracker?.stop());
+</script>
+</body>
+</html>

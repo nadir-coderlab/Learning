@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قياس المستوى — مدرسة البنات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<body>
+
+<div class="loading-screen" id="loading">
+  <div class="spinner"></div>
+  <div>لحظة… 📐</div>
+</div>
+
+<div id="page" style="display:none">
+  <div class="top">
+    <div class="wrap">
+      <div>
+        <div class="brand">📐 اختبار قياس المستوى</div>
+        <h1>وين وصلتي بالضبط؟</h1>
+        <div class="sub">اختبار شامل: حروف + كبير/صغير + أصوات + كلمات — يحدد ما نركز عليه</div>
+      </div>
+      <div class="topbtns">
+        <a class="tbtn" href="/">🏠 الرئيسية</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="text-align:center; max-width:640px">
+
+    <!-- البداية -->
+    <div id="introView">
+      <div class="big-card" style="padding:28px">
+        <div style="font-size:60px">📐</div>
+        <div class="word">اختبار شامل من 24 سؤالًا</div>
+        <div class="lname" style="margin-top:10px; line-height:2">
+          🔤 6 أسئلة حروف · 🔠 5 أسئلة كبير/صغير<br>
+          🗣️ 6 أسئلة أصوات · 🏠 7 أسئلة كلمات
+        </div>
+        <div class="card-actions">
+          <button class="btn" id="startBtn" style="font-size:20px; padding:16px 34px">🚀 ابدئي القياس</button>
+        </div>
+        <div class="lname" style="font-size:13px; margin-top:8px">النتيجة تبين نقاط قوتك وما تحتاجين تتدربين عليه</div>
+      </div>
+    </div>
+
+    <!-- السؤال -->
+    <div id="quizView" style="display:none">
+      <div class="progress-chip" id="qProgress"></div>
+      <div class="big-card" style="padding:24px">
+        <div class="badge role" id="qArea" style="font-size:14px"></div>
+        <div class="quiz-question" id="qText" style="margin-top:8px"></div>
+        <div class="quiz-big-letter en" id="qBig" style="min-height:60px"></div>
+        <button class="btn" id="qHear">🔊 أعيدي السماع</button>
+      </div>
+      <div class="quiz-options" id="qOptions"></div>
+    </div>
+
+    <!-- النتيجة -->
+    <div id="resultView" style="display:none">
+      <div class="big-card">
+        <div style="font-size:64px">📐</div>
+        <div class="word" id="rScore"></div>
+        <div class="lname" id="rMsg"></div>
+      </div>
+      <div class="panel" style="margin-top:18px; text-align:right">
+        <h2>📊 نتيجتك في كل مهارة</h2>
+        <div id="rAreas"></div>
+        <div class="alert info" id="rFocus" style="margin-top:12px"></div>
+        <div class="lname" id="rSaveState" style="font-size:14px; text-align:center"></div>
+      </div>
+      <div class="card-actions">
+        <a class="btn" href="/">🏠 الرئيسية</a>
+        <button class="btn ghost" id="rAgain">🔄 إعادة القياس</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+import { requireSession, saveQuizResult } from "/assets/js/auth.js";
+import { LETTERS, shuffled, randomOf } from "/assets/js/letters.js";
+import { SOUNDS } from "/assets/js/phonics.js";
+import { ALL_WORDS } from "/assets/js/vocab.js";
+import { speak, speakAr, speakSound } from "/assets/js/speech.js";
+import { startTracking } from "/assets/js/tracker.js";
+import { openSkills } from "/assets/js/skills.js";
+
+const $ = (id) => document.getElementById(id);
+const PRAISES = ["ممتاز!", "صح عليك!", "أحسنتِ!", "رائع!"];
+const AREA_INFO = {
+  letters: { name: "الحروف", icon: "🔤", tip: "تعلم الحروف والبطاقات" },
+  casing:  { name: "كبير/صغير", icon: "🔠", tip: "الاختبار الذكي (المطابقة)" },
+  phonics: { name: "الأصوات", icon: "🗣️", tip: "قسم الأصوات والمقاطع" },
+  vocab:   { name: "الكلمات", icon: "🏠", tip: "قسم كلمات البيت" }
+};
+
+let session = null, tracker = null, skills = null;
+let quiz = null;
+
+requireSession(async (s) => {
+  session = s;
+  tracker = startTracking(s, "placement");
+  skills = await openSkills(s);
+  $("loading").style.display = "none";
+  $("page").style.display = "block";
+});
+
+function show(view) {
+  ["introView", "quizView", "resultView"].forEach((v) => $(v).style.display = v === view ? "" : "none");
+}
+
+// ---------- بناء الأقسام الأربعة ----------
+
+function buildQuestions() {
+  const qs = [];
+
+  // 1) الحروف: اسمعي واختاري (6)
+  shuffled(LETTERS).slice(0, 6).forEach((L) => {
+    const qCase = Math.random() < 0.5 ? "u" : "l";
+    const opts = shuffled([L, ...shuffled(LETTERS.filter((x) => x.u !== L.u)).slice(0, 3)])
+      .map((x) => ({ text: x[qCase], correct: x.u === L.u }));
+    qs.push({ area: "letters", kind: "sound", L, text: "استمعي واختاري الحرف الصحيح", big: "❓", options: opts,
+      hear: () => speakSound(L) });
+  });
+
+  // 2) كبير/صغير: مطابقة (3) + تمييز (2)
+  shuffled(LETTERS).slice(0, 3).forEach((L) => {
+    const qCase = Math.random() < 0.5 ? "u" : "l";
+    const other = qCase === "u" ? "l" : "u";
+    const opts = shuffled([L, ...shuffled(LETTERS.filter((x) => x.u !== L.u)).slice(0, 3)])
+      .map((x) => ({ text: x[other], correct: x.u === L.u }));
+    qs.push({ area: "casing", kind: "match", L,
+      text: qCase === "u" ? "اختاري الشكل الصغير لهذا الحرف" : "اختاري الشكل الكبير لهذا الحرف",
+      big: L[qCase], options: opts, hear: () => speakSound(L) });
+  });
+  shuffled(LETTERS).slice(0, 2).forEach((L) => {
+    const qCase = Math.random() < 0.5 ? "u" : "l";
+    qs.push({ area: "casing", kind: "case", L, text: "هل هذا الحرف كبير أم صغير؟", big: L[qCase], word: true,
+      options: shuffled([
+        { text: "كبير", correct: qCase === "u" },
+        { text: "صغير", correct: qCase === "l" }
+      ]), hear: () => speakSound(L) });
+  });
+
+  // 3) الأصوات: اسمعي الكلمة — أي صوت فيها؟ (6 من أصوات مختلفة)
+  shuffled(SOUNDS).slice(0, 6).forEach((s) => {
+    const w = randomOf(s.words);
+    const others = shuffled(SOUNDS.filter((x) => x.id !== s.id)).slice(0, 3);
+    qs.push({ area: "phonics", kind: "phonics", sound: s, wordObj: w,
+      text: "استمعي للكلمة — أي صوت تسمعين فيها؟", big: "🎧",
+      options: shuffled([s, ...others]).map((x) => ({ text: x.label, correct: x.id === s.id })),
+      hear: () => speak(w.en, { rate: 0.65 }) });
+  });
+
+  // 4) الكلمات: اسمعي واختاري الصورة (7)
+  shuffled(ALL_WORDS).slice(0, 7).forEach((w) => {
+    const opts = shuffled([w, ...shuffled(ALL_WORDS.filter((x) => x.en !== w.en)).slice(0, 3)])
+      .map((x) => ({ text: x.emoji, correct: x.en === w.en }));
+    qs.push({ area: "vocab", kind: "vocab", wordObj: w,
+      text: "استمعي للكلمة واختاري صورتها", big: "🎧", options: opts,
+      hear: () => speak(w.en, { rate: 0.7 }) });
+  });
+
+  return qs; // بالترتيب: أقسام متتالية حتى تفهم الطفلة كل قسم
+}
+
+function startQuiz() {
+  quiz = { questions: buildQuestions(), idx: 0, correct: 0, details: [],
+    byArea: { letters: [0, 0], casing: [0, 0], phonics: [0, 0], vocab: [0, 0] },
+    startedAt: Date.now() };
+  show("quizView");
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = quiz.questions[quiz.idx];
+  const a = AREA_INFO[q.area];
+  $("qProgress").textContent = `السؤال ${quiz.idx + 1} من ${quiz.questions.length} ⭐ ${quiz.correct}`;
+  $("qArea").textContent = `${a.icon} قسم ${a.name}`;
+  $("qText").textContent = q.text;
+  $("qBig").textContent = q.big;
+  const box = $("qOptions");
+  box.innerHTML = "";
+  q.options.forEach((opt) => {
+    const b = document.createElement("button");
+    b.className = "quiz-opt" + (q.word ? " word" : "");
+    if (q.kind === "vocab") b.style.fontSize = "50px";
+    if (q.kind === "phonics") b.style.fontSize = "32px";
+    b.textContent = opt.text;
+    b.addEventListener("click", () => answer(b, opt));
+    box.appendChild(b);
+  });
+  tracker?.addLetters(1);
+  q.hear();
+}
+
+async function answer(btn, chosen) {
+  const q = quiz.questions[quiz.idx];
+  const buttons = [...$("qOptions").children];
+  buttons.forEach((b) => (b.disabled = true));
+  const ok = !!chosen.correct;
+  btn.classList.add(ok ? "correct" : "wrong");
+  if (!ok) buttons.find((b, i) => q.options[i].correct)?.classList.add("correct");
+  quiz.byArea[q.area][1]++;
+  if (ok) { quiz.correct++; quiz.byArea[q.area][0]++; speakAr(PRAISES[Math.floor(Math.random() * PRAISES.length)]); }
+  else speakAr("للأسف");
+  // نغذي ذاكرة مهارات الحروف من قسمي الحروف والحالة
+  if (q.L) skills.recordAnswer(q.L.u, ok, null);
+  quiz.details.push({
+    area: q.area, letter: q.L?.u || q.wordObj?.en || q.sound?.label || "",
+    chosen: chosen.text, correct: ok
+  });
+  await new Promise((r) => setTimeout(r, ok ? 1000 : 1500));
+  quiz.idx++;
+  if (quiz.idx < quiz.questions.length) showQuestion(); else finish();
+}
+
+async function finish() {
+  show("resultView");
+  const total = quiz.details.length;
+  const pct = Math.round((quiz.correct / total) * 100);
+  const areas = {};
+  Object.entries(quiz.byArea).forEach(([k, [c, t]]) => areas[k] = t ? Math.round(100 * c / t) : 0);
+
+  $("rScore").textContent = `نتيجتك الكلية: ${quiz.correct} من ${total} (${pct}%)`;
+  $("rMsg").textContent = pct >= 85 ? "ما شاء الله! مستواك ممتاز 🎉" : pct >= 60 ? "جيد جدًا — وعرفنا وش نطور 👏" : "بداية حلوة — والخطة جاهزة 💪";
+  $("rAreas").innerHTML = Object.entries(areas).map(([k, v]) => {
+    const a = AREA_INFO[k];
+    const color = v >= 80 ? "#16a34a" : v >= 50 ? "#f59e0b" : "#dc2626";
+    return `<div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; font-weight:800">
+      <span style="width:110px">${a.icon} ${a.name}</span>
+      <div style="flex:1; background:var(--line); border-radius:99px; height:14px; overflow:hidden">
+        <div style="width:${v}%; height:100%; background:${color}; border-radius:99px"></div>
+      </div>
+      <span style="width:46px; text-align:left; color:${color}">${v}%</span>
+    </div>`;
+  }).join("");
+
+  // التوصية: أضعف مهارتين تحت 80%
+  const weak = Object.entries(areas).filter(([, v]) => v < 80).sort((a, b) => a[1] - b[1]).slice(0, 2);
+  $("rFocus").innerHTML = weak.length
+    ? `🎯 <b>نركز على:</b> ${weak.map(([k]) => `${AREA_INFO[k].icon} ${AREA_INFO[k].name} (${AREA_INFO[k].tip})`).join(" · ")}`
+    : "🏆 كل المهارات ممتازة — استمري على الاختبار الذكي والأصوات!";
+  speakAr(pct >= 85 ? "ما شاء الله! مستواك ممتاز" : "أحسنتِ! الآن عرفنا وش نركز عليه");
+
+  $("rSaveState").textContent = "جارٍ حفظ النتيجة…";
+  try {
+    await Promise.all([
+      saveQuizResult(session, {
+        type: "placement", areas, total, correct: quiz.correct, pct,
+        durationSec: Math.round((Date.now() - quiz.startedAt) / 1000),
+        details: quiz.details
+      }),
+      skills.saveAreas(areas)
+    ]);
+    $("rSaveState").textContent = "تم حفظ النتيجة ✅ — بابا يشوفها في لوحة المتابعة";
+  } catch (e) {
+    $("rSaveState").textContent = "تعذر حفظ النتيجة";
+  }
+}
+
+$("startBtn").addEventListener("click", startQuiz);
+$("rAgain").addEventListener("click", startQuiz);
+$("qHear").addEventListener("click", () => quiz?.questions[quiz.idx]?.hear());
+window.addEventListener("pagehide", () => tracker?.stop());
+</script>
+</body>
+</html>
