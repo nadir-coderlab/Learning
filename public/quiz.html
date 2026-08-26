@@ -210,7 +210,15 @@ function buildQuestion(L, tier) {
 
 function startQuiz() {
   const tier = skills.tier();
-  const chosen = skills.pickLetters(BASE);
+  // 7 حروف من سلة التغطية (تضمن المرور على كل الحروف الـ26 عبر الاختبارات
+  // المتتالية بترتيب عشوائي) + 3 حروف من الأضعف (بالأوزان) — ثم خلط الترتيب
+  const coverage = skills.drawCoverage(7);
+  const used = new Set(coverage.map((L) => L.u));
+  const weak = skills.pickLetters(BASE).filter((L) => !used.has(L.u)).slice(0, BASE - coverage.length);
+  weak.forEach((L) => used.add(L.u));
+  // تعبئة احتياطية إن لم تكفِ (نادرًا)
+  const fill = shuffled(LETTERS).filter((L) => !used.has(L.u)).slice(0, BASE - coverage.length - weak.length);
+  const chosen = shuffled([...coverage, ...weak, ...fill]);
   quiz = {
     tier,
     questions: chosen.map((L) => buildQuestion(L, tier)),
