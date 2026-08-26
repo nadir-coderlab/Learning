@@ -1,0 +1,39 @@
+# نشر تلقائي لموقع تعليم البنات إلى Firebase Hosting عند كل دفعة إلى main.
+#
+# يعمل فور إضافة سرّ باسم FIREBASE_TOKEN في إعدادات هذا المستودع:
+#   Settings → Secrets and variables → Actions → New repository secret
+#   الاسم: FIREBASE_TOKEN   ·   القيمة: نفس قيمة السرّ في مستودع supportive
+#   (مخرجات الأمر firebase login:ci)
+#
+# وقبل إضافة السرّ لا يفشل الإجراء ولا يرسل إشعارات — يتخطى خطوة النشر فقط.
+name: Deploy to Firebase Hosting
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      HAS_TOKEN: ${{ secrets.FIREBASE_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: تخطٍّ — لم يُضبط السرّ بعد
+        if: env.HAS_TOKEN != 'true'
+        run: |
+          echo "::notice title=النشر متوقف::لم يُضبط السرّ FIREBASE_TOKEN بعد، فتُخطّى خطوة النشر."
+          echo "أضِف السرّ من: Settings → Secrets and variables → Actions"
+
+      # إنشاء موقع الاستضافة الثاني إن لم يكن موجودًا (لا يفشل إذا كان منشأً من قبل)
+      - name: تجهيز موقع الاستضافة girls-learning-en
+        if: env.HAS_TOKEN == 'true'
+        run: npx firebase-tools@latest hosting:sites:create girls-learning-en --project supportive-med --non-interactive || echo "الموقع موجود مسبقًا — نتابع"
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: نشر الاستضافة
+        if: env.HAS_TOKEN == 'true'
+        run: npx firebase-tools@latest deploy --only hosting --project supportive-med --non-interactive --force
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}

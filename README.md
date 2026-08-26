@@ -26,36 +26,45 @@
 
 ## خطوات التشغيل (مرة واحدة)
 
-### 1) قواعد Firestore
-قواعد المشروع تُدار من مستودع `supportive`. افتح `firestore.rules` هناك،
-والصق محتوى الملف [`firestore-learning.rules`](firestore-learning.rules)
-**قبل** قاعدة الرفض الأخيرة `match /{document=**}`، ثم من مستودع supportive:
+### 1) قواعد Firestore — تلقائي ✅
+قواعد المشروع تُدار من مستودع `supportive`، وقد دُمجت قواعد `edu*`
+(الموجودة هنا في [`firestore-learning.rules`](firestore-learning.rules) للمرجعية)
+في `firestore.rules` هناك. عند الدفع إلى main في supportive ينشرها
+الإجراء التلقائي `firebase-deploy.yml` (يتطلب سرّ `FIREBASE_TOKEN` هناك).
+وللنشر اليدوي من مستودع supportive:
 
 ```bash
-firebase deploy --only firestore:rules
+firebase deploy --only firestore:rules --project supportive-med
 ```
 
-### 2) موقع استضافة ثانٍ في نفس المشروع
-حتى لا يمس هذا الموقع استضافة البوابة، أنشئ Hosting site ثانيًا:
+### 2) النشر — تلقائي عبر GitHub Actions ✅
+هذا المستودع فيه إجراء نشر تلقائي (`.github/workflows/firebase-deploy.yml`)
+يعمل عند كل دفعة إلى `main`: ينشئ موقع الاستضافة الثاني `girls-learning-en`
+إن لم يكن موجودًا ثم ينشر الموقع. كل ما يحتاجه:
+
+- أضف سرًّا باسم `FIREBASE_TOKEN` في إعدادات **هذا** المستودع
+  (Settings → Secrets and variables → Actions) — نفس قيمة السرّ في مستودع
+  supportive (مخرجات `firebase login:ci`).
+
+وللنشر اليدوي من هذا المستودع:
 
 ```bash
-firebase hosting:sites:create girls-learning-en --project supportive-med
-```
-
-> إن كان الاسم محجوزًا اختر اسمًا آخر وعدّل حقل `"site"` في `firebase.json`.
-
-### 3) النشر (من هذا المستودع)
-```bash
+firebase hosting:sites:create girls-learning-en --project supportive-med   # مرة واحدة
 firebase deploy --only hosting --project supportive-med
 ```
 
 الموقع سيصبح على: `https://girls-learning-en.web.app`
 
-### 4) السماح للنطاق الجديد في المصادقة
-من Firebase Console → **Authentication → Settings → Authorized domains**
-أضف: `girls-learning-en.web.app`
+> إن كان اسم الموقع محجوزًا اختر اسمًا آخر وعدّل حقل `"site"` في `firebase.json`
+> وفي الـ workflow.
 
-### 5) أول دخول
+### 3) النطاق في المصادقة — غالبًا غير مطلوب
+الدخول هنا باسم مستخدم/كلمة مرور فقط، وهذا لا يتطلب إضافة النطاق إلى
+Authorized domains. إن ظهرت مشكلة دخول من النطاق الجديد أضف
+`girls-learning-en.web.app` من Firebase Console → **Authentication →
+Settings → Authorized domains**.
+
+### 4) أول دخول
 - ادخل بحساب المدير (نفس يوزر وباسورد بوابة الخدمات المساندة) — سيُنشأ ملفه تلقائيًا.
 - من «📊 لوحة المتابعة» أضف حسابًا لكل بنت (اسم، يوزر، باسورد، رمز 🦄).
 - كل بنت تدخل بيوزرها من أي جهاز، وأنت تتابع كل شيء من اللوحة.
