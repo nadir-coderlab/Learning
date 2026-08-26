@@ -21,9 +21,9 @@ export const LETTERS = [
   { u: "S", l: "s", name: "إس",     word: "Sun",       ar: "شمس",       emoji: "☀️" },
   { u: "T", l: "t", name: "تي",     word: "Tree",      ar: "شجرة",      emoji: "🌳" },
   { u: "U", l: "u", name: "يو",     word: "Umbrella",  ar: "مظلة",      emoji: "☂️" },
-  { u: "V", l: "v", name: "ڤي",     word: "Violin",    ar: "كمان",      emoji: "🎻" },
-  { u: "W", l: "w", name: "دبليو",  word: "Watch",     ar: "ساعة",      emoji: "⌚" },
-  { u: "X", l: "x", name: "إكس",    word: "Xylophone", ar: "إكسيليفون", emoji: "🎵" },
+  { u: "V", l: "v", name: "ڤي",     word: "Van",       ar: "فان (سيارة)", emoji: "🚐" },
+  { u: "W", l: "w", name: "دبليو",  word: "Water",     ar: "ماء",       emoji: "💧" },
+  { u: "X", l: "x", name: "إكس",    word: "Fox",       ar: "ثعلب",      emoji: "🦊" },
   { u: "Y", l: "y", name: "واي",    word: "Yo-yo",     ar: "يويو",      emoji: "🪀" },
   { u: "Z", l: "z", name: "زد",     word: "Zebra",     ar: "حمار وحشي", emoji: "🦓" }
 ];
