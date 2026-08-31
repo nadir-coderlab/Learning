@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>خطة ديولينجو 120 — 3 أيام</title>
+<meta name="description" content="خطة مذاكرة كاملة لاختبار Duolingo English Test بهدف +120 خلال 3 أيام: تريكات كل قسم، قوالب، جدول متابعة، وقوانين المراقبة.">
+<meta name="theme-color" content="#0f766e">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --grad:linear-gradient(135deg,#0f766e 0%,#0d9488 50%,#22c55e 100%);
+  --grad-soft:linear-gradient(160deg,#f0fdf9 0%,#ecfdf5 55%,#f7fee7 100%);
+  --teal:#0f766e; --teal2:#0d9488; --green:#16a34a; --lime:#65a30d;
+  --ink:#14342f; --muted:#5f7d76; --card:#ffffff; --line:#d8ebe4;
+  --soft:#e8f6f0; --chip:#f1f8f5;
+  --amber:#b45309; --amber-soft:#fef6e7; --red:#b91c1c; --red-soft:#fdeeec;
+  --radius:20px; --shadow:0 10px 30px rgba(15,118,110,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+body{
+  font-family:"Cairo","Segoe UI",Tahoma,sans-serif;
+  background:var(--grad-soft);background-attachment:fixed;
+  color:var(--ink);min-height:100vh;line-height:1.9;font-size:16px;
+}
+.en{font-family:"Baloo 2","Cairo",sans-serif;direction:ltr;unicode-bidi:isolate;
+  display:inline-block;background:var(--chip);border:1px solid var(--line);
+  border-radius:7px;padding:0 7px;font-size:.9em;line-height:1.6}
+.en.w{white-space:normal}
+a{color:var(--teal)}
+strong{font-weight:800}
+.wrap{max-width:900px;margin:0 auto;padding:0 16px}
+
+/* ---------- الترويسة ---------- */
+.top{background:var(--grad);color:#fff;padding:30px 0 26px;box-shadow:var(--shadow)}
+.top .brand{font-weight:800;font-size:14px;opacity:.9;letter-spacing:.02em}
+.top h1{font-size:30px;font-weight:900;margin:6px 0 8px;line-height:1.35}
+.top .sub{font-size:15px;opacity:.95;font-weight:600;max-width:60ch}
+.top .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.top .pills span{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);
+  border-radius:999px;padding:4px 14px;font-size:13px;font-weight:700}
+.homelink{display:inline-block;margin-top:16px;background:#fff;color:var(--teal);
+  border-radius:999px;padding:6px 16px;font-weight:800;font-size:13px;text-decoration:none}
+
+/* ---------- التنقل ---------- */
+nav{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.94);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:8px;overflow-x:auto;padding-top:10px;padding-bottom:10px;scrollbar-width:none}
+nav .wrap::-webkit-scrollbar{display:none}
+nav a{flex:none;text-decoration:none;color:var(--muted);font-size:13px;font-weight:700;
+  border:1px solid var(--line);border-radius:999px;padding:5px 14px;background:#fff}
+nav a:hover,nav a:focus-visible{color:var(--teal);border-color:var(--teal2)}
+
+section{padding-top:38px;scroll-margin-top:62px}
+h2{font-size:23px;font-weight:900;margin-bottom:6px}
+h2 .tag{font-size:12px;font-weight:800;color:var(--teal2);background:var(--soft);
+  border-radius:999px;padding:3px 12px;vertical-align:middle;margin-right:8px}
+.lead{color:var(--muted);font-weight:600;margin-bottom:14px}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:14px 0;box-shadow:var(--shadow)}
+.card h3{font-size:17px;font-weight:800;margin-bottom:8px}
+.note{border-radius:16px;padding:14px 18px;margin:14px 0;border:1px solid;font-weight:600}
+.note b{display:block;margin-bottom:3px;font-weight:900}
+.note.g{background:var(--soft);border-color:var(--teal2);color:#134e46}
+.note.a{background:var(--amber-soft);border-color:#f0c26b;color:var(--amber)}
+.note.r{background:var(--red-soft);border-color:#eaa9a1;color:var(--red)}
+
+/* ---------- جدول المتابعة ---------- */
+.tracker{background:var(--card);border:2px solid var(--teal2);border-radius:var(--radius);
+  overflow:hidden;box-shadow:var(--shadow);margin:14px 0}
+.tk-head{background:var(--grad);color:#fff;padding:18px 20px}
+.tk-head .t{font-size:19px;font-weight:900}
+.tk-head .s{font-size:13px;opacity:.92;font-weight:600}
+.tk-overall{display:flex;align-items:center;gap:14px;margin-top:14px}
+.ring{position:relative;width:66px;height:66px;flex:none;border-radius:50%;
+  background:conic-gradient(#fff var(--p,0%),rgba(255,255,255,.25) 0)}
+.ring::after{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--teal)}
+.ring span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  z-index:1;font-weight:900;font-size:15px}
+.tk-overall .txt{font-size:14px;font-weight:700}
+.tk-overall .txt b{display:block;font-size:16px;font-weight:900}
+
+.day{border-top:1px solid var(--line)}
+.day-h{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:14px 20px;background:var(--chip);flex-wrap:wrap}
+.day-h .n{font-weight:900;font-size:16px}
+.day-h .n small{display:block;font-weight:700;font-size:12px;color:var(--muted)}
+.bar{flex:1;min-width:140px;height:9px;border-radius:999px;background:#e2f0ea;overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:999px;background:var(--grad);
+  transition:width .3s ease}
+.day-h .pct{font-weight:900;font-size:13px;color:var(--teal);min-width:38px;text-align:left}
+
+.task{display:flex;gap:12px;padding:12px 20px;border-top:1px solid var(--line);
+  align-items:flex-start;cursor:pointer}
+.task:hover{background:#fafffd}
+.task input{appearance:none;flex:none;width:24px;height:24px;margin-top:3px;border-radius:8px;
+  border:2px solid var(--line);background:#fff;cursor:pointer;position:relative;transition:.15s}
+.task input:checked{background:var(--teal2);border-color:var(--teal2)}
+.task input:checked::after{content:"✓";position:absolute;inset:0;color:#fff;font-weight:900;
+  display:flex;align-items:center;justify-content:center;font-size:15px}
+.task input:focus-visible{outline:3px solid #99f6e4;outline-offset:2px}
+.task .body{flex:1;display:flex;flex-direction:column;gap:2px}
+.task .ttl{display:block;font-weight:700;font-size:15px;line-height:1.6}
+.task .meta{display:block;font-size:12px;color:var(--muted);font-weight:700;line-height:1.5}
+.task.done .ttl{text-decoration:line-through;color:var(--muted)}
+.tk-foot{padding:12px 20px;border-top:1px solid var(--line);display:flex;
+  justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.tk-foot .saved{font-size:12px;color:var(--muted);font-weight:700}
+.btn-reset{background:#fff;border:1px solid var(--line);color:var(--muted);
+  border-radius:999px;padding:6px 16px;font-family:inherit;font-weight:800;
+  font-size:12px;cursor:pointer}
+.btn-reset:hover{border-color:var(--red);color:var(--red)}
+
+/* ---------- جداول ---------- */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:16px;
+  background:var(--card);margin:14px 0;box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:14px}
+th{background:var(--chip);font-weight:800;font-size:12.5px;color:var(--muted);text-align:right}
+th,td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+td.num{font-family:"Baloo 2",sans-serif;direction:ltr;text-align:right;
+  font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:700}
+
+/* ---------- القواعد المرقّمة ---------- */
+ol.rules{list-style:none;display:grid;gap:10px}
+ol.rules li{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:14px 54px 14px 18px;position:relative;box-shadow:var(--shadow)}
+ol.rules li::before{counter-increment:r;content:counter(r);position:absolute;right:16px;top:14px;
+  width:26px;height:26px;border-radius:50%;background:var(--grad);color:#fff;
+  font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center}
+ol.rules{counter-reset:r}
+
+/* ---------- بطاقات الأسئلة ---------- */
+.q{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:14px 0;box-shadow:var(--shadow)}
+.q-top{display:flex;gap:12px;align-items:flex-start;margin-bottom:8px}
+.q-n{flex:none;width:38px;height:38px;border-radius:12px;background:var(--soft);
+  color:var(--teal);font-family:"Baloo 2",sans-serif;font-weight:800;font-size:17px;
+  display:flex;align-items:center;justify-content:center}
+.q-name{font-size:17px;font-weight:900}
+.q-ar{color:var(--muted);font-size:13.5px;font-weight:700}
+.stats{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 12px}
+.stats span{font-size:12.5px;background:var(--chip);border:1px solid var(--line);
+  border-radius:999px;padding:3px 12px;color:var(--muted);font-weight:700}
+.stats span b{color:var(--ink)}
+ul.t{list-style:none;display:grid;gap:8px}
+ul.t li{padding-right:20px;position:relative;font-size:15px}
+ul.t li::before{content:"◂";position:absolute;right:0;color:var(--teal2);font-size:13px}
+ol.steps{padding-right:22px;display:grid;gap:6px;font-size:15px;margin-top:8px}
+
+/* ---------- مسموح / ممنوع ---------- */
+.dd{display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:640px){.dd{grid-template-columns:1fr 1fr}}
+.dd .box{border-radius:16px;padding:16px 18px;border:1px solid}
+.dd .box h4{font-size:15px;font-weight:900;margin-bottom:10px}
+.dd .box ul{list-style:none;display:grid;gap:8px;font-size:14px;font-weight:600}
+.dd .box li{padding-right:22px;position:relative}
+.dd .ok{background:var(--soft);border-color:var(--teal2)}
+.dd .ok h4{color:#134e46}
+.dd .ok li::before{content:"✓";position:absolute;right:0;color:var(--green);font-weight:900}
+.dd .no{background:var(--red-soft);border-color:#eaa9a1}
+.dd .no h4{color:var(--red)}
+.dd .no li::before{content:"✕";position:absolute;right:0;color:var(--red);font-weight:900}
+
+.phr{display:flex;flex-wrap:wrap;gap:7px;direction:ltr;justify-content:flex-end}
+footer{margin-top:50px;background:var(--card);border-top:1px solid var(--line);
+  padding:26px 0 40px;color:var(--muted);font-size:13.5px;font-weight:600}
+footer strong{color:var(--ink)}
+.up{position:fixed;bottom:18px;left:18px;z-index:40;background:var(--grad);color:#fff;
+  border:none;border-radius:50%;width:46px;height:46px;font-size:20px;cursor:pointer;
+  box-shadow:var(--shadow);display:none}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">صيغة الاختبار الرسمية 2025–2026</div>
+    <h1>خطة الحرب: ديولينجو 120</h1>
+    <div class="sub">ملف المذاكرة الوحيد اللي تحتاجه — كل قسم، كل تريك، جدول متابعة، وخطة ساعة بساعة لثلاثة أيام.</div>
+    <div class="pills">
+      <span>⏱ 3 أيام</span><span>🎯 الهدف +120</span>
+      <span>📊 120 = IELTS 6.5</span><span>🧮 الدرجة = متوسط 4 مهارات</span>
+    </div>
+    <a class="homelink" href="/">🏠 الرئيسية</a>
+  </div>
+</header>
+
+<nav>
+  <div class="wrap">
+    <a href="#tracker">جدول المتابعة</a>
+    <a href="#facts">3 حقائق</a>
+    <a href="#map">خريطة الاختبار</a>
+    <a href="#golden">القواعد الذهبية</a>
+    <a href="#types">تريكات الأقسام</a>
+    <a href="#bank">بنك العبارات</a>
+    <a href="#stories">قصصك الست</a>
+    <a href="#proctor">قوانين المراقبة</a>
+    <a href="#exp">تجارب الناس</a>
+    <a href="#links">المصادر</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<!-- ============ جدول المتابعة ============ -->
+<section id="tracker">
+  <h2>جدول المتابعة <span class="tag">يُحفظ تلقائيًا</span></h2>
+  <p class="lead">علّم على كل مهمة تخلصها — التقدم ينحفظ في متصفحك ويرجع لك حتى لو قفلت الصفحة.</p>
+
+  <div class="tracker">
+    <div class="tk-head">
+      <div class="t">تقدمك في الخطة</div>
+      <div class="s">أنجز مهام الأيام الثلاثة بالترتيب — كل يوم مبني على اللي قبله</div>
+      <div class="tk-overall">
+        <div class="ring" id="ring" role="img" aria-label="نسبة الإنجاز"><span id="ringTxt">0%</span></div>
+        <div class="txt"><b id="doneCount">0 من 0 مهمة</b><span id="doneHint">ابدأ بأول مهمة في اليوم الأول</span></div>
+      </div>
+    </div>
+    <div id="days"></div>
+    <div class="tk-foot">
+      <span class="saved" id="savedAt">لم تبدأ بعد</span>
+      <button class="btn-reset" id="resetBtn" type="button">🔄 تصفير الجدول</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ الحقائق ============ -->
+<section id="facts">
+  <h2>قبل أي شي: 3 حقائق تحدد كل شي</h2>
+  <ol class="rules">
+    <li><strong>الاختبار تغيّر جذريًا في 1 يوليو 2025.</strong> انحذف نهائيًا <span class="en">Read Aloud</span> و<span class="en">Listen, Then Speak</span> و<span class="en">Listen and Select</span>، وأضيف <span class="en">Interactive Speaking</span> و<span class="en">Listen and Complete</span>. أي فيديو أو موقع يشرح الأنواع المحذوفة = قديم، لا تضيّع عليه دقيقة.</li>
+    <li><strong>درجتك = متوسط 4 درجات فرعية</strong> (قراءة + استماع + محادثة + كتابة) مقرّبًا لأقرب 5. يعني المحادثة والكتابة = <strong>50% من درجتك</strong>، وكل مهامها ثابتة وغير تكيفية ومعروفة مسبقًا = قابلة للتحضير 100%. هنا تنسرق الدرجات العالية بالتكتيك، مو بمستوى الإنجليزي.</li>
+    <li><strong>120 هدف واقعي جدًا.</strong> تعادل IELTS 6.5 وTOEFL 87–92 حسب الجدول الرسمي. متوسط المتقدمين عالميًا 110، وربعهم فوق 125.</li>
+  </ol>
+</section>
+
+<!-- ============ الخريطة ============ -->
+<section id="map">
+  <h2>خريطة الاختبار كاملة <span class="tag">~ساعة وحدة</span></h2>
+  <p class="lead">~5 دقائق تجهيز ← ~45 دقيقة القسم التكيفي ← ~10 دقائق العينتان الأخيرتان.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>#</th><th>السؤال</th><th>كم مرة؟</th><th>الوقت</th><th>الدرجة</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1</td><td><span class="en">Read and Select</span> — حقيقية أم وهمية؟</td><td>15–18</td><td class="num">5 ث/كلمة</td><td>القراءة</td></tr>
+      <tr><td class="num">2</td><td><span class="en">Fill in the Blanks</span> — كمّل نهاية الكلمة</td><td>6–9</td><td class="num">20 ث</td><td>القراءة</td></tr>
+      <tr><td class="num">3</td><td><span class="en">Read and Complete</span> — الفقرة المثقوبة</td><td>3–6</td><td class="num">3 د</td><td>القراءة</td></tr>
+      <tr><td class="num">4</td><td><span class="en">Listen and Type</span> — الإملاء</td><td>6–9</td><td class="num">1 د · 3 تشغيلات</td><td>الاستماع</td></tr>
+      <tr><td class="num">5</td><td><span class="en">Interactive Reading</span> — قطعة + 6 أسئلة</td><td>2–3</td><td class="num">7–8 د</td><td>القراءة</td></tr>
+      <tr><td class="num">6</td><td><span class="en">Interactive Listening</span> — محادثة + ملخص</td><td>2</td><td class="num">6:30 + 75 ث</td><td>استماع + كتابة</td></tr>
+      <tr><td class="num">7</td><td><span class="en">Write About the Photo</span></td><td>3</td><td class="num">1 د</td><td>الكتابة</td></tr>
+      <tr><td class="num">8</td><td><span class="en">Interactive Writing</span> — مقال بجزأين</td><td>1</td><td class="num">5 د + 3 د</td><td>الكتابة</td></tr>
+      <tr><td class="num">9</td><td><span class="en">Speak About the Photo</span></td><td>1</td><td class="num">20 ث + 90 ث</td><td>المحادثة</td></tr>
+      <tr><td class="num">10</td><td><span class="en">Read Then Speak</span></td><td>1</td><td class="num">20 ث + 90 ث</td><td>المحادثة</td></tr>
+      <tr><td class="num">11</td><td><span class="en">Interactive Speaking</span> — مع Bea/Oscar</td><td>6–8</td><td class="num">35 ث/جواب</td><td>المحادثة</td></tr>
+      <tr><td class="num">12</td><td><span class="en">Writing Sample</span> — يُرسل للجامعات</td><td>1</td><td class="num">30 ث + 5 د</td><td>الكتابة</td></tr>
+      <tr><td class="num">13</td><td><span class="en">Speaking Sample</span> — فيديو للجامعات</td><td>1</td><td class="num">30 ث + 3 د</td><td>المحادثة</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note a"><b>تصحيح معلومة منتشرة</b>العينتان الأخيرتان (12 و13) <strong>محسوبتان في الدرجة</strong> وترسلان للجامعات. المعلومة القديمة إنها «غير محسوبة» خطأ.</div>
+</section>
+
+<!-- ============ القواعد الذهبية ============ -->
+<section id="golden">
+  <h2>القواعد الذهبية <span class="tag">تنطبق على كل الاختبار</span></h2>
+  <ol class="rules">
+    <li><strong>لا تترك أي سؤال فاضي أبدًا.</strong> الفراغ = نفس عقوبة الخطأ (رسميًا). وفي الإملاء الكلمة <em>الناقصة</em> تنقّص أكثر من المكتوبة غلط.</li>
+    <li><strong>الاختبار تكيفي:</strong> جاوبت صح ← السؤال الجاي أصعب، وهذا ممتاز. صارت الأسئلة سهلة فجأة؟ هذا الإنذار السيئ.</li>
+    <li><strong>الأسئلة الأولى أغلى ما في الاختبار</strong> — تحدد تقدير النظام لمستواك اللي يبني عليه الباقي. ادخل مركّز من أول ثانية.</li>
+    <li><strong>الوقت المتبقي لا يُخزَّن</strong> — كلام وكتابة أطول = درجة أعلى، وبالمهام الموقوتة راجع إملاءك للنهاية.</li>
+    <li><strong>الإملاء الأمريكي والبريطاني مقبولان</strong> بأغلب المهام — والأسلم تعتمد الأمريكي (<span class="en">organize, color</span>).</li>
+    <li><strong>ممنوع حفظ جُمل جاهزة</strong> — النظام يقارن جوابك بكل المتقدمين السابقين. احفظ هياكل وبدايات أقصر من 5 كلمات فقط.</li>
+    <li><strong>نص درجتك من مهام ثابتة معروفة مسبقًا</strong> — القوالب تحت تغطيها كلها. هذا استثمارك الأكبر.</li>
+  </ol>
+</section>
+
+<!-- ============ تريكات الأقسام ============ -->
+<section id="types">
+  <h2>تريكات كل قسم <span class="tag">13 نوع سؤال</span></h2>
+
+  <article class="q">
+    <div class="q-top"><div class="q-n">1</div><div><div class="q-name"><span class="en">Read and Select</span></div><div class="q-ar">هل هذه كلمة إنجليزية حقيقية؟</div></div></div>
+    <div class="stats"><span>العدد <b>15–18</b></span><span>الوقت <b>5 ثوانٍ</b></span><span>ما تقدر تغيّر جوابك</span></div>
+    <ul class="t">
+      <li><strong>اضغط شي دائمًا</strong> — انتهاء الوقت بلا إجابة = خطأ محسوب.</li>
+      <li><strong>قاعدة القرار:</strong> تعرف الكلمة وشفتها قبل؟ ← Yes. عمرك ما شفتها؟ ← <strong>No</strong>. الوهمية مولّدة بشبكات عصبية عشان تبدو حقيقية.</li>
+      <li><strong>انطقها بسرّك</strong> — الوهمية غالبًا تتعثر بالنطق (<span class="en">flarpulous</span>، <span class="en">thrunting</span>).</li>
+      <li><strong>أشهر فخين:</strong> جذر حقيقي + لاحقة غلط (<span class="en">unhappiment</span>، <span class="en">cemention</span>)، وتغيير حرف بكلمة معروفة (<span class="en">wirter</span>، <span class="en">beleive</span>، <span class="en">fizical</span>).</li>
+      <li><strong>لا توازن إجاباتك</strong> — ما فيه نسبة ثابتة للحقيقي والوهمي.</li>
+    </ul>
+  </article>
+
+  <article class="q">
+    <div class="q-top"><div class="q-n">2</div><div><div class="q-name"><span class="en">Fill in the Blanks</span></div><div class="q-ar">اكتب نهاية الكلمة الناقصة</div></div></div>
+    <div class="stats"><span>العدد <b>6–9</b></span><span>الوقت <b>20 ثانية</b></span><span>حرف غلط = صفر</span></div>
+    <ul class="t">
+      <li><strong>عدّ الفراغات أول شي</strong> — عددها = عدد الحروف الناقصة. مثال رسمي: <span class="en">soc_____ unrest</span> ← <span class="en">societal</span> مو <span class="en">social</span>.</li>
+      <li><strong>دوّر «الدليل المزروع»</strong> — ديولينجو تضمّن ببعض الجمل مرادفًا أو ضدًا أو <span class="en">collocation</span>: «…destroys social cohesion… offset by acts of <span class="en">kindness</span>» ← <span class="en">wickedness</span>.</li>
+      <li>قبل اسم ← صفة. بعد فعل ← ظرف. طابق الزمن (<span class="en">-ed / -ing / -s</span>).</li>
+      <li>عرفت الجذر بس مو النهاية؟ جرّب اللواحق: <span class="en w">-tion -ment -ness -ity -ous -ive -able -ically</span>.</li>
+      <li>اكتب بأول 10 ثوانٍ وراجع حرفًا حرفًا. لا تتركه فاضيًا أبدًا.</li>
+    </ul>
+  </article>
+
+  <article class="q">
+    <div class="q-top"><div class="q-n">3</div><div><div class="q-name"><span class="en">Read and Complete</span></div><div class="q-ar">فقرة بكلمات ناقصة النصف الثاني</div></div></div>
+    <div class="stats"><span>العدد <b>3–6 فقرات</b></span><span>الوقت <b>3 دقائق</b></span><span>كل كلمة تصحح لوحدها</span></div>
+    <div class="note g"><b>ضمانات رسمية — استغلها</b>العنوان + الجملة الأولى + الأخيرة سليمة دائمًا. الكلمات الناقصة ما تتجاور أبدًا، وما تكون أسماء أعلام أو اختصارات.</div>
+    <ol class="steps">
+      <li>اقرأ العنوان وأول وآخر جملة، ثم الفقرة كاملة بسرعة متجاهلًا الفراغات.</li>
+      <li>عبّي كل السهل فورًا — أغلبها نهايات قواعدية (<span class="en">beca___</span>←because، <span class="en">-ed / -ing</span>).</li>
+      <li>الباقي بالقواعد: نوع الكلمة؟ جمع بعد أرقام؟ مقارنة بعد <span class="en">than</span>؟</li>
+      <li><strong>دوّر الكلمة نفسها مكتوبة كاملة بمكان ثاني بالفقرة</strong> — ديولينجو تكرر المفردات كثير.</li>
+      <li>آخر 30 ثانية مراجعة إملاء. عبّي كل فراغ — التخمين مجاني.</li>
+    </ol>
+  </article>
+
+  <article class="q">
+    <div class="q-top"><div class="q-n">4</div><div><div class="q-name"><span class="en">Listen and Type</span></div><div class="q-ar">الإملاء — اكتب الجملة اللي تسمعها</div></div></div>
+    <div class="stats"><span>العدد <b>6–9</b></span><span>الوقت <b>60 ثانية</b></span><span><b>3 تشغيلات</b> كحد أقصى</span></div>
+    <ul class="t">
+      <li><strong>الطريقة:</strong> تشغيلة 1 افهم بلا كتابة ثم اكتب كل اللي تذكره ← تشغيلة 2 كمّل وصحح ← تشغيلة 3 اقرأ نصك مع الصوت كلمة كلمة.</li>
+      <li><strong>الكلمة الناقصة تنقّص أكثر من المكتوبة غلط</strong> — اكتب تخمينًا صوتيًا لأي كلمة سمعتها.</li>
+      <li><strong>النقاط والكابيتل محسوبة:</strong> حرف كبير + نقطة أو <span class="en">?</span>، والاختصارات كما سمعتها (<span class="en">don't</span>).</li>
+      <li>الأفخاخ: النفي · <span class="en">a/the</span> · حروف الجر · الأزمنة التامة · جمع <span class="en">-s</span>.</li>
+      <li>تدرّب <strong>بسبيكر الجهاز مو سماعات</strong> — السماعات ممنوعة يوم الاختبار.</li>
+    </ul>
+  </article>
+
+  <article class="q">
+    <div class="q-top"><div class="q-n">5</div><div><div class="q-name"><span class="en">Interactive Reading</span></div><div class="q-ar">قطعة + 6 أسئلة بمؤقت مشترك</div></div></div>
+    <div class="stats"><span>العدد <b>2–3 قطع</b></span><span><b>7 أو 8 دقائق</b> للقطعة كاملة</span></div>
+    <div class="note g"><b>تريك «الكشف التدريجي»</b>السؤال 1 يعرض نصف القطعة؛ السؤال 2 يعرض النصف الأول <strong>مصححًا</strong> + النصف الجديد؛ الأسئلة 3–6 القطعة كاملة. أخطاؤك تتصحح قدامك.</div>
+    <ul class="t">
+      <li><strong>التوزيع:</strong> الفراغات ≤2.5 د ← الجملة الناقصة ~1.5 د ← كل تظليل ~1 د ← الفكرة ~1 د ← العنوان ≤45 ث.</li>
+      <li><strong>الفراغات:</strong> خياران غلط واضح والباقيان متقاربان — افصل بالـ<span class="en">collocation</span> والزمن. لا تعلق على فراغ أكثر من 25 ثانية.</li>
+      <li><strong>الجملة الناقصة:</strong> مرّر الماوس فوق الخيار ليظهر داخل الفراغ. اشطب أي خيار يذكر شيئًا ما انذكر بالقطعة. الصح غالبًا يبدأ برابط مفصلي (<span class="en">However / Therefore</span>).</li>
+      <li><strong>التظليل:</strong> الجواب مكتوب حرفيًا بالنص — ظلل العبارة المجيبة فقط. تظليل فقرة كاملة = صفر.</li>
+      <li><strong>الفكرة:</strong> اشطب أي خيار فيه حقيقة أو رقم ما ورد بالقطعة، ثم اختر اللي يغطي القطعة كلها.</li>
+      <li><strong>العنوان:</strong> حوّل جواب «الفكرة» لعبارة اسمية — العنوان الصح دائمًا يعيد صياغتها.</li>
+    </ul>
+  </article>
+
+  <article class="q">
+    <div class="q-top"><div class="q-n">6</div><div><div class="q-name"><span class="en">Interactive Listening</span></div><div class="q-ar">محادثة جامعية + ملخص مكتوب</div></div></div>
+    <div class="stats"><span>محادثتان</span><span><b>6:30</b> + <b>75 ث</b> للملخص</span></div>
+    <ul class="t">
+      <li><strong>الجزء الأول:</strong> تسمع السيناريو صوتًا وتجاوب 3–4 أسئلة قصيرة. الإعادة غير محدودة والإيقاف متاح، بس المؤقت ما يوقف — <strong>لا تتجاوز 2.5 دقيقة</strong>. الإجابات أقل من 5 كلمات والإملاء غير محسوب.</li>
+      <li><strong>الجزء الثاني:</strong> الصوت ما يشتغل تلقائيًا — <strong>اضغط تشغيل فورًا</strong>، ويشتغل مرة وحدة. الخيارات الغلط غلط سياقيًا مو نحويًا — طابق الموضوع والزمن والنبرة.</li>
+      <li>السؤال الأول أحيانًا بلا صوت (اختر الافتتاحية): الصح يعيد كلمات مفتاحية من السيناريو.</li>
+      <li>غلطت؟ اقرأ الجواب الصح الظاهر — المحادثة تكمل منه. وبقي وقت؟ أعد قراءة المحادثة كاملة قبل الملخص.</li>
+      <li><strong>الملخص:</strong> <span class="en w">In this conversation, I talked with … about …</span> + جملتين: المشكلة والقرار. بالماضي، فقرة متصلة، <strong>3 جمل لهدف 125+</strong>.</li>
+    </ul>
+  </article>
+
+  <article class="q">
+    <div class="q-top"><div class="q-n">7</div><div><div class="q-name"><span class="en">Write About the Photo</span></div><div class="q-ar">3 صور × دقيقة — الهدف 40–50+ كلمة</div></div></div>
+    <ul class="t">
+      <li><strong>قالب الـ3 جمل:</strong> ① <span class="en">This image shows…</span> ← ② زوم على تفصيلة بصيغة الاستمرار + مكانيات (<span class="en">in the foreground/background</span>) ← ③ استنتاج (<span class="en">Perhaps… / It looks like…</span>).</li>
+      <li><strong>غيّر الافتتاحية بين الصور الثلاث</strong> — التكرار ينقّص تنوع المفردات.</li>
+      <li>سمِّ بدقة، وضِف فاصلة وجملة تابعة (<span class="en">because/while</span>). وصف فقط بلا رأي، ولا تسلّم جملة مقطوعة.</li>
+      <li>تحذير رسمي: لا تفتح بحشو محفوظ مثل <span class="en w">"This picture shows a situation that might be happening in everyday life…"</span></li>
+    </ul>
+  </article>
+
+  <article class="q">
+    <div class="q-top"><div class="q-n">8</div><div><div class="q-name"><span class="en">Interactive Writing</span></div><div class="q-ar">مقال بجزأين — المتابعة تسأل عن زاوية ما غطيتها</div></div></div>
+    <div class="stats"><span>جزء 1: <b>5 د · 150+ كلمة</b></span><span>جزء 2: <b>3 د · 100+ كلمة</b></span></div>
+    <ul class="t">
+      <li><strong>الوقت:</strong> جزء 1 = 4 د كتابة + 1 د مراجعة. جزء 2 = 30 ث تخطيط + 2 د كتابة + 30 ث مراجعة.</li>
+      <li><strong>الهيكل:</strong> موقف مباشر (<span class="en">I definitely agree that…</span>) ← سببان كل واحد بمثال شخصي ملموس ← <span class="en">Overall, …</span></li>
+      <li><strong>الجزء 2:</strong> افتح بـ<span class="en">As I mentioned,…</span> وجاوب <strong>الزاوية الجديدة فقط</strong> — إعادة شرح الجزء 1 تنقّص.</li>
+      <li><strong>ازرع إشارات 130+:</strong> شرطية + مبني للمجهول + جملة موصولة — منصوصة حرفيًا بوصف النطاق الرسمي.</li>
+    </ul>
+  </article>
+
+  <article class="q">
+    <div class="q-top"><div class="q-n">9</div><div><div class="q-name"><span class="en">Speak About the Photo</span></div><div class="q-ar">تسجيلة وحدة بلا إعادة</div></div></div>
+    <div class="stats"><span><b>20 ث</b> تحضير</span><span>حتى <b>90 ث</b> — املأها كلها</span></div>
+    <ul class="t">
+      <li><strong>Zoom &amp; Speculate:</strong> 0–20 ث نظرة عامة ← 20–60 ث تفاصيل (مين يسوي وش، أمامية مقابل خلفية) ← 60–90 ث تخمين (<span class="en">It appears to me that…</span>).</li>
+      <li>ما تعرف كلمة؟ <strong>صفها بكلمات سهلة</strong> بدل السكوت (نصيحة رسمية).</li>
+    </ul>
+  </article>
+
+  <article class="q">
+    <div class="q-top"><div class="q-n">10</div><div><div class="q-name"><span class="en">Read Then Speak</span></div><div class="q-ar">الأسئلة الفرعية تظل ظاهرة وأنت تتكلم</div></div></div>
+    <ul class="t">
+      <li><strong>الأسئلة الفرعية = مخطط إجابتك.</strong> جاوبها بالترتيب، ~15–20 ثانية لكل واحد.</li>
+      <li>أعلن انتقالك صوتيًا: <span class="en">About [X], I would say…</span> — نموذج 140 الرسمي سوى كذا.</li>
+      <li>قصة واحدة متطورة بعمق أفضل من 5 نقاط سطحية.</li>
+    </ul>
+  </article>
+
+  <article class="q">
+    <div class="q-top"><div class="q-n">11</div><div><div class="q-name"><span class="en">Interactive Speaking</span></div><div class="q-ar">محادثة مع شخصية — أخطر قسم جديد</div></div></div>
+    <div class="stats"><span><b>6–8 أسئلة</b> على موضوعين</span><span><b>35 ث</b> للجواب</span><span>السؤال <b>مرة وحدة</b> بلا نص</span></div>
+    <ul class="t">
+      <li>المؤقت يبدأ لحظة ما تسكت الشخصية و<strong>لازم تضغط زر التسجيل فورًا</strong>.</li>
+      <li><strong>السؤال الفعلي بالنصف الثاني من الكلام</strong> — ركّز على <span class="en w">describe / discuss / do you think</span>.</li>
+      <li><strong>صيغة OREO:</strong> رأي مباشر ← سبب (<span class="en">One reason is…</span>) ← مثال (<span class="en">For example…</span>) ← إغلاق (<span class="en">In short…</span>). املأ ~30 من الـ35 ثانية.</li>
+      <li>ما فهمت السؤال؟ <strong>تكلم عن الموضوع العام فورًا</strong> — السكوت صفر، والجواب شبه المرتبط لا.</li>
+      <li>توقع القفزة المفاجئة لموضوع ثانٍ عند السؤال الرابع تقريبًا.</li>
+    </ul>
+  </article>
+
+  <article class="q">
+    <div class="q-top"><div class="q-n">12</div><div><div class="q-name"><span class="en">Writing Sample</span></div><div class="q-ar">مقال 5 دقائق — يقرأه مسؤول القبول</div></div></div>
+    <div class="stats"><span><b>30 ث</b> + <b>5 د</b></span><span>الهدف <b>150+ كلمة</b></span></div>
+    <ul class="t">
+      <li>موقف مباشر ← سببان بمثال شخصي ← <span class="en">Overall,…</span></li>
+      <li><strong>جاوب كل الأسئلة الفرعية</strong> — «صلة الجواب بالسؤال» عامل ثقيل جدًا.</li>
+      <li>فقرات متصلة (ممنوع نقاط)، وآخر 45 ثانية مراجعة إملاء.</li>
+    </ul>
+  </article>
+
+  <article class="q">
+    <div class="q-top"><div class="q-n">13</div><div><div class="q-name"><span class="en">Speaking Sample</span></div><div class="q-ar">فيديو 3 دقائق — يشاهده مسؤول القبول</div></div></div>
+    <ul class="t">
+      <li>مقدمة تجاوب مباشرة ← نقطتان-ثلاث بمثال ← خاتمة. <strong>قصة واحدة حقيقية متطورة</strong> تسوى أكثر من قائمة نقاط.</li>
+      <li>عبارة الإنقاذ الرسمية: <span class="en w">This is an interesting question. I've never thought about this before, but…</span></li>
+      <li><strong>تكلم أغلب الـ3 دقائق</strong> — «تكلم قليلًا جدًا» سبب رسمي لإلغاء الشهادة. والبس مرتب.</li>
+    </ul>
+  </article>
+
+  <div class="note g"><b>وش يكافئ مصحح الكلام فعليًا؟</b>
+  اللكنة <strong>غير محسوبة إطلاقًا</strong> («أي لكنة إنجليزية مفهومة مقبولة» — رسمي). المهم: استمرارية الكلام بلا توقفات طويلة (~110–150 كلمة/دقيقة)، أمثلة ملموسة بأسماء حقيقية، تنوّع قواعدي مقصود، و<span class="en">collocations</span> بدل الكلمات النادرة. الأخطاء الصغيرة ما منعت أحدًا من 135–145 — <strong>الوقوف عن الكلام هو اللي يمنع</strong>.</div>
+</section>
+
+<!-- ============ بنك العبارات ============ -->
+<section id="bank">
+  <h2>بنك العبارات <span class="tag">كله أقصر من 5 كلمات = آمن</span></h2>
+  <div class="card"><h3>روابط ممدوحة بالنماذج الرسمية 140–150</h3>
+    <div class="phr"><span class="en">First of all,</span><span class="en">Moreover,</span><span class="en">However,</span><span class="en">For example,</span><span class="en">In other words,</span><span class="en">As a result,</span><span class="en">On the other hand,</span><span class="en">Overall,</span></div></div>
+  <div class="card"><h3>مكانيات الصور</h3>
+    <div class="phr"><span class="en">in the foreground</span><span class="en">in the background</span><span class="en">on the left / right</span><span class="en">towards the back</span><span class="en">in the center</span><span class="en">next to</span></div></div>
+  <div class="card"><h3>تخمين واستنتاج</h3>
+    <div class="phr"><span class="en">It appears to me that…</span><span class="en">It looks like…</span><span class="en">Perhaps</span><span class="en">Presumably</span><span class="en">Judging by…</span><span class="en">must / might / could</span></div></div>
+  <div class="card"><h3>ترقية مفردات — collocations أهم من الكلمات النادرة</h3>
+    <div class="phr"><span class="en">good → excellent</span><span class="en">important → crucial</span><span class="en">happy → thrilled</span><span class="en">expand your social group</span><span class="en">broaden my horizons</span><span class="en">a good source of information</span></div></div>
+  <div class="card"><h3>إشارات قواعد 130+ — ازرعها عمدًا</h3>
+    <div class="phr"><span class="en">If I had more time, I would…</span><span class="en">…has been shaped by…</span><span class="en">…, which changed my perspective,</span><span class="en">I have always believed that…</span></div></div>
+  <div class="card"><h3>بدايات القوالب</h3>
+    <div class="phr"><span class="en">This image shows…</span><span class="en">In this conversation, I talked with…</span><span class="en">I definitely agree that…</span><span class="en">As I mentioned,</span></div></div>
+</section>
+
+<!-- ============ القصص ============ -->
+<section id="stories">
+  <h2>قصصك الست <span class="tag">تغطي كل مهام الإنتاج</span></h2>
+  <p class="lead">كل مهام الكتابة والمحادثة تدور على نفس العناقيد: التعليم · التقنية · السفر · البيئة · العمل والفريق · قصص شخصية. حضّر 6 قصص حقيقية <strong>كنقاط مو جمل محفوظة</strong>:</p>
+  <div class="tablewrap"><table style="min-width:0"><tbody>
+    <tr><td class="num">1</td><td>تحدي تجاوزته: المشكلة ← وش سويت ← النتيجة ← الدرس</td></tr>
+    <tr><td class="num">2</td><td>إنجاز تفتخر فيه</td></tr>
+    <tr><td class="num">3</td><td>قرار صعب اتخذته</td></tr>
+    <tr><td class="num">4</td><td>رحلة أو مكان أثّر فيك — بأسماء حقيقية</td></tr>
+    <tr><td class="num">5</td><td>شخص أثّر فيك (معلم / قدوة)</td></tr>
+    <tr><td class="num">6</td><td>رأيك بالتقنية والسوشال ميديا: إيجابيتان + سلبيتان + مثال من حياتك</td></tr>
+  </tbody></table></div>
+  <div class="card"><h3>مواضيع رسمية حرفية — تدرّب عليها بالمؤقت</h3>
+    <ul class="t">
+      <li><strong>Writing Sample:</strong> <span class="en w">"Describe the last time you enjoyed being out in nature…"</span> · <span class="en w">"Sports is a required subject in some schools. Good or bad?"</span></li>
+      <li><strong>Interactive Writing:</strong> <span class="en w">"Why do people visit museums?"</span> · <span class="en w">"Success is a combination of luck and hard work"</span> · <span class="en w">"Technology is making people less social"</span></li>
+      <li><strong>Read Then Speak:</strong> <span class="en w">"Talk about a book you read recently"</span> · <span class="en w">"Car ownership vs public transportation"</span></li>
+      <li><strong>Speaking Sample:</strong> <span class="en w">"Should schools require uniforms?"</span> · <span class="en w">"Money can't buy happiness — agree?"</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ المراقبة ============ -->
+<section id="proctor">
+  <h2>قوانين المراقبة <span class="tag">هنا تنلغى النتائج</span></h2>
+  <p class="lead">كل اختبار يُراجع بالذكاء الاصطناعي + مدققين بشر (80+ سلوكًا) خلال 48 ساعة. السبب الأول عالميًا للإلغاء: <strong>النظر بعيدًا عن الشاشة</strong>.</p>
+
+  <div class="card"><h3>تجهيز الغرفة</h3><ul class="t">
+    <li>غرفة هادئة خاصة، <strong>إضاءة قدامك مو وراك</strong>، باب مقفول، وبلّغ أهل البيت: ساعة كاملة ممنوع أحد يدخل أو يتكلم.</li>
+    <li>المكتب فاضي إلا: الكمبيوتر + الجوال + الهوية. لا ورق ولا قلم ولا كوب.</li>
+    <li><strong>الهوية:</strong> أصلية فعلية (الجواز الأنسب)، والاسم بالتسجيل = الاسم بالهوية حرفيًا.</li>
+    <li>إنترنت: يفضل كيبل، وافصل بقية الأجهزة عن الشبكة.</li>
+  </ul></div>
+
+  <div class="card"><h3>الكاميرا الثانية — إلزامية منذ سبتمبر 2025</h3><ul class="t">
+    <li>جوال (مو لابتوب) عليه تطبيق DET، يرتبط بمسح QR من شاشة الكمبيوتر.</li>
+    <li><strong>أفقيًا على حامل ثابت</strong> بمسافة ~75 سم، يصور: الشاشة + الكيبورد + الماوس + جسمك العلوي.</li>
+    <li>شاحن + واي فاي + عدم إزعاج — <strong>إشعار واحد أو سقوط الجوال = الجلسة تنلغى وتحرق محاولة</strong>. ولا تلمسه بعد البدء.</li>
+    <li>قبل البدء: مسح الغرفة 360° + <strong>مسح الأذنين</strong> — شِل النظارة والأقراط قبله.</li>
+  </ul></div>
+
+  <div class="dd">
+    <div class="box ok"><h4>مسموح</h4><ul>
+      <li>النظر للكيبورد <strong>أثناء الكتابة</strong> (آمن رسميًا)</li>
+      <li>وقفة صمت ثانية–ثانيتين أثناء الكلام</li>
+      <li>لهجتك الطبيعية بأي شكل</li>
+      <li>غطاء رأس ديني (بظهور العينين والفم)</li>
+      <li>نظارة طبية بلا انعكاس إضاءة</li>
+    </ul></div>
+    <div class="box no"><h4>يلغي نتيجتك</h4><ul>
+      <li>التحديق بالسقف أو الجنب وأنت «تفكر»</li>
+      <li>الهمس أو قراءة الأسئلة بصوت</li>
+      <li>سماعات أذن أو رأس من أي نوع</li>
+      <li>تغطية الفم أو الأذنين</li>
+      <li>مغادرة الكرسي — ما فيه استراحة حمام</li>
+      <li>خروج الماوس من نافذة الاختبار</li>
+      <li>نسخ/لصق · تصحيح تلقائي · Grammarly · VPN</li>
+    </ul></div>
+  </div>
+
+  <div class="note a"><b>لو صار خلل أو انلغت النتيجة</b>النت انقطع؟ لا تقفل التطبيق — انتظر إعادة الاتصال. الشراء الواحد = 3 محاولات بدء ونتيجة معتمدة وحدة. <strong>قدّم استئنافًا خلال 72 ساعة</strong> وكلّم الدعم قبل ما تدفع من جديد.</div>
+  <div class="note g"><b>نصيحة الشراء</b>إذا فيه احتمال إعادة: باقة الاختبارين <strong>$118</strong> أفضل من واحد بـ$70. النتيجة خلال 48 ساعة (أو +$40 لـ12 ساعة).</div>
+</section>
+
+<!-- ============ التجارب ============ -->
+<section id="exp">
+  <h2>خلاصة تجارب الناس <span class="tag">115–150 بتحضير قصير</span></h2>
+  <ul class="t">
+    <li><strong>يومان ← 150</strong> · <strong>3 أيام ← 140</strong> · <strong>2–3 أيام ← 125</strong> · <strong>6 أيام ← 120</strong>. القاسم المشترك: ركزوا على التجريبيات والشكل، مو «تحسين الإنجليزي».</li>
+    <li>درجتك الحقيقية غالبًا داخل نطاق التقدير التجريبي حول المنتصف — <strong>لا تخلي موك سيئ يكسرك</strong>.</li>
+    <li>أكثر شي فاجأ الناس: <strong>التعب الذهني</strong> — 45–60 دقيقة تركيز متواصل، وفقدان التركيز بالمنتصف أكبر سارق درجات.</li>
+    <li>ثاني مفاجأة: <span class="en">Interactive Speaking</span> والمواضيع المجردة — الحل: OREO + قصصك الست + عبارة الإنقاذ.</li>
+    <li>سرعة الكتابة عامل درجات فعلي بمهام الدقيقة الواحدة.</li>
+  </ul>
+</section>
+
+<!-- ============ المصادر ============ -->
+<section id="links">
+  <h2>المصادر المعتمدة <span class="tag">صيغة ما بعد يوليو 2025</span></h2>
+  <div class="card"><h3>رسمي — الأهم</h3><ul class="t">
+    <li><a href="https://englishtest.duolingo.com/practice" target="_blank" rel="noopener">الاختبار التجريبي المجاني</a> — غير محدود، نفس المحرك التكيفي.</li>
+    <li><a href="https://englishtest-static.duolingo.com/media/resources/Question%20Guide%20(2025).pdf" target="_blank" rel="noopener">دليل الأسئلة الرسمي 2025 (PDF)</a></li>
+    <li><a href="https://englishtest-static.duolingo.com/media/resources/GPN%20DET%20Sample%20Questions%20-%20Full.pdf" target="_blank" rel="noopener">كتيب 1000+ سؤال حقيقي بالأجوبة (PDF)</a></li>
+    <li><a href="https://www.youtube.com/watch?v=VttOg1fbsa8" target="_blank" rel="noopener">الجولة الرسمية بالفيديو 2025</a></li>
+  </ul></div>
+  <div class="card"><h3>تدريب مجاني</h3><ul class="t">
+    <li><a href="https://goarno.io/duolingo-english-test/practice-free-unlimited-practice-questions" target="_blank" rel="noopener">Arno</a> — 30,000+ سؤال مجاني + أول موك كامل بدرجات فرعية.</li>
+    <li><a href="https://www.detpractice.com/duolingo-practice-test" target="_blank" rel="noopener">DET Practice</a> — موك 30 دقيقة بلا تسجيل.</li>
+    <li><a href="https://ieltsahead.com/free-practice-duolingo-test-yes-no-vocabulary-text/" target="_blank" rel="noopener">IELTS Ahead</a> — تمارين Read and Select مؤقتة.</li>
+    <li><a href="https://www.youtube.com/@TeacherLuke-DET" target="_blank" rel="noopener">قناة Teacher Luke</a> — أكبر قناة DET بصيغة 2025.</li>
+    <li><a href="https://monkeytype.com" target="_blank" rel="noopener">monkeytype</a> — سرعة الكتابة (هدفك 40+ كلمة/دقيقة).</li>
+  </ul></div>
+</section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <p><strong>الخلاصة بجملة وحدة:</strong> اعرف الشكل بالضبط، لا تترك فراغًا أبدًا، عبّي كل ثانية كلام وكتابة بمحتوى ملموس، اكتب 150+ كلمة بالمقالات، وعيونك على الشاشة — والـ120 تجيك بإذن الله. 🎯</p>
+    <p style="margin-top:8px">مبنية على أدلة Duolingo الرسمية 2025–2026 ومواقع التحضير المتخصصة وتجارب متقدمين حقيقيين · آخر تحديث للمعلومات: أغسطس 2026</p>
+  </div>
+</footer>
+
+<button class="up" id="upBtn" type="button" aria-label="أعلى الصفحة">↑</button>
+
+<script>
+const PLAN = [
+  { id:"d1", name:"اليوم الأول", goal:"افهم الملعب + خط الأساس · ~5–6 ساعات", tasks:[
+    { id:"d1t1", t:"اقرأ هذه الصفحة كاملة مرة أولى", m:"ساعة 1" },
+    { id:"d1t2", t:"شاهد الجولة الرسمية بالفيديو (Walkthrough 2025)", m:"ساعة 1" },
+    { id:"d1t3", t:"الاختبار التجريبي الرسمي بجدية كاملة — وسجّل النطاق التقديري", m:"ساعة 2 · الأهم" },
+    { id:"d1t4", t:"راجع أقسام القراءة (1–5) + تمارين Read and Select المؤقتة", m:"ساعة 3" },
+    { id:"d1t5", t:"راجع أقسام الاستماع (4 و6) + تدريب إملاء عبر السبيكر", m:"ساعة 4" },
+    { id:"d1t6", t:"احفظ بنك العبارات + اكتب Write About the Photo ×3 بالمؤقت", m:"ساعة 5" },
+    { id:"d1t7", t:"تدريب سرعة كتابة 30 دقيقة — الهدف 40+ كلمة/دقيقة", m:"مساءً" }
+  ]},
+  { id:"d2", name:"اليوم الثاني", goal:"الإنتاج (الـ50% المضمونة) + محاكاة · ~5–6 ساعات", tasks:[
+    { id:"d2t1", t:"جهّز قصصك الست كنقاط", m:"ساعة 1" },
+    { id:"d2t2", t:"سجّل نفسك: Speak About the Photo (90 ث) ×3 صور", m:"ساعة 1" },
+    { id:"d2t3", t:"Read Then Speak ×3 مواضيع + استمع لتسجيلاتك وقيّم التوقفات", m:"ساعة 2" },
+    { id:"d2t4", t:"محاكاة Interactive Speaking ×6 أسئلة بصيغة OREO", m:"ساعة 3" },
+    { id:"d2t5", t:"Speaking Sample كامل (3 دقائق) ×2", m:"ساعة 3" },
+    { id:"d2t6", t:"Interactive Writing كامل موقوت (150+100 كلمة)", m:"ساعة 4" },
+    { id:"d2t7", t:"Writing Sample موقوت (5 دقائق · 150 كلمة)", m:"ساعة 4" },
+    { id:"d2t8", t:"اختبار كامل محاكى + تحليل الأخطاء", m:"ساعة 5 · الأهم" },
+    { id:"d2t9", t:"سرعة كتابة + مراجعة الكلمات الوهمية وبنك العبارات", m:"مساءً" }
+  ]},
+  { id:"d3", name:"اليوم الثالث", goal:"صقل + بروفة الغرفة + راحة · ~4 ساعات فقط", tasks:[
+    { id:"d3t1", t:"الاختبار التجريبي الرسمي مرة أخيرة — قارن بنطاق اليوم الأول", m:"ساعة 1" },
+    { id:"d3t2", t:"جولة خفيفة على أضعف قسمين عندك فقط", m:"ساعة 2" },
+    { id:"d3t3", t:"حمّل تطبيق DET على الكمبيوتر والجوال", m:"ساعة 3" },
+    { id:"d3t4", t:"بروفة كاملة: مسح الغرفة 360° + وضع الجوال + فحص الكاميرا والمايك", m:"ساعة 3 · الأهم" },
+    { id:"d3t5", t:"20 دقيقة جلوس بعيون ثابتة على الشاشة (تدريب الانضباط)", m:"ساعة 3" },
+    { id:"d3t6", t:"مراجعة أخيرة 20 دقيقة كحد أقصى — ثم اقفل كل شي ونم بدري", m:"ساعة 4" }
+  ]},
+  { id:"d0", name:"يوم الاختبار", goal:"روتين ما قبل البدء — كل بند منها سبب معلن لإلغاء نتائج", tasks:[
+    { id:"d0t1", t:"أعد تشغيل الكمبيوتر", m:"إلزامي" },
+    { id:"d0t2", t:"اقفل كل البرامج من مدير المهام (WhatsApp · Zoom · Grammarly)", m:"إلزامي" },
+    { id:"d0t3", t:"عطّل التصحيح التلقائي وافصل أي شاشة إضافية", m:"إلزامي" },
+    { id:"d0t4", t:"الجوال: شاحن + عدم إزعاج + حامل ثابت على مسافة ~75 سم", m:"إلزامي" },
+    { id:"d0t5", t:"المكتب فاضي إلا الكمبيوتر والجوال والهوية الأصلية", m:"إلزامي" },
+    { id:"d0t6", t:"حمام + مويه + إحماء إنجليزي 15 دقيقة", m:"قبل البدء" },
+    { id:"d0t7", t:"بعد النهاية: لا تقفل التطبيق حتى يكتمل رفع الاختبار", m:"بعد الاختبار" }
+  ]}
+];
+
+const KEY = "detPlanProgress.v1";
+const $ = (id) => document.getElementById(id);
+let state = {};
+
+function load() {
+  try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; }
+  catch (e) { state = {}; }
+  if (typeof state !== "object" || state === null) state = {};
+}
+function save() {
+  try {
+    state._at = new Date().toISOString();
+    localStorage.setItem(KEY, JSON.stringify(state));
+    return true;
+  } catch (e) { return false; }
+}
+
+function render() {
+  const box = $("days");
+  box.innerHTML = "";
+  PLAN.forEach((day) => {
+    const wrap = document.createElement("div");
+    wrap.className = "day";
+
+    const head = document.createElement("div");
+    head.className = "day-h";
+    head.innerHTML =
+      '<div class="n">' + day.name + "<small>" + day.goal + "</small></div>" +
+      '<div class="bar"><i id="bar-' + day.id + '"></i></div>' +
+      '<div class="pct" id="pct-' + day.id + '">0%</div>';
+    wrap.appendChild(head);
+
+    day.tasks.forEach((task) => {
+      const row = document.createElement("label");
+      row.className = "task";
+      row.setAttribute("for", task.id);
+      row.innerHTML =
+        '<input type="checkbox" id="' + task.id + '">' +
+        '<span class="body"><span class="ttl">' + task.t + "</span>" +
+        '<span class="meta">' + task.m + "</span></span>";
+      const cb = row.querySelector("input");
+      cb.checked = !!state[task.id];
+      if (cb.checked) row.classList.add("done");
+      cb.addEventListener("change", () => {
+        state[task.id] = cb.checked;
+        row.classList.toggle("done", cb.checked);
+        save();
+        update();
+      });
+      wrap.appendChild(row);
+    });
+
+    box.appendChild(wrap);
+  });
+  update();
+}
+
+function update() {
+  let total = 0, done = 0;
+  PLAN.forEach((day) => {
+    const d = day.tasks.filter((t) => state[t.id]).length;
+    const n = day.tasks.length;
+    total += n; done += d;
+    const pct = n ? Math.round((d / n) * 100) : 0;
+    const bar = $("bar-" + day.id), lbl = $("pct-" + day.id);
+    if (bar) bar.style.width = pct + "%";
+    if (lbl) lbl.textContent = pct + "%";
+  });
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  $("ring").style.setProperty("--p", pct + "%");
+  $("ringTxt").textContent = pct + "%";
+  $("doneCount").textContent = done + " من " + total + " مهمة";
+  $("doneHint").textContent =
+    done === 0 ? "ابدأ بأول مهمة في اليوم الأول" :
+    pct === 100 ? "خلّصت الخطة كاملة — بالتوفيق في الاختبار! 🎯" :
+    "باقي " + (total - done) + " مهمة — كمّل على راحتك";
+
+  const at = state._at ? new Date(state._at) : null;
+  $("savedAt").textContent = at
+    ? "آخر حفظ: " + at.toLocaleString("ar", { dateStyle: "medium", timeStyle: "short" })
+    : "لم تبدأ بعد";
+}
+
+$("resetBtn").addEventListener("click", () => {
+  if (!confirm("تصفير كل علامات الجدول؟ ما راح تقدر ترجعها.")) return;
+  state = {};
+  try { localStorage.removeItem(KEY); } catch (e) {}
+  render();
+});
+
+const upBtn = $("upBtn");
+addEventListener("scroll", () => {
+  upBtn.style.display = scrollY > 700 ? "block" : "none";
+}, { passive: true });
+upBtn.addEventListener("click", () => scrollTo({ top: 0, behavior: "smooth" }));
+
+load();
+render();
+</script>
+</body>
+</html>
