@@ -1,0 +1,59 @@
+# نشر صفحة «خطة ديولينجو 120» على GitHub Pages.
+#
+# الرابط بعد أول نشر ناجح:
+#   https://nadir-coderlab.github.io/Learning/
+#
+# لماذا صفحة واحدة فقط وليس مجلد public كاملًا؟
+# موقع البنات يستخدم مسارات مطلقة (/assets/... و /learn) وهذه تنكسر تحت
+# مسار مشروع Pages (‎/Learning/‎)، بينما صفحة الخطة مستقلة تمامًا بلا أي
+# ملف خارجي — فتعمل من أي مسار. موقع البنات يبقى على Firebase Hosting.
+#
+# الخطوة اليدوية الوحيدة (مرة واحدة، إن لم يفعّلها الإجراء تلقائيًا):
+#   Settings → Pages → Source: GitHub Actions
+name: Deploy plan page to GitHub Pages
+on:
+  push:
+    branches: [main]
+    paths:
+      - "public/det.html"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# نشرة واحدة في كل مرة، بلا إلغاء نشرة جارية
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: تجهيز الموقع
+        run: |
+          mkdir -p _site
+          cp public/det.html _site/index.html
+          touch _site/.nojekyll
+
+      - name: تهيئة Pages
+        uses: actions/configure-pages@v5
+        with:
+          # يحاول تفعيل Pages تلقائيًا إن لم يكن مفعّلًا
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: النشر
+        id: deployment
+        uses: actions/deploy-pages@v4
