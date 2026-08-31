@@ -59,19 +59,26 @@ firebase deploy --only hosting --project supportive-med
 > إن كان اسم الموقع محجوزًا اختر اسمًا آخر وعدّل حقل `"site"` في `firebase.json`
 > وفي الـ workflow.
 
-### 2‑ب) صفحة خطة ديولينجو على GitHub Pages
+### 2‑ب) صفحة خطة ديولينجو على GitHub Pages — تعمل ✅
 
-صفحة `/det` تُنشر أيضًا كموقع مستقل على GitHub Pages عبر
-[`.github/workflows/pages.yml`](.github/workflows/pages.yml) عند كل دفعة إلى `main`:
+صفحة `/det` منشورة أيضًا كموقع مستقل على GitHub Pages:
 
 **https://nadir-coderlab.github.io/Learning/**
 
-تُنشر الصفحة وحدها (وليس مجلد `public` كاملًا) لأن موقع البنات يستخدم مسارات
-مطلقة (`/assets/...`) تنكسر تحت مسار مشروع Pages، بينما صفحة الخطة مستقلة تمامًا
-بلا أي ملف خارجي. موقع البنات يبقى على Firebase Hosting.
+الموقع يخدم من فرع **`gh-pages`** (يحوي `index.html` و`.nojekyll` فقط)، ويتولى
+[`.github/workflows/pages.yml`](.github/workflows/pages.yml) مزامنته تلقائيًا من
+`public/det.html` عند كل دفعة إلى `main` — فالتعديل في مكان واحد ينعكس على
+Firebase وGitHub Pages معًا. لا تُعدّل فرع `gh-pages` يدويًا.
 
-إن لم يفعّل الإجراء صفحات المستودع تلقائيًا، فعّلها مرة واحدة من:
-**Settings → Pages → Source: GitHub Actions**.
+قراران يفسران التصميم:
+
+- **صفحة واحدة لا مجلد `public` كاملًا:** موقع البنات يستخدم مسارات مطلقة
+  (`/assets/...` و`/learn`) تنكسر تحت مسار مشروع Pages (`/Learning/`)، بينما صفحة
+  الخطة مستقلة بلا أي ملف خارجي فتعمل من أي مسار. موقع البنات يبقى على Firebase.
+- **فرع `gh-pages` لا `actions/deploy-pages`:** التوكن الافتراضي للإجراءات لا يملك
+  صلاحية تفعيل خدمة Pages لأول مرة (`Create Pages site → Resource not accessible
+  by integration`)، بينما وجود الفرع يجعل GitHub يفعّلها تلقائيًا، والمزامنة
+  تحتاج صلاحية الكتابة فقط.
 
 ### 3) النطاق في المصادقة — غالبًا غير مطلوب
 الدخول هنا باسم مستخدم/كلمة مرور فقط، وهذا لا يتطلب إضافة النطاق إلى
