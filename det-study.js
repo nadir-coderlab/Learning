@@ -751,19 +751,34 @@ photo|visible|ظاهر|A bridge is visible in the distance.
     return true;
   }
 
-  function setTab(name) {
+  function setTab(name, updateHash = true) {
+    const pane = byId("study-" + name);
+    if (!pane) return;
     document.querySelectorAll("[data-study-tab]").forEach((button) => {
       button.setAttribute("aria-selected", String(button.dataset.studyTab === name));
     });
     document.querySelectorAll(".study-pane").forEach((pane) => pane.classList.remove("active"));
-    const pane = byId("study-" + name);
-    if (pane) pane.classList.add("active");
+    pane.classList.add("active");
+    if (updateHash && window.history && window.history.replaceState) {
+      window.history.replaceState(null, "", "#" + name);
+    }
   }
 
   function setupTabs() {
     document.querySelectorAll("[data-study-tab]").forEach((button) => {
-      button.addEventListener("click", () => setTab(button.dataset.studyTab));
+      button.addEventListener("click", () => {
+        setTab(button.dataset.studyTab);
+        byId("study").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     });
+    document.querySelectorAll("[data-open-study]").forEach((button) => {
+      button.addEventListener("click", () => {
+        setTab(button.dataset.openStudy);
+        byId("study").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+    const requestedTab = window.location.hash.replace("#", "");
+    if (requestedTab && byId("study-" + requestedTab)) setTab(requestedTab, false);
   }
 
   function setupVocabControls() {
@@ -826,6 +841,8 @@ photo|visible|ظاهر|A bridge is visible in the distance.
     byId("vocabCount").textContent = done + " من " + VOCAB.length + " كلمة";
     byId("vocabPct").textContent = pct + "%";
     byId("vocabBar").style.width = pct + "%";
+    const overview = byId("overviewVocabProgress");
+    if (overview) overview.textContent = done ? done + " من " + VOCAB.length + " متقنة ←" : "ابدأ المذاكرة ←";
   }
 
   function speak(word) {
@@ -885,6 +902,8 @@ photo|visible|ظاهر|A bridge is visible in the distance.
     byId("topicCount").textContent = done + " من " + TOPICS.length + " موضوعا";
     byId("topicPct").textContent = pct + "%";
     byId("topicBar").style.width = pct + "%";
+    const overview = byId("overviewTopicProgress");
+    if (overview) overview.textContent = done ? done + " من " + TOPICS.length + " تمت مذاكرتها ←" : "ابدأ المذاكرة ←";
   }
 
   function renderWriting() {
