@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>خطة ديولينجو 120 — 3 أيام</title>
-<meta name="description" content="خطة مذاكرة كاملة لاختبار Duolingo English Test بهدف +120 خلال 3 أيام: تريكات كل قسم، قوالب، جدول متابعة، وقوانين المراقبة.">
+<title>خطة ديولينجو 120 — الخطة ومركز المذاكرة</title>
+<meta name="description" content="خطة مذاكرة كاملة لاختبار Duolingo English Test بهدف +120 مع مفردات مترجمة وقطع وموضوعات ونماذج كتابة وتحدث وقواعد وتدريب ذاتي.">
 <meta name="theme-color" content="#0f766e">
 <!-- معاينة الرابط عند مشاركته (واتساب/تيليجرام/تويتر) -->
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ar_AR">
-<meta property="og:title" content="خطة ديولينجو 120 — 3 أيام">
-<meta property="og:description" content="تريكات كل قسم، قوالب جاهزة، جدول متابعة، وقوانين المراقبة — للوصول إلى +120 في Duolingo English Test.">
+<meta property="og:title" content="خطة ديولينجو 120 — الخطة ومركز المذاكرة">
+<meta property="og:description" content="مفردات مترجمة وقطع وموضوعات ونماذج كتابة وتحدث مع خطة متابعة كاملة للوصول إلى +120.">
 <meta name="twitter:card" content="summary">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
@@ -173,6 +173,83 @@ ol.steps{padding-right:22px;display:grid;gap:6px;font-size:15px;margin-top:8px}
 .dd .no li::before{content:"✕";position:absolute;right:0;color:var(--red);font-weight:900}
 
 .phr{display:flex;flex-wrap:wrap;gap:7px;direction:ltr;justify-content:flex-end}
+
+/* ---------- مركز المذاكرة ---------- */
+.study-shell{background:var(--card);border:2px solid var(--teal2);border-radius:var(--radius);
+  overflow:hidden;box-shadow:var(--shadow);margin:14px 0}
+.study-intro{padding:20px;background:linear-gradient(135deg,#ecfdf5,#f7fee7);border-bottom:1px solid var(--line)}
+.study-intro h3{font-size:19px;font-weight:900;margin-bottom:6px}
+.study-intro p{color:var(--muted);font-weight:600}
+.study-cycle{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:14px}
+.study-cycle div{background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px;font-size:13px;font-weight:800}
+.study-cycle b{display:block;color:var(--teal);font-size:18px;line-height:1.4}
+.study-tabs{display:flex;gap:8px;overflow-x:auto;padding:12px;background:var(--chip);border-bottom:1px solid var(--line);scrollbar-width:none}
+.study-tabs::-webkit-scrollbar{display:none}
+.study-tab{flex:none;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;
+  padding:8px 15px;font:800 13px "Cairo",sans-serif;cursor:pointer}
+.study-tab[aria-selected="true"]{background:var(--teal);border-color:var(--teal);color:#fff}
+.study-pane{display:none;padding:18px}
+.study-pane.active{display:block}
+.study-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.study-tools input,.study-tools select{font:700 14px "Cairo",sans-serif;color:var(--ink);background:#fff;
+  border:1px solid var(--line);border-radius:12px;padding:9px 12px;min-height:42px}
+.study-tools input{flex:1;min-width:210px}
+.study-tools select{min-width:170px}
+.study-btn{border:1px solid var(--teal2);background:#fff;color:var(--teal);border-radius:12px;
+  padding:9px 14px;font:800 13px "Cairo",sans-serif;cursor:pointer}
+.study-btn.primary{background:var(--teal);color:#fff;border-color:var(--teal)}
+.study-progress{display:flex;align-items:center;gap:10px;background:var(--soft);border:1px solid var(--line);
+  border-radius:14px;padding:11px 13px;margin:10px 0;font-size:13px;font-weight:800}
+.study-progress .mini-bar{height:8px;background:#d7ebe3;border-radius:999px;overflow:hidden;flex:1}
+.study-progress .mini-bar i{display:block;height:100%;background:var(--grad);width:0;transition:.2s}
+.vocab-grid{display:grid;grid-template-columns:1fr;gap:10px}
+.vocab-card{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff;position:relative}
+.vocab-card.known{background:#f0fdf4;border-color:#86efac}
+.vocab-top{display:flex;align-items:center;gap:9px;direction:ltr;text-align:left}
+.vocab-word{font:800 20px "Baloo 2","Cairo",sans-serif;color:var(--teal);flex:1}
+.vocab-cat{font-size:11px;color:var(--muted);background:var(--chip);border-radius:999px;padding:2px 8px;direction:rtl}
+.vocab-ar{font-weight:800;margin:5px 0}
+.vocab-ex{direction:ltr;text-align:left;font-family:"Baloo 2","Cairo",sans-serif;color:var(--muted);line-height:1.55}
+.icon-btn,.known-btn{border:1px solid var(--line);background:#fff;border-radius:10px;min-width:36px;height:36px;
+  cursor:pointer;font:800 13px "Cairo",sans-serif;color:var(--teal)}
+.known-btn{width:auto;padding:0 10px;direction:rtl}
+.topic-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+.topic-pick{border:1px solid var(--line);background:#fff;border-radius:14px;padding:12px;text-align:right;
+  font:800 13px "Cairo",sans-serif;color:var(--ink);cursor:pointer}
+.topic-pick.active{border-color:var(--teal);background:var(--soft);color:var(--teal)}
+.topic-pick.done::after{content:" ✓";color:var(--green)}
+.study-reader{border:1px solid var(--line);border-radius:18px;padding:18px;background:#fff;margin-top:12px}
+.study-reader h3{font-size:20px;font-weight:900;margin-bottom:5px}
+.study-reader h4{font-size:14px;font-weight:900;color:var(--teal);margin:15px 0 5px}
+.english-block{direction:ltr;text-align:left;font-family:"Baloo 2","Cairo",sans-serif;
+  line-height:1.75;background:#f8fbfa;border:1px solid var(--line);border-radius:14px;padding:14px;font-size:16px}
+.arabic-block{background:var(--amber-soft);border:1px solid #f0c26b;border-radius:14px;padding:14px;font-weight:600}
+.idea-list{display:grid;gap:7px;margin-top:8px}
+.idea-list div{background:var(--chip);border-radius:12px;padding:9px 11px;font-weight:700;font-size:14px}
+.model-select{display:grid;grid-template-columns:1fr;gap:10px;margin:12px 0}
+.model-pick{border:1px solid var(--line);background:#fff;border-radius:14px;padding:13px;text-align:right;
+  font:800 14px "Cairo",sans-serif;cursor:pointer}
+.model-pick.active{border-color:var(--teal);background:var(--soft)}
+.timer-box{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--grad);
+  color:#fff;border-radius:18px;padding:16px;margin:12px 0;flex-wrap:wrap}
+.timer-clock{font:800 34px "Baloo 2",sans-serif;direction:ltr}
+.timer-actions{display:flex;gap:8px}
+.timer-actions button{border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.16);color:#fff;
+  border-radius:10px;padding:8px 12px;font:800 12px "Cairo",sans-serif;cursor:pointer}
+.prompt-box{direction:ltr;text-align:left;background:#fff;border:1px solid var(--line);border-radius:16px;
+  padding:16px;font-family:"Baloo 2","Cairo",sans-serif;font-size:18px;font-weight:600}
+.grammar-grid{display:grid;grid-template-columns:1fr;gap:10px}
+.grammar-card{border:1px solid var(--line);border-radius:16px;padding:15px;background:#fff}
+.grammar-card h4{font-weight:900;color:var(--teal);margin-bottom:6px}
+.grammar-card .fix{direction:ltr;text-align:left;background:#f8fbfa;border-radius:10px;padding:8px 10px;
+  font-family:"Baloo 2","Cairo",sans-serif;margin-top:7px}
+@media(min-width:640px){
+  .study-cycle{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .vocab-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .topic-list{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .model-select{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grammar-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 footer{margin-top:50px;background:var(--card);border-top:1px solid var(--line);
   padding:26px 0 40px;color:var(--muted);font-size:13.5px;font-weight:600}
 footer strong{color:var(--ink)}
@@ -185,9 +262,9 @@ footer strong{color:var(--ink)}
 
 <header class="top">
   <div class="wrap">
-    <div class="brand">صيغة الاختبار الرسمية 2025–2026</div>
+    <div class="brand">محدّثة وفق دليل الاختبار الرسمي 2026</div>
     <h1>خطة الحرب: ديولينجو 120</h1>
-    <div class="sub">ملف المذاكرة الوحيد اللي تحتاجه — كل قسم، كل تريك، جدول متابعة، وخطة ساعة بساعة لثلاثة أيام.</div>
+    <div class="sub">الخطة ومركز المذاكرة في مكان واحد. مفردات مترجمة وقطع وموضوعات ونماذج كتابة وتحدث وقواعد مع متابعة محفوظة.</div>
     <div class="pills">
       <span>⏱ 3 أيام</span><span>🎯 الهدف +120</span>
       <span>📊 120 = IELTS 6.5</span><span>🧮 الدرجة = متوسط 4 مهارات</span>
@@ -199,6 +276,7 @@ footer strong{color:var(--ink)}
 <nav>
   <div class="wrap">
     <a href="#tracker">جدول المتابعة</a>
+    <a href="#study">مركز المذاكرة</a>
     <a href="#facts">3 حقائق</a>
     <a href="#map">خريطة الاختبار</a>
     <a href="#golden">القواعد الذهبية</a>
@@ -235,13 +313,89 @@ footer strong{color:var(--ink)}
   </div>
 </section>
 
+<!-- ============ مركز المذاكرة ============ -->
+<section id="study">
+  <h2>مركز المذاكرة <span class="tag">مرجعك الأساسي</span></h2>
+  <p class="lead">المحتوى هنا مبني على عناقيد الموضوعات والمهارات الموجودة في دليل DET الرسمي لعام 2026. لا توجد قائمة تضمن كلمات أو أسئلة الاختبار نفسها لأن البنك متغير وتكيفي. الموجود هنا هو أعلى تغطية عملية ممكنة لمستوى B1–B2 والهدف 120.</p>
+
+  <div class="note r"><b>مهم قبل الحفظ</b>احفظ معنى الكلمة والفكرة وترتيب الجواب. لا تحفظ فقرة كاملة لتعيدها حرفيا. Duolingo تنص على أن الكتابة يجب أن تكون أصلية وتُنتج وقت الاختبار. النماذج هنا للتدريب وإعادة الصياغة.</div>
+
+  <div class="study-shell">
+    <div class="study-intro">
+      <h3>دورة المذاكرة الواحدة</h3>
+      <p>كرر هذه الدورة. كل دورة مدتها نحو 60 دقيقة وتغطي المهارات الأربع.</p>
+      <div class="study-cycle">
+        <div><b>20</b>مفردة جديدة</div>
+        <div><b>1</b>قطعة وموضوع</div>
+        <div><b>1</b>جواب كتابة</div>
+        <div><b>3</b>إجابات تحدث</div>
+      </div>
+    </div>
+
+    <div class="study-tabs" role="tablist" aria-label="أقسام مركز المذاكرة">
+      <button class="study-tab" type="button" role="tab" aria-selected="true" data-study-tab="vocab">المفردات</button>
+      <button class="study-tab" type="button" role="tab" aria-selected="false" data-study-tab="topics">الموضوعات والقطع</button>
+      <button class="study-tab" type="button" role="tab" aria-selected="false" data-study-tab="writing">الكتابة</button>
+      <button class="study-tab" type="button" role="tab" aria-selected="false" data-study-tab="speaking">التحدث</button>
+      <button class="study-tab" type="button" role="tab" aria-selected="false" data-study-tab="grammar">القواعد والأخطاء</button>
+    </div>
+
+    <div class="study-pane active" id="study-vocab" role="tabpanel">
+      <h3>المفردات الأساسية المترجمة</h3>
+      <p class="lead">انطق الكلمة. اقرأ المثال. ثم علّمها كمتقنة فقط إذا قدرت تستخدمها في جملة من عندك.</p>
+      <div class="study-tools">
+        <input id="vocabSearch" type="search" placeholder="ابحث بالكلمة أو الترجمة" aria-label="بحث المفردات">
+        <select id="vocabCategory" aria-label="تصنيف المفردات"></select>
+        <button class="study-btn" id="vocabUnknown" type="button">غير المتقن فقط</button>
+      </div>
+      <div class="study-progress"><span id="vocabCount">0 من 0</span><div class="mini-bar"><i id="vocabBar"></i></div><span id="vocabPct">0%</span></div>
+      <div class="vocab-grid" id="vocabList"></div>
+    </div>
+
+    <div class="study-pane" id="study-topics" role="tabpanel">
+      <h3>22 موضوعا عالي التكرار</h3>
+      <p class="lead">كل موضوع يحتوي قطعة أصلية وترجمتها وخطة أفكار وسؤال كتابة وأسئلة تحدث. هذه العناقيد مستخلصة من موضوعات دليل التدريب الرسمي 2026 من غير نسخ أسئلته أو إجاباته.</p>
+      <div class="study-progress"><span id="topicCount">0 من 22 موضوعا</span><div class="mini-bar"><i id="topicBar"></i></div><span id="topicPct">0%</span></div>
+      <div class="topic-list" id="topicList"></div>
+      <div class="study-reader" id="topicReader"></div>
+    </div>
+
+    <div class="study-pane" id="study-writing" role="tabpanel">
+      <h3>نماذج الكتابة المرنة</h3>
+      <p class="lead">اقرأ النموذج. اقفله. ثم اكتب الفكرة نفسها بأسلوبك. الهدف هو تثبيت الهيكل والمفردات وليس حفظ النص.</p>
+      <div class="model-select" id="writingList"></div>
+      <div class="study-reader" id="writingReader"></div>
+    </div>
+
+    <div class="study-pane" id="study-speaking" role="tabpanel">
+      <h3>بنك التحدث مع مؤقت</h3>
+      <p class="lead">اختر 35 ثانية للمحادثة التفاعلية. اختر 90 ثانية لـ Read Then Speak. اختر 180 ثانية لعينة التحدث.</p>
+      <div class="study-tools">
+        <button class="study-btn" type="button" data-seconds="35">35 ثانية</button>
+        <button class="study-btn" type="button" data-seconds="90">90 ثانية</button>
+        <button class="study-btn" type="button" data-seconds="180">180 ثانية</button>
+        <button class="study-btn primary" id="newPrompt" type="button">سؤال جديد</button>
+      </div>
+      <div class="prompt-box" id="speakingPrompt"></div>
+      <div class="timer-box"><div><strong>المؤقت</strong><div class="timer-clock" id="timerClock">00:35</div></div><div class="timer-actions"><button id="timerStart" type="button">ابدأ</button><button id="timerReset" type="button">إعادة</button></div></div>
+      <div class="study-reader" id="speakingGuide"></div>
+    </div>
+
+    <div class="study-pane" id="study-grammar" role="tabpanel">
+      <h3>القواعد والأخطاء التي تسرق الدرجة</h3>
+      <p class="lead">هذه ليست دورة قواعد طويلة. هي القواعد الأعلى عائدا في الكلام والكتابة مع تصحيح أخطاء تكررت في تدريبك.</p>
+      <div class="grammar-grid" id="grammarGrid"></div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ الحقائق ============ -->
 <section id="facts">
   <h2>قبل أي شي: 3 حقائق تحدد كل شي</h2>
   <ol class="rules">
-    <li><strong>الاختبار تغيّر جذريًا في 1 يوليو 2025.</strong> انحذف نهائيًا <span class="en">Read Aloud</span> و<span class="en">Listen, Then Speak</span> و<span class="en">Listen and Select</span>، وأضيف <span class="en">Interactive Speaking</span> و<span class="en">Listen and Complete</span>. أي فيديو أو موقع يشرح الأنواع المحذوفة = قديم، لا تضيّع عليه دقيقة.</li>
-    <li><strong>درجتك = متوسط 4 درجات فرعية</strong> (قراءة + استماع + محادثة + كتابة) مقرّبًا لأقرب 5. يعني المحادثة والكتابة = <strong>50% من درجتك</strong>، وكل مهامها ثابتة وغير تكيفية ومعروفة مسبقًا = قابلة للتحضير 100%. هنا تنسرق الدرجات العالية بالتكتيك، مو بمستوى الإنجليزي.</li>
-    <li><strong>120 هدف واقعي جدًا.</strong> تعادل IELTS 6.5 وTOEFL 87–92 حسب الجدول الرسمي. متوسط المتقدمين عالميًا 110، وربعهم فوق 125.</li>
+    <li><strong>صيغة 2026 تضم 13 نوعا من المهام.</strong> لا تستخدم شرحا قديما يتضمن <span class="en">Read Aloud</span> أو <span class="en">Listen, Then Speak</span> أو <span class="en">Listen and Select</span>. الأنواع الحالية موثقة في كتاب التدريب الرسمي Volume 4 لعام 2026.</li>
+    <li><strong>درجتك هي متوسط 4 درجات فردية</strong> للقراءة والاستماع والتحدث والكتابة. ثم تُقرب لأقرب 5. رفع مهارة واحدة لا يعوض إهمال مهارة أخرى بالكامل. لذلك مركز المذاكرة يدرب المهارات الأربع معا.</li>
+    <li><strong>120 يقع ضمن مستوى B2 رسميا.</strong> التحضير القصير يحسن معرفتك بالصيغة وإدارة الوقت. لكنه لا يضمن رقما محددا. أفضل مؤشر قبل الاختبار هو نطاق الاختبار التجريبي الرسمي.</li>
   </ol>
 </section>
 
@@ -262,12 +416,12 @@ footer strong{color:var(--ink)}
       <tr><td class="num">8</td><td><span class="en">Interactive Writing</span> — مقال بجزأين</td><td>1</td><td class="num">5 د + 3 د</td><td>الكتابة</td></tr>
       <tr><td class="num">9</td><td><span class="en">Speak About the Photo</span></td><td>1</td><td class="num">20 ث + 90 ث</td><td>المحادثة</td></tr>
       <tr><td class="num">10</td><td><span class="en">Read Then Speak</span></td><td>1</td><td class="num">20 ث + 90 ث</td><td>المحادثة</td></tr>
-      <tr><td class="num">11</td><td><span class="en">Interactive Speaking</span> — مع Bea/Oscar</td><td>6–8</td><td class="num">35 ث/جواب</td><td>المحادثة</td></tr>
-      <tr><td class="num">12</td><td><span class="en">Writing Sample</span> — يُرسل للجامعات</td><td>1</td><td class="num">30 ث + 5 د</td><td>الكتابة</td></tr>
-      <tr><td class="num">13</td><td><span class="en">Speaking Sample</span> — فيديو للجامعات</td><td>1</td><td class="num">30 ث + 3 د</td><td>المحادثة</td></tr>
+      <tr><td class="num">11</td><td><span class="en">Interactive Speaking</span> — موضوعان</td><td>3–4 لكل موضوع</td><td class="num">35 ث/جواب</td><td>المحادثة</td></tr>
+      <tr><td class="num">12</td><td><span class="en">Writing Sample</span> — يُرسل للجامعات</td><td>1</td><td class="num">30 ث + 5 د</td><td>غير محسوب</td></tr>
+      <tr><td class="num">13</td><td><span class="en">Speaking Sample</span> — فيديو للجامعات</td><td>1</td><td class="num">30 ث + 3 د</td><td>غير محسوب</td></tr>
     </tbody>
   </table></div>
-  <div class="note a"><b>تصحيح معلومة منتشرة</b>العينتان الأخيرتان (12 و13) <strong>محسوبتان في الدرجة</strong> وترسلان للجامعات. المعلومة القديمة إنها «غير محسوبة» خطأ.</div>
+  <div class="note a"><b>تصحيح مهم وفق تحديث 2026</b>عينتا الكتابة والتحدث الأخيرتان <strong>غير محسوبتين في الدرجة</strong>. لكنهما تُرسلان للجامعات وقد يراجعهما مسؤول القبول. عاملهما بجدية من غير اعتقاد أنهما ترفعان الرقم.</div>
 </section>
 
 <!-- ============ القواعد الذهبية ============ -->
@@ -276,11 +430,11 @@ footer strong{color:var(--ink)}
   <ol class="rules">
     <li><strong>لا تترك أي سؤال فاضي أبدًا.</strong> الفراغ = نفس عقوبة الخطأ (رسميًا). وفي الإملاء الكلمة <em>الناقصة</em> تنقّص أكثر من المكتوبة غلط.</li>
     <li><strong>الاختبار تكيفي:</strong> جاوبت صح ← السؤال الجاي أصعب، وهذا ممتاز. صارت الأسئلة سهلة فجأة؟ هذا الإنذار السيئ.</li>
-    <li><strong>الأسئلة الأولى أغلى ما في الاختبار</strong> — تحدد تقدير النظام لمستواك اللي يبني عليه الباقي. ادخل مركّز من أول ثانية.</li>
-    <li><strong>الوقت المتبقي لا يُخزَّن</strong> — كلام وكتابة أطول = درجة أعلى، وبالمهام الموقوتة راجع إملاءك للنهاية.</li>
+    <li><strong>كل سؤال مهم</strong> لأن الصعوبة تتكيف مع إجاباتك. لا تحاول تفسير صعوبة سؤال واحد على أنها تقدير نهائي لدرجتك.</li>
+    <li><strong>استخدم الوقت بفاعلية</strong> — طوّر الإجابة ما دامت مرتبطة بالسؤال وواضحة. الطول وحده لا يرفع الدرجة إذا زادت الأخطاء أو خرجت عن الموضوع.</li>
     <li><strong>الإملاء الأمريكي والبريطاني مقبولان</strong> بأغلب المهام — والأسلم تعتمد الأمريكي (<span class="en">organize, color</span>).</li>
-    <li><strong>ممنوع حفظ جُمل جاهزة</strong> — النظام يقارن جوابك بكل المتقدمين السابقين. احفظ هياكل وبدايات أقصر من 5 كلمات فقط.</li>
-    <li><strong>نص درجتك من مهام ثابتة معروفة مسبقًا</strong> — القوالب تحت تغطيها كلها. هذا استثمارك الأكبر.</li>
+    <li><strong>لا تحفظ إجابات كاملة</strong> — الاستجابة يجب أن تكون أصلية وتُكتب وقت الاختبار. احفظ مفردات وروابط وهيكل أفكار ثم اكتب بصياغتك.</li>
+    <li><strong>التدريب الأفضل يجمع المهارة والصيغة</strong> — اعرف الوقت وطريقة السؤال. ثم تدرب على مفردات وقواعد وقراءة واستماع وتحدث وكتابة حقيقية.</li>
   </ol>
 </section>
 
@@ -404,10 +558,10 @@ footer strong{color:var(--ink)}
 
   <article class="q">
     <div class="q-top"><div class="q-n">11</div><div><div class="q-name"><span class="en">Interactive Speaking</span></div><div class="q-ar">محادثة مع شخصية — أخطر قسم جديد</div></div></div>
-    <div class="stats"><span><b>6–8 أسئلة</b> على موضوعين</span><span><b>35 ث</b> للجواب</span><span>السؤال <b>مرة وحدة</b> بلا نص</span></div>
+    <div class="stats"><span><b>3–4 أسئلة</b> لكل موضوع</span><span><b>35 ث</b> للجواب</span><span><b>بلا وقت تحضير</b></span></div>
     <ul class="t">
       <li>المؤقت يبدأ لحظة ما تسكت الشخصية و<strong>لازم تضغط زر التسجيل فورًا</strong>.</li>
-      <li><strong>السؤال الفعلي بالنصف الثاني من الكلام</strong> — ركّز على <span class="en w">describe / discuss / do you think</span>.</li>
+      <li>استمع لعبارة المهمة مثل <span class="en w">describe / discuss / do you think</span> وحدد المطلوب قبل بدء الجواب.</li>
       <li><strong>صيغة OREO:</strong> رأي مباشر ← سبب (<span class="en">One reason is…</span>) ← مثال (<span class="en">For example…</span>) ← إغلاق (<span class="en">In short…</span>). املأ ~30 من الـ35 ثانية.</li>
       <li>ما فهمت السؤال؟ <strong>تكلم عن الموضوع العام فورًا</strong> — السكوت صفر، والجواب شبه المرتبط لا.</li>
       <li>توقع القفزة المفاجئة لموضوع ثانٍ عند السؤال الرابع تقريبًا.</li>
@@ -429,17 +583,17 @@ footer strong{color:var(--ink)}
     <ul class="t">
       <li>مقدمة تجاوب مباشرة ← نقطتان-ثلاث بمثال ← خاتمة. <strong>قصة واحدة حقيقية متطورة</strong> تسوى أكثر من قائمة نقاط.</li>
       <li>عبارة الإنقاذ الرسمية: <span class="en w">This is an interesting question. I've never thought about this before, but…</span></li>
-      <li><strong>تكلم أغلب الـ3 دقائق</strong> — «تكلم قليلًا جدًا» سبب رسمي لإلغاء الشهادة. والبس مرتب.</li>
+      <li>قدم إجابة كاملة ومنظمة ضمن الوقت. هذه العينة لا تدخل في الرقم لكنها تُرسل للجامعات.</li>
     </ul>
   </article>
 
   <div class="note g"><b>وش يكافئ مصحح الكلام فعليًا؟</b>
-  اللكنة <strong>غير محسوبة إطلاقًا</strong> («أي لكنة إنجليزية مفهومة مقبولة» — رسمي). المهم: استمرارية الكلام بلا توقفات طويلة (~110–150 كلمة/دقيقة)، أمثلة ملموسة بأسماء حقيقية، تنوّع قواعدي مقصود، و<span class="en">collocations</span> بدل الكلمات النادرة. الأخطاء الصغيرة ما منعت أحدًا من 135–145 — <strong>الوقوف عن الكلام هو اللي يمنع</strong>.</div>
+  لا تحتاج لهجة أمريكية أو بريطانية. المطلوب كلام واضح ومفهوم. التقييم ينظر إلى المحتوى والترابط والمفردات والقواعد والطلاقة والنطق. استخدم أمثلة ملموسة وواصل الكلام بوتيرة طبيعية من غير سرعة مصطنعة.</div>
 </section>
 
 <!-- ============ بنك العبارات ============ -->
 <section id="bank">
-  <h2>بنك العبارات <span class="tag">كله أقصر من 5 كلمات = آمن</span></h2>
+  <h2>بنك العبارات <span class="tag">روابط قصيرة للاستخدام الطبيعي</span></h2>
   <div class="card"><h3>روابط ممدوحة بالنماذج الرسمية 140–150</h3>
     <div class="phr"><span class="en">First of all,</span><span class="en">Moreover,</span><span class="en">However,</span><span class="en">For example,</span><span class="en">In other words,</span><span class="en">As a result,</span><span class="en">On the other hand,</span><span class="en">Overall,</span></div></div>
   <div class="card"><h3>مكانيات الصور</h3>
@@ -535,8 +689,8 @@ footer strong{color:var(--ink)}
   <h2>المصادر المعتمدة <span class="tag">صيغة ما بعد يوليو 2025</span></h2>
   <div class="card"><h3>رسمي — الأهم</h3><ul class="t">
     <li><a href="https://englishtest.duolingo.com/practice" target="_blank" rel="noopener">الاختبار التجريبي المجاني</a> — غير محدود، نفس المحرك التكيفي.</li>
-    <li><a href="https://englishtest-static.duolingo.com/media/resources/Question%20Guide%20(2025).pdf" target="_blank" rel="noopener">دليل الأسئلة الرسمي 2025 (PDF)</a></li>
-    <li><a href="https://englishtest-static.duolingo.com/media/resources/GPN%20DET%20Sample%20Questions%20-%20Full.pdf" target="_blank" rel="noopener">كتيب 1000+ سؤال حقيقي بالأجوبة (PDF)</a></li>
+    <li><a href="https://englishtest-static.duolingo.com/media/resources/DET%20Practice%20Questions%20Volume%204.pdf" target="_blank" rel="noopener">كتاب التدريب الرسمي Volume 4 لعام 2026</a> — أكثر من 250 سؤالا مرتبة حسب النوع والصعوبة.</li>
+    <li><a href="https://englishtest.duolingo.com/readiness" target="_blank" rel="noopener">مركز الاستعداد الرسمي</a> — الدليل والتجريبي وتجهيز الاختبار.</li>
     <li><a href="https://www.youtube.com/watch?v=VttOg1fbsa8" target="_blank" rel="noopener">الجولة الرسمية بالفيديو 2025</a></li>
   </ul></div>
   <div class="card"><h3>تدريب مجاني</h3><ul class="t">
@@ -553,7 +707,7 @@ footer strong{color:var(--ink)}
 <footer>
   <div class="wrap">
     <p><strong>الخلاصة بجملة وحدة:</strong> اعرف الشكل بالضبط، لا تترك فراغًا أبدًا، عبّي كل ثانية كلام وكتابة بمحتوى ملموس، اكتب 150+ كلمة بالمقالات، وعيونك على الشاشة — والـ120 تجيك بإذن الله. 🎯</p>
-    <p style="margin-top:8px">مبنية على أدلة Duolingo الرسمية 2025–2026 ومواقع التحضير المتخصصة وتجارب متقدمين حقيقيين · آخر تحديث للمعلومات: أغسطس 2026</p>
+    <p style="margin-top:8px">مبنية على دليل Duolingo الرسمي Volume 4 لعام 2026 ومركز الاستعداد الرسمي ودليل الدرجات · آخر تحديث للمعلومات: سبتمبر 2026</p>
   </div>
 </footer>
 
@@ -562,32 +716,34 @@ footer strong{color:var(--ink)}
 <script>
 const PLAN = [
   { id:"d1", name:"اليوم الأول", goal:"افهم الملعب + خط الأساس · ~5–6 ساعات", tasks:[
-    { id:"d1t1", t:"اقرأ هذه الصفحة كاملة مرة أولى", m:"ساعة 1" },
-    { id:"d1t2", t:"شاهد الجولة الرسمية بالفيديو (Walkthrough 2025)", m:"ساعة 1" },
-    { id:"d1t3", t:"الاختبار التجريبي الرسمي بجدية كاملة — وسجّل النطاق التقديري", m:"ساعة 2 · الأهم" },
-    { id:"d1t4", t:"راجع أقسام القراءة (1–5) + تمارين Read and Select المؤقتة", m:"ساعة 3" },
-    { id:"d1t5", t:"راجع أقسام الاستماع (4 و6) + تدريب إملاء عبر السبيكر", m:"ساعة 4" },
-    { id:"d1t6", t:"احفظ بنك العبارات + اكتب Write About the Photo ×3 بالمؤقت", m:"ساعة 5" },
-    { id:"d1t7", t:"تدريب سرعة كتابة 30 دقيقة — الهدف 40+ كلمة/دقيقة", m:"مساءً" }
+    { id:"d1t1", t:"اقرأ الحقائق وخريطة الاختبار والقواعد الذهبية", m:"30 دقيقة" },
+    { id:"d1t2", t:"الاختبار التجريبي الرسمي بجدية كاملة — وسجّل النطاق التقديري", m:"ساعة 1 · الأهم" },
+    { id:"d1t3", t:"مركز المذاكرة: أتقن أول 80 مفردة مع النطق والأمثلة", m:"ساعة 2" },
+    { id:"d1t4", t:"مركز المذاكرة: ادرس الموضوعات 1–7 واقرأ القطعة والترجمة بصوت", m:"ساعة 3" },
+    { id:"d1t5", t:"راجع تريكات القراءة والاستماع في هذه الصفحة", m:"45 دقيقة" },
+    { id:"d1t6", t:"القواعد والأخطاء: البطاقات 1–8 ثم اكتب وصف صورتين من نماذج الكتابة", m:"ساعة 4" },
+    { id:"d1t7", t:"تحدث عن 6 أسئلة من موضوعات اليوم بمؤقت 35 ثانية", m:"ساعة 5" },
+    { id:"d1t8", t:"سرعة كتابة 30 دقيقة — الهدف 40+ كلمة/دقيقة بدقة جيدة", m:"مساء" }
   ]},
-  { id:"d2", name:"اليوم الثاني", goal:"الإنتاج (الـ50% المضمونة) + محاكاة · ~5–6 ساعات", tasks:[
-    { id:"d2t1", t:"جهّز قصصك الست كنقاط", m:"ساعة 1" },
-    { id:"d2t2", t:"سجّل نفسك: Speak About the Photo (90 ث) ×3 صور", m:"ساعة 1" },
-    { id:"d2t3", t:"Read Then Speak ×3 مواضيع + استمع لتسجيلاتك وقيّم التوقفات", m:"ساعة 2" },
-    { id:"d2t4", t:"محاكاة Interactive Speaking ×6 أسئلة بصيغة OREO", m:"ساعة 3" },
-    { id:"d2t5", t:"Speaking Sample كامل (3 دقائق) ×2", m:"ساعة 3" },
-    { id:"d2t6", t:"Interactive Writing كامل موقوت (150+100 كلمة)", m:"ساعة 4" },
-    { id:"d2t7", t:"Writing Sample موقوت (5 دقائق · 150 كلمة)", m:"ساعة 4" },
-    { id:"d2t8", t:"اختبار كامل محاكى + تحليل الأخطاء", m:"ساعة 5 · الأهم" },
-    { id:"d2t9", t:"سرعة كتابة + مراجعة الكلمات الوهمية وبنك العبارات", m:"مساءً" }
+  { id:"d2", name:"اليوم الثاني", goal:"الإنتاج المكثف + محاكاة · ~5–6 ساعات", tasks:[
+    { id:"d2t1", t:"مركز المذاكرة: أتقن 90 مفردة إضافية", m:"ساعة 1" },
+    { id:"d2t2", t:"مركز المذاكرة: ادرس الموضوعات 8–15 واقرأها بصوت", m:"ساعة 2" },
+    { id:"d2t3", t:"نماذج الكتابة: ادرس النماذج كلها ثم أعد كتابة 3 منها بأسلوبك", m:"ساعة 3" },
+    { id:"d2t4", t:"محاكاة Interactive Speaking ×10 أسئلة بصيغة OREO", m:"45 دقيقة" },
+    { id:"d2t5", t:"Read Then Speak ×3 مواضيع بمؤقت 90 ثانية مع تسجيل الصوت", m:"30 دقيقة" },
+    { id:"d2t6", t:"Interactive Writing كامل موقوت: 5 دقائق ثم متابعة 3 دقائق", m:"30 دقيقة" },
+    { id:"d2t7", t:"اختبار تجريبي رسمي كامل + سجل أضعف مهارتين", m:"ساعة 5 · الأهم" },
+    { id:"d2t8", t:"راجع البطاقات النحوية 9–15 وبنك العبارات", m:"30 دقيقة" }
   ]},
   { id:"d3", name:"اليوم الثالث", goal:"صقل + بروفة الغرفة + راحة · ~4 ساعات فقط", tasks:[
-    { id:"d3t1", t:"الاختبار التجريبي الرسمي مرة أخيرة — قارن بنطاق اليوم الأول", m:"ساعة 1" },
-    { id:"d3t2", t:"جولة خفيفة على أضعف قسمين عندك فقط", m:"ساعة 2" },
-    { id:"d3t3", t:"حمّل تطبيق DET على الكمبيوتر والجوال", m:"ساعة 3" },
-    { id:"d3t4", t:"بروفة كاملة: مسح الغرفة 360° + وضع الجوال + فحص الكاميرا والمايك", m:"ساعة 3 · الأهم" },
-    { id:"d3t5", t:"20 دقيقة جلوس بعيون ثابتة على الشاشة (تدريب الانضباط)", m:"ساعة 3" },
-    { id:"d3t6", t:"مراجعة أخيرة 20 دقيقة كحد أقصى — ثم اقفل كل شي ونم بدري", m:"ساعة 4" }
+    { id:"d3t1", t:"مركز المذاكرة: أكمل جميع المفردات غير المتقنة", m:"ساعة 1" },
+    { id:"d3t2", t:"مركز المذاكرة: أكمل الموضوعات 16–22 وراجع القصص الشخصية الست", m:"ساعة 2" },
+    { id:"d3t3", t:"جولة مركزة على أضعف مهارتين من نتيجة التجريبي", m:"45 دقيقة" },
+    { id:"d3t4", t:"تحدث عن 8 أسئلة عشوائية ثم عينة 3 دقائق واحدة", m:"30 دقيقة" },
+    { id:"d3t5", t:"حمّل تطبيق DET على الكمبيوتر والجوال", m:"قبل البروفة" },
+    { id:"d3t6", t:"بروفة كاملة: مسح الغرفة 360° + وضع الجوال + فحص الكاميرا والمايك", m:"ساعة 3 · الأهم" },
+    { id:"d3t7", t:"20 دقيقة جلوس بعيون ثابتة على الشاشة", m:"ساعة 3" },
+    { id:"d3t8", t:"مراجعة أخيرة للمفردات غير المتقنة والقواعد فقط ثم نم بدري", m:"ساعة 4" }
   ]},
   { id:"d0", name:"يوم الاختبار", goal:"روتين ما قبل البدء — كل بند منها سبب معلن لإلغاء نتائج", tasks:[
     { id:"d0t1", t:"أعد تشغيل الكمبيوتر", m:"إلزامي" },
@@ -699,5 +855,6 @@ upBtn.addEventListener("click", () => scrollTo({ top: 0, behavior: "smooth" }));
 load();
 render();
 </script>
+<script src="./det-study.js"></script>
 </body>
 </html>
