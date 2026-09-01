@@ -50,6 +50,9 @@
       <button class="study-tab" type="button" role="tab" aria-selected="false" data-study-tab="grammar">
         <span class="tab-label"><span>🧩</span>القواعد والأخطاء</span><span class="tab-count">15</span>
       </button>
+      <button class="study-tab" type="button" role="tab" aria-selected="false" data-study-tab="tests">
+        <span class="tab-label"><span>📝</span>الاختبارات</span><span class="tab-count">4</span>
+      </button>
     </div>
   </aside>
 
@@ -90,6 +93,12 @@
           <strong>القواعد والأخطاء</strong>
           <p>15 قاعدة مهمة مع الخطأ والتصحيح المباشر.</p>
           <small>افتح القسم ←</small>
+        </button>
+        <button class="overview-card test-highlight" type="button" data-open-study="tests">
+          <span class="overview-icon">📝</span>
+          <strong>اختبر نفسك</strong>
+          <p>اختبار مفردات واختبار شامل ومحاكاة كتابة وتحدث.</p>
+          <small id="overviewTestProgress">ابدأ أول اختبار ←</small>
         </button>
       </div>
 
@@ -164,6 +173,97 @@
         <p class="lead">قواعد مختصرة وعالية الفائدة للكلام والكتابة مع أمثلة خطأ وصح.</p>
       </div>
       <div class="grammar-grid" id="grammarGrid"></div>
+    </section>
+
+    <section class="study-pane" id="study-tests" role="tabpanel">
+      <div class="pane-head">
+        <h2>اختبر نفسك</h2>
+        <p class="lead">اختر نوع الاختبار. الأسئلة تتغير في كل محاولة والنتيجة تنحفظ تلقائيا.</p>
+      </div>
+
+      <div class="test-stats">
+        <div><small>المحاولات</small><strong id="testAttempts">0</strong></div>
+        <div><small>أفضل مفردات</small><strong id="bestVocabScore">--</strong></div>
+        <div><small>أفضل شامل</small><strong id="bestMixedScore">--</strong></div>
+      </div>
+
+      <div class="test-mode-grid" id="testModeGrid">
+        <button class="test-mode active" type="button" data-test-mode="vocab">
+          <span>🔤</span><strong>اختبار المفردات</strong><small>10 أسئلة</small>
+        </button>
+        <button class="test-mode" type="button" data-test-mode="mixed">
+          <span>🎯</span><strong>اختبار شامل</strong><small>15 سؤالا</small>
+        </button>
+        <button class="test-mode" type="button" data-test-mode="writing">
+          <span>✍️</span><strong>اختبار الكتابة</strong><small>5 دقائق</small>
+        </button>
+        <button class="test-mode" type="button" data-test-mode="speaking">
+          <span>🎙️</span><strong>اختبار التحدث</strong><small>35 إلى 180 ثانية</small>
+        </button>
+      </div>
+
+      <div class="test-panel active" id="testPanelObjective">
+        <div class="test-start" id="objectiveStart">
+          <h3 id="objectiveTitle">اختبار المفردات</h3>
+          <p id="objectiveDescription">10 أسئلة عشوائية من الكلمات الموجودة في قسم المفردات.</p>
+          <button class="study-btn primary" id="startObjectiveTest" type="button">ابدأ الاختبار</button>
+        </div>
+        <div class="test-runner" id="objectiveRunner" hidden>
+          <div class="quiz-head">
+            <span id="quizProgress">1 من 10</span>
+            <span id="quizLiveScore">النتيجة 0</span>
+          </div>
+          <div class="quiz-bar"><i id="quizBar"></i></div>
+          <article class="quiz-card">
+            <small id="quizKind">اختر الإجابة الصحيحة</small>
+            <h3 id="quizQuestion"></h3>
+            <div class="quiz-choices" id="quizChoices"></div>
+            <div class="quiz-feedback" id="quizFeedback" aria-live="polite"></div>
+            <button class="study-btn primary" id="quizNext" type="button" hidden>السؤال التالي</button>
+          </article>
+        </div>
+        <div class="test-result" id="objectiveResult" hidden></div>
+      </div>
+
+      <div class="test-panel" id="testPanelWriting">
+        <div class="simulation-head">
+          <div>
+            <small>السؤال</small>
+            <div class="prompt-box" id="writingTestPrompt"></div>
+          </div>
+          <div class="simulation-clock" id="writingTestClock">05:00</div>
+        </div>
+        <textarea class="test-textarea" id="writingTestText" lang="en" dir="ltr" placeholder="ابدأ الكتابة هنا بعد تشغيل المؤقت"></textarea>
+        <div class="study-tools">
+          <button class="study-btn primary" id="writingTestStart" type="button">ابدأ الاختبار</button>
+          <button class="study-btn" id="writingTestFinish" type="button" disabled>أنهِ واعرض التقييم</button>
+          <button class="study-btn" id="writingTestNew" type="button">سؤال جديد</button>
+        </div>
+        <div id="writingTestResult"></div>
+      </div>
+
+      <div class="test-panel" id="testPanelSpeaking">
+        <div class="prompt-box" id="speakingTestPrompt"></div>
+        <div class="study-tools">
+          <button class="study-btn primary" type="button" data-test-speaking-seconds="35">35 ثانية</button>
+          <button class="study-btn" type="button" data-test-speaking-seconds="90">90 ثانية</button>
+          <button class="study-btn" type="button" data-test-speaking-seconds="180">180 ثانية</button>
+          <button class="study-btn" id="speakingTestNew" type="button">سؤال جديد</button>
+        </div>
+        <div class="timer-box">
+          <div><strong>وقت الإجابة</strong><div class="timer-clock" id="speakingTestClock">00:35</div></div>
+          <div class="timer-actions"><button id="speakingTestStart" type="button">ابدأ</button><button id="speakingTestReset" type="button">إعادة</button></div>
+        </div>
+        <div class="self-check" id="speakingSelfCheck" hidden>
+          <h3>قيّم إجابتك بصدق</h3>
+          <label><input type="checkbox"> جاوبت السؤال مباشرة</label>
+          <label><input type="checkbox"> ذكرت سببا واضحا</label>
+          <label><input type="checkbox"> أعطيت مثالا</label>
+          <label><input type="checkbox"> استخدمت كلمات ربط</label>
+          <label><input type="checkbox"> تكلمت بدون توقف طويل</label>
+          <strong id="speakingSelfScore">0 من 5</strong>
+        </div>
+      </div>
     </section>
   </main>
 </div>
