@@ -714,13 +714,30 @@ photo|visible|ظاهر|A bridge is visible in the distance.
   ];
 
   const STORAGE_KEY = "detStudyProgress.v1";
-  let studyState = { known: {}, topics: {} };
+  let studyState = {
+    known: {},
+    topics: {},
+    tests: { attempts: 0, modeAttempts: { vocab: 0, mixed: 0 }, best: { vocab: 0, mixed: 0 }, writingAttempts: 0, speakingAttempts: 0 }
+  };
   let unknownOnly = false;
   let currentTopic = TOPICS[0].id;
   let currentWriting = WRITING_MODELS[0].id;
   let timerSeconds = 35;
   let timerRemaining = 35;
   let timerHandle = null;
+  let quizMode = "vocab";
+  let quizQuestions = [];
+  let quizIndex = 0;
+  let quizScore = 0;
+  let quizReview = [];
+  let writingTestModel = null;
+  let writingTestRemaining = 300;
+  let writingTestHandle = null;
+  let writingTestFinished = false;
+  let speakingTestSeconds = 35;
+  let speakingTestRemaining = 35;
+  let speakingTestHandle = null;
+  let speakingAttemptSaved = false;
 
   const byId = (id) => document.getElementById(id);
   const escapeHtml = (value) => String(value)
@@ -736,9 +753,27 @@ photo|visible|ظاهر|A bridge is visible in the distance.
       if (saved && typeof saved === "object") {
         studyState.known = saved.known && typeof saved.known === "object" ? saved.known : {};
         studyState.topics = saved.topics && typeof saved.topics === "object" ? saved.topics : {};
+        const tests = saved.tests && typeof saved.tests === "object" ? saved.tests : {};
+        studyState.tests = {
+          attempts: Number(tests.attempts) || 0,
+          modeAttempts: {
+            vocab: Number(tests.modeAttempts && tests.modeAttempts.vocab) || 0,
+            mixed: Number(tests.modeAttempts && tests.modeAttempts.mixed) || 0
+          },
+          best: {
+            vocab: Number(tests.best && tests.best.vocab) || 0,
+            mixed: Number(tests.best && tests.best.mixed) || 0
+          },
+          writingAttempts: Number(tests.writingAttempts) || 0,
+          speakingAttempts: Number(tests.speakingAttempts) || 0
+        };
       }
     } catch (error) {
-      studyState = { known: {}, topics: {} };
+      studyState = {
+        known: {},
+        topics: {},
+        tests: { attempts: 0, modeAttempts: { vocab: 0, mixed: 0 }, best: { vocab: 0, mixed: 0 }, writingAttempts: 0, speakingAttempts: 0 }
+      };
     }
   }
 
@@ -1025,6 +1060,333 @@ photo|visible|ظاهر|A bridge is visible in the distance.
     ).join("");
   }
 
+  function shuffle(items) {
+    const copy = items.slice();
+    for (let index = copy.length - 1; index > 0; index -= 1) {
+      const randomIndex = Math.floor(Math.random() * (index + 1));
+      [copy[index], copy[randomIndex]] = [copy[randomIndex], copy[index]];
+    }
+    return copy;
+  }
+
+  function uniqueChoices(answer, pool, count) {
+    const choices = [answer];
+    shuffle(pool).forEach((value) => {
+      if (choices.length < count && value !== answer && !choices.includes(value)) choices.push(value);
+    });
+    return shuffle(choices);
+  }
+
+  function makeVocabQuestions(count, reverseEveryOther = false) {
+    return shuffle(VOCAB).slice(0, count).map((item, index) => {
+      const reverse = reverseEveryOther && index % 2 === 1;
+      if (reverse) {
+        return {
+          kind: "اختر الكلمة الإنجليزية",
+          prompt: item.ar,
+          answer: item.word,
+          choices: uniqueChoices(item.word, VOCAB.map((word) => word.word), 4),
+          promptDirection: "rtl",
+          choicesDirection: "ltr"
+        };
+      }
+      return {
+        kind: "ما معنى هذه الكلمة؟",
+        prompt: item.word,
+        answer: item.ar,
+        choices: uniqueChoices(item.ar, VOCAB.map((word) => word.ar), 4),
+        promptDirection: "ltr",
+        choicesDirection: "rtl"
+      };
+    });
+  }
+
+  function makeGrammarQuestions(count) {
+    return shuffle(GRAMMAR).slice(0, count).map((item) => ({
+      kind: "اختر الجملة الصحيحة",
+      prompt: item.title,
+      answer: item.right,
+      choices: uniqueChoices(item.right, [item.wrong].concat(GRAMMAR.filter((rule) => rule !== item).map((rule) => rule.wrong)), 4),
+      promptDirection: "ltr",
+      choicesDirection: "ltr"
+    }));
+  }
+
+  function showTestMode(mode) {
+    quizMode = mode;
+    document.querySelectorAll("[data-test-mode]").forEach((button) => {
+      button.classList.toggle("active", button.dataset.testMode === mode);
+    });
+    document.querySelectorAll(".test-panel").forEach((panel) => panel.classList.remove("active"));
+    if (mode === "writing") {
+      byId("testPanelWriting").classList.add("active");
+      if (!writingTestModel) newWritingTest();
+      return;
+    }
+    if (mode === "speaking") {
+      byId("testPanelSpeaking").classList.add("active");
+      if (!byId("speakingTestPrompt").textContent) newSpeakingTestPrompt();
+      return;
+    }
+    byId("testPanelObjective").classList.add("active");
+    byId("objectiveStart").hidden = false;
+    byId("objectiveRunner").hidden = true;
+    byId("objectiveResult").hidden = true;
+    byId("objectiveTitle").textContent = mode === "mixed" ? "الاختبار الشامل" : "اختبار المفردات";
+    byId("objectiveDescription").textContent = mode === "mixed"
+      ? "15 سؤالا عشوائيا في المفردات والقواعد."
+      : "10 أسئلة عشوائية من الكلمات الموجودة في قسم المفردات.";
+  }
+
+  function startObjectiveTest() {
+    quizQuestions = quizMode === "mixed"
+      ? shuffle(makeVocabQuestions(8, true).concat(makeGrammarQuestions(7)))
+      : makeVocabQuestions(10, false);
+    quizIndex = 0;
+    quizScore = 0;
+    quizReview = [];
+    byId("objectiveStart").hidden = true;
+    byId("objectiveResult").hidden = true;
+    byId("objectiveRunner").hidden = false;
+    renderQuizQuestion();
+  }
+
+  function renderQuizQuestion() {
+    const question = quizQuestions[quizIndex];
+    const total = quizQuestions.length;
+    byId("quizProgress").textContent = quizIndex + 1 + " من " + total;
+    byId("quizLiveScore").textContent = "النتيجة " + quizScore;
+    byId("quizBar").style.width = Math.round((quizIndex / total) * 100) + "%";
+    byId("quizKind").textContent = question.kind;
+    byId("quizQuestion").textContent = question.prompt;
+    byId("quizQuestion").style.direction = question.promptDirection;
+    byId("quizQuestion").style.textAlign = question.promptDirection === "ltr" ? "left" : "right";
+    byId("quizFeedback").textContent = "";
+    byId("quizFeedback").className = "quiz-feedback";
+    byId("quizNext").hidden = true;
+    byId("quizChoices").innerHTML = "";
+    question.choices.forEach((choice) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "quiz-choice" + (question.choicesDirection === "ltr" ? " en-choice" : "");
+      button.textContent = choice;
+      button.addEventListener("click", () => answerQuizQuestion(choice));
+      byId("quizChoices").appendChild(button);
+    });
+  }
+
+  function answerQuizQuestion(choice) {
+    const question = quizQuestions[quizIndex];
+    const correct = choice === question.answer;
+    if (correct) quizScore += 1;
+    quizReview.push({ prompt: question.prompt, chosen: choice, answer: question.answer, correct });
+    byId("quizLiveScore").textContent = "النتيجة " + quizScore;
+    byId("quizBar").style.width = Math.round(((quizIndex + 1) / quizQuestions.length) * 100) + "%";
+    byId("quizChoices").querySelectorAll("button").forEach((button) => {
+      button.disabled = true;
+      if (button.textContent === question.answer) button.classList.add("correct");
+      if (button.textContent === choice && !correct) button.classList.add("wrong");
+    });
+    byId("quizFeedback").textContent = correct ? "صح ✓" : "خطأ. الإجابة الصحيحة: " + question.answer;
+    byId("quizFeedback").classList.add(correct ? "good" : "bad");
+    byId("quizNext").textContent = quizIndex === quizQuestions.length - 1 ? "اعرض النتيجة" : "السؤال التالي";
+    byId("quizNext").hidden = false;
+  }
+
+  function nextQuizQuestion() {
+    if (quizIndex >= quizQuestions.length - 1) {
+      finishObjectiveTest();
+      return;
+    }
+    quizIndex += 1;
+    renderQuizQuestion();
+  }
+
+  function finishObjectiveTest() {
+    const total = quizQuestions.length;
+    const percent = Math.round((quizScore / total) * 100);
+    studyState.tests.attempts += 1;
+    studyState.tests.modeAttempts[quizMode] += 1;
+    studyState.tests.best[quizMode] = Math.max(studyState.tests.best[quizMode] || 0, percent);
+    saveStudyState();
+    updateTestStats();
+    byId("objectiveRunner").hidden = true;
+    byId("objectiveResult").hidden = false;
+    const wrongAnswers = quizReview.filter((item) => !item.correct);
+    const message = percent >= 80 ? "ممتاز. انتقل لاختبار أصعب." : percent >= 60 ? "جيد. راجع أخطاءك ثم أعد المحاولة." : "ارجع للقسم وراجع المحتوى قبل المحاولة الجاية.";
+    byId("objectiveResult").innerHTML =
+      '<div class="result-score">' + percent + "%</div>" +
+      "<h3>" + quizScore + " من " + total + "</h3>" +
+      "<p>" + message + "</p>" +
+      (wrongAnswers.length ? '<div class="review-list">' + wrongAnswers.map((item) =>
+        '<div class="review-item wrong"><b>' + escapeHtml(item.prompt) + "</b><br>إجابتك: " + escapeHtml(item.chosen) + "<br>الصحيح: " + escapeHtml(item.answer) + "</div>"
+      ).join("") + "</div>" : '<div class="note g"><b>كل الإجابات صحيحة</b>ما عندك أخطاء في هذي المحاولة.</div>') +
+      '<button class="study-btn primary" id="retryObjective" type="button">اختبار جديد</button>';
+    byId("retryObjective").addEventListener("click", startObjectiveTest);
+  }
+
+  function formatTestTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainder = seconds % 60;
+    return String(minutes).padStart(2, "0") + ":" + String(remainder).padStart(2, "0");
+  }
+
+  function newWritingTest() {
+    if (writingTestHandle) clearInterval(writingTestHandle);
+    writingTestHandle = null;
+    const alternatives = WRITING_MODELS.filter((model) => !writingTestModel || model.id !== writingTestModel.id);
+    writingTestModel = alternatives[Math.floor(Math.random() * alternatives.length)] || WRITING_MODELS[0];
+    writingTestRemaining = 300;
+    writingTestFinished = false;
+    byId("writingTestPrompt").textContent = writingTestModel.prompt;
+    byId("writingTestText").value = "";
+    byId("writingTestText").disabled = true;
+    byId("writingTestStart").disabled = false;
+    byId("writingTestStart").textContent = "ابدأ الاختبار";
+    byId("writingTestFinish").disabled = true;
+    byId("writingTestResult").innerHTML = "";
+    byId("writingTestClock").textContent = formatTestTime(writingTestRemaining);
+  }
+
+  function startWritingTest() {
+    if (writingTestHandle) return;
+    byId("writingTestText").disabled = false;
+    byId("writingTestText").focus();
+    byId("writingTestStart").disabled = true;
+    byId("writingTestFinish").disabled = false;
+    writingTestHandle = setInterval(() => {
+      writingTestRemaining -= 1;
+      byId("writingTestClock").textContent = formatTestTime(writingTestRemaining);
+      if (writingTestRemaining <= 0) finishWritingTest();
+    }, 1000);
+  }
+
+  function finishWritingTest() {
+    if (writingTestFinished) return;
+    writingTestFinished = true;
+    if (writingTestHandle) clearInterval(writingTestHandle);
+    writingTestHandle = null;
+    const text = byId("writingTestText").value.trim();
+    const words = text ? text.split(/\s+/).length : 0;
+    const sentences = (text.match(/[.!?]+/g) || []).length;
+    const checks = [
+      { label: "كتبت 80 كلمة أو أكثر", passed: words >= 80 },
+      { label: "كتبت 4 جمل مكتملة أو أكثر", passed: sentences >= 4 },
+      { label: "استخدمت كلمة ربط", passed: /\b(however|although|because|therefore|moreover|while|overall|first|second)\b/i.test(text) },
+      { label: "استخدمت مثالا واضحا", passed: /\b(for example|for instance|such as|from my experience)\b/i.test(text) },
+      { label: "بدأت بحرف كبير وختمت بعلامة ترقيم", passed: /^[A-Z]/.test(text) && /[.!?]$/.test(text) }
+    ];
+    const score = checks.filter((item) => item.passed).length;
+    studyState.tests.attempts += 1;
+    studyState.tests.writingAttempts += 1;
+    saveStudyState();
+    updateTestStats();
+    byId("writingTestText").disabled = true;
+    byId("writingTestFinish").disabled = true;
+    byId("writingTestResult").innerHTML =
+      '<div class="note ' + (score >= 4 ? "g" : "a") + '"><b>التقييم الآلي ' + score + " من 5</b>عدد الكلمات: " + words + ". هذا التقييم يفحص البناء فقط ولا يحكم على دقة كل قاعدة.</div>" +
+      '<div class="writing-score-grid">' + checks.map((item) => '<div class="' + (item.passed ? "passed" : "failed") + '">' + (item.passed ? "✓ " : "✕ ") + escapeHtml(item.label) + "</div>").join("") + "</div>" +
+      '<div class="study-reader"><h3>نموذج للمقارنة بعد ما خلصت</h3><div class="english-block">' + escapeHtml(writingTestModel.model) + "</div></div>";
+  }
+
+  function newSpeakingTestPrompt() {
+    const item = SPEAKING_PROMPTS[Math.floor(Math.random() * SPEAKING_PROMPTS.length)];
+    byId("speakingTestPrompt").innerHTML = '<small style="display:block;color:var(--teal);direction:rtl;text-align:right">' + escapeHtml(item.topic) + "</small>" + escapeHtml(item.prompt);
+    resetSpeakingTest();
+  }
+
+  function paintSpeakingTestClock() {
+    byId("speakingTestClock").textContent = formatTestTime(speakingTestRemaining);
+  }
+
+  function resetSpeakingTest() {
+    if (speakingTestHandle) clearInterval(speakingTestHandle);
+    speakingTestHandle = null;
+    speakingTestRemaining = speakingTestSeconds;
+    speakingAttemptSaved = false;
+    byId("speakingTestStart").textContent = "ابدأ";
+    byId("speakingSelfCheck").hidden = true;
+    byId("speakingSelfCheck").querySelectorAll('input[type="checkbox"]').forEach((input) => { input.checked = false; });
+    byId("speakingSelfScore").textContent = "0 من 5";
+    paintSpeakingTestClock();
+  }
+
+  function toggleSpeakingTest() {
+    if (speakingTestHandle) {
+      clearInterval(speakingTestHandle);
+      speakingTestHandle = null;
+      byId("speakingTestStart").textContent = "استئناف";
+      return;
+    }
+    if (speakingTestRemaining <= 0) resetSpeakingTest();
+    byId("speakingTestStart").textContent = "إيقاف";
+    speakingTestHandle = setInterval(() => {
+      speakingTestRemaining -= 1;
+      paintSpeakingTestClock();
+      if (speakingTestRemaining <= 0) finishSpeakingTest();
+    }, 1000);
+  }
+
+  function finishSpeakingTest() {
+    if (speakingTestHandle) clearInterval(speakingTestHandle);
+    speakingTestHandle = null;
+    speakingTestRemaining = 0;
+    paintSpeakingTestClock();
+    byId("speakingTestStart").textContent = "ابدأ من جديد";
+    byId("speakingSelfCheck").hidden = false;
+    if (!speakingAttemptSaved) {
+      speakingAttemptSaved = true;
+      studyState.tests.attempts += 1;
+      studyState.tests.speakingAttempts += 1;
+      saveStudyState();
+      updateTestStats();
+    }
+    if ("vibrate" in navigator) navigator.vibrate([120, 80, 120]);
+  }
+
+  function updateSpeakingSelfScore() {
+    const checked = byId("speakingSelfCheck").querySelectorAll('input[type="checkbox"]:checked').length;
+    byId("speakingSelfScore").textContent = checked + " من 5";
+  }
+
+  function updateTestStats() {
+    const tests = studyState.tests;
+    byId("testAttempts").textContent = tests.attempts;
+    byId("bestVocabScore").textContent = tests.modeAttempts.vocab ? tests.best.vocab + "%" : "--";
+    byId("bestMixedScore").textContent = tests.modeAttempts.mixed ? tests.best.mixed + "%" : "--";
+    const overview = byId("overviewTestProgress");
+    if (overview) overview.textContent = tests.attempts ? tests.attempts + " محاولات مكتملة ←" : "ابدأ أول اختبار ←";
+  }
+
+  function setupTests() {
+    document.querySelectorAll("[data-test-mode]").forEach((button) => {
+      button.addEventListener("click", () => showTestMode(button.dataset.testMode));
+    });
+    byId("startObjectiveTest").addEventListener("click", startObjectiveTest);
+    byId("quizNext").addEventListener("click", nextQuizQuestion);
+    byId("writingTestStart").addEventListener("click", startWritingTest);
+    byId("writingTestFinish").addEventListener("click", finishWritingTest);
+    byId("writingTestNew").addEventListener("click", newWritingTest);
+    document.querySelectorAll("[data-test-speaking-seconds]").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll("[data-test-speaking-seconds]").forEach((item) => item.classList.remove("primary"));
+        button.classList.add("primary");
+        speakingTestSeconds = Number(button.dataset.testSpeakingSeconds);
+        resetSpeakingTest();
+      });
+    });
+    byId("speakingTestStart").addEventListener("click", toggleSpeakingTest);
+    byId("speakingTestReset").addEventListener("click", resetSpeakingTest);
+    byId("speakingTestNew").addEventListener("click", newSpeakingTestPrompt);
+    byId("speakingSelfCheck").querySelectorAll('input[type="checkbox"]').forEach((input) => {
+      input.addEventListener("change", updateSpeakingSelfScore);
+    });
+    newWritingTest();
+    newSpeakingTestPrompt();
+    updateTestStats();
+    showTestMode("vocab");
+  }
+
   function initStudyCenter() {
     if (!byId("study")) return;
     loadStudyState();
@@ -1035,6 +1397,7 @@ photo|visible|ظاهر|A bridge is visible in the distance.
     renderWriting();
     setupSpeaking();
     renderGrammar();
+    setupTests();
   }
 
   initStudyCenter();
