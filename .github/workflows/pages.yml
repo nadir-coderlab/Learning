@@ -1,8 +1,9 @@
-# مزامنة صفحتي «خطة ديولينجو» و«مدرّب ديولينجو» إلى فرع gh-pages (موقع GitHub Pages).
+# مزامنة صفحات «خطة ديولينجو» إلى فرع gh-pages (موقع GitHub Pages).
 #
 # الروابط:
 #   https://nadir-coderlab.github.io/Learning/               ← الخطة (index.html)
-#   https://nadir-coderlab.github.io/Learning/det-train.html ← المدرّب
+#   https://nadir-coderlab.github.io/Learning/det-train.html ← المدرّب التفاعلي
+#   https://nadir-coderlab.github.io/Learning/study.html     ← مركز المذاكرة
 #
 # لماذا فرع gh-pages وليس النشر عبر actions/deploy-pages؟
 # توكن الإجراءات لا يملك صلاحية تفعيل خدمة Pages لأول مرة
@@ -10,10 +11,10 @@
 # فرع gh-pages يجعل GitHub يفعّلها تلقائيًا. وهذا الإجراء لا يحتاج سوى
 # صلاحية الكتابة على المستودع، وهي متاحة للتوكن الافتراضي.
 #
-# لماذا صفحتان فقط وليس مجلد public كاملًا؟
+# لماذا ملفات الخطة فقط وليس مجلد public كاملًا؟
 # موقع البنات يستخدم مسارات مطلقة (/assets/... و /learn) تنكسر تحت مسار
-# مشروع Pages (‎/Learning/‎)، بينما صفحتا الخطة والمدرّب مستقلتان تمامًا بلا
-# أي ملف خارجي فتعملان من أي مسار. موقع البنات يبقى على Firebase Hosting.
+# مشروع Pages (‎/Learning/‎)، بينما صفحات الخطة والمدرّب ومركز المذاكرة
+# تستخدم مسارات نسبية فتعمل من أي مسار. موقع البنات يبقى على Firebase Hosting.
 name: Sync plan pages to gh-pages
 on:
   push:
@@ -21,6 +22,9 @@ on:
     paths:
       - "public/det.html"
       - "public/det-train.html"
+      - "public/study.html"
+      - "public/det-study.js"
+      - "public/det-study.css"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -45,16 +49,19 @@ jobs:
         run: |
           git fetch origin main --depth=1
           git show origin/main:public/det.html > index.html
-          # الخطة تشير إلى det.html نسبيًا؛ نوفّر الاسمين حتى يعمل الرابط من الصفحتين
+          # الصفحات تشير إلى det.html نسبيًا؛ نوفّر الاسمين حتى يعمل الرابط من كل صفحة
           cp index.html det.html
           git show origin/main:public/det-train.html > det-train.html
+          git show origin/main:public/study.html > study.html
+          git show origin/main:public/det-study.js > det-study.js
+          git show origin/main:public/det-study.css > det-study.css
           touch .nojekyll
 
       - name: دفع التحديث إن تغيّر شيء
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html det.html det-train.html .nojekyll
+          git add index.html det.html det-train.html study.html det-study.js det-study.css .nojekyll
           if git diff --staged --quiet; then
             echo "::notice title=لا تغيير::صفحات النشر مطابقة للمصدر بالفعل."
             exit 0

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مركز مذاكرة ديولينجو 120</title>
+<meta name="description" content="مركز مذاكرة مرتب لاختبار Duolingo English Test. مفردات مترجمة وقطع وموضوعات ونماذج كتابة وبنك تحدث وقواعد.">
+<meta name="theme-color" content="#0f766e">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ar_AR">
+<meta property="og:title" content="مركز مذاكرة ديولينجو 120">
+<meta property="og:description" content="كل مواد المذاكرة مرتبة في أقسام مستقلة وسهلة التنقل.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./det-study.css">
+</head>
+<body>
+
+<header class="study-header">
+  <div class="header-inner">
+    <div class="eyebrow">هدفك +120</div>
+    <h1>مركز المذاكرة</h1>
+    <p class="header-copy">كل مادة الاختبار في أقسام مستقلة. اختر القسم من القائمة وركز عليه بدون ما تضيع بين بقية المحتوى.</p>
+    <div class="header-actions">
+      <a class="header-link" href="./">← الرجوع للخطة</a>
+      <a class="header-link secondary" href="https://girls-learning-en.web.app/">موقع المدرسة</a>
+    </div>
+  </div>
+</header>
+
+<div class="study-layout" id="study">
+  <aside class="study-nav" aria-label="أقسام مركز المذاكرة">
+    <div class="nav-title">انتقل إلى</div>
+    <div class="study-tabs" role="tablist" aria-label="أقسام المذاكرة">
+      <button class="study-tab" type="button" role="tab" aria-selected="true" data-study-tab="overview">
+        <span class="tab-label"><span>🏠</span>نظرة عامة</span>
+      </button>
+      <button class="study-tab" type="button" role="tab" aria-selected="false" data-study-tab="vocab">
+        <span class="tab-label"><span>🔤</span>المفردات</span><span class="tab-count">250</span>
+      </button>
+      <button class="study-tab" type="button" role="tab" aria-selected="false" data-study-tab="topics">
+        <span class="tab-label"><span>📖</span>الموضوعات والقطع</span><span class="tab-count">22</span>
+      </button>
+      <button class="study-tab" type="button" role="tab" aria-selected="false" data-study-tab="writing">
+        <span class="tab-label"><span>✍️</span>الكتابة</span><span class="tab-count">10</span>
+      </button>
+      <button class="study-tab" type="button" role="tab" aria-selected="false" data-study-tab="speaking">
+        <span class="tab-label"><span>🎙️</span>المحادثة والتحدث</span><span class="tab-count">66</span>
+      </button>
+      <button class="study-tab" type="button" role="tab" aria-selected="false" data-study-tab="grammar">
+        <span class="tab-label"><span>🧩</span>القواعد والأخطاء</span><span class="tab-count">15</span>
+      </button>
+      <button class="study-tab" type="button" role="tab" aria-selected="false" data-study-tab="tests">
+        <span class="tab-label"><span>📝</span>الاختبارات</span><span class="tab-count">4</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="study-main">
+    <section class="study-pane active" id="study-overview" role="tabpanel">
+      <div class="pane-head">
+        <h2>وش تذاكر الحين؟</h2>
+        <p class="lead">ابدأ بالقسم اللي تحتاجه. تقدم المفردات والموضوعات ينحفظ في نفس المتصفح.</p>
+      </div>
+
+      <div class="overview-grid">
+        <button class="overview-card" type="button" data-open-study="vocab">
+          <span class="overview-icon">🔤</span>
+          <strong>المفردات</strong>
+          <p>250 كلمة مترجمة مع مثال ونطق وتصنيفات.</p>
+          <small id="overviewVocabProgress">ابدأ المذاكرة ←</small>
+        </button>
+        <button class="overview-card" type="button" data-open-study="topics">
+          <span class="overview-icon">📖</span>
+          <strong>الموضوعات والقطع</strong>
+          <p>22 موضوعا مع قطعة وترجمة وخطة أفكار وأسئلة.</p>
+          <small id="overviewTopicProgress">ابدأ المذاكرة ←</small>
+        </button>
+        <button class="overview-card" type="button" data-open-study="writing">
+          <span class="overview-icon">✍️</span>
+          <strong>الكتابة</strong>
+          <p>10 نماذج مرنة مع الهيكل والترجمة وطريقة الاستخدام.</p>
+          <small>افتح القسم ←</small>
+        </button>
+        <button class="overview-card" type="button" data-open-study="speaking">
+          <span class="overview-icon">🎙️</span>
+          <strong>المحادثة والتحدث</strong>
+          <p>66 سؤالا مع مؤقت وخطة جواب لكل مدة.</p>
+          <small>افتح القسم ←</small>
+        </button>
+        <button class="overview-card" type="button" data-open-study="grammar">
+          <span class="overview-icon">🧩</span>
+          <strong>القواعد والأخطاء</strong>
+          <p>15 قاعدة مهمة مع الخطأ والتصحيح المباشر.</p>
+          <small>افتح القسم ←</small>
+        </button>
+        <button class="overview-card test-highlight" type="button" data-open-study="tests">
+          <span class="overview-icon">📝</span>
+          <strong>اختبر نفسك</strong>
+          <p>اختبار مفردات واختبار شامل ومحاكاة كتابة وتحدث.</p>
+          <small id="overviewTestProgress">ابدأ أول اختبار ←</small>
+        </button>
+      </div>
+
+      <div class="pane-head" style="margin-top:14px">
+        <h2>دورة مذاكرة 60 دقيقة</h2>
+        <p class="lead">إذا ما عرفت من وين تبدأ امش على هذي الدورة بالترتيب.</p>
+        <div class="study-cycle">
+          <div><b>20 دقيقة</b>مفردات</div>
+          <div><b>15 دقيقة</b>قطعة وموضوع</div>
+          <div><b>15 دقيقة</b>جواب كتابة</div>
+          <div><b>10 دقائق</b>3 إجابات تحدث</div>
+        </div>
+        <div class="note r"><b>طريقة الحفظ الصحيحة</b>احفظ معنى الكلمة والفكرة وترتيب الجواب. لا تحفظ فقرة كاملة وتكررها حرفيا. النماذج للتدريب وإعادة الصياغة بأسلوبك.</div>
+      </div>
+    </section>
+
+    <section class="study-pane" id="study-vocab" role="tabpanel">
+      <div class="pane-head">
+        <h2>المفردات الأساسية المترجمة</h2>
+        <p class="lead">انطق الكلمة. اقرأ المثال. ثم علّمها كمتقنة فقط إذا قدرت تستخدمها في جملة من عندك.</p>
+      </div>
+      <div class="study-tools">
+        <input id="vocabSearch" type="search" placeholder="ابحث بالكلمة أو الترجمة" aria-label="بحث المفردات">
+        <select id="vocabCategory" aria-label="تصنيف المفردات"></select>
+        <button class="study-btn" id="vocabUnknown" type="button">غير المتقن فقط</button>
+      </div>
+      <div class="study-progress"><span id="vocabCount">0 من 0</span><div class="mini-bar"><i id="vocabBar"></i></div><span id="vocabPct">0%</span></div>
+      <div class="vocab-grid" id="vocabList"></div>
+    </section>
+
+    <section class="study-pane" id="study-topics" role="tabpanel">
+      <div class="pane-head">
+        <h2>22 موضوعا وقطعة</h2>
+        <p class="lead">كل موضوع فيه قطعة أصلية وترجمتها ومفردات وخطة أفكار وسؤال كتابة وثلاثة أسئلة تحدث.</p>
+      </div>
+      <div class="study-progress"><span id="topicCount">0 من 22 موضوعا</span><div class="mini-bar"><i id="topicBar"></i></div><span id="topicPct">0%</span></div>
+      <div class="topic-list" id="topicList"></div>
+      <div class="study-reader" id="topicReader"></div>
+    </section>
+
+    <section class="study-pane" id="study-writing" role="tabpanel">
+      <div class="pane-head">
+        <h2>نماذج الكتابة المرنة</h2>
+        <p class="lead">اقرأ النموذج. اقفله. ثم اكتب الفكرة نفسها بأسلوبك. احفظ الهيكل والمفردات ولا تحفظ النص حرفيا.</p>
+      </div>
+      <div class="model-select" id="writingList"></div>
+      <div class="study-reader" id="writingReader"></div>
+    </section>
+
+    <section class="study-pane" id="study-speaking" role="tabpanel">
+      <div class="pane-head">
+        <h2>المحادثة والتحدث</h2>
+        <p class="lead">اختر 35 ثانية للمحادثة التفاعلية. اختر 90 ثانية لـ Read Then Speak. اختر 180 ثانية لعينة التحدث.</p>
+      </div>
+      <div class="study-tools">
+        <button class="study-btn" type="button" data-seconds="35">35 ثانية</button>
+        <button class="study-btn" type="button" data-seconds="90">90 ثانية</button>
+        <button class="study-btn" type="button" data-seconds="180">180 ثانية</button>
+        <button class="study-btn primary" id="newPrompt" type="button">سؤال جديد</button>
+      </div>
+      <div class="prompt-box" id="speakingPrompt"></div>
+      <div class="timer-box">
+        <div><strong>المؤقت</strong><div class="timer-clock" id="timerClock">00:35</div></div>
+        <div class="timer-actions"><button id="timerStart" type="button">ابدأ</button><button id="timerReset" type="button">إعادة</button></div>
+      </div>
+      <div class="study-reader" id="speakingGuide"></div>
+    </section>
+
+    <section class="study-pane" id="study-grammar" role="tabpanel">
+      <div class="pane-head">
+        <h2>القواعد والأخطاء اللي تسرق الدرجة</h2>
+        <p class="lead">قواعد مختصرة وعالية الفائدة للكلام والكتابة مع أمثلة خطأ وصح.</p>
+      </div>
+      <div class="grammar-grid" id="grammarGrid"></div>
+    </section>
+
+    <section class="study-pane" id="study-tests" role="tabpanel">
+      <div class="pane-head">
+        <h2>اختبر نفسك</h2>
+        <p class="lead">اختر نوع الاختبار. الأسئلة تتغير في كل محاولة والنتيجة تنحفظ تلقائيا.</p>
+      </div>
+
+      <div class="test-stats">
+        <div><small>المحاولات</small><strong id="testAttempts">0</strong></div>
+        <div><small>أفضل مفردات</small><strong id="bestVocabScore">--</strong></div>
+        <div><small>أفضل شامل</small><strong id="bestMixedScore">--</strong></div>
+      </div>
+
+      <div class="test-mode-grid" id="testModeGrid">
+        <button class="test-mode active" type="button" data-test-mode="vocab">
+          <span>🔤</span><strong>اختبار المفردات</strong><small>10 أسئلة</small>
+        </button>
+        <button class="test-mode" type="button" data-test-mode="mixed">
+          <span>🎯</span><strong>اختبار شامل</strong><small>15 سؤالا</small>
+        </button>
+        <button class="test-mode" type="button" data-test-mode="writing">
+          <span>✍️</span><strong>اختبار الكتابة</strong><small>5 دقائق</small>
+        </button>
+        <button class="test-mode" type="button" data-test-mode="speaking">
+          <span>🎙️</span><strong>اختبار التحدث</strong><small>35 إلى 180 ثانية</small>
+        </button>
+      </div>
+
+      <div class="test-panel active" id="testPanelObjective">
+        <div class="test-start" id="objectiveStart">
+          <h3 id="objectiveTitle">اختبار المفردات</h3>
+          <p id="objectiveDescription">10 أسئلة عشوائية من الكلمات الموجودة في قسم المفردات.</p>
+          <button class="study-btn primary" id="startObjectiveTest" type="button">ابدأ الاختبار</button>
+        </div>
+        <div class="test-runner" id="objectiveRunner" hidden>
+          <div class="quiz-head">
+            <span id="quizProgress">1 من 10</span>
+            <span id="quizLiveScore">النتيجة 0</span>
+          </div>
+          <div class="quiz-bar"><i id="quizBar"></i></div>
+          <article class="quiz-card">
+            <small id="quizKind">اختر الإجابة الصحيحة</small>
+            <h3 id="quizQuestion"></h3>
+            <div class="quiz-choices" id="quizChoices"></div>
+            <div class="quiz-feedback" id="quizFeedback" aria-live="polite"></div>
+            <button class="study-btn primary" id="quizNext" type="button" hidden>السؤال التالي</button>
+          </article>
+        </div>
+        <div class="test-result" id="objectiveResult" hidden></div>
+      </div>
+
+      <div class="test-panel" id="testPanelWriting">
+        <div class="simulation-head">
+          <div>
+            <small>السؤال</small>
+            <div class="prompt-box" id="writingTestPrompt"></div>
+          </div>
+          <div class="simulation-clock" id="writingTestClock">05:00</div>
+        </div>
+        <textarea class="test-textarea" id="writingTestText" lang="en" dir="ltr" placeholder="ابدأ الكتابة هنا بعد تشغيل المؤقت"></textarea>
+        <div class="study-tools">
+          <button class="study-btn primary" id="writingTestStart" type="button">ابدأ الاختبار</button>
+          <button class="study-btn" id="writingTestFinish" type="button" disabled>أنهِ واعرض التقييم</button>
+          <button class="study-btn" id="writingTestNew" type="button">سؤال جديد</button>
+        </div>
+        <div id="writingTestResult"></div>
+      </div>
+
+      <div class="test-panel" id="testPanelSpeaking">
+        <div class="prompt-box" id="speakingTestPrompt"></div>
+        <div class="study-tools">
+          <button class="study-btn primary" type="button" data-test-speaking-seconds="35">35 ثانية</button>
+          <button class="study-btn" type="button" data-test-speaking-seconds="90">90 ثانية</button>
+          <button class="study-btn" type="button" data-test-speaking-seconds="180">180 ثانية</button>
+          <button class="study-btn" id="speakingTestNew" type="button">سؤال جديد</button>
+        </div>
+        <div class="timer-box">
+          <div><strong>وقت الإجابة</strong><div class="timer-clock" id="speakingTestClock">00:35</div></div>
+          <div class="timer-actions"><button id="speakingTestStart" type="button">ابدأ</button><button id="speakingTestReset" type="button">إعادة</button></div>
+        </div>
+        <div class="self-check" id="speakingSelfCheck" hidden>
+          <h3>قيّم إجابتك بصدق</h3>
+          <label><input type="checkbox"> جاوبت السؤال مباشرة</label>
+          <label><input type="checkbox"> ذكرت سببا واضحا</label>
+          <label><input type="checkbox"> أعطيت مثالا</label>
+          <label><input type="checkbox"> استخدمت كلمات ربط</label>
+          <label><input type="checkbox"> تكلمت بدون توقف طويل</label>
+          <strong id="speakingSelfScore">0 من 5</strong>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer class="study-footer">مركز مذاكرة ديولينجو 120 · تقدمك محفوظ في متصفحك</footer>
+<script src="./det-study.js"></script>
+</body>
+</html>
