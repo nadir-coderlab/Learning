@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مدرّب ديولينجو 90+</title>
+<meta name="description" content="مدرّب تفاعلي لاختبار Duolingo English Test: تمارين موقّتة لكل نوع سؤال، إملاء بالصوت، مدرّب كتابة ومحادثة، دروس ومفردات — كل شي في صفحة وحدة.">
+<meta name="theme-color" content="#0f766e">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ar_AR">
+<meta property="og:title" content="مدرّب ديولينجو 90+">
+<meta property="og:description" content="تمارين موقّتة لكل نوع سؤال، إملاء بالصوت، مدرّب كتابة ومحادثة، دروس ومفردات — للوصول إلى 90+ في Duolingo English Test.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --grad:linear-gradient(135deg,#0f766e 0%,#0d9488 50%,#22c55e 100%);
+  --grad-soft:linear-gradient(160deg,#f0fdf9 0%,#ecfdf5 55%,#f7fee7 100%);
+  --teal:#0f766e; --teal2:#0d9488; --green:#16a34a;
+  --ink:#14342f; --muted:#5f7d76; --card:#fff; --line:#d8ebe4; --soft:#e8f6f0; --chip:#f1f8f5;
+  --amber:#b45309; --amber-soft:#fef6e7; --red:#b91c1c; --red-soft:#fdeeec; --ok-soft:#dcfce7;
+  --radius:18px; --shadow:0 8px 24px rgba(15,118,110,.09);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:"Cairo","Segoe UI",Tahoma,sans-serif;background:var(--grad-soft);background-attachment:fixed;color:var(--ink);min-height:100vh;line-height:1.85;font-size:16px;padding-bottom:84px}
+.en{font-family:"Baloo 2","Cairo",sans-serif;direction:ltr;unicode-bidi:isolate;display:inline-block}
+.ltr{direction:ltr;text-align:left;unicode-bidi:isolate}
+a{color:var(--teal)}
+button{font-family:inherit;cursor:pointer}
+.wrap{max-width:860px;margin:0 auto;padding:0 14px}
+
+/* header */
+.top{background:var(--grad);color:#fff;padding:18px 0 14px;box-shadow:var(--shadow)}
+.top .wrap{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.top h1{font-size:22px;font-weight:900}
+.top .sub{font-size:13px;opacity:.92;font-weight:600}
+.top a.lnk{color:#fff;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:4px 14px;font-size:13px;font-weight:800;text-decoration:none}
+
+/* bottom tabs */
+.tabs{position:fixed;bottom:0;left:0;right:0;z-index:40;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+.tabs button{background:none;border:none;color:var(--muted);font-weight:800;font-size:11.5px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 6px;border-radius:10px;min-width:56px}
+.tabs button .ic{font-size:20px;line-height:1}
+.tabs button.on{color:var(--teal);background:var(--soft)}
+
+.view{display:none;padding-top:16px}
+.view.on{display:block}
+h2{font-size:21px;font-weight:900;margin:14px 0 6px}
+h3{font-size:16px;font-weight:800;margin:10px 0 6px}
+.lead{color:var(--muted);font-weight:600;font-size:14.5px;margin-bottom:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:12px 0;box-shadow:var(--shadow)}
+.note{border-radius:14px;padding:12px 16px;margin:12px 0;border:1px solid;font-weight:600;font-size:14.5px}
+.note b{display:block;font-weight:900;margin-bottom:2px}
+.note.g{background:var(--soft);border-color:var(--teal2);color:#134e46}
+.note.a{background:var(--amber-soft);border-color:#f0c26b;color:var(--amber)}
+.note.r{background:var(--red-soft);border-color:#eaa9a1;color:var(--red)}
+
+/* drill menu */
+.menu{display:grid;gap:10px;grid-template-columns:1fr}
+@media(min-width:560px){.menu{grid-template-columns:1fr 1fr}}
+.mi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;cursor:pointer;box-shadow:var(--shadow);display:flex;gap:12px;align-items:center;text-align:right;width:100%}
+.mi:hover{border-color:var(--teal2)}
+.mi .ic{font-size:26px;flex:none}
+.mi b{display:block;font-size:15px;font-weight:900}
+.mi small{display:block;color:var(--muted);font-size:12.5px;font-weight:600}
+.mi .best{margin-right:auto;flex:none;font-size:12px;font-weight:800;color:var(--teal);background:var(--soft);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+/* drill frame */
+.drill{background:var(--card);border:2px solid var(--teal2);border-radius:var(--radius);padding:16px;margin:12px 0;box-shadow:var(--shadow)}
+.dhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.dhead .t{font-weight:900;font-size:16px}
+.timer{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:22px;color:var(--teal);direction:ltr;min-width:60px;text-align:center}
+.timer.low{color:var(--red)}
+.tbar{height:6px;border-radius:999px;background:var(--chip);overflow:hidden;margin:6px 0 12px}
+.tbar i{display:block;height:100%;width:100%;background:var(--grad);transition:width .25s linear}
+.prog{font-size:12.5px;color:var(--muted);font-weight:700}
+.btn{background:var(--grad);color:#fff;border:none;border-radius:999px;padding:10px 22px;font-weight:800;font-size:15px;box-shadow:var(--shadow)}
+.btn.sm{padding:6px 16px;font-size:13px}
+.btn.ghost{background:#fff;color:var(--teal);border:1px solid var(--line);box-shadow:none}
+.btn.danger{background:#fff;color:var(--red);border:1px solid #eaa9a1;box-shadow:none}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.big{font-family:"Baloo 2",sans-serif;direction:ltr;font-size:34px;font-weight:800;text-align:center;padding:18px 0;letter-spacing:.02em}
+.yn{display:grid;grid-template-columns:1fr 1fr;gap:10px;direction:ltr}
+.yn button{padding:16px;border-radius:14px;border:2px solid var(--line);background:#fff;font-weight:900;font-size:20px}
+.yn button.yes{border-color:#22c55e;color:#166534}.yn button.no{border-color:#ef4444;color:#991b1b}
+.sent{direction:ltr;text-align:left;font-family:"Baloo 2",sans-serif;font-size:19px;line-height:1.9;padding:10px 12px;background:var(--chip);border-radius:12px;border:1px solid var(--line)}
+.sent .gap{display:inline-flex;align-items:baseline;gap:0;margin:0 3px}
+.sent .stem{font-weight:800;color:var(--teal)}
+.sent input{font-family:inherit;font-size:19px;border:none;border-bottom:2px solid var(--teal2);background:#fff;width:auto;letter-spacing:.35em;padding:0 4px;outline:none;direction:ltr}
+.sent input.ok{border-bottom-color:#22c55e;background:var(--ok-soft)}
+.sent input.bad{border-bottom-color:#ef4444;background:var(--red-soft)}
+.passage{direction:ltr;text-align:left;font-family:"Baloo 2",sans-serif;font-size:17px;line-height:2;padding:12px 14px;background:var(--chip);border-radius:12px;border:1px solid var(--line)}
+.passage select{font-family:inherit;font-size:15px;border:1px solid var(--teal2);border-radius:6px;padding:1px 4px;background:#fff;margin:0 2px}
+.passage select.ok{background:var(--ok-soft);border-color:#22c55e}.passage select.bad{background:var(--red-soft);border-color:#ef4444}
+.passage .miss{background:#fef08a;padding:0 4px;border-radius:4px;font-weight:700}
+.passage mark{background:#bbf7d0;padding:0 2px}
+textarea.ta{width:100%;min-height:150px;border:2px solid var(--line);border-radius:12px;padding:12px;font-family:"Baloo 2","Segoe UI",sans-serif;font-size:16px;line-height:1.7;direction:ltr;text-align:left;outline:none;resize:vertical}
+textarea.ta:focus{border-color:var(--teal2)}
+input.in{width:100%;border:2px solid var(--line);border-radius:10px;padding:8px 10px;font-family:"Baloo 2",sans-serif;font-size:16px;direction:ltr;text-align:left;outline:none}
+input.in:focus{border-color:var(--teal2)}
+.opts{display:grid;gap:8px;margin:10px 0}
+.opt{text-align:left;direction:ltr;background:#fff;border:2px solid var(--line);border-radius:12px;padding:10px 12px;font-family:"Baloo 2",sans-serif;font-size:15px;line-height:1.6}
+.opt.sel{border-color:var(--teal2);background:var(--soft)}
+.opt.ok{border-color:#22c55e;background:var(--ok-soft)}.opt.bad{border-color:#ef4444;background:var(--red-soft)}
+.wc{font-size:13px;font-weight:800;color:var(--muted);direction:ltr;text-align:right}
+.wc b{color:var(--teal)}.wc.hit b{color:var(--green)}
+.checks{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.checks span{font-size:12px;font-weight:800;border-radius:999px;padding:2px 10px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+.checks span.on{background:var(--ok-soft);border-color:#22c55e;color:#166534}
+.model{direction:ltr;text-align:left;font-family:"Baloo 2",sans-serif;font-size:15px;line-height:1.8;background:var(--soft);border:1px solid var(--teal2);border-radius:12px;padding:12px 14px;margin:8px 0}
+.arnote{font-size:14px;font-weight:600;color:#134e46;background:var(--chip);border-radius:10px;padding:8px 12px;margin:6px 0}
+.res{font-size:15px}
+.res .score{font-family:"Baloo 2",sans-serif;font-size:30px;font-weight:800;color:var(--teal);direction:ltr;text-align:center}
+.list{display:grid;gap:6px;margin:8px 0}
+.li{display:flex;gap:10px;align-items:flex-start;background:var(--chip);border-radius:10px;padding:8px 10px;font-size:14px}
+.li .w{font-family:"Baloo 2",sans-serif;font-weight:800;direction:ltr;min-width:110px}
+.li.ok{background:var(--ok-soft)}.li.bad{background:var(--red-soft)}
+.diff{direction:ltr;text-align:left;font-family:"Baloo 2",sans-serif;font-size:16px;line-height:1.9}
+.diff .m{background:#fecaca;text-decoration:line-through;padding:0 3px;border-radius:4px}
+.diff .x{background:#fde68a;padding:0 3px;border-radius:4px}
+.diff .o{background:#bbf7d0;padding:0 2px;border-radius:4px}
+.pill{display:inline-block;font-size:12px;font-weight:800;background:var(--soft);color:var(--teal);border-radius:999px;padding:2px 10px}
+.acc{border:1px solid var(--line);border-radius:14px;margin:8px 0;background:var(--card);overflow:hidden}
+.acc>button{width:100%;text-align:right;background:var(--chip);border:none;padding:12px 14px;font-weight:900;font-size:15px;display:flex;justify-content:space-between;align-items:center}
+.acc>div{display:none;padding:12px 14px}
+.acc.open>div{display:block}
+.acc.done>button::after{content:"✅"}
+.explain{white-space:pre-line;font-size:14.5px;font-weight:600}
+.fc{background:var(--card);border:2px solid var(--teal2);border-radius:18px;padding:22px;text-align:center;min-height:170px;display:flex;flex-direction:column;justify-content:center;gap:6px;cursor:pointer;box-shadow:var(--shadow)}
+.fc .w{font-family:"Baloo 2",sans-serif;font-size:30px;font-weight:800;direction:ltr}
+.fc .ar{font-size:20px;font-weight:900;color:var(--teal)}
+.fc .ex{direction:ltr;font-family:"Baloo 2",sans-serif;font-size:14px;color:var(--muted)}
+.themes{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.themes button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:3px 12px;font-size:12.5px;font-weight:800;color:var(--muted)}
+.themes button.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+.task{display:flex;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line);align-items:flex-start;cursor:pointer}
+.task input{appearance:none;flex:none;width:22px;height:22px;margin-top:4px;border-radius:7px;border:2px solid var(--line);background:#fff;position:relative;cursor:pointer}
+.task input:checked{background:var(--teal2);border-color:var(--teal2)}
+.task input:checked::after{content:"✓";position:absolute;inset:0;color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:14px}
+.task .ttl{font-weight:700;font-size:14.5px;display:block}
+.task .meta{font-size:12px;color:var(--muted);font-weight:700;display:block}
+.task.done .ttl{text-decoration:line-through;color:var(--muted)}
+.task a{font-size:12px;font-weight:800}
+.bar{height:8px;border-radius:999px;background:#e2f0ea;overflow:hidden;margin:6px 0}
+.bar i{display:block;height:100%;width:0;background:var(--grad);border-radius:999px;transition:width .3s}
+.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:10px 0}
+.stat div{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font-family:"Baloo 2",sans-serif;font-size:22px;color:var(--teal);direction:ltr}
+.stat small{font-size:12px;font-weight:700;color:var(--muted)}
+.hl-tip{font-size:13px;color:var(--muted);font-weight:700}
+.rec{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.rec .dot{width:12px;height:12px;border-radius:50%;background:#ef4444;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.2}}
+.transcript{direction:ltr;text-align:left;font-family:"Baloo 2",sans-serif;font-size:14px;color:var(--muted);background:var(--chip);border-radius:10px;padding:8px 10px;min-height:44px;margin:8px 0}
+audio{width:100%;margin:6px 0}
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 18px;border-radius:999px;font-weight:800;font-size:14px;display:none;z-index:60}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top"><div class="wrap">
+  <div><h1>🎯 مدرّب ديولينجو 90+</h1><div class="sub">كل التمارين هنا — ما تحتاج تفتح أي شي ثاني</div></div>
+  <a class="lnk" href="det.html">📋 الخطة والتريكات</a>
+</div></header>
+
+<div class="wrap">
+
+<!-- ======================= اليوم ======================= -->
+<section class="view on" id="v-home">
+  <div class="note a"><b>وضعك الحالي: 60–80 في التجريبي ≈ 70–75 حقيقي</b>الهدف الواقعي خلال 36 ساعة: <strong>90+</strong>. نص الدرجة كتابة ومحادثة، وهذي ترتفع بالطول والهيكل وعدم السكوت — مو بمستوى الإنجليزي. الأولوية بالترتيب: ① لا تترك فراغ أبدًا ② اكتب وتكلم أطول وبهيكل ③ الإملاء (نقاط سهلة) ④ الشكل والسرعة.</div>
+
+  <div class="card">
+    <h3>📊 تقدمك</h3>
+    <div class="stat" id="homeStats"></div>
+    <div class="bar"><i id="homeBar"></i></div>
+    <div class="prog" id="homeProg"></div>
+  </div>
+
+  <div class="card">
+    <h3>🎲 محاكاة مصغّرة (~25 دقيقة)</h3>
+    <div class="lead" style="margin:0 0 8px">8 تمارين متتالية من كل الأنواع بمؤقتاتها — تدرّبك على الانتقال السريع والتعب الذهني مثل الاختبار الحقيقي. سوّها مرة الليلة ومرة بكرة.</div>
+    <div class="row"><button class="btn" id="mockBtn">▶️ ابدأ المحاكاة</button></div>
+  </div>
+  <div class="card">
+    <h3>📖 كيف تستخدم المدرّب</h3>
+    <ul class="t">
+      <li>التبويبات تحت: قراءة · استماع · كتابة · محادثة · مهارات. كل تمرين بمؤقت الاختبار الحقيقي، وبعده تشوف الجواب أو نموذجًا بمستوى 90.</li>
+      <li>أفضل درجة لكل تمرين تنحفظ وتظهر بجانب اسمه. أي تمرين أقل من 70% أعده مرة ثانية.</li>
+      <li>صوت الإملاء والمحادثة من متصفحك — اسمح بالمايك أول مرة، واستخدم كروم للحصول على النص المحوّل وسرعة الكلام.</li>
+    </ul>
+  </div>
+
+  <h2>📅 خطة الـ36 ساعة</h2>
+  <p class="lead">علّم على اللي تخلصه. كل مهمة لها رابط يوديك للتمرين مباشرة.</p>
+  <div id="plan"></div>
+
+  <div class="note g"><b>نصيحة الشراء (مهمة بوضعك)</b>اشترِ <strong>باقة الاختبارين ($118)</strong>. إذا جبت 85–90 بأول محاولة، عندك 21 يوم للمحاولة الثانية بعد نتيجتك — وتذاكر من نفس المدرّب. الهدف 120 يصير ممكن بالمحاولة الثانية مو الأولى.</div>
+</section>
+
+<!-- ======================= قراءة ======================= -->
+<section class="view" id="v-read">
+  <h2>📖 القراءة</h2>
+  <p class="lead">القراءة = 25% من درجتك. ابدأ بالكلمات ثم الفراغات ثم الفقرة، والقطعة التفاعلية آخر شي.</p>
+  <div class="menu" id="readMenu"></div>
+  <div id="readDrill"></div>
+</section>
+
+<!-- ======================= استماع ======================= -->
+<section class="view" id="v-listen">
+  <h2>🎧 الاستماع</h2>
+  <p class="lead">الإملاء أسهل نقاط تجيبها. الصوت من متصفحك (نطق آلي واضح بلهجة أمريكية) — شغّل السبيكر مو السماعات، مثل الاختبار.</p>
+  <div class="menu" id="listenMenu"></div>
+  <div id="listenDrill"></div>
+</section>
+
+<!-- ======================= كتابة ======================= -->
+<section class="view" id="v-write">
+  <h2>✍️ الكتابة</h2>
+  <p class="lead">25% من درجتك، وكلها مهام ثابتة. القاعدة: طول + هيكل + جواب على كل سؤال فرعي. المدرّب يعدّ كلماتك ويفحص «إشارات الدرجة» وأنت تكتب.</p>
+  <div class="note r"><b>عطّل التصحيح التلقائي بجهازك الحين</b>لأنه ممنوع بالاختبار — تدرّب بدونه من الحين عشان أخطاؤك الحقيقية تبان لك.</div>
+  <div class="menu" id="writeMenu"></div>
+  <div id="writeDrill"></div>
+</section>
+
+<!-- ======================= محادثة ======================= -->
+<section class="view" id="v-speak">
+  <h2>🗣️ المحادثة</h2>
+  <p class="lead">25% من درجتك. المدرّب يسجّل صوتك، ويحوّله لنص ويحسب سرعتك (كلمة/دقيقة) إذا متصفحك يدعم (كروم). الهدف: 100–130 كلمة/دقيقة بلا سكتات، وتعبّي الوقت كله.</p>
+  <div class="menu" id="speakMenu"></div>
+  <div id="speakDrill"></div>
+</section>
+
+<!-- ======================= مهارات ======================= -->
+<section class="view" id="v-skills">
+  <h2>📚 مهارات B1 → B2</h2>
+  <p class="lead">10 دروس صغيرة (5–8 دقائق) بالعربي مع تمارين، وبطاقات مفردات بالمعنى والمثال. هذي «الإشارات» اللي ترفعك من 70 إلى 90.</p>
+  <div class="menu" id="skillsMenu"></div>
+  <div id="skillsDrill"></div>
+</section>
+
+</div>
+
+<nav class="tabs">
+  <button data-v="home" class="on"><span class="ic">🏠</span>اليوم</button>
+  <button data-v="read"><span class="ic">📖</span>قراءة</button>
+  <button data-v="listen"><span class="ic">🎧</span>استماع</button>
+  <button data-v="write"><span class="ic">✍️</span>كتابة</button>
+  <button data-v="speak"><span class="ic">🗣️</span>محادثة</button>
+  <button data-v="skills"><span class="ic">📚</span>مهارات</button>
+</nav>
+<div id="toast"></div>
+
+<script id="banks" type="application/json">__DET_BANKS__</script>
+<script>
+/* =========================================================
+   أدوات عامة
+   ========================================================= */
+const BANKS = JSON.parse(document.getElementById('banks').textContent);
+const $ = (id) => document.getElementById(id);
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pick = (a, n) => shuffle(a).slice(0, n);
+const words = (s) => (s.trim().match(/[A-Za-z0-9'’-]+/g) || []);
+const wcount = (s) => words(s).length;
+const norm = (s) => s.toLowerCase().replace(/[’‘]/g, "'").replace(/[^a-z0-9' ]+/g, ' ').replace(/\s+/g, ' ').trim();
+
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+const SK = 'detTrainer.v1';
+let S = store.get(SK, { best: {}, done: {}, vocab: {}, lessons: {}, plan: {} });
+const save = () => store.set(SK, S);
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', 1800); }
+function setBest(key, score) { const b = S.best[key]; if (b == null || score > b) S.best[key] = score; S.done[key] = (S.done[key] || 0) + 1; save(); renderHome(); }
+function bestBadge(key) { const b = S.best[key]; return b == null ? '' : `<span class="best">أفضل: ${b}%</span>`; }
+
+/* المؤقت */
+class Timer {
+  constructor(sec, elTime, elBar, onEnd) { this.total = sec; this.left = sec; this.elTime = elTime; this.elBar = elBar; this.onEnd = onEnd; this.h = null; this.render(); }
+  start() { if (this.h) return; this.h = setInterval(() => { this.left--; this.render(); if (this.left <= 0) { this.stop(); this.onEnd && this.onEnd(); } }, 1000); }
+  stop() { clearInterval(this.h); this.h = null; }
+  render() { const m = Math.floor(this.left / 60), s = this.left % 60; if (this.elTime) { this.elTime.textContent = `${m}:${String(s).padStart(2, '0')}`; this.elTime.classList.toggle('low', this.left <= 10); } if (this.elBar) this.elBar.style.width = (100 * this.left / this.total) + '%'; }
+}
+let activeTimer = null;
+function useTimer(t) { if (activeTimer) activeTimer.stop(); activeTimer = t; return t; }
+
+/* النطق الآلي */
+const TTS = {
+  voice: null,
+  load() { const vs = speechSynthesis.getVoices(); const en = vs.filter(v => /^en[-_]/i.test(v.lang)); const pref = en.find(v => /en[-_]US/i.test(v.lang) && /google|natural|premium|samantha|zira|aria|jenny/i.test(v.name)) || en.find(v => /en[-_]US/i.test(v.lang)) || en[0]; TTS.voice = pref || null; },
+  speak(text, rate = 0.92) { return new Promise((res) => { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; if (TTS.voice) u.voice = TTS.voice; u.rate = rate; u.onend = res; u.onerror = res; speechSynthesis.speak(u); } catch (e) { res(); } }); },
+  ok() { return 'speechSynthesis' in window; }
+};
+if (TTS.ok()) { TTS.load(); speechSynthesis.onvoiceschanged = TTS.load; }
+
+/* التسجيل الصوتي + التحويل لنص */
+const Rec = {
+  stream: null, mr: null, chunks: [], sr: null, text: '', on: false, startedAt: 0,
+  async start(onText) {
+    this.text = ''; this.chunks = []; this.on = true; this.startedAt = Date.now();
+    try { this.stream = await navigator.mediaDevices.getUserMedia({ audio: true }); this.mr = new MediaRecorder(this.stream); this.mr.ondataavailable = (e) => this.chunks.push(e.data); this.mr.start(); } catch (e) { this.mr = null; toast('ما قدرت أوصل للمايك — التسجيل معطّل، بس المؤقت شغال'); }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SR) {
+      const sr = new SR(); sr.lang = 'en-US'; sr.continuous = true; sr.interimResults = true;
+      sr.onresult = (e) => { let fin = '', tmp = ''; for (let i = 0; i < e.results.length; i++) { const r = e.results[i]; if (r.isFinal) fin += r[0].transcript + ' '; else tmp += r[0].transcript + ' '; } this.text = fin; onText && onText(fin + tmp); };
+      sr.onend = () => { if (this.on) { try { sr.start(); } catch (e) {} } };
+      try { sr.start(); this.sr = sr; } catch (e) { this.sr = null; }
+    }
+  },
+  stop() {
+    this.on = false;
+    return new Promise((res) => {
+      const dur = (Date.now() - this.startedAt) / 1000;
+      if (this.sr) { try { this.sr.stop(); } catch (e) {} }
+      const finish = (url) => { if (this.stream) this.stream.getTracks().forEach(t => t.stop()); res({ url, dur, text: this.text }); };
+      if (this.mr && this.mr.state !== 'inactive') { this.mr.onstop = () => finish(URL.createObjectURL(new Blob(this.chunks, { type: this.mr.mimeType || 'audio/webm' }))); this.mr.stop(); } else finish(null);
+    });
+  }
+};
+
+/* التنقل */
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => showView(b.dataset.v)));
+function showView(v) {
+  document.querySelectorAll('.view').forEach(x => x.classList.toggle('on', x.id === 'v-' + v));
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x.dataset.v === v));
+  window.scrollTo({ top: 0 });
+  if (activeTimer) { activeTimer.stop(); activeTimer = null; }
+  if (v === 'home') renderHome();
+}
+function go(view, drill) { showView(view); if (drill) { const fn = DRILLS[drill]; fn && fn(); } }
+window.addEventListener('hashchange', () => routeHash());
+function routeHash() { const h = location.hash.replace('#', ''); if (!h) return; const [v, d] = h.split('/'); go(v, d); }
+
+/* =========================================================
+   الخطة (36 ساعة)
+   ========================================================= */
+const PLAN = [
+  { id: 'n', name: 'الليلة — الأساس (4–5 ساعات)', goal: 'اعرف الشكل، ثبّت «لا فراغ»، وابدأ الإنتاج', tasks: [
+    { id: 'n1', t: 'اقرأ صفحة الخطة كاملة مرة وحدة (الحقائق الثلاث + القواعد الذهبية + تريكات الأقسام)', m: '40 د', link: 'det.html' },
+    { id: 'n2', t: 'درس 1 الروابط + درس 7 الأدوات a/the — مع التمارين', m: '20 د', go: 'skills/lessons' },
+    { id: 'n3', t: 'Read and Select: 3 جولات (54 كلمة) — الهدف 75%+', m: '15 د', go: 'read/rs' },
+    { id: 'n4', t: 'Fill in the Blanks: جولتان — الهدف 6/10', m: '15 د', go: 'read/fib' },
+    { id: 'n5', t: 'Listen and Type: 12 جملة — الهدف 80% كلمات صح', m: '25 د', go: 'listen/lt' },
+    { id: 'n6', t: 'Write About the Photo ×3 (صور من جوالك) — 40+ كلمة لكل صورة', m: '15 د', go: 'write/wp' },
+    { id: 'n7', t: 'Speak About the Photo ×2 — 90 ثانية كاملة بلا سكوت', m: '10 د', go: 'speak/sp' },
+    { id: 'n8', t: 'Read and Complete: فقرتان', m: '15 د', go: 'read/rc' },
+    { id: 'n9', t: 'مفردات: 40 بطاقة (التعليم + التقنية) — علّم اللي ما تعرفها', m: '20 د', go: 'skills/vocab' },
+    { id: 'n10', t: 'Writing Sample واحد كامل (5 د، 120+ كلمة) ثم قارن بالنموذج', m: '10 د', go: 'write/ws' },
+    { id: 'n11', t: 'نم 6 ساعات على الأقل — الدماغ يثبّت اللي ذاكرته وأنت نايم', m: '💤' },
+  ]},
+  { id: 'd', name: 'بكرة — الإنتاج والمحاكاة (7–8 ساعات)', goal: 'ثبّت نص الدرجة (كتابة + محادثة) ثم محاكاة كاملة', tasks: [
+    { id: 'd1', t: 'إحماء: Read and Select جولة + Listen and Type 6 جمل', m: '15 د', go: 'read/rs' },
+    { id: 'd2', t: 'درس 3 (المضارع التام) + درس 4 (الشرطية) + درس 5 (المبني للمجهول) — هذي إشارات 90+', m: '30 د', go: 'skills/lessons' },
+    { id: 'd3', t: 'Interactive Writing كامل (5+3 د) ثم اقرأ نموذج 90 والترقية', m: '15 د', go: 'write/iw' },
+    { id: 'd4', t: 'Writing Sample ×2 بمواضيع مختلفة — 120+ كلمة وجواب على كل سؤال فرعي', m: '15 د', go: 'write/ws' },
+    { id: 'd5', t: 'Read Then Speak ×3 — سجّل واسمع نفسك: هل عبّيت 90 ثانية؟', m: '20 د', go: 'speak/rts' },
+    { id: 'd6', t: 'Interactive Speaking: مجموعتان (12 سؤال) بصيغة OREO', m: '20 د', go: 'speak/is' },
+    { id: 'd7', t: 'Interactive Reading: قطعتان بالمؤقت', m: '20 د', go: 'read/ir' },
+    { id: 'd8', t: 'Interactive Listening: سيناريوهان + الملخص', m: '20 د', go: 'listen/il' },
+    { id: 'd9', t: 'استراحة حقيقية 45 دقيقة (أكل، مشي) — التعب الذهني أكبر سارق درجات', m: '☕' },
+    { id: 'd10', t: 'Speaking Sample ×2 (3 دقائق كاملة) + جهّز قصصك الست كنقاط', m: '20 د', go: 'speak/ss' },
+    { id: 'd11', t: 'مفردات: راجع بطاقات «أراجعها» + 40 بطاقة جديدة (البيئة + العمل)', m: '20 د', go: 'skills/vocab' },
+    { id: 'd12', t: 'الاختبار التجريبي الرسمي مرة ثانية (الاستثناء الوحيد خارج المدرّب) — قارن بـ60–80', m: '45 د', link: 'https://englishtest.duolingo.com/practice' },
+    { id: 'd13', t: 'راجع أخطاءك: كل درجة أقل من 70% بالمدرّب أعد تمرينها مرة', m: '30 د' },
+    { id: 'd14', t: 'درس 8 (الجمع و-s) + درس 9 (الأسئلة) — لأخطاء الإملاء', m: '15 د', go: 'skills/lessons' },
+    { id: 'd15', t: 'بروفة الغرفة والجوال والكاميرا الثانية (قسم قوانين المراقبة بصفحة الخطة)', m: '30 د', link: 'det.html#proctor' },
+    { id: 'd16', t: 'نوم أو قيلولة 90 دقيقة على الأقل قبل الاختبار — لا تدخل الاختبار وأنت ساهر', m: '💤' },
+  ]},
+  { id: 'x', name: 'قبل الاختبار بساعة', goal: 'روتين ما قبل البدء + إحماء خفيف', tasks: [
+    { id: 'x1', t: 'إحماء 15 دقيقة فقط: Listen and Type 4 جمل + تكلم بالإنجليزي دقيقتين عن يومك', m: '15 د', go: 'listen/lt' },
+    { id: 'x2', t: 'أعد تشغيل الكمبيوتر واقفل كل البرامج وعطّل التصحيح التلقائي', m: 'إلزامي' },
+    { id: 'x3', t: 'الجوال: شاحن + عدم إزعاج + حامل ثابت ~75 سم يصور الشاشة والكيبورد وجسمك', m: 'إلزامي' },
+    { id: 'x4', t: 'المكتب فاضي إلا الكمبيوتر والجوال والهوية الأصلية · حمام · مويه', m: 'إلزامي' },
+    { id: 'x5', t: 'تذكير أخير: لا فراغ أبدًا · املأ كل ثانية كلام · 120+ كلمة بالمقالات · عيونك على الشاشة', m: '🎯' },
+  ]},
+];
+function renderPlan() {
+  const box = $('plan'); box.innerHTML = '';
+  PLAN.forEach(day => {
+    const c = el('div', 'card');
+    const done = day.tasks.filter(t => S.plan[t.id]).length;
+    c.innerHTML = `<h3>${day.name}</h3><div class="lead" style="margin:0 0 4px">${day.goal}</div><div class="bar"><i style="width:${Math.round(100 * done / day.tasks.length)}%"></i></div>`;
+    day.tasks.forEach(t => {
+      const row = el('label', 'task' + (S.plan[t.id] ? ' done' : ''));
+      const link = t.go ? `<a href="#${t.go}">افتح التمرين ←</a>` : t.link ? `<a href="${t.link}" ${t.link.startsWith('http') ? 'target="_blank" rel="noopener"' : ''}>افتح ←</a>` : '';
+      row.innerHTML = `<input type="checkbox" ${S.plan[t.id] ? 'checked' : ''}><span><span class="ttl">${t.t}</span><span class="meta">${t.m} ${link}</span></span>`;
+      const cb = row.querySelector('input');
+      cb.addEventListener('change', () => { S.plan[t.id] = cb.checked; save(); renderPlan(); renderHome(); });
+      row.querySelector('a')?.addEventListener('click', (e) => e.stopPropagation());
+      c.appendChild(row);
+    });
+    box.appendChild(c);
+  });
+}
+function renderHome() {
+  const all = PLAN.flatMap(d => d.tasks); const done = all.filter(t => S.plan[t.id]).length;
+  $('homeBar').style.width = Math.round(100 * done / all.length) + '%';
+  $('homeProg').textContent = `${done} من ${all.length} مهمة بالخطة`;
+  const keys = Object.keys(S.best);
+  const avg = keys.length ? Math.round(keys.reduce((a, k) => a + S.best[k], 0) / keys.length) : 0;
+  const sessions = Object.values(S.done).reduce((a, b) => a + b, 0);
+  const known = Object.values(S.vocab).filter(v => v === 'know').length;
+  const lessons = Object.keys(S.lessons).length;
+  $('homeStats').innerHTML = `<div><b>${sessions}</b><small>جلسات تدريب</small></div><div><b>${avg}%</b><small>متوسط أفضل درجاتك</small></div><div><b>${known}</b><small>مفردة تعرفها</small></div><div><b>${lessons}/10</b><small>دروس مكتملة</small></div>`;
+}
+
+/* =========================================================
+   القوائم
+   ========================================================= */
+function menu(boxId, items) {
+  const box = $(boxId); box.innerHTML = '';
+  items.forEach(it => { const b = el('button', 'mi'); b.innerHTML = `<span class="ic">${it.ic}</span><span><b>${it.t}</b><small>${it.s}</small></span>${bestBadge(it.key)}`; b.addEventListener('click', () => { location.hash = it.hash; }); box.appendChild(b); });
+}
+function renderMenus() {
+  menu('readMenu', [
+    { ic: '🔤', t: 'Read and Select', s: '18 كلمة × 5 ثوانٍ — حقيقية أم وهمية؟', key: 'rs', hash: 'read/rs' },
+    { ic: '✏️', t: 'Fill in the Blanks', s: '10 جمل × 20 ثانية — كمّل نهاية الكلمة', key: 'fib', hash: 'read/fib' },
+    { ic: '🧩', t: 'Read and Complete', s: 'فقرة مثقوبة × 3 دقائق', key: 'rc', hash: 'read/rc' },
+    { ic: '📄', t: 'Interactive Reading', s: 'قطعة + 6 أسئلة × 7–8 دقائق', key: 'ir', hash: 'read/ir' },
+  ]);
+  menu('listenMenu', [
+    { ic: '⌨️', t: 'Listen and Type', s: '6 جمل × 60 ثانية — 3 تشغيلات', key: 'lt', hash: 'listen/lt' },
+    { ic: '💬', t: 'Interactive Listening', s: 'سيناريو جامعي + محادثة + ملخص 75 ث', key: 'il', hash: 'listen/il' },
+  ]);
+  menu('writeMenu', [
+    { ic: '🖼️', t: 'Write About the Photo', s: '60 ثانية — الهدف 40+ كلمة', key: 'wp', hash: 'write/wp' },
+    { ic: '📝', t: 'Interactive Writing', s: '5 دقائق + 3 دقائق — 110 + 80 كلمة', key: 'iw', hash: 'write/iw' },
+    { ic: '📜', t: 'Writing Sample', s: '5 دقائق — الهدف 120+ كلمة', key: 'ws', hash: 'write/ws' },
+    { ic: '🗒️', t: 'Summarize the Conversation', s: '75 ثانية — 3 جمل بالماضي', key: 'sum', hash: 'write/sum' },
+  ]);
+  menu('speakMenu', [
+    { ic: '🖼️', t: 'Speak About the Photo', s: '20 ث تحضير + 90 ث كلام', key: 'sp', hash: 'speak/sp' },
+    { ic: '📖', t: 'Read Then Speak', s: '20 ث + 90 ث — جاوب كل نقطة', key: 'rts', hash: 'speak/rts' },
+    { ic: '🤖', t: 'Interactive Speaking', s: '6 أسئلة × 35 ث — تسمع السؤال مرة وحدة', key: 'is', hash: 'speak/is' },
+    { ic: '🎥', t: 'Speaking Sample', s: '30 ث + 3 دقائق — يشوفه مسؤول القبول', key: 'ss', hash: 'speak/ss' },
+  ]);
+  menu('skillsMenu', [
+    { ic: '🎓', t: 'الدروس العشرة', s: 'قواعد B1→B2 بالعربي مع تمارين', key: 'lessons', hash: 'skills/lessons' },
+    { ic: '🃏', t: 'بطاقات المفردات', s: `${(BANKS.grammar_vocab?.vocab || []).length} كلمة بالمعنى والمثال`, key: 'vocab', hash: 'skills/vocab' },
+    { ic: '🧱', t: 'العبارات الآمنة', s: 'بدايات وروابط وعبارات إنقاذ (أقل من 5 كلمات)', key: 'frames', hash: 'skills/frames' },
+  ]);
+}
+
+/* إطار تمرين */
+function frame(boxId, title, sec, onEnd) {
+  const box = $(boxId); box.innerHTML = '';
+  const d = el('div', 'drill');
+  d.innerHTML = `<div class="dhead"><div class="t">${title}</div><div class="timer" id="tm"></div></div><div class="tbar"><i id="tb"></i></div><div id="body"></div>`;
+  box.appendChild(d); d.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const t = sec ? useTimer(new Timer(sec, d.querySelector('#tm'), d.querySelector('#tb'), onEnd)) : null;
+  if (!sec) { d.querySelector('#tm').style.display = 'none'; d.querySelector('.tbar').style.display = 'none'; }
+  return { body: d.querySelector('#body'), timer: t, box: d };
+}
+function result(body, score, title, extra) {
+  body.innerHTML = `<div class="res"><div class="score">${score}%</div><div style="text-align:center;font-weight:800">${title}</div></div>` + (extra || '');
+}
+function again(body, fn, label) {
+  const r = el('div', 'row');
+  if (MOCK.queue.length) { const n = el('button', 'btn', `➡️ التالي بالمحاكاة (${MOCK.queue.length} متبقي)`); n.addEventListener('click', () => { const [v, k] = MOCK.queue.shift(); location.hash = v + '/' + k; }); r.appendChild(n); }
+  else if (MOCK.on) { MOCK.on = false; r.appendChild(el('div', 'note g', '<b>انتهت المحاكاة المصغّرة 🎉</b>ارجع لتبويب «اليوم» وشوف أفضل درجاتك، وأعد أي تمرين نزل عن 70%.')); }
+  const b = el('button', 'btn' + (MOCK.queue.length ? ' ghost sm' : ''), label || '🔄 جولة جديدة'); b.addEventListener('click', fn); r.appendChild(b); body.appendChild(r);
+}
+const MOCK = { on: false, queue: [] };
+function startMock() {
+  MOCK.on = true; MOCK.queue = [['read', 'fib'], ['listen', 'lt'], ['read', 'rc'], ['write', 'wp'], ['speak', 'sp'], ['read', 'ir'], ['write', 'sum']];
+  toast('محاكاة مصغّرة: 8 تمارين متتالية (~25 دقيقة)'); location.hash = 'read/rs';
+}
+
+/* =========================================================
+   القراءة
+   ========================================================= */
+const DRILLS = {};
+
+DRILLS.rs = function () {
+  const real = pick(BANKS.readselect.real, 10).map(x => ({ ...x, real: true }));
+  const fake = pick(BANKS.readselect.fake, 8).map(x => ({ ...x, real: false }));
+  const items = shuffle(real.concat(fake));
+  let i = 0, right = 0; const log = [];
+  const f = frame('readDrill', '🔤 Read and Select', 0);
+  let t = null;
+  function show() {
+    if (i >= items.length) return finish();
+    const it = items[i];
+    f.body.innerHTML = `<div class="prog">الكلمة ${i + 1} من ${items.length}</div><div class="tbar"><i id="wb"></i></div><div class="big">${esc(it.w)}</div><div style="text-align:center;font-weight:700;color:var(--muted)">Is this a real English word?</div><div class="yn"><button class="no" data-a="0">✗ No</button><button class="yes" data-a="1">✓ Yes</button></div><div class="hl-tip" style="text-align:center;margin-top:8px">لوحة المفاتيح: Y = نعم · N = لا</div>`;
+    let left = 50; const bar = f.body.querySelector('#wb');
+    t = useTimer({ stop() { clearInterval(this.h); }, h: setInterval(() => { left--; bar.style.width = (2 * left) + '%'; if (left <= 0) answer(null); }, 100) });
+    f.body.querySelectorAll('.yn button').forEach(b => b.addEventListener('click', () => answer(b.dataset.a === '1')));
+  }
+  function answer(a) {
+    t && t.stop(); const it = items[i]; const ok = a === it.real; if (ok) right++;
+    log.push({ it, a, ok }); i++; show();
+  }
+  function finish() {
+    const sc = Math.round(100 * right / items.length); setBest('rs', sc);
+    const rows = log.map(l => `<div class="li ${l.ok ? 'ok' : 'bad'}"><span class="w">${esc(l.it.w)}</span><span>${l.it.real ? '✓ حقيقية — ' + esc(l.it.ar) : '✗ وهمية — ' + esc(l.it.why_ar)}${l.a == null ? ' <span class="pill">ما جاوبت (تحسب غلط)</span>' : ''}</span></div>`).join('');
+    result(f.body, sc, `${right} من ${items.length}`, `<div class="arnote">القاعدة: كلمة عمرك ما شفتها = No. ما تعرف؟ اضغط أي شي قبل ما ينتهي الوقت — الفراغ يحسب غلط.</div><div class="list">${rows}</div>`);
+    again(f.body, DRILLS.rs);
+  }
+  document.onkeydown = (e) => { if (!f.box.isConnected) { document.onkeydown = null; return; } if (e.key === 'y' || e.key === 'Y') answer(true); if (e.key === 'n' || e.key === 'N') answer(false); };
+  show();
+};
+
+DRILLS.fib = function () {
+  const items = pick(BANKS.fib.items, 10); let i = 0, right = 0; const log = [];
+  const f = frame('readDrill', '✏️ Fill in the Blanks', 0);
+  function show() {
+    if (i >= items.length) return finish();
+    const it = items[i]; const miss = it.answer.length - it.stem.length;
+    const html = esc(it.sentence).replace(esc(it.answer), `<span class="gap"><span class="stem">${esc(it.stem)}</span><input id="g" maxlength="${miss}" size="${miss}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${'_'.repeat(miss)}"></span>`);
+    f.body.innerHTML = `<div class="prog">الجملة ${i + 1} من ${items.length} · <span class="timer" id="t2" style="font-size:16px"></span></div><div class="tbar"><i id="b2"></i></div><div class="sent">${html}</div><div class="hl-tip" style="margin-top:6px">عدد الفراغات = عدد الحروف الناقصة (${miss}). اضغط Enter للتحقق.</div><div class="row"><button class="btn sm" id="chk">تحقق</button></div>`;
+    const inp = f.body.querySelector('#g'); inp.focus();
+    const tm = useTimer(new Timer(20, f.body.querySelector('#t2'), f.body.querySelector('#b2'), () => answer(inp.value)));
+    tm.start();
+    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') answer(inp.value); });
+    f.body.querySelector('#chk').addEventListener('click', () => answer(inp.value));
+    function answer(v) { tm.stop(); const guess = (it.stem + (v || '')).toLowerCase(); const ok = guess === it.answer.toLowerCase(); if (ok) right++; log.push({ it, guess, ok }); i++; show(); }
+  }
+  function finish() {
+    const sc = Math.round(100 * right / items.length); setBest('fib', sc);
+    const rows = log.map(l => `<div class="li ${l.ok ? 'ok' : 'bad'}"><span class="w">${esc(l.it.answer)}</span><span>${l.ok ? '✓' : 'كتبت: <b class="en">' + esc(l.guess) + '</b> · '}${esc(l.it.hint_ar)} — <em>${esc(l.it.clue_ar)}</em></span></div>`).join('');
+    result(f.body, sc, `${right} من ${items.length}`, `<div class="list">${rows}</div>`); again(f.body, DRILLS.fib);
+  }
+  show();
+};
+
+DRILLS.rc = function () {
+  const p = pick(BANKS.readcomplete.passages, 1)[0];
+  const f = frame('readDrill', '🧩 Read and Complete', 180, () => check());
+  const gaps = []; let n = 0;
+  const html = esc(p.text).replace(/\{([^}]+)\}/g, (m, w) => { const stem = w.slice(0, Math.floor(w.length / 2)); const miss = w.length - stem.length; gaps.push({ w, stem, miss, id: 'rc' + (n++) }); return `<span class="gap"><span class="stem">${esc(stem)}</span><input id="${'rc' + (n - 1)}" maxlength="${miss}" size="${miss}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${'_'.repeat(miss)}"></span>`; });
+  f.body.innerHTML = `<div class="prog">${gaps.length} كلمات ناقصة · المستوى ${esc(p.level)}</div><div class="passage"><b>${esc(p.title)}</b><br>${html}</div><div class="hl-tip" style="margin-top:6px">اقرأ العنوان وأول وآخر جملة أولًا، عبّي السهل، ودوّر الكلمة مكتوبة بمكان ثاني. لا تترك فراغًا.</div><div class="row"><button class="btn" id="chk">تحقق</button></div>`;
+  f.timer.start();
+  f.body.querySelector('#chk').addEventListener('click', check);
+  let done = false;
+  function check() {
+    if (done) return; done = true; f.timer.stop(); let right = 0;
+    gaps.forEach(g => { const inp = $(g.id); const ok = (g.stem + inp.value).toLowerCase() === g.w.toLowerCase(); if (ok) right++; inp.classList.add(ok ? 'ok' : 'bad'); inp.disabled = true; if (!ok) inp.value = g.w.slice(g.stem.length); });
+    const sc = Math.round(100 * right / gaps.length); setBest('rc', sc);
+    const r = el('div'); r.innerHTML = `<div class="res"><div class="score">${sc}%</div><div style="text-align:center;font-weight:800">${right} من ${gaps.length} — الحروف الحمراء هي الصح اللي فاتك</div></div><div class="arnote">${esc(p.gist_ar)}</div>`;
+    f.body.querySelector('.row').replaceWith(r); again(f.body, DRILLS.rc, '🔄 فقرة جديدة');
+  }
+};
+
+DRILLS.ir = function () {
+  const s = pick(BANKS.ireading.sets, 1)[0];
+  const gaps = []; let gi = 0;
+  const p1html = esc(s.part1).replace(/\{([^}]+)\}/g, (m, body) => { const o = body.split('|'); const id = 'ir' + (gi++); gaps.push({ id, correct: o[0], opts: shuffle(o) }); return `<select id="${id}"><option value="">…</option>${gaps[gaps.length - 1].opts.map(x => `<option>${esc(x)}</option>`).join('')}</select>`; });
+  const secs = gaps.length >= 6 ? 480 : 420;
+  const f = frame('readDrill', '📄 Interactive Reading', secs, () => { toast('انتهى الوقت — الأسئلة الباقية تحسب غلط'); finish(); });
+  f.timer.start();
+  const scores = { gaps: 0, missing: 0, hl: [0, 0], idea: 0, title: 0 };
+  const fullP1 = s.part1.replace(/\{([^}]+)\}/g, (m, b) => b.split('|')[0]);
+  const fullP2 = s.part2.replace('[[MISSING]]', s.missing_options[s.missing_correct]);
+  const full = fullP1 + ' ' + fullP2;
+  let step = 0;
+  const steps = [
+    () => { f.body.innerHTML = `<div class="prog">1/6 · Complete the Sentences — اختر الكلمة الصحيحة لكل فراغ</div><div class="passage"><b>${esc(s.title)}</b><br>${p1html}</div><div class="row"><button class="btn" id="nx">التالي</button></div>`; f.body.querySelector('#nx').onclick = () => { let r = 0; gaps.forEach(g => { const sel = $(g.id); const ok = sel.value === g.correct; sel.classList.add(ok ? 'ok' : 'bad'); if (ok) r++; }); scores.gaps = r / gaps.length; setTimeout(next, 900); }; },
+    () => { const p2 = esc(s.part2).replace('[[MISSING]]', '<span class="miss" id="ms">[ … الجملة الناقصة … ]</span>'); f.body.innerHTML = `<div class="prog">2/6 · Complete the Passage — اختر الجملة الناقصة (تظهر مكانها لما تضغطها)</div><div class="passage">${esc(fullP1)}<br><br>${p2}</div><div class="opts" id="op"></div><div class="row"><button class="btn" id="nx" disabled>التالي</button></div>`; let chosen = -1; s.missing_options.forEach((o, k) => { const b = el('button', 'opt', esc(o)); b.onclick = () => { chosen = k; f.body.querySelectorAll('.opt').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); $('ms').textContent = o; $('nx').disabled = false; }; $('op').appendChild(b); }); $('nx').onclick = () => { scores.missing = chosen === s.missing_correct ? 1 : 0; f.body.querySelectorAll('.opt')[s.missing_correct].classList.add('ok'); if (chosen !== s.missing_correct) f.body.querySelectorAll('.opt')[chosen].classList.add('bad'); setTimeout(next, 1200); }; },
+    () => hl(0), () => hl(1),
+    () => choose('5/6 · Identify the Idea — أي جملة تعبّر عن فكرة القطعة كلها؟', s.idea_options, s.idea_correct, 'idea'),
+    () => choose('6/6 · Title the Passage — أفضل عنوان', s.title_options, s.title_correct, 'title'),
+  ];
+  function hl(k) {
+    const q = s.highlight[k];
+    f.body.innerHTML = `<div class="prog">${3 + k}/6 · Highlight the Answer — ظلّل بإصبعك/الماوس الجزء اللي يجاوب السؤال ثم اضغط «تحقق»</div><div class="sent" style="margin-bottom:8px"><b>${esc(q.q)}</b></div><div class="passage" id="ptx">${esc(full)}</div><div class="hl-tip">ظلّل العبارة المجيبة فقط، مو الفقرة كلها. تظليل أوسع شوي = درجة جزئية؛ فقرة كاملة = صفر.</div><div class="row"><button class="btn" id="nx">تحقق</button></div>`;
+    $('nx').onclick = () => { const sel = (window.getSelection ? window.getSelection().toString() : '').trim(); const a = new Set(norm(q.answer).split(' ')); const b = new Set(norm(sel).split(' ').filter(Boolean)); let inter = 0; a.forEach(w => { if (b.has(w)) inter++; }); const sc = b.size === 0 ? 0 : (b.size > a.size * 4 ? 0 : inter / Math.max(a.size, b.size)); scores.hl[k] = sc; f.body.querySelector('#ptx').innerHTML = esc(full).replace(esc(q.answer), '<mark>' + esc(q.answer) + '</mark>'); f.body.querySelector('.hl-tip').innerHTML = `<b>درجتك ${Math.round(sc * 100)}%</b> — الإجابة الصحيحة مظللة بالأخضر.${sel ? ' ظللت: <span class="en">' + esc(sel) + '</span>' : ' ما ظللت شي.'}`; $('nx').textContent = 'التالي'; $('nx').onclick = next; };
+  }
+  function choose(label, opts, correct, key) {
+    f.body.innerHTML = `<div class="prog">${label}</div><div class="passage" style="font-size:14px;line-height:1.7">${esc(full)}</div><div class="opts" id="op"></div>`;
+    opts.forEach((o, k) => { const b = el('button', 'opt', esc(o)); b.onclick = () => { scores[key] = k === correct ? 1 : 0; f.body.querySelectorAll('.opt').forEach((x, j) => { x.disabled = true; if (j === correct) x.classList.add('ok'); else if (j === k) x.classList.add('bad'); }); setTimeout(next, 1100); }; $('op').appendChild(b); });
+  }
+  function next() { step++; if (step < steps.length) steps[step](); else finish(); }
+  let fin = false;
+  function finish() {
+    if (fin) return; fin = true; f.timer.stop();
+    const total = (scores.gaps * gaps.length + scores.missing + scores.hl[0] + scores.hl[1] + scores.idea + scores.title) / (gaps.length + 5);
+    const sc = Math.round(100 * total); setBest('ir', sc);
+    result(f.body, sc, `الفراغات ${Math.round(scores.gaps * 100)}% · الجملة ${scores.missing ? '✓' : '✗'} · تظليل ${Math.round(scores.hl[0] * 100)}%/${Math.round(scores.hl[1] * 100)}% · الفكرة ${scores.idea ? '✓' : '✗'} · العنوان ${scores.title ? '✓' : '✗'}`, `<div class="arnote explain">${esc(s.explain_ar)}</div>`);
+    again(f.body, DRILLS.ir, '🔄 قطعة جديدة');
+  }
+  steps[0]();
+};
+
+/* =========================================================
+   الاستماع
+   ========================================================= */
+DRILLS.lt = function () {
+  if (!TTS.ok()) { $('listenDrill').innerHTML = '<div class="note r">متصفحك ما يدعم النطق الآلي — جرّب كروم أو سفاري.</div>'; return; }
+  const items = pick(BANKS.listentype.items, 6); let i = 0; const log = []; let sum = 0;
+  const f = frame('listenDrill', '⌨️ Listen and Type', 0);
+  function show() {
+    if (i >= items.length) return finish();
+    const it = items[i]; let plays = 0, started = false, done = false;
+    f.body.innerHTML = `<div class="prog">الجملة ${i + 1} من ${items.length} · <span class="timer" id="t3" style="font-size:16px">1:00</span></div><div class="tbar"><i id="b3"></i></div><div class="row"><button class="btn" id="pl">▶️ تشغيل (<span id="pc">3</span> متبقية)</button></div><textarea class="ta" id="ans" placeholder="Type what you hear…" autocapitalize="sentences" spellcheck="false" style="min-height:90px"></textarea><div class="hl-tip">المرة الأولى: افهم واكتب اللي تذكره. الثانية: كمّل. الثالثة: راجع مع الصوت. لا تنسَ الحرف الكبير والنقطة/علامة الاستفهام.</div><div class="row"><button class="btn sm" id="chk">تحقق</button></div>`;
+    const tm = useTimer(new Timer(60, f.body.querySelector('#t3'), f.body.querySelector('#b3'), () => answer()));
+    const pl = $('pl');
+    pl.onclick = async () => { if (plays >= 3) return; plays++; $('pc').textContent = 3 - plays; if (plays >= 3) pl.disabled = true; if (!started) { started = true; tm.start(); } pl.classList.add('ghost'); await TTS.speak(it.text); pl.classList.remove('ghost'); };
+    $('chk').onclick = answer;
+    function answer() { if (done) return; done = true; tm.stop(); speechSynthesis.cancel(); const typed = $('ans').value; const r = scoreDictation(typed, it.text); sum += r.score; log.push({ it, typed, r }); i++; show(); }
+  }
+  function finish() {
+    const sc = Math.round(100 * sum / items.length); setBest('lt', sc);
+    const rows = log.map(l => `<div class="card" style="padding:10px 12px"><div class="diff">${l.r.html}</div><div class="hl-tip" style="margin-top:4px">درجتك ${Math.round(l.r.score * 100)}% · ${l.r.punct ? '' : '⚠️ بداية كبيرة أو علامة نهاية ناقصة · '}${esc(l.it.trap_ar)}</div></div>`).join('');
+    result(f.body, sc, 'متوسط تطابق الكلمات', `<div class="hl-tip">🟩 صح · 🟨 كلمة كتبتها غلط · 🟥 كلمة فاتتك (تنقّص أكثر من الغلط — اكتب أي تخمين دائمًا)</div>${rows}`);
+    again(f.body, DRILLS.lt, '🔄 6 جمل جديدة');
+  }
+  show();
+};
+function scoreDictation(typed, correct) {
+  const a = norm(correct).split(' ').filter(Boolean), b = norm(typed).split(' ').filter(Boolean);
+  // LCS alignment
+  const n = a.length, m = b.length; const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+  let i = 0, j = 0; const parts = []; let hit = 0;
+  while (i < n && j < m) { if (a[i] === b[j]) { parts.push(`<span class="o">${esc(a[i])}</span>`); hit++; i++; j++; } else if (dp[i + 1][j] >= dp[i][j + 1]) { const wrong = (j < m && dp[i + 1][j + 1] === dp[i + 1][j]) ? b[j] : null; if (wrong != null && (i + 1 <= n) && dp[i + 1][j + 1] >= dp[i + 1][j]) { parts.push(`<span class="x">${esc(a[i])}</span>`); i++; j++; hit += 0.5; } else { parts.push(`<span class="m">${esc(a[i])}</span>`); i++; } } else { j++; } }
+  while (i < n) { parts.push(`<span class="m">${esc(a[i++])}</span>`); }
+  const punct = /^[A-Z]/.test(typed.trim()) && /[.?!]$/.test(typed.trim());
+  let score = n ? hit / n : 0; if (!punct) score = Math.max(0, score - 0.05);
+  return { score, punct, html: parts.join(' ') + `<div style="font-size:13px;color:var(--muted);margin-top:4px">✔ ${esc(correct)}</div><div style="font-size:13px;color:var(--muted)">✎ ${esc(typed || '(فاضي)')}</div>` };
+}
+
+DRILLS.il = function () {
+  if (!TTS.ok()) { $('listenDrill').innerHTML = '<div class="note r">متصفحك ما يدعم النطق الآلي — جرّب كروم أو سفاري.</div>'; return; }
+  const sc = pick(BANKS.ilistening.scenarios, 1)[0];
+  const f = frame('listenDrill', '💬 Interactive Listening', 390, () => { toast('انتهت 6:30 — ننتقل للملخص'); toSummary(); });
+  f.timer.start();
+  const res = { complete: 0, turns: 0 };
+  // الجزء 1
+  f.body.innerHTML = `<div class="prog">1/3 · Listen and Complete — اسمع السيناريو (إعادة غير محدودة) وجاوب باختصار</div><div class="row"><button class="btn" id="pl">▶️ شغّل السيناريو</button></div><div id="qs"></div><div class="hl-tip">جواب قصير (أقل من 5 كلمات). الإملاء غير محسوب — المعنى هو المهم. لا تتجاوز دقيقتين ونص هنا.</div><div class="row"><button class="btn" id="nx">التالي: المحادثة</button></div>`;
+  $('pl').onclick = () => TTS.speak(sc.scenario);
+  sc.complete.forEach((q, k) => { const d = el('div'); d.innerHTML = `<div class="sent" style="font-size:15px;margin:8px 0 4px">${esc(q.q)}</div><input class="in" id="c${k}" autocomplete="off">`; $('qs').appendChild(d); });
+  $('nx').onclick = () => { speechSynthesis.cancel(); let r = 0; sc.complete.forEach((q, k) => { const v = norm($(`c${k}`).value); const ok = q.keywords.some(kw => v.includes(kw.toLowerCase())) || (v && norm(q.answer).includes(v)); if (ok) r++; $(`c${k}`).style.borderColor = ok ? '#22c55e' : '#ef4444'; if (!ok) $(`c${k}`).value += `   ← ${q.answer}`; }); res.complete = r / sc.complete.length; setTimeout(turns, 1300); };
+  // الجزء 2
+  let ti = 0, tr = 0; const convo = [];
+  function turns() {
+    if (ti >= sc.turns.length) return toSummary();
+    const t = sc.turns[ti]; let played = false;
+    f.body.innerHTML = `<div class="prog">2/3 · Listen and Respond — الدور ${ti + 1} من ${sc.turns.length}</div>` + (t.partner ? `<div class="row"><button class="btn" id="pl">▶️ اسمع الطرف الثاني (مرة وحدة فقط)</button></div>` : `<div class="sent" style="font-size:15px">ابدأ المحادثة — اختر أفضل افتتاحية (الصح تعيد كلمات السيناريو)</div>`) + `<div class="opts" id="op"></div>` + (convo.length ? `<details style="margin-top:8px"><summary style="font-weight:800;cursor:pointer">المحادثة حتى الآن</summary><div class="ltr" style="font-family:'Baloo 2';font-size:14px;line-height:1.7;padding:6px 0">${convo.map(c => esc(c)).join('<br>')}</div></details>` : '');
+    if (t.partner) { $('pl').onclick = async () => { if (played) return; played = true; $('pl').disabled = true; await TTS.speak(t.partner); }; }
+    t.options.forEach((o, k) => { const b = el('button', 'opt', esc(o)); b.onclick = () => { speechSynthesis.cancel(); const ok = k === t.correct; if (ok) tr++; f.body.querySelectorAll('.opt').forEach((x, j) => { x.disabled = true; if (j === t.correct) x.classList.add('ok'); else if (j === k) x.classList.add('bad'); }); if (t.partner) convo.push('Partner: ' + t.partner); convo.push('You: ' + t.options[t.correct]); const n = el('div', 'arnote', (ok ? '✓ ' : '✗ ') + esc(t.why_ar)); $('op').after(n); ti++; setTimeout(turns, 1400); }; $('op').appendChild(b); });
+  }
+  let sumDone = false;
+  function toSummary() {
+    if (sumDone) return; sumDone = true; f.timer.stop(); res.turns = sc.turns.length ? tr / sc.turns.length : 0;
+    f.body.innerHTML = `<div class="prog">3/3 · Summarize the Conversation — 75 ثانية · <span class="timer" id="t4" style="font-size:16px"></span></div><div class="tbar"><i id="b4"></i></div><details><summary style="font-weight:800;cursor:pointer">المحادثة كاملة</summary><div class="ltr" style="font-family:'Baloo 2';font-size:14px;line-height:1.7;padding:6px 0">${convo.map(c => esc(c)).join('<br>')}</div></details><textarea class="ta" id="sm" placeholder="In this conversation, I talked with … about …"></textarea><div class="wc" id="wc">0 words</div><div class="hl-tip">3 جمل بالماضي: مع مين؟ وش المشكلة؟ وش القرار؟ يجوز تعيد كلمات المحادثة.</div><div class="row"><button class="btn" id="fin">إرسال</button></div>`;
+    const tm = useTimer(new Timer(75, $('t4'), $('b4'), finish)); tm.start();
+    $('sm').addEventListener('input', () => { const n = wcount($('sm').value); $('wc').innerHTML = `<b>${n}</b> words`; $('wc').classList.toggle('hit', n >= 40); });
+    $('fin').onclick = finish;
+    function finish() { tm.stop(); const txt = $('sm').value; const n = wcount(txt); const sents = (txt.match(/[.!?]+/g) || []).length; const wScore = Math.min(1, n / 40) * 0.6 + Math.min(1, sents / 3) * 0.4; const total = Math.round(100 * (res.complete * 0.3 + res.turns * 0.4 + wScore * 0.3)); setBest('il', total); result(f.body, total, `الأسئلة ${Math.round(res.complete * 100)}% · المحادثة ${tr}/${sc.turns.length} · الملخص ${n} كلمة / ${sents} جمل`, `<h3>ملخصك</h3><div class="model">${esc(txt) || '(فاضي)'}</div><h3>نموذج ملخص</h3><div class="model">${esc(sc.summary_model)}</div><div class="arnote">${esc(sc.summary_ar)}</div>`); again(f.body, DRILLS.il, '🔄 سيناريو جديد'); }
+  }
+};
+
+/* =========================================================
+   الكتابة
+   ========================================================= */
+const SIGNALS = [
+  { k: 'رابط', re: /\b(first of all|moreover|however|for example|for instance|in addition|on the other hand|as a result|overall|in conclusion)\b/i },
+  { k: 'سبب', re: /\b(because|since|so that|while|although|even though)\b/i },
+  { k: 'مثال', re: /\b(for example|for instance|such as|last year|when i|once,? i)\b/i },
+  { k: 'شرطية', re: /\bif\b[^.]*\b(would|could|will|can)\b/i },
+  { k: 'مبني للمجهول', re: /\b(is|are|was|were|been|be)\s+\w+(ed|en)\b/i },
+  { k: 'موصولة', re: /\b(which|who|that|where)\b/i },
+  { k: 'خاتمة', re: /\b(overall|in conclusion|to sum up|in short)\b/i },
+];
+function writingBox(body, target, secs, onDone, opts = {}) {
+  body.insertAdjacentHTML('beforeend', `<textarea class="ta" id="wt" placeholder="${opts.ph || 'Start writing…'}" spellcheck="false" autocorrect="off" autocapitalize="sentences"></textarea><div class="wc" id="wc"><b>0</b> / ${target} words</div><div class="checks" id="sig">${SIGNALS.map(s => `<span>${s.k}</span>`).join('')}</div><div class="row"><button class="btn" id="sub">إرسال</button></div>`);
+  const ta = $('wt'); ta.focus();
+  const tm = secs ? useTimer(new Timer(secs, body.closest('.drill').querySelector('#tm'), body.closest('.drill').querySelector('#tb'), () => done())) : null; tm && tm.start();
+  ta.addEventListener('input', () => { const n = wcount(ta.value); $('wc').innerHTML = `<b>${n}</b> / ${target} words`; $('wc').classList.toggle('hit', n >= target); [...$('sig').children].forEach((c, i) => c.classList.toggle('on', SIGNALS[i].re.test(ta.value))); });
+  $('sub').onclick = done; let fin = false;
+  function done() { if (fin) return; fin = true; tm && tm.stop(); const txt = ta.value; const n = wcount(txt); const sig = SIGNALS.filter(s => s.re.test(txt)).map(s => s.k); onDone(txt, n, sig); }
+}
+function writeScore(n, target, sig, maxSig) { return Math.round(100 * (Math.min(1, n / target) * 0.65 + Math.min(1, sig.length / maxSig) * 0.35)); }
+
+DRILLS.wp = function () {
+  const sc = pick(BANKS.writing.photo, 1)[0];
+  const f = frame('writeDrill', '🖼️ Write About the Photo', 60);
+  f.body.innerHTML = `<div class="note a" style="margin-top:0"><b>افتح صورة من جوالك فيها ناس يسوون شي</b>(أو تخيّل هذا المشهد: ${esc(sc.scene_ar)})</div><div class="hl-tip">3 جمل: ① مشهد عام ② زوم على شخص/فعل بصيغة الاستمرار + مكان (in the foreground / background) ③ تخمين (probably / It looks like). 40+ كلمة. وصف بلا رأي.</div>`;
+  writingBox(f.body, 40, null, (txt, n, sig) => { const s = writeScore(n, 40, sig.filter(k => ['سبب', 'موصولة'].includes(k)), 2); setBest('wp', s); result(f.body, s, `${n} كلمة${n >= 40 ? ' ✓' : ' — قليل، الهدف 40+'}`, `<h3>كتابتك</h3><div class="model">${esc(txt) || '(فاضي)'}</div><h3>نموذج 90 (~40 كلمة)</h3><div class="model">${esc(sc.model_90)}</div><h3>نموذج 120 (~55 كلمة)</h3><div class="model">${esc(sc.model_120)}</div><div class="arnote">${esc(sc.notes_ar)}</div>`); again(f.body, DRILLS.wp, '🔄 صورة جديدة'); }, { ph: 'This image shows…' });
+  f.timer.start();
+};
+DRILLS.iw = function () {
+  const it = pick(BANKS.writing.interactive, 1)[0];
+  const f = frame('writeDrill', '📝 Interactive Writing — الجزء 1', 300);
+  f.body.innerHTML = `<div class="sent" style="font-size:15px">${esc(it.prompt)}</div><div class="hl-tip">موقفك مباشرة ← سببان كل واحد بمثال شخصي ← Overall. الهدف 110+ كلمة (150 لـ120). آخر دقيقة مراجعة إملاء.</div>`;
+  writingBox(f.body, 110, null, (t1, n1, s1) => {
+    const f2 = frame('writeDrill', '📝 Interactive Writing — الجزء 2 (سؤال المتابعة)', 180);
+    f2.body.innerHTML = `<details open><summary style="font-weight:800">سؤالك الأول وإجابتك</summary><div class="model" style="font-size:13px">${esc(it.prompt)}<br><br>${esc(t1)}</div></details><div class="sent" style="font-size:15px;margin-top:8px">${esc(it.followup)}</div><div class="hl-tip">افتح بـ As I mentioned, … ثم أضف <b>معلومة جديدة</b> فقط — لا تعيد الجزء الأول. الهدف 80+ كلمة.</div>`;
+    writingBox(f2.body, 80, null, (t2, n2, s2) => { const s = Math.round((writeScore(n1, 110, s1, 4) + writeScore(n2, 80, s2, 3)) / 2); setBest('iw', s); result(f2.body, s, `الجزء 1: ${n1} كلمة · الجزء 2: ${n2} كلمة`, `<h3>نموذج الجزء 1 (مستوى 90)</h3><div class="model">${esc(it.model1_90)}</div><h3>نموذج الجزء 2</h3><div class="model">${esc(it.model2_90)}</div><h3>كيف يصير 120</h3><div class="arnote explain">${esc(it.upgrade_ar)}</div>`); again(f2.body, DRILLS.iw, '🔄 موضوع جديد'); }, { ph: 'As I mentioned, …' });
+    f2.timer.start();
+  });
+  f.timer.start();
+};
+DRILLS.ws = function () {
+  const it = pick(BANKS.writing.sample, 1)[0];
+  const f = frame('writeDrill', '📜 Writing Sample', 300);
+  f.body.innerHTML = `<div class="sent" style="font-size:15px">${esc(it.prompt)}</div><div class="hl-tip">جاوب <b>كل</b> الأسئلة الفرعية. 120+ كلمة. فقرات متصلة. آخر 45 ثانية مراجعة.</div>`;
+  writingBox(f.body, 120, null, (txt, n, sig) => { const s = writeScore(n, 120, sig, 5); setBest('ws', s); result(f.body, s, `${n} كلمة · إشارات: ${sig.join('، ') || 'لا شي'}`, `<h3>خطة النموذج</h3><div class="arnote explain">${esc(it.plan_ar)}</div><h3>نموذج 90 (~120 كلمة)</h3><div class="model">${esc(it.model_90)}</div><h3>كتابتك</h3><div class="model">${esc(txt) || '(فاضي)'}</div>`); again(f.body, DRILLS.ws, '🔄 موضوع جديد'); });
+  f.timer.start();
+};
+DRILLS.sum = function () {
+  const it = pick(BANKS.writing.summary, 1)[0];
+  const f = frame('writeDrill', '🗒️ Summarize the Conversation', 75);
+  f.body.innerHTML = `<div class="note g" style="margin-top:0"><b>الموقف</b>${esc(it.context_ar)}</div><div class="hl-tip">3 جمل بالماضي: In this conversation, I talked with … about … + المشكلة + القرار. 40+ كلمة.</div>`;
+  writingBox(f.body, 40, null, (txt, n) => { const sents = (txt.match(/[.!?]+/g) || []).length; const s = Math.round(100 * (Math.min(1, n / 40) * 0.6 + Math.min(1, sents / 3) * 0.4)); setBest('sum', s); result(f.body, s, `${n} كلمة · ${sents} جمل`, `<h3>نموذج</h3><div class="model">${esc(it.model)}</div><h3>ملخصك</h3><div class="model">${esc(txt) || '(فاضي)'}</div>`); again(f.body, DRILLS.sum, '🔄 موقف جديد'); }, { ph: 'In this conversation, I talked with …' });
+  f.timer.start();
+};
+
+/* =========================================================
+   المحادثة
+   ========================================================= */
+function speakBox(body, prepSec, speakSec, onDone) {
+  const drill = body.closest('.drill'); const tmEl = drill.querySelector('#tm'), tbEl = drill.querySelector('#tb');
+  body.insertAdjacentHTML('beforeend', `<div class="row" id="ctl"><button class="btn" id="st">🎙️ ابدأ التسجيل</button></div><div class="rec" id="rc" style="display:none"><span class="dot"></span><b>يسجّل…</b><button class="btn sm danger" id="sp">إيقاف وإرسال</button></div><div class="transcript" id="tr" style="display:none"></div>`);
+  let phase = 'prep';
+  const prep = prepSec ? useTimer(new Timer(prepSec, tmEl, tbEl, () => startRec())) : null; prep && prep.start();
+  $('st').onclick = startRec;
+  let started = false;
+  async function startRec() {
+    if (started) return; started = true; phase = 'speak'; prep && prep.stop(); $('ctl').style.display = 'none'; $('rc').style.display = 'flex'; $('tr').style.display = 'block'; $('tr').textContent = '(النص يظهر هنا إذا متصفحك يدعم التحويل — كروم)';
+    await Rec.start((t) => { $('tr').textContent = t; });
+    const tm = useTimer(new Timer(speakSec, tmEl, tbEl, stop)); tm.start();
+    $('sp').onclick = stop; let fin = false;
+    async function stop() { if (fin) return; fin = true; tm.stop(); const r = await Rec.stop(); const n = wcount(r.text); const wpm = r.dur > 5 ? Math.round(n / (r.dur / 60)) : 0; onDone({ ...r, n, wpm }); }
+  }
+}
+function speakResult(body, r, target, extra) {
+  const fill = Math.min(1, r.dur / target); const s = Math.round(100 * (fill * 0.6 + (r.text ? Math.min(1, r.wpm / 110) : 0.6) * 0.4));
+  const stats = `<div class="stat"><div><b>${Math.round(r.dur)}s</b><small>تكلمت من ${target}s</small></div>${r.text ? `<div><b>${r.n}</b><small>كلمة</small></div><div><b>${r.wpm}</b><small>كلمة/دقيقة (الهدف 100–130)</small></div>` : ''}</div>`;
+  result(body, s, r.dur < target * 0.8 ? '⚠️ وقفت بدري — املأ الوقت كله' : '✓ عبّيت الوقت', stats + (r.url ? `<audio controls src="${r.url}"></audio><div class="hl-tip">اسمع نفسك: فيه سكتات أطول من ثانيتين؟ كررت um/uh؟</div>` : '') + (r.text ? `<div class="transcript">${esc(r.text)}</div>` : '') + extra);
+  return s;
+}
+DRILLS.sp = function () {
+  const sc = pick(BANKS.speaking.photo, 1)[0];
+  const f = frame('speakDrill', '🖼️ Speak About the Photo', 0);
+  f.body.innerHTML = `<div class="note a" style="margin-top:0"><b>افتح صورة من جوالك فيها ناس يسوون شي</b>(أو تخيّل: ${esc(sc.scene_ar)}) — 20 ثانية تحضير ثم 90 ثانية كلام.</div><div class="hl-tip">0–20ث نظرة عامة · 20–60ث تفاصيل (مين يسوي وش، أمامية/خلفية، ملابس) · 60–90ث تخمين (must / might / probably). لا توقف قبل النهاية.</div>`;
+  speakBox(f.body, 20, 90, (r) => { const s = speakResult(f.body, r, 90, `<h3>نموذج وصف</h3><div class="model">${esc(sc.model)}</div>`); setBest('sp', s); again(f.body, DRILLS.sp, '🔄 صورة جديدة'); });
+};
+DRILLS.rts = function () {
+  const it = pick(BANKS.speaking.rts, 1)[0];
+  const f = frame('speakDrill', '📖 Read Then Speak', 0);
+  f.body.innerHTML = `<div class="sent" style="font-size:15px"><b>${esc(it.prompt)}</b><ul style="margin:6px 0 0 18px">${it.bullets.map(b => `<li>${esc(b)}</li>`).join('')}</ul></div><div class="hl-tip">20 ثانية تحضير: فكرة لكل نقطة. ثم جاوب النقاط بالترتيب (~20 ثانية لكل وحدة) وأعلن الانتقال: About …, I would say …</div>`;
+  speakBox(f.body, 20, 90, (r) => { const s = speakResult(f.body, r, 90, `<h3>مخطط الإجابة</h3><div class="arnote explain">${esc(it.outline_ar)}</div><h3>نموذج (~140 كلمة)</h3><div class="model">${esc(it.model)}</div>`); setBest('rts', s); again(f.body, DRILLS.rts, '🔄 موضوع جديد'); });
+};
+DRILLS.is = function () {
+  if (!TTS.ok()) { $('speakDrill').innerHTML = '<div class="note r">متصفحك ما يدعم النطق الآلي.</div>'; return; }
+  const set = pick(BANKS.speaking.interactive, 1)[0]; let i = 0; const rs = [];
+  const f = frame('speakDrill', '🤖 Interactive Speaking', 0);
+  function show() {
+    if (i >= set.questions.length) return finish();
+    const q = set.questions[i]; let played = false;
+    f.body.innerHTML = `<div class="prog">السؤال ${i + 1} من ${set.questions.length} · الموضوع: ${esc(set.topics[i < 3 ? 0 : 1])}</div><div class="hl-tip">تسمع السؤال <b>مرة وحدة</b> ثم يبدأ التسجيل تلقائيًا (35 ث). ما فهمت؟ تكلم عن الموضوع العام فورًا. OREO: رأي ← سبب ← مثال ← In short.</div><div class="row"><button class="btn" id="pq">▶️ اسمع السؤال</button></div><div id="sb"></div>`;
+    $('pq').onclick = async () => { if (played) return; played = true; $('pq').disabled = true; await TTS.speak(q.q, 0.95); const sb = $('sb'); sb.innerHTML = ''; speakBox(sb, 0, 35, (r) => { rs.push({ q, r }); i++; show(); }); $('st').click(); };
+  }
+  function finish() {
+    const avg = Math.round(rs.reduce((a, x) => a + Math.min(1, x.r.dur / 35), 0) / rs.length * 100); setBest('is', avg);
+    const rows = rs.map((x, k) => `<div class="card" style="padding:10px 12px"><div class="ltr" style="font-family:'Baloo 2';font-weight:800">${k + 1}. ${esc(x.q.q)}</div><div class="hl-tip">تكلمت ${Math.round(x.r.dur)}s${x.r.text ? ' · ' + x.r.n + ' كلمة' : ''}</div>${x.r.url ? `<audio controls src="${x.r.url}"></audio>` : ''}<div class="model" style="font-size:14px">${esc(x.q.model)}</div><div class="arnote">${esc(x.q.tip_ar)}</div></div>`).join('');
+    result(f.body, avg, 'نسبة تعبئة الـ35 ثانية', rows); again(f.body, DRILLS.is, '🔄 مجموعة جديدة');
+  }
+  show();
+};
+DRILLS.ss = function () {
+  const it = pick(BANKS.speaking.sample, 1)[0];
+  const f = frame('speakDrill', '🎥 Speaking Sample', 0);
+  f.body.innerHTML = `<div class="sent" style="font-size:15px"><b>${esc(it.prompt)}</b></div><div class="hl-tip">30 ثانية تحضير: اختر 2–3 أفكار. ثم 3 دقائق: مقدمة تجاوب مباشرة ← نقطتان بمثال حقيقي ← خاتمة. الفيديو يشوفه مسؤول القبول — اجلس عدل وابتسم.</div>`;
+  speakBox(f.body, 30, 180, (r) => { const s = speakResult(f.body, r, 180, `<h3>أفكار للتغطية</h3><div class="arnote explain">${esc(it.plan_ar)}</div><h3>نموذج (~200 كلمة)</h3><div class="model">${esc(it.model)}</div>`); setBest('ss', s); again(f.body, DRILLS.ss, '🔄 موضوع جديد'); });
+};
+
+/* =========================================================
+   المهارات
+   ========================================================= */
+DRILLS.lessons = function () {
+  const box = $('skillsDrill'); box.innerHTML = '<h3>🎓 الدروس العشرة</h3><div class="hl-tip">اقرأ الشرح، احفظ الأنماط، وحل التمارين الست. الدرس يعتبر مكتمل لما تحل 4 من 6.</div>';
+  BANKS.grammar_vocab.lessons.forEach((L, k) => {
+    const a = el('div', 'acc' + (S.lessons[k] ? ' done' : ''));
+    a.innerHTML = `<button><span>${k + 1}. ${esc(L.title_ar)}</span><span>▾</span></button><div><div class="explain">${esc(L.explain_ar)}</div><h3>أنماط تستخدمها اليوم</h3>${L.patterns.map(p => `<div class="li"><span class="w" style="min-width:0">${esc(p.en)}</span><span>${esc(p.ar)}</span></div>`).join('')}<h3>تمارين</h3><div id="ex${k}"></div><div class="row"><button class="btn sm" id="ck${k}">تحقق</button></div></div>`;
+    box.appendChild(a);
+    a.querySelector('button').onclick = () => a.classList.toggle('open');
+    const ex = a.querySelector('#ex' + k);
+    L.exercises.forEach((e, j) => { const d = el('div'); d.innerHTML = `<div class="sent" style="font-size:15px;margin:8px 0 4px">${esc(e.q)}</div><input class="in" id="e${k}_${j}" autocomplete="off"><div class="arnote" id="w${k}_${j}" style="display:none"></div>`; ex.appendChild(d); });
+    a.querySelector('#ck' + k).onclick = () => { let r = 0; L.exercises.forEach((e, j) => { const inp = $(`e${k}_${j}`); const ok = norm(inp.value) === norm(e.a) || norm(inp.value).includes(norm(e.a)); if (ok) r++; inp.style.borderColor = ok ? '#22c55e' : '#ef4444'; const w = $(`w${k}_${j}`); w.style.display = 'block'; w.innerHTML = (ok ? '✓ ' : `✗ الجواب: <span class="en">${esc(e.a)}</span> — `) + esc(e.why_ar); }); if (r >= 4) { S.lessons[k] = true; a.classList.add('done'); save(); toast(`✅ الدرس مكتمل (${r}/6)`); renderHome(); } else toast(`${r}/6 — راجع الشرح وحاول مرة ثانية`); };
+  });
+};
+DRILLS.vocab = function () {
+  const V = BANKS.grammar_vocab.vocab; const themes = [...new Set(V.map(v => v.theme))];
+  const box = $('skillsDrill'); let theme = themes[0], mode = 'all', list = [], i = 0, flipped = false;
+  box.innerHTML = `<h3>🃏 بطاقات المفردات</h3><div class="themes" id="th"></div><div class="row"><button class="btn sm ghost" id="mAll">كل الكلمات</button><button class="btn sm ghost" id="mRev">🔁 أراجعها فقط (<span id="rn">0</span>)</button><button class="btn sm ghost" id="quiz">🎯 اختبار سريع</button></div><div id="fcbox"></div>`;
+  themes.forEach(t => { const b = el('button', '', esc(t)); b.onclick = () => { theme = t; mode = 'all'; build(); }; $('th').appendChild(b); });
+  $('mAll').onclick = () => { mode = 'all'; build(); }; $('mRev').onclick = () => { mode = 'rev'; build(); }; $('quiz').onclick = quiz;
+  function build() {
+    [...$('th').children].forEach(b => b.classList.toggle('on', b.textContent === theme && mode === 'all'));
+    list = mode === 'rev' ? V.filter(v => S.vocab[v.w] === 'rev') : V.filter(v => v.theme === theme); i = 0; flipped = false;
+    $('rn').textContent = V.filter(v => S.vocab[v.w] === 'rev').length; card();
+  }
+  function card() {
+    const b = $('fcbox'); if (!list.length) { b.innerHTML = '<div class="note g">ما فيه بطاقات هنا — كل شي معروف 👏</div>'; return; }
+    const v = list[i % list.length];
+    b.innerHTML = `<div class="prog">${(i % list.length) + 1} / ${list.length} · اضغط البطاقة لتقلبها</div><div class="fc" id="fc">${flipped ? `<div class="w">${esc(v.w)}</div><div class="ar">${esc(v.ar)}</div><div class="ex">${esc(v.example)}</div><div class="ex" style="color:var(--teal)">${esc(v.colloc)}</div>` : `<div class="w">${esc(v.w)}</div><div class="ex">وش معناها؟</div>`}</div><div class="row" style="justify-content:center"><button class="btn sm ghost" id="say">🔊 انطق</button><button class="btn sm" id="know">✓ أعرفها</button><button class="btn sm danger" id="rev">🔁 أراجعها</button></div>`;
+    $('fc').onclick = () => { flipped = !flipped; card(); };
+    $('say').onclick = () => TTS.speak(v.w);
+    $('know').onclick = () => { S.vocab[v.w] = 'know'; save(); next(); };
+    $('rev').onclick = () => { S.vocab[v.w] = 'rev'; save(); next(); };
+    function next() { i++; flipped = false; if (mode === 'rev') { list = V.filter(x => S.vocab[x.w] === 'rev'); i = Math.min(i, Math.max(0, list.length - 1)); } $('rn').textContent = V.filter(x => S.vocab[x.w] === 'rev').length; renderHome(); card(); }
+  }
+  function quiz() {
+    const pool = mode === 'rev' && list.length >= 4 ? list : V; const qs = pick(pool, 10); let k = 0, r = 0;
+    const b = $('fcbox');
+    function q() { if (k >= qs.length) { const s = Math.round(100 * r / qs.length); setBest('vocab', s); b.innerHTML = `<div class="res"><div class="score">${s}%</div><div style="text-align:center;font-weight:800">${r} من ${qs.length}</div></div>`; again(b, quiz, '🔄 اختبار جديد'); return; } const v = qs[k]; const opts = shuffle([v, ...pick(pool.filter(x => x.w !== v.w), 3)]); b.innerHTML = `<div class="prog">${k + 1}/${qs.length}</div><div class="fc" style="cursor:default;min-height:90px"><div class="ar">${esc(v.ar)}</div></div><div class="opts" id="op"></div>`; opts.forEach(o => { const bt = el('button', 'opt', esc(o.w)); bt.onclick = () => { const ok = o.w === v.w; if (ok) r++; [...$('op').children].forEach(x => { x.disabled = true; if (x.textContent === v.w) x.classList.add('ok'); }); if (!ok) { bt.classList.add('bad'); S.vocab[v.w] = 'rev'; save(); } k++; setTimeout(q, 800); }; $('op').appendChild(bt); }); }
+    q();
+  }
+  build();
+};
+DRILLS.frames = function () {
+  const box = $('skillsDrill'); const F = BANKS.writing.frames, R = BANKS.speaking.rescue;
+  const groups = [...new Set(F.map(f => f.group))];
+  box.innerHTML = `<h3>🧱 العبارات الآمنة (كلها أقصر من 5 كلمات)</h3><div class="hl-tip">هذي مسموح تحفظها. الجمل الطويلة المحفوظة ممنوعة — النظام يقارنك بكل المتقدمين.</div>` + groups.map(g => `<div class="card"><h3>${esc(g)}</h3>${F.filter(f => f.group === g).map(f => `<div class="li"><span class="w" style="min-width:0">${esc(f.en)}</span><span>${esc(f.ar)}</span></div>`).join('')}</div>`).join('') + `<div class="card"><h3>🛟 عبارات إنقاذ بالمحادثة</h3>${R.map(r => `<div class="li"><span class="w" style="min-width:0">${esc(r.en)}</span><span>${esc(r.ar)} — <em>${esc(r.when_ar)}</em></span></div>`).join('')}</div>`;
+};
+
+/* التهيئة */
+$('mockBtn').addEventListener('click', startMock);
+renderPlan(); renderHome(); renderMenus(); routeHash();
+</script>
+</body>
+</html>
