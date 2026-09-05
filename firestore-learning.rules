@@ -61,4 +61,14 @@
       allow delete: if isEduAdmin();
     }
 
+    // ===== سجل مدرّب ديولينجو (detLogs) — خاص بصاحبه فقط =====
+    // detLogs/{uid}            ← لقطة حالة المدرّب (مستند واحد)
+    // detLogs/{uid}/attempts   ← كل محاولة (سؤال + إجابة + وقت)
+    match /detLogs/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+      match /attempts/{attemptId} {
+        allow read, write: if signedIn() && request.auth.uid == uid;
+      }
+    }
+
     // ===== نهاية قواعد موقع تعليم الإنجليزية =====

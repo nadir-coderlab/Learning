@@ -25,6 +25,11 @@ on:
       - "public/study.html"
       - "public/det-study.js"
       - "public/det-study.css"
+      - "public/det-scoring.js"
+      - "public/det-sync.js"
+      - "public/det-words.txt"
+      - "public/det-packs.json"
+      - "public/assets/det/**"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -55,13 +60,19 @@ jobs:
           git show origin/main:public/study.html > study.html
           git show origin/main:public/det-study.js > det-study.js
           git show origin/main:public/det-study.css > det-study.css
+          # ملفات المدرّب الإضافية: محرك التقييم، المزامنة، قائمة الكلمات، حزمة المدرّب، والصور
+          for f in det-scoring.js det-sync.js det-words.txt det-packs.json; do
+            git show "origin/main:public/$f" > "$f"
+          done
+          rm -rf assets/det && mkdir -p assets
+          git archive origin/main public/assets/det | tar -x --strip-components=1
           touch .nojekyll
 
       - name: دفع التحديث إن تغيّر شيء
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html det.html det-train.html study.html det-study.js det-study.css .nojekyll
+          git add -A index.html det.html det-train.html study.html det-study.js det-study.css det-scoring.js det-sync.js det-words.txt det-packs.json assets/det .nojekyll
           if git diff --staged --quiet; then
             echo "::notice title=لا تغيير::صفحات النشر مطابقة للمصدر بالفعل."
             exit 0

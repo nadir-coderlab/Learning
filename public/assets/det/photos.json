@@ -1,0 +1,312 @@
+{
+  "photos": [
+    {
+      "id": "library",
+      "file": "assets/det/photos/01-library.jpg",
+      "title_en": "Reading room in a public library",
+      "scene_ar": "قاعة قراءة كبيرة في مكتبة عامة، سقفها قبة عالية وفيها أعمدة وطاولات خشب طويلة.\nكم واحد قاعدين يذاكرون بهدوء، وواحد منهم لابس سماعات.",
+      "keywords": ["library", "reading room", "dome", "columns", "tables", "chairs", "studying", "quiet", "books", "headphones", "lamps", "students", "ceiling"],
+      "vocab": [
+        {"w": "dome", "ar": "قبة"},
+        {"w": "column", "ar": "عمود"},
+        {"w": "reading room", "ar": "قاعة قراءة"},
+        {"w": "wooden table", "ar": "طاولة خشب"},
+        {"w": "headphones", "ar": "سماعات"},
+        {"w": "quiet", "ar": "هادي"},
+        {"w": "to study", "ar": "يذاكر"},
+        {"w": "ceiling", "ar": "سقف"}
+      ],
+      "questions_ar": ["وش تشوف بالصورة؟", "وين هم؟ وش يسوون؟", "كيف شكل المكان؟ وش فيه؟", "ليش تتوقع الناس جايين هنا؟", "وش ممكن يصير بعدين؟"],
+      "write_60": "This is a big reading room in a public library. I can see a high dome with a glass window in the middle, and there are many columns around the walls. There are long wooden tables and chairs. A few people are sitting and studying quietly. One man is wearing headphones. Maybe they are university students preparing for exams.",
+      "write_90": "This photo shows a large reading room in a public library. The ceiling is a huge dome with a round glass window in the middle, and there are tall columns all around the walls. In the middle of the room there is a big clock. There are long wooden tables with chairs, and green lamps on the tables. A few people are sitting and studying quietly. One young man is wearing headphones. The room is very quiet and calm. Maybe these people are university students preparing for their exams.",
+      "speak_model": "In this picture I can see a very big reading room in a public library. It is a beautiful old building. The ceiling is a huge dome, and in the middle of the dome there is a round glass window, so the room has natural light. There are tall columns around the walls and a big clock on the wall at the back. In front of the clock there are long wooden tables with chairs and green reading lamps. A few people are sitting at the tables. They are reading and studying quietly. One young man on the left is wearing headphones, so maybe he is listening to music while he studies. I think these people are probably university students, and maybe they have exams soon. Personally, I love places like this because they are quiet and I can focus. In my city we also have a big public library, and I sometimes go there to study English.",
+      "credit": "Ridiculopathy, CC0, https://commons.wikimedia.org/wiki/File:People_studying_in_the_Wolfson_Reading_Room_of_Manchester_Central_Library_03.jpg"
+    },
+    {
+      "id": "market",
+      "file": "assets/det/photos/02-market.jpg",
+      "title_en": "Vegetable stall at a street market",
+      "scene_ar": "بسطة خضار في سوق شعبي مفتوح، فيها طماطم وبصل وبطاطس.\nالبياع لابس كاب ويعبي كيس طماطم، وزبون واقف قدامه يطالع الخضار.",
+      "keywords": ["market", "stall", "vendor", "customer", "tomatoes", "onions", "potatoes", "vegetables", "bag", "cap", "shoes", "umbrella", "selling", "buying"],
+      "vocab": [
+        {"w": "stall", "ar": "بسطة"},
+        {"w": "vendor", "ar": "بياع"},
+        {"w": "customer", "ar": "زبون"},
+        {"w": "tomatoes", "ar": "طماطم"},
+        {"w": "onions", "ar": "بصل"},
+        {"w": "potatoes", "ar": "بطاطس"},
+        {"w": "cap", "ar": "كاب"},
+        {"w": "to weigh", "ar": "يوزن"}
+      ],
+      "questions_ar": ["وش تشوف بالصورة؟", "وين هم؟ وش يسوون؟", "وش يلبسون؟ كيف الجو؟", "وش نوع الخضار اللي تشوفها؟", "وش ممكن يصير بعدين؟"],
+      "write_60": "This picture shows a vegetable stall at a street market. I can see a lot of red tomatoes, white onions and some potatoes in plastic bags. There are two men. The man on the right is wearing a cap and he is putting tomatoes in a red net bag. The other man is looking at the vegetables. Maybe he wants to buy some tomatoes for dinner.",
+      "write_90": "This is a photo of a small vegetable stall at an open-air street market. In the front I can see many red tomatoes and white onions in red net bags, and there are also some potatoes in plastic bags. Two men are standing behind the stall. The man on the right is wearing an orange cap and a grey T-shirt, and he is filling a bag with tomatoes. The young man on the left is wearing a dark blue polo shirt and he is looking down at the vegetables. Behind them there are shoes and sandals hanging on a wall. It is probably a hot day, because the market is outside.",
+      "speak_model": "In this photo I can see a vegetable stall at an open-air street market. In the front there are lots of red tomatoes and white onions, and they are packed in red net bags. On the right there are also some potatoes in plastic bags. There are two men at the stall. The man on the right is wearing an orange and white cap, a grey T-shirt and a watch, and he is filling a small bag with tomatoes. I think he is the vendor. The young man on the left is wearing a dark blue polo shirt and he is looking at the vegetables, so maybe he is a customer choosing what to buy. Behind them there is a blue wall, and there are many colourful shoes and sandals hanging from a rope, so probably there is another shop next to the stall. It looks like a warm, sunny day. I like this kind of market because the vegetables are fresh and cheap. In Saudi Arabia we also have vegetable markets, and my mother usually buys tomatoes and onions there.",
+      "credit": "Wilfredor, CC0, https://commons.wikimedia.org/wiki/File:Seller_offering_tomatoes_and_onions_to_your_customer.jpg"
+    },
+    {
+      "id": "park",
+      "file": "assets/det/photos/03-park.jpg",
+      "title_en": "People relaxing in a city park",
+      "scene_ar": "حديقة عامة وسط المدينة، عشبها أخضر وورا الناس جسر كبير وعمارات عالية.\nرجال قاعد على العشب، وورا فيه عوايل وأطفال قاعدين يتمشون ويرتاحون.",
+      "keywords": ["park", "grass", "lawn", "bridge", "buildings", "skyline", "families", "sitting", "relaxing", "stroller", "afternoon", "city", "river"],
+      "vocab": [
+        {"w": "lawn", "ar": "عشب / مسطح أخضر"},
+        {"w": "bridge", "ar": "جسر"},
+        {"w": "skyscraper", "ar": "ناطحة سحاب"},
+        {"w": "stroller", "ar": "عربية أطفال"},
+        {"w": "to relax", "ar": "يرتاح"},
+        {"w": "in the background", "ar": "في الخلفية"},
+        {"w": "in the foreground", "ar": "في المقدمة"},
+        {"w": "sunny", "ar": "مشمس"}
+      ],
+      "questions_ar": ["وش تشوف بالصورة؟", "وين هم؟ وش يسوون؟", "وش يلبسون؟ كيف الجو؟", "وش اللي في الخلفية؟", "وش ممكن يصير بعدين؟"],
+      "write_60": "This photo shows a green park in a big city. In the foreground a man is sitting on the grass with his back to the camera. He is wearing a green T-shirt. In the background there are many people and families sitting and relaxing on the lawn. I can also see a big bridge and tall buildings. Maybe it is a sunny afternoon at the weekend.",
+      "write_90": "This is a picture of a city park with a big green lawn. In the foreground a young man with a beard is sitting on the grass with his back to the camera. He is wearing a green T-shirt and dark trousers. In the background there are many people. Some families are sitting on the grass, some people are walking, and I can see a baby stroller on the right. Behind the park there is a huge bridge and the skyline of the city with tall skyscrapers. The weather looks warm and a little hazy. Maybe it is the weekend, because a lot of people are relaxing outside.",
+      "speak_model": "This is a photo of a city park, and I think it is in New York because I can see a famous bridge and a lot of skyscrapers in the background. In the foreground there is a big green lawn, and a young man with a beard is sitting alone on the grass with his back to the camera. He is wearing a green T-shirt and he is looking to the right, maybe at the river. Behind him there are many other people. Some families are sitting on the grass and talking, a few people are walking, and on the right I can see a baby stroller, so probably there are small children too. The sky is bright but a little hazy, so it is probably a warm summer afternoon. I think this park is a nice place to relax after work or at the weekend. Personally, I like going to parks with my family in the evening when the weather is cooler, and we usually bring tea and snacks.",
+      "credit": "Brooke Cagle (Unsplash), CC0, https://commons.wikimedia.org/wiki/File:Man_in_Brooklyn_park_(Unsplash).jpg"
+    },
+    {
+      "id": "kitchen",
+      "file": "assets/det/photos/04-kitchen.jpg",
+      "title_en": "Cooking in a home kitchen",
+      "scene_ar": "مطبخ بيت بجدران خشب، وطواجن ومقالي معلقة على الحيط وبهارات على الرف.\nحرمة كبيرة بالسن لابسة قميص أحمر ماسكة قدر أسود وملعقة خشب وتذوق الأكل.",
+      "keywords": ["kitchen", "cooking", "pot", "wooden spoon", "stove", "pans", "spices", "tasting", "shirt", "smiling", "home", "shelf", "curly hair"],
+      "vocab": [
+        {"w": "pot", "ar": "قدر"},
+        {"w": "frying pan", "ar": "مقلاة"},
+        {"w": "wooden spoon", "ar": "ملعقة خشب"},
+        {"w": "stove", "ar": "طباخ / بوتاجاز"},
+        {"w": "spices", "ar": "بهارات"},
+        {"w": "to taste", "ar": "يذوق"},
+        {"w": "to stir", "ar": "يحرّك"},
+        {"w": "recipe", "ar": "وصفة"}
+      ],
+      "questions_ar": ["وش تشوف بالصورة؟", "وين هي؟ وش تسوي؟", "وش تلبس؟ وش شكلها مبسوطة؟", "وش الأشياء اللي تشوفها في المطبخ؟", "وش ممكن يصير بعدين؟"],
+      "write_60": "In this picture a woman is cooking in a home kitchen. She has curly grey hair and she is wearing a red shirt. She is holding a black pot in one hand and a wooden spoon in the other hand. She is smiling and tasting the food. On the wall I can see pans and kitchen tools. Maybe she is cooking lunch for her family.",
+      "write_90": "This photo shows a woman cooking in a small home kitchen. She has curly grey hair and she is wearing a bright red shirt. In her right hand she is holding a wooden spoon, and in her left hand she is holding a black cooking pot. Her eyes are closed and she is smiling, so I think she is tasting or smelling the food, and it smells good. The walls of the kitchen are made of wood, and there are frying pans hanging on the wall. On the right I can see shelves with bottles of oil and spices. Maybe she is preparing dinner for her family.",
+      "speak_model": "This picture shows a woman cooking in a cosy home kitchen. She looks about fifty or sixty years old, she has curly grey hair, and she is wearing a bright red shirt. She is holding a black cooking pot in her left hand and a wooden spoon in her right hand. Her eyes are closed and she is smiling, so I think she is tasting the food and she is happy with it. Maybe she is making a soup or a stew. The kitchen is small and made of wood, and it looks warm and comfortable. On the wall behind her there are frying pans hanging on hooks, and on the right there are shelves with bottles of oil, spices and salt. In front of her there is a small gas stove. I think she is probably preparing dinner for her family or for guests. Personally, I enjoy cooking at the weekend, and my favourite dish to make is kabsa with chicken.",
+      "credit": "Shixart1985, CC BY 2.0, https://commons.wikimedia.org/wiki/File:Woman_stirring_a_pot_in_a_cozy_kitchen,_enjoying_the_cooking_process.jpg"
+    },
+    {
+      "id": "street",
+      "file": "assets/det/photos/05-street.jpg",
+      "title_en": "Busy city street",
+      "scene_ar": "شارع زحمة في مدينة آسيوية، فيه دبابات وسيارات ونقل صغير وأسلاك كهرباء كثيرة فوق.\nمحلات بلوحات ملونة على الجنبين وناس يمشون على الرصيف.",
+      "keywords": ["street", "traffic", "motorbikes", "cars", "pickup truck", "shops", "signs", "pedestrians", "pavement", "wires", "buildings", "busy", "city"],
+      "vocab": [
+        {"w": "traffic", "ar": "زحمة / حركة مرور"},
+        {"w": "motorbike", "ar": "دباب"},
+        {"w": "pickup truck", "ar": "ونيت / نقل صغير"},
+        {"w": "pedestrian", "ar": "ماشي على الرجل"},
+        {"w": "pavement", "ar": "رصيف"},
+        {"w": "sign", "ar": "لوحة"},
+        {"w": "power lines", "ar": "أسلاك كهرباء"},
+        {"w": "crowded", "ar": "مزدحم"}
+      ],
+      "questions_ar": ["وش تشوف بالصورة؟", "وين هم؟ وش يسوون؟", "كيف الجو؟ وش وقت اليوم؟", "وش أنواع المواصلات اللي تشوفها؟", "وش ممكن يصير بعدين؟"],
+      "write_60": "This is a busy street in a city. There is a lot of traffic. I can see many motorbikes, some cars and a white pickup truck. On both sides of the road there are shops with colourful signs. Some people are walking on the pavement, and there are many electric wires above the street. Maybe it is the evening, because the shops are open.",
+      "write_90": "This photo shows a busy street in an Asian city. There is a lot of traffic on the road. I can see several motorbikes, a white pickup truck, a black car and some parked motorbikes on the left. A man in a black T-shirt is riding a motorbike in the middle of the road. On both sides of the street there are shops and restaurants with big colourful signs, and above the street there are a lot of electric wires. A few people are walking on the pavement on the right. The sky is grey, so maybe it is late afternoon.",
+      "speak_model": "In this picture I can see a very busy street in a city, and I think it is somewhere in Asia because of the signs on the shops. There is a lot of traffic. In the middle of the road a man in a black T-shirt is riding a motorbike, and behind him there is a white pickup truck and a black car. On the left there are many motorbikes parked next to the pavement. On both sides of the street there are shops, restaurants and a pharmacy with big, colourful signs, and above the street there are hundreds of electric wires. A few people are walking on the pavement on the right, and one woman is wearing pink. The sky is grey, so maybe it is late afternoon or it is going to rain. The street looks noisy and a little crowded, but also interesting. Personally, I prefer quiet streets, but I like visiting busy places like this on holiday because there is always something to see.",
+      "credit": "PattayaPatrol, CC BY-SA 4.0, https://commons.wikimedia.org/wiki/File:DFC_3731_Busy_city_street_with_motorcycles_cars_and_pedestrians_passing_shops_and_colorful_buildings_under_tangled_overhead_wires.jpg"
+    },
+    {
+      "id": "airport",
+      "file": "assets/det/photos/06-airport.jpg",
+      "title_en": "Airport check-in hall",
+      "scene_ar": "صالة مغادرة كبيرة في مطار، سقفها معدني عالي وفيها كاونترات تسجيل بأرقام.\nمسافرين واقفين في الطابور ومعهم شنط سفر وشنط ظهر، وبعضهم لابسين جواكيت.",
+      "keywords": ["airport", "terminal", "check-in", "counter", "queue", "passengers", "suitcase", "luggage", "backpack", "roof", "travelling", "flight", "waiting"],
+      "vocab": [
+        {"w": "check-in counter", "ar": "كاونتر تسجيل"},
+        {"w": "queue", "ar": "طابور"},
+        {"w": "suitcase", "ar": "شنطة سفر"},
+        {"w": "luggage", "ar": "عفش"},
+        {"w": "passenger", "ar": "مسافر / راكب"},
+        {"w": "boarding pass", "ar": "بطاقة صعود"},
+        {"w": "departure hall", "ar": "صالة المغادرة"},
+        {"w": "to travel", "ar": "يسافر"}
+      ],
+      "questions_ar": ["وش تشوف بالصورة؟", "وين هم؟ وش يسوون؟", "وش يلبسون؟ وش معهم؟", "وين تتوقع رايحين؟", "وش ممكن يصير بعدين؟"],
+      "write_60": "This picture shows the check-in hall of an airport. It is a big building with a high metal roof and many windows. I can see several check-in counters with numbers. Many passengers are standing in a queue with their suitcases and backpacks. Most of them are wearing jackets, so maybe it is winter. They are probably waiting to check in for their flight.",
+      "write_90": "This is a photo of a large departure hall in an airport. The building is very modern, with a high curved metal roof and big windows that let in the light. In the middle I can see check-in counters with numbers like 231 and 235. A lot of passengers are standing in a queue in front of the counters. They have suitcases, red and grey trolley bags and backpacks. Most people are wearing warm jackets, so it is probably winter. On the right, a man with a big backpack is walking. I think they are all waiting to check in and get their boarding passes.",
+      "speak_model": "In this photo I can see a large check-in hall at an airport. The building is very modern and bright. It has a high, curved metal roof with big lights, and there are large windows on the left, so the hall has a lot of natural light. In the middle of the picture there is a row of check-in counters with numbers, for example 231, 232 and 235. In front of the counters, many passengers are waiting in a queue. They have suitcases of different colours, and some people have backpacks. On the left, a man in a black coat is standing with a small brown suitcase, and on the right, another man with a big backpack is walking away. Most people are wearing warm jackets, so I think it is winter. They are probably going to check in their luggage and get their boarding passes, and then they will go to security. I love airports because they mean holidays. Last year I flew from Riyadh to Istanbul, and the queue at check-in was very long, just like this one.",
+      "credit": "Filip Troníček, CC BY-SA 4.0, https://commons.wikimedia.org/wiki/File:Check-in_on_terminal_2_of_the_V%C3%A1clav_Havel_Airport_in_Prague.jpg"
+    },
+    {
+      "id": "classroom",
+      "file": "assets/det/photos/07-classroom.jpg",
+      "title_en": "Teacher and students in a classroom",
+      "scene_ar": "فصل دراسي بسيط جدرانه صفراء وطاولات خشب، والشباك مفتوح ونوره داخل.\nمعلمة لابسة فستان ملون وطرحة بنفسجية واقفة وتشرح، والطلاب قاعدين بزي أزرق وأبيض يسمعون لها.",
+      "keywords": ["classroom", "teacher", "students", "pupils", "desks", "uniform", "lesson", "listening", "explaining", "window", "school", "books", "wall"],
+      "vocab": [
+        {"w": "desk", "ar": "طاولة دراسة"},
+        {"w": "pupil", "ar": "طالب / تلميذ"},
+        {"w": "uniform", "ar": "زي مدرسي"},
+        {"w": "lesson", "ar": "درس / حصة"},
+        {"w": "to explain", "ar": "يشرح"},
+        {"w": "to raise your hand", "ar": "يرفع يده"},
+        {"w": "headscarf", "ar": "طرحة"},
+        {"w": "to pay attention", "ar": "ينتبه"}
+      ],
+      "questions_ar": ["وش تشوف بالصورة؟", "وين هم؟ وش يسوون؟", "وش يلبسون؟", "وش تتوقع المادة اللي يدرسونها؟", "وش ممكن يصير بعدين؟"],
+      "write_60": "This is a picture of a classroom in a school. A teacher is standing in front of the class. She is wearing a colourful dress and a purple headscarf, and she is explaining something to the students. Many students are sitting at wooden desks. They are wearing blue and white school uniforms and they are listening. Maybe it is an English lesson.",
+      "write_90": "This photo shows a lesson in a simple classroom. The walls are yellow and there is a big open window on the right, so the room is bright. A teacher is standing at the front with her back to the camera. She is wearing a colourful dress and a purple headscarf, and she is explaining something with her hands. A large group of students is sitting at wooden desks. They are wearing blue and white school uniforms, and most of them are looking at the teacher and listening carefully. Some students have books and pens on their desks. Maybe it is a maths or an English lesson.",
+      "speak_model": "In this picture I can see a lesson in a school classroom. The room is quite simple. The walls are yellow, there is some writing on the walls, and on the right there is a big open window, so the classroom is bright. The teacher is standing at the front of the class with her back to the camera. She is wearing a long colourful dress and a purple headscarf, and she is moving her hands, so I think she is explaining something important. There are a lot of students, maybe twenty or thirty. They are sitting at old wooden desks, and they are all wearing blue and white school uniforms. Most of them are looking at the teacher and listening carefully, and one boy at the front has his hand on his head, so maybe the question is difficult. I think this is a primary school, and perhaps it is a maths lesson. When I was at school, my favourite subject was English, and I still remember my teacher because she was very patient with us.",
+      "credit": "Knowledge and philosophy, CC BY-SA 4.0, https://commons.wikimedia.org/wiki/File:Students_learning_in_class.jpg"
+    },
+    {
+      "id": "beach",
+      "file": "assets/det/photos/08-beach.jpg",
+      "title_en": "Families on the beach at sunset",
+      "scene_ar": "شاطئ واسع وقت الغروب، السما زرقا وبرتقالية والرمل مبلول يعكس الناس.\nعوايل يتمشون على الشاطئ، وفيه جمل عليه واحد راكب، وفي الخلفية عمارات المدينة.",
+      "keywords": ["beach", "sunset", "sea", "sand", "families", "walking", "camel", "sky", "reflection", "buildings", "evening", "waves", "silhouette"],
+      "vocab": [
+        {"w": "sunset", "ar": "غروب"},
+        {"w": "wet sand", "ar": "رمل مبلول"},
+        {"w": "waves", "ar": "موج"},
+        {"w": "reflection", "ar": "انعكاس"},
+        {"w": "camel ride", "ar": "ركوب جمل"},
+        {"w": "silhouette", "ar": "ظل / خيال"},
+        {"w": "shore", "ar": "ساحل"},
+        {"w": "to take a walk", "ar": "يتمشى"}
+      ],
+      "questions_ar": ["وش تشوف بالصورة؟", "وين هم؟ وش يسوون؟", "كيف الجو؟ وش وقت اليوم؟", "وش الألوان اللي تشوفها في السما؟", "وش ممكن يصير بعدين؟"],
+      "write_60": "This photo shows a wide beach at sunset. The sky is blue and orange, and the sand is wet, so I can see the reflections of the people. Many families are walking on the beach near the sea. On the left there is a camel with a rider. In the background I can see the tall buildings of a city. Maybe it is a warm evening at the weekend.",
+      "write_90": "This is a beautiful picture of a beach at sunset. The sky is dark blue at the top and orange near the sea, and the sand is wet, so it works like a mirror and reflects the people. A lot of families are walking on the beach. I can see men, women and children, and they look like dark shapes because the sun is behind them. On the left there is a camel with a person riding it, so maybe people can pay for a camel ride. In the background, on the right, I can see the tall buildings of a big city. It is probably a warm evening, and people are enjoying the fresh air after a hot day.",
+      "speak_model": "In this picture I can see a very wide beach at sunset, and I think it is in a big city because there are tall buildings on the right side. The sky is amazing. It is dark blue at the top and orange and pink near the horizon. The sand is wet, so it looks like a mirror, and I can see the reflections of all the people. There are many families walking along the shore. I can see men, women and small children, but they look like dark shapes, like silhouettes, because the sun is behind them. On the left there is a camel with a rider, so maybe families can pay for a short camel ride, which children usually love. The sea is calm, with small waves. I think it is a warm evening, probably at the weekend, and people have come to the beach to relax after a hot day. This photo reminds me of the Corniche in Jeddah, where my family likes to walk in the evening and eat ice cream.",
+      "credit": "M.irfan44, CC BY-SA 4.0, https://commons.wikimedia.org/wiki/File:Seaview_(Clifton_Beach)_Karachi.jpg"
+    },
+    {
+      "id": "clinic",
+      "file": "assets/det/photos/09-clinic.jpg",
+      "title_en": "Doctor examining a patient",
+      "scene_ar": "غرفة في مستشفى، فيها مريضة قاعدة على السرير لابسة روب المستشفى.\nدكتور لابس معطف أبيض يفحصها بالسماعة، وورا فيه دكتورين ثانيين ماسكين أوراق ويسجلون.",
+      "keywords": ["hospital", "doctor", "patient", "stethoscope", "white coat", "examining", "bed", "gown", "clipboard", "nurse", "check-up", "room", "curtain"],
+      "vocab": [
+        {"w": "stethoscope", "ar": "سماعة الطبيب"},
+        {"w": "white coat", "ar": "معطف أبيض"},
+        {"w": "patient", "ar": "مريض"},
+        {"w": "hospital gown", "ar": "روب المستشفى"},
+        {"w": "to examine", "ar": "يفحص"},
+        {"w": "clipboard", "ar": "لوح أوراق"},
+        {"w": "check-up", "ar": "كشف / فحص"},
+        {"w": "to take notes", "ar": "يسجل ملاحظات"}
+      ],
+      "questions_ar": ["وش تشوف بالصورة؟", "وين هم؟ وش يسوون؟", "وش يلبسون؟", "وش تتوقع المريضة تحس فيه؟", "وش ممكن يصير بعدين؟"],
+      "write_60": "This picture shows a hospital room. A woman is sitting on a hospital bed. She is wearing a hospital gown. A doctor in a white coat is examining her with a stethoscope. Behind them there are two other doctors. They are holding clipboards and writing notes. There is a curtain in the background. Maybe the woman has a problem with her heart or her lungs.",
+      "write_90": "In this photo I can see a doctor examining a patient in a hospital. The patient is a woman with short hair, and she is sitting on a hospital bed. She is wearing a white and purple hospital gown, and she looks a little worried. On the left, a young doctor with glasses and a white coat is listening to her chest with a stethoscope. Behind them, two other doctors in white coats are standing and holding clipboards. They are probably medical students taking notes. In the background there is a yellow curtain and some medical equipment. Maybe the woman has a cough or a problem with her heart.",
+      "speak_model": "This photo was taken in a hospital room. In the middle of the picture there is a patient, a woman with short dark hair. She is sitting on a hospital bed and she is wearing a hospital gown, and I think she looks a little bit worried. On the left there is a young doctor. He is wearing glasses and a white coat, and he is listening to her chest with a stethoscope. Behind them, two other doctors in white coats are standing next to the bed. They are holding clipboards and writing notes, so maybe they are medical students learning from the first doctor. In the background I can see a curtain and some medical equipment on the wall. I think the woman probably has a cough or a chest infection, and the doctor is checking her breathing. I hope she gets better soon. Personally, I do not like hospitals very much, but I think doctors do a very important job. My cousin is a nurse in Riyadh and she works very long hours.",
+      "credit": "National Cancer Institute (photographer unknown), Public domain, https://commons.wikimedia.org/wiki/File:Doctor_examines_patient_with_stethoscope.jpg"
+    },
+    {
+      "id": "cafe",
+      "file": "assets/det/photos/10-cafe.jpg",
+      "title_en": "People working in a café",
+      "scene_ar": "كوفي شوب مصوّر من فوق عبر الزجاج، فيه طاولة خشب طويلة.\nثلاث أشخاص قاعدين، اثنين على لابتوب وواحد يقرأ ويكتب في دفتر، وقدامهم فناجيل قهوة.",
+      "keywords": ["café", "coffee shop", "laptop", "table", "window", "working", "notebook", "coffee", "chairs", "customers", "typing", "reading", "evening"],
+      "vocab": [
+        {"w": "coffee shop", "ar": "كوفي شوب / مقهى"},
+        {"w": "laptop", "ar": "لابتوب"},
+        {"w": "notebook", "ar": "دفتر"},
+        {"w": "cup of coffee", "ar": "فنجان قهوة"},
+        {"w": "to type", "ar": "يكتب على الكيبورد"},
+        {"w": "window", "ar": "شباك / زجاج"},
+        {"w": "from above", "ar": "من فوق"},
+        {"w": "to work remotely", "ar": "يشتغل عن بعد"}
+      ],
+      "questions_ar": ["وش تشوف بالصورة؟", "وين هم؟ وش يسوون؟", "من وين مصورة الصورة؟", "وش تتوقع يشتغلون عليه؟", "وش ممكن يصير بعدين؟"],
+      "write_60": "This photo was taken from above, through the window of a coffee shop. I can see a long wooden table with three people. The man on the left is using a laptop and reading a book. The woman in the middle is writing in a notebook. The man on the right is also working on a laptop. There are cups of coffee on the table. Maybe they are students or people working remotely.",
+      "write_90": "This picture shows a coffee shop from above, through a large glass window. Inside there is a long wooden table next to the window, and three people are sitting there. On the left, a man in a grey T-shirt is working on a laptop and he has an open book next to him. In the middle, a woman in a striped top is writing in a notebook, and there is a cup of coffee in front of her. On the right, a man in a dark shirt is typing on his laptop. Outside the café there is a pavement with red bricks. It looks like the evening, because the lights inside are on. Maybe they are freelancers or students.",
+      "speak_model": "This is an interesting photo because it was taken from above, probably from a balcony, and we are looking through the big glass window of a coffee shop. Inside, there is a long wooden table next to the window, and three people are sitting there and working. On the left there is a man in a grey T-shirt. He is using a laptop and he also has an open book and a phone next to him. In the middle there is a woman with long hair and a striped top, and she is writing in a notebook. There is a cup of coffee in front of her. On the right, a man in a dark shirt is typing on his laptop, and he has some papers on the table. Outside the café, the ground is made of red bricks. I think it is the evening, because the lights inside are warm and bright. Maybe these people are freelancers or university students, and they come here because the coffee is good and there is free Wi-Fi. I also like working in cafés, because at home I get distracted, but in a café I can focus better.",
+      "credit": "Tim Gouw (Unsplash), CC0, https://commons.wikimedia.org/wiki/File:Busy_people_at_a_coffee_shop_(Unsplash).jpg"
+    },
+    {
+      "id": "office-meeting",
+      "file": "assets/det/photos/11-office-meeting.jpg",
+      "title_en": "Office meeting",
+      "scene_ar": "اجتماع عمل في مكتب، خمسة موظفين حول طاولة خشب عليها أوراق وأقلام ونظارة.\nوحدة واقفة وتتكلم، ووحدة تشرح بيدها، والباقي يسمعون بتركيز.",
+      "keywords": ["office", "meeting", "table", "colleagues", "papers", "documents", "discussing", "tie", "blinds", "listening", "explaining", "notes", "business"],
+      "vocab": [
+        {"w": "meeting", "ar": "اجتماع"},
+        {"w": "colleague", "ar": "زميل"},
+        {"w": "documents", "ar": "أوراق / مستندات"},
+        {"w": "to discuss", "ar": "يناقش"},
+        {"w": "to present", "ar": "يعرض / يقدّم"},
+        {"w": "tie", "ar": "ربطة عنق"},
+        {"w": "blinds", "ar": "ستاير مكتب"},
+        {"w": "to agree", "ar": "يوافق"}
+      ],
+      "questions_ar": ["وش تشوف بالصورة؟", "وين هم؟ وش يسوون؟", "وش يلبسون؟", "وش تتوقع موضوع الاجتماع؟", "وش ممكن يصير بعدين؟"],
+      "write_60": "This picture shows a meeting in an office. Five people are sitting and standing around a wooden table. There are four women and one man. The man is wearing a white shirt and a tie. On the table there are many papers, pencils and a pair of glasses. One woman on the right is talking and moving her hand. The others are listening. Maybe they are discussing a new project.",
+      "write_90": "This is a photo of a business meeting in an office. Five colleagues are around a large wooden table. Four of them are women and one is a man, and he is wearing a white shirt with a black tie. One woman is standing and leaning on the table, and the others are sitting. The woman on the right, in a grey jacket, is talking and explaining something with her hand. Everyone is looking at her and listening carefully. On the table there are a lot of papers, notes, pencils and a pair of glasses. Behind them there are white blinds on the window. Maybe they are planning a new project or discussing a problem.",
+      "speak_model": "In this photo I can see a meeting in an office. There are five people around a big wooden table: four women and one man. The man is in the middle, and he is wearing a white shirt and a black tie. He is holding a pencil and he looks serious. One woman, in a dark purple dress, is standing behind the table and leaning on it, and the woman on the right, in a grey jacket, is talking and explaining something with her hand. Everyone else is looking at her and listening carefully, so I think she is the manager or she has an important idea. On the table there are many papers and documents, some notes, pencils and a pair of glasses. In the background there are white blinds on the window, and the light is coming through. I think they are discussing a new project or maybe a problem with a customer. In my job we also have meetings every week, and honestly, sometimes they are too long, but they are useful when everyone is prepared.",
+      "credit": "Bill Branson / National Cancer Institute, Public domain, https://commons.wikimedia.org/wiki/File:Staff_meeting_(3).jpg"
+    },
+    {
+      "id": "family-dinner",
+      "file": "assets/det/photos/12-family-dinner.jpg",
+      "title_en": "Family dinner",
+      "scene_ar": "عائلة من خمس أشخاص قاعدين على طاولة عشا مغطاة بمفرش أبيض.\nجدة وأب وأم وبنت وولد، وعلى الطاولة رز وسلطة وخضار وفاصوليا وجك ماي، وكلهم مبتسمين ويناولون الأكل.",
+      "keywords": ["family", "dinner", "table", "tablecloth", "rice", "salad", "vegetables", "grandmother", "parents", "children", "passing", "smiling", "plates", "jug"],
+      "vocab": [
+        {"w": "tablecloth", "ar": "مفرش"},
+        {"w": "bowl", "ar": "صحن عميق / زبدية"},
+        {"w": "jug", "ar": "جك / إبريق"},
+        {"w": "to pass (the salad)", "ar": "يناول"},
+        {"w": "to serve", "ar": "يقدّم الأكل"},
+        {"w": "grandmother", "ar": "جدة"},
+        {"w": "home-cooked", "ar": "أكل بيت"},
+        {"w": "to share", "ar": "يتشارك"}
+      ],
+      "questions_ar": ["وش تشوف بالصورة؟", "وين هم؟ وش يسوون؟", "وش الأكل اللي على الطاولة؟", "وش تتوقع العلاقة بينهم؟", "وش ممكن يصير بعدين؟"],
+      "write_60": "This photo shows a family having dinner together. There are five people around a table with a white tablecloth: a grandmother, a father, a mother, a girl and a boy. On the table I can see rice, salad, vegetables, beans and a jug of water. The mother is passing a bowl of salad to the girl. Everyone is smiling. Maybe it is a special family dinner.",
+      "write_90": "This is a picture of a family dinner. Five people are sitting around a table covered with a white tablecloth. On the left there is a girl with long hair and a grandmother with grey hair. In the middle there is the father, who is wearing a colourful checked shirt and has a moustache. On the right there is the mother in a blue top and a boy in a red shirt. The table is full of food: a big bowl of white rice, a green salad, a pot of vegetables, red beans and a jug of water. The mother is passing the salad to her daughter, and everyone is smiling and talking. Maybe they are celebrating something.",
+      "speak_model": "In this picture I can see a family having dinner together at home. There are five people around a table with a white tablecloth. On the left there is a girl with long dark hair, and next to her there is a grandmother with grey hair. In the middle there is the father. He has a moustache and he is wearing a colourful checked shirt. On the right there is the mother, in a dark blue top, and a boy in a red shirt. The table is full of food. I can see a big bowl of white rice, a green salad with tomatoes, a pot of cooked vegetables, a bowl of red beans, some plates and a glass jug of water. The mother is passing the salad to her daughter, and everyone is smiling and looking happy. I think it is a normal family dinner, but maybe they are celebrating something, like good school results. In my family we also eat together every evening, usually rice with chicken, and my grandmother always sits at the head of the table.",
+      "credit": "National Cancer Institute, Public domain, https://commons.wikimedia.org/wiki/File:Family_eating_meal.jpg"
+    },
+    {
+      "id": "bus-stop",
+      "file": "assets/det/photos/13-bus-stop.jpg",
+      "title_en": "Waiting at a bus stop",
+      "scene_ar": "موقف باص في يوم شتوي بارد، الثلج على الأرض والشجر بدون ورق.\nمجموعة شباب لابسين جواكيت وشنط ظهر واقفين ينتظرون الباص، وواحد يتكلم بالجوال.",
+      "keywords": ["bus stop", "shelter", "waiting", "snow", "winter", "coats", "jackets", "backpacks", "trees", "building", "cold", "phone", "students", "sign"],
+      "vocab": [
+        {"w": "bus shelter", "ar": "مظلة موقف الباص"},
+        {"w": "to wait for", "ar": "ينتظر"},
+        {"w": "snow", "ar": "ثلج"},
+        {"w": "coat", "ar": "معطف / جاكيت"},
+        {"w": "backpack", "ar": "شنطة ظهر"},
+        {"w": "bare trees", "ar": "شجر بدون ورق"},
+        {"w": "freezing", "ar": "بارد جداً"},
+        {"w": "timetable", "ar": "جدول المواعيد"}
+      ],
+      "questions_ar": ["وش تشوف بالصورة؟", "وين هم؟ وش يسوون؟", "وش يلبسون؟ كيف الجو؟", "وين تتوقع رايحين؟", "وش ممكن يصير بعدين؟"],
+      "write_60": "This picture shows people waiting at a bus stop in winter. There is snow on the ground and the trees have no leaves. About ten young people are standing near a glass bus shelter. They are wearing warm coats, hats and backpacks. One man on the left is talking on his phone. Behind them there is a big brick building. Maybe they are students going to university.",
+      "write_90": "This photo shows a bus stop on a cold winter day. There is snow on the ground and on the grass, and the trees have no leaves. A group of about ten young people are waiting for the bus next to a glass bus shelter. They are all wearing warm winter coats, some of them have hats, and many have backpacks. On the left, a man in a blue shirt is talking on his phone. Two men on the right are standing with their hands in their pockets because it is very cold. Behind them there is a large brick building, and I can see a yellow sign for pedestrians. Maybe they are university students going to class.",
+      "speak_model": "In this photo I can see a group of people waiting at a bus stop, and it is clearly winter. There is snow on the ground and on the grass, the sky is grey, and the trees have no leaves. About ten young people are standing on the pavement next to a glass bus shelter. They are all wearing warm coats, some of them have wool hats, and most of them have backpacks, so I think they are university students. In fact, the name of a college is written on the shelter. On the left, a man in a blue shirt is talking on his phone, and next to him a woman with blue hair is standing with her bag. In the middle, a man in a grey coat is looking at the road, probably to see if the bus is coming. On the right, two men are standing with their hands in their pockets, because it looks freezing. Behind them there is a big brick building with many windows. I have never seen so much snow in real life, because in Saudi Arabia it is usually hot, so for me this picture looks very cold but also beautiful.",
+      "credit": "Frank Hank, CC BY-SA 3.0, https://commons.wikimedia.org/wiki/File:People_waiting_at_bus_stop.jpg"
+    },
+    {
+      "id": "football",
+      "file": "assets/det/photos/14-football.jpg",
+      "title_en": "Football match at night",
+      "scene_ar": "مباراة كورة بالليل على ملعب عشب صناعي تحت الكشافات.\nلاعب توه سدد، والحارس لابس أخضر طاير عشان يصد الكورة، والجمهور قاعدين على الدرج ورا الشبك الأزرق.",
+      "keywords": ["football", "match", "pitch", "goalkeeper", "goal", "players", "ball", "floodlights", "night", "spectators", "kit", "shooting", "saving", "fence"],
+      "vocab": [
+        {"w": "pitch", "ar": "ملعب"},
+        {"w": "goalkeeper", "ar": "حارس مرمى"},
+        {"w": "to shoot", "ar": "يسدد"},
+        {"w": "to save", "ar": "يصد"},
+        {"w": "to score a goal", "ar": "يسجل هدف"},
+        {"w": "floodlights", "ar": "كشافات"},
+        {"w": "spectators", "ar": "جمهور / متفرجين"},
+        {"w": "kit", "ar": "طقم اللاعب"}
+      ],
+      "questions_ar": ["وش تشوف بالصورة؟", "وين هم؟ وش يسوون؟", "وش يلبسون؟ وش وقت اليوم؟", "تتوقع الكورة بتدخل ولا لا؟", "وش ممكن يصير بعدين؟"],
+      "write_60": "This picture shows a football match at night. The players are on a green pitch with bright floodlights. A player in a white shirt has just kicked the ball towards the goal. The goalkeeper is wearing a green kit and he is diving to save the ball. Other players are running. Behind the blue fence, some spectators are watching the game. Maybe it is a friendly match.",
+      "write_90": "This is a photo of a football match at night. The game is on an artificial grass pitch with white lines, and there are floodlights, so the pitch is bright. On the left there is a goal. A player in a white shirt and black shorts has just shot the ball, and the goalkeeper, who is wearing a bright green kit, is diving to make a save. The other players, in white and in orange and black shirts, are running towards the goal. Behind the tall blue fence, a group of spectators is sitting on the steps and watching. It is probably an amateur match between two local teams.",
+      "speak_model": "In this picture I can see a football match, and it is at night because the sky is dark and there are big floodlights around the pitch. The pitch is artificial grass with white lines, and there is a tall blue fence around it. On the left there is the goal. A player in a white shirt and black shorts has just shot the ball towards the goal, and the goalkeeper, who is wearing a bright green kit, is diving to save it. I am not sure if the ball is going in, but it looks like a very close moment. There are other players in white and in orange and black shirts, and they are running towards the goal, and on the right I can see the referee in a black kit. Behind the fence, about twenty spectators are sitting on the steps and watching the game. I think this is an amateur match between two local teams, maybe on a Friday evening. I love football. I play with my friends every week, and my favourite team is Al-Hilal, so I would enjoy watching a game like this.",
+      "credit": "PattayaPatrol, CC BY-SA 4.0, https://commons.wikimedia.org/wiki/File:DFC_5336_A_tense_moment_as_a_striker_fires_a_shot_on_goal_while_the_goalkeeper_dives_to_make_the_save_during_a_nighttime_amateur_soccer_match.jpg"
+    }
+  ]
+}
