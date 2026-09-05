@@ -1,0 +1,14 @@
+{
+  "v": 1,
+  "updated": "2026-09-05",
+  "_readme_ar": "حزمة المدرّب: أنا (كلود) أحدّث هذا الملف بناءً على سجل محاولاتك (det-logs). coach = ملاحظات تظهر في تبويب «اليوم». banks = أسئلة إضافية تُضاف لبنوك المدرّب بنفس شكل عناصر كل بنك (fib.items, readselect.real/fake, listentype.items, readcomplete.passages, ireading.sets, writing.photo/interactive/sample/summary, speaking.rts/interactive/sample/photo, grammar_vocab.vocab).",
+  "coach": [
+    {
+      "date": "2026-09-05",
+      "title_ar": "أول ملاحظة — كيف نشتغل مع بعض",
+      "body_ar": "سجّل دخولك في «حسابي والمزامنة» بنفس يوزر وباسورد بوابتك. من هالحين كل محاولة (السؤال وإجابتك ووقتك ونص كتابتك وكلامك) تنحفظ بحسابك الخاص، وأنا أقرأها وأضيف لك هنا ملاحظات وأسئلة جديدة على نفس أخطائك. ابدأ اليوم بـ Listen and Type و Fill in the Blanks (أسرع نقاط)، وسوّ المحاكاة الكاملة مرة وحدة الليلة عشان أعرف مستواك الحقيقي بكل مهارة.",
+      "focus": ["lt", "fib", "wp"]
+    }
+  ],
+  "banks": {}
+}
