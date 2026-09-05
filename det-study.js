@@ -918,8 +918,11 @@ photo|visible|ظاهر|A bridge is visible in the distance.
       '<div class="idea-list">' + topic.ideas.map((idea) => "<div>" + escapeHtml(idea) + "</div>").join("") + "</div>" +
       "<h4>سؤال كتابة</h4>" +
       '<div class="prompt-box">' + escapeHtml(topic.writing) + "</div>" +
-      "<h4>أسئلة تحدث</h4>" +
-      '<div class="idea-list" style="direction:ltr;text-align:left">' + topic.speaking.map((prompt) => "<div>" + escapeHtml(prompt) + "</div>").join("") + "</div>" +
+      '<div class="practice-tools"><button class="study-btn" type="button" id="hidePassage">🙈 خبّي القطعة والترجمة وأكتب من راسي</button></div>' +
+      '<div id="topicWrite"></div>' +
+      "<h4>أسئلة تحدث — اضغط 🎙️ وجاوب، وأراجع لك</h4>" +
+      '<div class="idea-list" style="direction:ltr;text-align:left">' + topic.speaking.map((prompt, qi) => '<div><button class="study-btn sm" type="button" data-sq="' + qi + '">🎙️</button> ' + escapeHtml(prompt) + "</div>").join("") + "</div>" +
+      '<div id="topicSpeak"></div>' +
       '<div style="margin-top:14px"><button class="study-btn ' + (isDone ? "" : "primary") + '" id="topicDone" type="button">' +
       (isDone ? "✓ تمت مذاكرته" : "علّمه كمُذاكر") + "</button></div>";
 
@@ -927,6 +930,18 @@ photo|visible|ظاهر|A bridge is visible in the distance.
       studyState.topics[topic.id] = !studyState.topics[topic.id];
       saveStudyState();
       renderTopics();
+    });
+    byId("hidePassage").addEventListener("click", () => {
+      const reader = byId("topicReader"); const hidden = reader.classList.toggle("passage-hidden");
+      byId("hidePassage").textContent = hidden ? "👀 أظهر القطعة والترجمة" : "🙈 خبّي القطعة والترجمة وأكتب من راسي";
+    });
+    practiceWriting(byId("topicWrite"), { key: "topic:" + topic.id, drill: "study-w", prompt: topic.writing, keywords: kwFrom(topic.passage + " " + topic.words), kind: "sample", min: 120, seconds: 300, modelHtml: '<div class="english-block">' + escapeHtml(topic.passage) + '</div><div class="arabic-block">' + escapeHtml(topic.translation) + "</div>" });
+    byId("topicReader").querySelectorAll("[data-sq]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const prompt = topic.speaking[Number(button.dataset.sq)];
+        practiceSpeaking(byId("topicSpeak"), { key: "topic:" + topic.id + ":s" + button.dataset.sq, drill: "study-s", prompt, seconds: 90, kind: "rts", keywords: kwFrom(topic.passage + " " + prompt), planHtml: speakPlanHtml(topic) });
+        byId("topicSpeak").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     });
     updateTopicProgress();
   }
@@ -962,13 +977,14 @@ photo|visible|ظاهر|A bridge is visible in the distance.
       '<div class="stats"><span><b>المهمة:</b> ' + escapeHtml(model.task) + "</span></div>" +
       "<h4>السؤال التدريبي</h4>" +
       '<div class="prompt-box">' + escapeHtml(model.prompt) + "</div>" +
+      (model.photo ? '<div class="photo-frame"><img src="' + escapeHtml(model.photo) + '" alt="" loading="lazy"></div>' : "") +
       "<h4>الهيكل الذي تحفظه</h4>" +
       '<div class="idea-list"><div>' + escapeHtml(model.structure) + "</div></div>" +
-      "<h4>النموذج الإنجليزي</h4>" +
-      '<div class="english-block">' + escapeHtml(model.model) + "</div>" +
-      "<h4>الترجمة</h4>" +
-      '<div class="arabic-block">' + escapeHtml(model.translation) + "</div>" +
-      '<div class="note g"><b>طريقة الاستخدام</b>' + escapeHtml(model.note) + "</div>";
+      '<div id="writingPractice"></div>' +
+      (model.speak ? '<h4>🎙️ أو صفها بالكلام (90 ثانية)</h4><div id="writingSpeak"></div>' : "") +
+      '<details class="model-details"><summary>🧑‍🏫 النموذج والترجمة — افتحه بعد ما تكتب</summary>' + modelHtmlOf(model) + "</details>";
+    practiceWriting(byId("writingPractice"), { key: "model:" + model.id, drill: model.photo ? "study-photo" : "study-w", prompt: model.prompt, keywords: model.keywords || kwFrom(model.model), kind: taskKind(model.task), min: taskMin(model.task), seconds: taskSeconds(model.task), modelHtml: modelHtmlOf(model) });
+    if (model.speak) practiceSpeaking(byId("writingSpeak"), { key: "model:" + model.id + ":s", drill: "study-s", prompt: "Describe the photo.", seconds: 90, kind: "photo", keywords: model.keywords || [], planHtml: '<div class="english-block">' + escapeHtml(model.speak) + "</div>" });
   }
 
   const SPEAKING_PROMPTS = TOPICS.flatMap((topic) => topic.speaking.map((prompt) => ({ topic: topic.title, prompt })));
@@ -996,6 +1012,8 @@ photo|visible|ظاهر|A bridge is visible in the distance.
     byId("speakingPrompt").innerHTML = '<small style="display:block;color:var(--teal);direction:rtl;text-align:right">' +
       escapeHtml(item.topic) + "</small>" + escapeHtml(item.prompt);
     resetTimer();
+    const topic = TOPICS.find((t) => t.title === item.topic);
+    practiceSpeaking(byId("speakingPractice"), { key: "speak:" + item.prompt.slice(0, 40), drill: "study-s", prompt: item.prompt, seconds: timerSeconds || 35, kind: timerSeconds >= 180 ? "sample" : timerSeconds >= 90 ? "rts" : "interactive", keywords: kwFrom((topic ? topic.passage : "") + " " + item.prompt), planHtml: speakPlanHtml(topic) });
   }
 
   function renderSpeakingGuide() {
@@ -1238,7 +1256,7 @@ photo|visible|ظاهر|A bridge is visible in the distance.
     writingTestModel = alternatives[Math.floor(Math.random() * alternatives.length)] || WRITING_MODELS[0];
     writingTestRemaining = 300;
     writingTestFinished = false;
-    byId("writingTestPrompt").textContent = writingTestModel.prompt;
+    byId("writingTestPrompt").innerHTML = escapeHtml(writingTestModel.prompt) + (writingTestModel.photo ? '<div class="photo-frame"><img src="' + escapeHtml(writingTestModel.photo) + '" alt=""></div>' : "");
     byId("writingTestText").value = "";
     byId("writingTestText").disabled = true;
     byId("writingTestStart").disabled = false;
@@ -1277,6 +1295,8 @@ photo|visible|ظاهر|A bridge is visible in the distance.
       { label: "بدأت بحرف كبير وختمت بعلامة ترقيم", passed: /^[A-Z]/.test(text) && /[.!?]$/.test(text) }
     ];
     const score = checks.filter((item) => item.passed).length;
+    const rep = window.DetScore && DetScore.writing ? safeCall(() => DetScore.writing({ text, prompt: writingTestModel.prompt, keywords: writingTestModel.keywords || kwFrom(writingTestModel.model), minWords: taskMin(writingTestModel.task), kind: taskKind(writingTestModel.task) })) : null;
+    logStudyAttempt("study-test", { q: writingTestModel.prompt, a: text, sc: rep ? rep.score : Math.round(score * 20), ms: (300 - writingTestRemaining) * 1000, extra: repExtra(rep, { key: "test:" + writingTestModel.id, words, checks: score }) });
     studyState.tests.attempts += 1;
     studyState.tests.writingAttempts += 1;
     saveStudyState();
@@ -1286,7 +1306,8 @@ photo|visible|ظاهر|A bridge is visible in the distance.
     byId("writingTestResult").innerHTML =
       '<div class="note ' + (score >= 4 ? "g" : "a") + '"><b>التقييم الآلي ' + score + " من 5</b>عدد الكلمات: " + words + ". هذا التقييم يفحص البناء فقط ولا يحكم على دقة كل قاعدة.</div>" +
       '<div class="writing-score-grid">' + checks.map((item) => '<div class="' + (item.passed ? "passed" : "failed") + '">' + (item.passed ? "✓ " : "✕ ") + escapeHtml(item.label) + "</div>").join("") + "</div>" +
-      '<div class="study-reader"><h3>نموذج للمقارنة بعد ما خلصت</h3><div class="english-block">' + escapeHtml(writingTestModel.model) + "</div></div>";
+      "<h4>🧑‍🏫 مراجعة بمعايير ديولينجو</h4>" + rubricHtml(rep) +
+      '<div class="study-reader"><h3>🧑‍🏫 كيف كتبتها أنا</h3>' + (writingTestModel.photo ? '<div class="photo-frame"><img src="' + escapeHtml(writingTestModel.photo) + '" alt=""></div>' : "") + '<div class="english-block">' + escapeHtml(writingTestModel.model) + "</div></div>";
   }
 
   function newSpeakingTestPrompt() {
@@ -1387,6 +1408,121 @@ photo|visible|ظاهر|A bridge is visible in the distance.
     showTestMode("vocab");
   }
 
+
+  // =====================================================================
+  // تدريب فعلي: اكتب أو تكلم ← مراجعة بمعايير ديولينجو (det-scoring.js) ← نموذجي بعدها
+  // المحاولات تُحفظ في سجل المدرّب (detTrainer.v1) وترتفع لحسابك أول ما تفتح المدرّب
+  // =====================================================================
+  const STOP_WORDS = new Set("the a an and or but so because of to in on at for with from by about as into like through after over between out against during without before under around among is are was were be been being have has had do does did will would can could should may might must this that these those there here they them their he she it his her its we our you your i my me not no yes very really just also than then when where which who what how all any some many much more most other such only own same too people".split(" "));
+  function kwFrom(text, n) {
+    const seen = new Set();
+    return (String(text || "").toLowerCase().match(/[a-z]+/g) || []).filter((w) => w.length >= 4 && !STOP_WORDS.has(w) && !seen.has(w) && seen.add(w)).slice(0, n || 14);
+  }
+  const countWords = (s) => (String(s || "").trim().match(/[A-Za-z0-9'’-]+/g) || []).length;
+  function safeCall(fn) { try { return fn(); } catch (error) { console.error(error); return null; } }
+  function logStudyAttempt(drill, o) {
+    try {
+      const KEY = "detTrainer.v1";
+      const S = JSON.parse(localStorage.getItem(KEY) || "{}") || {};
+      if (!Array.isArray(S.log)) S.log = [];
+      S.log.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 8), t: Date.now(), drill, q: String(o.q || "").slice(0, 600), a: String(o.a || "").slice(0, 6000), ok: null, sc: o.sc == null ? null : Math.round(o.sc), ms: Math.round(o.ms || 0), lvl: null, extra: o.extra || null, syn: 0 });
+      if (S.log.length > 3000) S.log.splice(0, S.log.length - 3000);
+      S.ts = Date.now();
+      localStorage.setItem(KEY, JSON.stringify(S));
+    } catch (error) { /* المساحة أو الخصوصية */ }
+  }
+  const RUB_AR = { task: "المهمة", vocab: "المفردات", grammar: "القواعد", structure: "الهيكل", mechanics: "الشكل" };
+  function rubricHtml(rep) {
+    if (!rep) return '<div class="note a"><b>محرك التقييم ما تحمّل</b>تأكد من الإنترنت وحدّث الصفحة. كتابتك محفوظة في السجل.</div>';
+    const sub = rep.subscores || {};
+    return '<div class="rubric-grid"><div><b>' + rep.score + '</b><small>من 100</small></div>' + Object.keys(RUB_AR).map((k) => '<div><b>' + (sub[k] == null ? "—" : sub[k]) + '</b><small>' + RUB_AR[k] + "</small></div>").join("") + "</div>" +
+      '<div class="note g" style="margin:6px 0"><b>' + escapeHtml(rep.band || "") + '</b>تقدير من المدرّب بمعايير ديولينجو، مو درجة رسمية. الأحمر = غلطة وبجانبها الصح.</div>' + (rep.html || "");
+  }
+  const repExtra = (rep, more) => Object.assign({}, more || {}, rep ? { score: rep.score, band: rep.band, sub: rep.subscores, wpm: rep.wpm, issues: (rep.issues || []).slice(0, 10).map((i) => ({ type: i.type, text: i.text, fix: i.fix })) } : {});
+
+  function practiceWriting(host, opts) {
+    if (!host) return;
+    host.innerHTML = '<div class="practice-box"><div class="practice-head"><b>✍️ اكتب هنا وأنا أراجع</b><span class="practice-clock" data-clock>' + (opts.seconds ? formatTestTime(opts.seconds) : "") + "</span></div>" +
+      '<textarea class="test-textarea" lang="en" dir="ltr" placeholder="Start writing here…" data-ta></textarea>' +
+      '<div class="practice-tools"><span class="practice-wc" data-wc>0 words' + (opts.min ? " / " + opts.min : "") + "</span>" +
+      (opts.seconds ? '<button class="study-btn" type="button" data-start>⏱️ شغّل المؤقت</button>' : "") +
+      '<button class="study-btn primary" type="button" data-review>راجع كتابتي</button>' +
+      (opts.modelHtml ? '<button class="study-btn" type="button" data-peek>👀 أبغى أشوف النموذج أول</button>' : "") +
+      "</div><div data-out></div></div>";
+    const ta = host.querySelector("[data-ta]"), wc = host.querySelector("[data-wc]"), out = host.querySelector("[data-out]"), clock = host.querySelector("[data-clock]");
+    let left = opts.seconds || 0, handle = null, t0 = 0, done = false;
+    ta.addEventListener("input", () => { wc.textContent = countWords(ta.value) + " words" + (opts.min ? " / " + opts.min : ""); });
+    const startBtn = host.querySelector("[data-start]");
+    if (startBtn) startBtn.addEventListener("click", () => { if (handle) return; t0 = Date.now(); ta.focus(); startBtn.disabled = true; handle = setInterval(() => { left -= 1; clock.textContent = formatTestTime(left); if (left <= 0) review(); }, 1000); });
+    const peek = host.querySelector("[data-peek]");
+    if (peek) peek.addEventListener("click", () => { out.innerHTML = '<h4>🧑‍🏫 كيف كتبتها أنا</h4>' + opts.modelHtml; peek.disabled = true; });
+    host.querySelector("[data-review]").addEventListener("click", review);
+    function review() {
+      if (done) return; done = true;
+      if (handle) clearInterval(handle);
+      const text = ta.value.trim(); ta.disabled = true;
+      const rep = window.DetScore && DetScore.writing ? safeCall(() => DetScore.writing({ text, prompt: opts.prompt || "", keywords: opts.keywords || [], minWords: opts.min || 40, kind: opts.kind || "sample" })) : null;
+      out.innerHTML = "<h4>🧑‍🏫 مراجعة فورية</h4>" + rubricHtml(rep) + (opts.modelHtml ? "<h4>🧑‍🏫 كيف كتبتها أنا</h4>" + opts.modelHtml : "") +
+        '<div class="practice-tools"><button class="study-btn" type="button" data-again>🔁 اكتب مرة ثانية</button></div>';
+      out.querySelector("[data-again]").addEventListener("click", () => practiceWriting(host, opts));
+      logStudyAttempt(opts.drill || "study-w", { q: opts.prompt, a: text, sc: rep ? rep.score : null, ms: t0 ? Date.now() - t0 : 0, extra: repExtra(rep, { key: opts.key, words: countWords(text) }) });
+    }
+  }
+
+  function practiceSpeaking(host, opts) {
+    if (!host) return;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    host.innerHTML = '<div class="practice-box"><div class="practice-head"><b>🎙️ تكلم وأنا أراجع</b><span class="practice-clock" data-clock>' + formatTestTime(opts.seconds) + "</span></div>" +
+      (SR ? '<div class="practice-tools"><button class="study-btn primary" type="button" data-rec>🎙️ ابدأ التسجيل</button><button class="study-btn" type="button" data-stop disabled>إيقاف وراجع</button></div><div class="transcript" data-tr>نص كلامك يظهر هنا أثناء التسجيل (كروم أو سفاري).</div>' : '<div class="note a"><b>متصفحك ما يحوّل الكلام لنص</b>اكتب جوابك هنا بدل الكلام وراجعه.</div>') +
+      '<textarea class="test-textarea" lang="en" dir="ltr" placeholder="' + (SR ? "أو اكتب جوابك هنا…" : "Type your answer…") + '" data-ta style="min-height:90px"></textarea>' +
+      '<div class="practice-tools"><button class="study-btn" type="button" data-review>راجع الجواب المكتوب</button></div><div data-out></div></div>';
+    const tr = host.querySelector("[data-tr]"), out = host.querySelector("[data-out]"), clock = host.querySelector("[data-clock]"), ta = host.querySelector("[data-ta]");
+    const recBtn = host.querySelector("[data-rec]"), stopBtn = host.querySelector("[data-stop]");
+    let rec = null, fin = "", started = 0, handle = null, left = opts.seconds, done = false;
+    function finish(text, seconds) {
+      if (done) return; done = true;
+      if (handle) clearInterval(handle);
+      if (rec) { try { rec.onend = null; rec.stop(); } catch (error) { /* تجاهل */ } }
+      const rep = window.DetScore && DetScore.speaking ? safeCall(() => DetScore.speaking({ transcript: text, seconds, prompt: opts.prompt || "", keywords: opts.keywords || [], kind: opts.kind || "interactive" })) : null;
+      out.innerHTML = "<h4>🧑‍🏫 مراجعة فورية</h4>" + (text ? '<div class="english-block" style="font-size:14px">' + escapeHtml(text) + "</div>" : '<div class="note a"><b>ما وصلني نص</b>سجّل مرة ثانية أو اكتب جوابك.</div>') + rubricHtml(rep) +
+        (opts.planHtml ? "<h4>🧑‍🏫 كيف أجاوبه أنا</h4>" + opts.planHtml : "") + '<div class="practice-tools"><button class="study-btn" type="button" data-again>🔁 مرة ثانية</button></div>';
+      out.querySelector("[data-again]").addEventListener("click", () => practiceSpeaking(host, opts));
+      logStudyAttempt(opts.drill || "study-s", { q: opts.prompt, a: text, sc: rep ? rep.score : null, ms: seconds * 1000, extra: repExtra(rep, { key: opts.key, seconds }) });
+    }
+    if (recBtn) recBtn.addEventListener("click", () => {
+      try {
+        rec = new SR(); rec.lang = "en-US"; rec.continuous = true; rec.interimResults = true;
+        rec.onresult = (e) => { let f = "", tmp = ""; for (let i = 0; i < e.results.length; i++) { const r = e.results[i]; if (r.isFinal) f += r[0].transcript + " "; else tmp += r[0].transcript + " "; } fin = f; tr.textContent = f + tmp; };
+        rec.onend = () => { if (!done && started) { try { rec.start(); } catch (error) { /* تجاهل */ } } };
+        rec.start();
+      } catch (error) { tr.textContent = "ما قدرت أشغّل المايك — اكتب جوابك تحت."; return; }
+      started = Date.now(); recBtn.disabled = true; stopBtn.disabled = false; tr.textContent = "يسجّل… تكلم بصوت واضح.";
+      handle = setInterval(() => { left -= 1; clock.textContent = formatTestTime(left); if (left <= 0) finish(fin.trim(), opts.seconds); }, 1000);
+    });
+    if (stopBtn) stopBtn.addEventListener("click", () => finish(fin.trim(), Math.max(1, Math.round((Date.now() - started) / 1000))));
+    host.querySelector("[data-review]").addEventListener("click", () => finish(ta.value.trim(), started ? Math.max(1, Math.round((Date.now() - started) / 1000)) : opts.seconds));
+  }
+
+  const speakPlanHtml = (topic) => (topic && topic.ideas ? '<div class="idea-list">' + topic.ideas.map((idea) => "<div>" + escapeHtml(idea) + "</div>").join("") + "</div>" : "") +
+    '<div class="note g"><b>الهيكل اللي أستخدمه</b>جواب مباشر ← سبب ← مثال من حياتي (أرقام أو موقف) ← نتيجة ← In short, … . ما أسكت: لو ضعت أقول "One practical example is…".</div>';
+  const modelHtmlOf = (model) => '<div class="english-block">' + escapeHtml(model.model) + '</div><div class="arabic-block">' + escapeHtml(model.translation || "") + "</div>" + (model.note ? '<div class="note g"><b>طريقة الاستخدام</b>' + escapeHtml(model.note) + "</div>" : "");
+  function taskSeconds(task) { const m = /(\d+)\s*seconds?/i.exec(task || ""); if (m) return Number(m[1]); const k = /(\d+)\s*minutes?/i.exec(task || ""); if (k) return Number(k[1]) * 60; return 300; }
+  function taskKind(task) { const t = String(task || ""); return /photo/i.test(t) ? "photo" : /interactive/i.test(t) ? "interactive" : /summar/i.test(t) ? "summary" : "sample"; }
+  function taskMin(task) { const k = taskKind(task); return k === "photo" ? 40 : k === "interactive" ? (/step\s*2/i.test(task) ? 80 : 110) : k === "summary" ? 40 : 120; }
+
+  // الصور الحقيقية من بنك المدرّب: تحل محل الوصف النصي وتضيف 12 صورة جديدة
+  const PHOTO_MAP = { "photo-market": "market", "photo-team": "office-meeting" };
+  function loadPhotoModels() {
+    fetch("./assets/det/photos.json?v=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
+      const photos = (j && j.photos) || []; if (!photos.length) return;
+      const used = new Set();
+      WRITING_MODELS.forEach((model) => { const pid = PHOTO_MAP[model.id]; const p = photos.find((x) => x.id === pid); if (p) { used.add(p.id); model.photo = p.file; model.keywords = p.keywords; model.model = p.write_90 || model.model; model.translation = p.scene_ar || model.translation; model.speak = p.speak_model; } });
+      photos.filter((p) => !used.has(p.id)).forEach((p) => WRITING_MODELS.push({ id: "photo-" + p.id, title: "وصف صورة: " + (p.scene_ar || p.title_en || p.id).split(/[.،]/)[0].slice(0, 40), task: "Write About the Photo · 60 seconds", prompt: "Describe the photo. What do you see? Where are the people and what are they doing? What might happen next?", structure: "مشهد عام ← شخص/فعل بصيغة الاستمرار + مكان ← تفاصيل (ملابس/أشياء/جو) ← تخمين بـ maybe / probably", model: p.write_90 || p.write_60 || "", translation: p.scene_ar || "", note: "الكلمات المفيدة: " + (p.keywords || []).join(", ") + " · " + (p.vocab || []).map((v) => v.w + " = " + v.ar).join(" · "), photo: p.file, keywords: p.keywords || [], speak: p.speak_model }));
+      const count = document.querySelector('[data-study-tab="writing"] .tab-count'); if (count) count.textContent = String(WRITING_MODELS.length);
+      renderWriting();
+    }).catch(() => { /* بدون صور: نكمل بالنماذج النصية */ });
+  }
+
   function initStudyCenter() {
     if (!byId("study")) return;
     loadStudyState();
@@ -1398,6 +1534,8 @@ photo|visible|ظاهر|A bridge is visible in the distance.
     setupSpeaking();
     renderGrammar();
     setupTests();
+    loadPhotoModels();
+    window.addEventListener("load", () => { if (window.DetScore && DetScore.loadWords) DetScore.loadWords("./det-words.txt").catch(() => {}); });
   }
 
   initStudyCenter();

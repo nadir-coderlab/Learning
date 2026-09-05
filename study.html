@@ -13,6 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./det-study.css">
+<script src="./det-scoring.js" defer></script>
 </head>
 <body>
 
@@ -79,7 +80,7 @@
         <button class="overview-card" type="button" data-open-study="writing">
           <span class="overview-icon">✍️</span>
           <strong>الكتابة</strong>
-          <p>10 نماذج مرنة مع الهيكل والترجمة وطريقة الاستخدام.</p>
+          <p>نماذج بصور حقيقية: اكتب، راجع، ثم قارن بنموذجي.</p>
           <small>افتح القسم ←</small>
         </button>
         <button class="overview-card" type="button" data-open-study="speaking">
@@ -132,7 +133,7 @@
     <section class="study-pane" id="study-topics" role="tabpanel">
       <div class="pane-head">
         <h2>22 موضوعا وقطعة</h2>
-        <p class="lead">كل موضوع فيه قطعة أصلية وترجمتها ومفردات وخطة أفكار وسؤال كتابة وثلاثة أسئلة تحدث.</p>
+        <p class="lead">كل موضوع فيه قطعة وترجمتها وخطة أفكار، وتحتها مكان تكتب فيه جواب السؤال وأنا أراجعه، وأسئلة تحدث تسجّل جوابها بصوتك وأراجعه.</p>
       </div>
       <div class="study-progress"><span id="topicCount">0 من 22 موضوعا</span><div class="mini-bar"><i id="topicBar"></i></div><span id="topicPct">0%</span></div>
       <div class="topic-list" id="topicList"></div>
@@ -142,7 +143,7 @@
     <section class="study-pane" id="study-writing" role="tabpanel">
       <div class="pane-head">
         <h2>نماذج الكتابة المرنة</h2>
-        <p class="lead">اقرأ النموذج. اقفله. ثم اكتب الفكرة نفسها بأسلوبك. احفظ الهيكل والمفردات ولا تحفظ النص حرفيا.</p>
+        <p class="lead">اكتب أولًا (الصور حقيقية وبمؤقت الاختبار)، اضغط «راجع كتابتي» عشان تشوف أخطاءك وتصحيحها، وبعدها افتح «كيف كتبتها أنا» وقارن. لا تحفظ النص حرفيًا.</p>
       </div>
       <div class="model-select" id="writingList"></div>
       <div class="study-reader" id="writingReader"></div>
@@ -164,6 +165,7 @@
         <div><strong>المؤقت</strong><div class="timer-clock" id="timerClock">00:35</div></div>
         <div class="timer-actions"><button id="timerStart" type="button">ابدأ</button><button id="timerReset" type="button">إعادة</button></div>
       </div>
+      <div id="speakingPractice"></div>
       <div class="study-reader" id="speakingGuide"></div>
     </section>
 
