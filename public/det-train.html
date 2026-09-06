@@ -618,7 +618,9 @@ function useTimer(t) { if (activeTimer) activeTimer.stop(); activeTimer = t; ret
 const TTS = {
   voice: null,
   load() { const vs = speechSynthesis.getVoices(); const en = vs.filter(v => /^en[-_]/i.test(v.lang)); const pref = en.find(v => /en[-_]US/i.test(v.lang) && /google|natural|premium|samantha|zira|aria|jenny/i.test(v.name)) || en.find(v => /en[-_]US/i.test(v.lang)) || en[0]; TTS.voice = pref || null; },
-  speak(text, rate = 0.92) { return new Promise((res) => { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; if (TTS.voice) u.voice = TTS.voice; u.rate = rate; u.onend = res; u.onerror = res; speechSynthesis.speak(u); } catch (e) { res(); } }); },
+  /* لهجات غير أمريكية (الاختبار صار يجرّبها): نرجّع صوتًا بريطانيًا/أستراليًا/أيرلنديًا إن وُجد */
+  accentVoice(tag) { try { const vs = speechSynthesis.getVoices().filter(v => new RegExp('^en[-_]' + tag, 'i').test(v.lang)); return vs.find(v => /google|natural|premium|daniel|karen|moira|catherine|libby|sonia|natasha/i.test(v.name)) || vs[0] || null; } catch (e) { return null; } },
+  speak(text, rate = 0.92, voice) { return new Promise((res) => { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); const v = voice || TTS.voice; u.lang = v && v.lang ? v.lang : 'en-US'; if (v) u.voice = v; u.rate = rate; u.onend = res; u.onerror = res; speechSynthesis.speak(u); } catch (e) { res(); } }); },
   ok() { return 'speechSynthesis' in window; }
 };
 if (TTS.ok()) { TTS.load(); speechSynthesis.onvoiceschanged = TTS.load; }
@@ -759,7 +761,7 @@ function renderMenus() {
     { ic: '📄', t: 'Interactive Reading', s: 'قطعة + 6 أسئلة × 7–8 دقائق', key: 'ir', hash: 'read/ir' },
   ]);
   menu('listenMenu', [
-    { ic: '⌨️', t: 'Listen and Type', s: '6 جمل × 60 ثانية — 3 تشغيلات', key: 'lt', hash: 'listen/lt' },
+    { ic: '⌨️', t: 'Listen and Type', s: '6 جمل × 60 ثانية — أول تشغيل تلقائي + تشغيلتان، لهجات مختلطة', key: 'lt', hash: 'listen/lt' },
     { ic: '💬', t: 'Interactive Listening', s: 'سيناريو جامعي + محادثة + ملخص 75 ث', key: 'il', hash: 'listen/il' },
   ]);
   menu('writeMenu', [
@@ -848,7 +850,7 @@ DRILLS.rs = function () {
 };
 
 DRILLS.fib = function () {
-  const items = adaptPick(BANKS.fib.items, x => x.level, 'fib', 10, { kinds: ['fib', 'rs', 'vocab'], keyFn: x => x.answer, max: 3 }); let i = 0, right = 0; const log = [];
+  const items = adaptPick(BANKS.fib.items, x => x.level, 'fib', MOCK.full ? 8 : 10, { kinds: ['fib', 'rs', 'vocab'], keyFn: x => x.answer, max: 3 }); let i = 0, right = 0; const log = [];
   const f = frame('readDrill', '✏️ Fill in the Blanks', 0);
   function show() {
     if (i >= items.length) return finish();
@@ -940,38 +942,60 @@ DRILLS.ir = function () {
    ========================================================= */
 DRILLS.lt = function () {
   if (!TTS.ok()) { $('listenDrill').innerHTML = '<div class="note r">متصفحك ما يدعم النطق الآلي — جرّب كروم أو سفاري.</div>'; return; }
-  const items = adaptPick(BANKS.listentype.items, x => x.level, 'lt', 6, { kinds: ['lt'], keyFn: x => x.text, max: 2 }); let i = 0; const log = []; let sum = 0;
+  const N = MOCK.full ? 9 : 6;
+  const items = adaptPick(BANKS.listentype.items, x => x.level, 'lt', N, { kinds: ['lt'], keyFn: x => x.text, max: 2 }); let i = 0; const log = []; let sum = 0;
+  const ACC = [['GB', '🇬🇧 لهجة بريطانية'], ['AU', '🇦🇺 لهجة أسترالية'], ['IE', '🇮🇪 لهجة أيرلندية']];
   const f = frame('listenDrill', '⌨️ Listen and Type', 0);
   function show() {
     if (i >= items.length) return finish();
     const it = items[i]; let plays = 0, started = false, done = false;
-    f.body.innerHTML = `<div class="prog">الجملة ${i + 1} من ${items.length} · <span class="timer" id="t3" style="font-size:16px">1:00</span></div><div class="tbar"><i id="b3"></i></div><div class="row"><button class="btn" id="pl">▶️ تشغيل (<span id="pc">3</span> متبقية)</button></div><textarea class="ta" id="ans" placeholder="Type what you hear…" autocapitalize="sentences" spellcheck="false" style="min-height:90px"></textarea><div class="hl-tip">المرة الأولى: افهم واكتب اللي تذكره. الثانية: كمّل. الثالثة: راجع مع الصوت. لا تنسَ الحرف الكبير والنقطة/علامة الاستفهام.</div><div class="row"><button class="btn sm" id="chk">تحقق</button></div>`;
+    /* مثل الاختبار: 30% من الجمل بلهجة غير أمريكية إذا كانت متوفرة بجهازك */
+    let voice = null, accent = ''; if (i > 0 && Math.random() < 0.3) { const [tag, label] = ACC[Math.floor(Math.random() * ACC.length)]; voice = TTS.accentVoice(tag); if (voice) accent = label; }
+    f.body.innerHTML = `<div class="prog">الجملة ${i + 1} من ${items.length} · <span class="timer" id="t3" style="font-size:16px">1:00</span>${accent ? ' · <span class="pill">' + accent + '</span>' : ''}</div><div class="tbar"><i id="b3"></i></div><div class="row"><button class="btn" id="pl">🔁 أعد التشغيل (<span id="pc">2</span> متبقية)</button></div><textarea class="ta" id="ans" placeholder="Type what you hear…" autocapitalize="sentences" spellcheck="false" style="min-height:90px"></textarea><div class="hl-tip">مثل الاختبار: أول تشغيل يبدأ لحاله والمؤقت معه. اكتب كل اللي سمعته ولو بأخطاء، والتشغيلتان الباقيتان لتصحيح الإملاء والكلمات الناقصة والفواصل. الحرف الكبير + النقطة/علامة الاستفهام + الفواصل كلها محسوبة.</div><div class="row"><button class="btn sm" id="chk">تحقق</button></div>`;
     const tm = useTimer(new Timer(60, f.body.querySelector('#t3'), f.body.querySelector('#b3'), () => answer()));
     const pl = $('pl'); const t0 = Date.now();
-    pl.onclick = async () => { if (plays >= 3) return; plays++; $('pc').textContent = 3 - plays; if (plays >= 3) pl.disabled = true; if (!started) { started = true; tm.start(); } pl.classList.add('ghost'); await TTS.speak(it.text); pl.classList.remove('ghost'); };
+    const play = async () => { if (plays >= 3 || done) return; plays++; $('pc').textContent = 3 - plays; if (plays >= 3) pl.disabled = true; if (!started) { started = true; tm.start(); } pl.classList.add('ghost'); await TTS.speak(it.text, 0.92, voice); pl.classList.remove('ghost'); };
+    pl.onclick = play;
+    setTimeout(() => { if (!done && plays === 0) play(); }, 700);
     $('chk').onclick = answer;
     function answer() { if (done) return; done = true; tm.stop(); speechSynthesis.cancel(); const typed = $('ans').value; const r = scoreDictation(typed, it.text); sum += r.score; learn('lt', it.level, r.score >= 0.8); logAttempt('lt', { q: it.text, a: typed, ok: r.score >= 0.8, sc: Math.round(r.score * 100), ms: Date.now() - t0, lvl: it.level }); log.push({ it, typed, r }); i++; show(); }
   }
   function finish() {
     const sc = Math.round(100 * sum / items.length); setBest('lt', sc);
     log.forEach(l => { if (l.r.score < 0.8) addMiss('lt', l.it.text, l.it.trap_ar, 'إملاء'); });
-    const rows = log.map(l => `<div class="card" style="padding:10px 12px"><div class="diff">${l.r.html}</div><div class="hl-tip" style="margin-top:4px">درجتك ${Math.round(l.r.score * 100)}% · ${l.r.punct ? '' : '⚠️ بداية كبيرة أو علامة نهاية ناقصة · '}${bidi(l.it.trap_ar)} ${flagBtn('lt', l.it.text, l.it.trap_ar, 'إملاء')}</div></div>`).join('');
+    const rows = log.map(l => `<div class="card" style="padding:10px 12px"><div class="diff">${l.r.html}</div><div class="hl-tip" style="margin-top:4px">درجتك ${Math.round(l.r.score * 100)}% · ${l.r.punct ? '' : '⚠️ ' + (l.r.notes || []).join(' · ') + ' · '}${bidi(l.it.trap_ar)} ${flagBtn('lt', l.it.text, l.it.trap_ar, 'إملاء')}</div></div>`).join('');
     result(f.body, sc, 'متوسط تطابق الكلمات', `<div class="hl-tip">🟩 صح · 🟨 كلمة كتبتها غلط · 🟥 كلمة فاتتك (تنقّص أكثر من الغلط — اكتب أي تخمين دائمًا)</div>${rows}`);
     again(f.body, DRILLS.lt, '🔄 6 جمل جديدة');
   }
   show();
 };
+/* الاختبار يقبل الاختصار والصيغة الكاملة (There's = There is) — نوحّد الاثنين قبل المقارنة */
+function contract(t) {
+  return String(t || '')
+    .replace(/\b(do|does|did|is|are|was|were|has|have|had|can|could|would|should|will|must)\s+not\b/gi, (m, v) => (v.toLowerCase() === 'can' ? "can't" : v.toLowerCase() === 'will' ? "won't" : v + "n't"))
+    .replace(/\bcannot\b/gi, "can't")
+    .replace(/\b(i)\s+am\b/gi, "$1'm")
+    .replace(/\b(you|we|they)\s+are\b/gi, "$1're")
+    .replace(/\b(i|you|we|they)\s+have\b/gi, "$1've")
+    .replace(/\b(i|you|he|she|it|we|they|there|that|who)\s+will\b/gi, "$1'll")
+    .replace(/\b(i|you|he|she|it|we|they)\s+would\b/gi, "$1'd")
+    .replace(/\b([a-z]+)\s+(is|has)\b/gi, (m, w, v) => (/^(this|that|there|here|it|he|she|what|who|where|how|when)$/i.test(w) ? w + "'s" : m))
+    .replace(/\bhe's\b|\bshe's\b|\bit's\b|\bthere's\b|\bthat's\b|\bwhat's\b|\bwho's\b|\bwhere's\b|\bhere's\b|\bhow's\b|\bwhen's\b/gi, (m) => m.toLowerCase());
+}
 function scoreDictation(typed, correct) {
-  const a = norm(correct).split(' ').filter(Boolean), b = norm(typed).split(' ').filter(Boolean);
+  const a = norm(contract(correct)).split(' ').filter(Boolean), b = norm(contract(typed)).split(' ').filter(Boolean);
   // LCS alignment
   const n = a.length, m = b.length; const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
   for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
   let i = 0, j = 0; const parts = []; let hit = 0;
   while (i < n && j < m) { if (a[i] === b[j]) { parts.push(`<span class="o">${esc(a[i])}</span>`); hit++; i++; j++; } else if (dp[i + 1][j] >= dp[i][j + 1]) { const wrong = (j < m && dp[i + 1][j + 1] === dp[i + 1][j]) ? b[j] : null; if (wrong != null && (i + 1 <= n) && dp[i + 1][j + 1] >= dp[i + 1][j]) { parts.push(`<span class="x">${esc(a[i])}</span>`); i++; j++; hit += 0.5; } else { parts.push(`<span class="m">${esc(a[i])}</span>`); i++; } } else { j++; } }
   while (i < n) { parts.push(`<span class="m">${esc(a[i++])}</span>`); }
-  const punct = /^[A-Z]/.test(typed.trim()) && /[.?!]$/.test(typed.trim());
-  let score = n ? hit / n : 0; if (!punct) score = Math.max(0, score - 0.05);
-  return { score, punct, html: parts.join(' ') + `<div style="font-size:13px;color:var(--muted);margin-top:4px">✔ ${esc(correct)}</div><div style="font-size:13px;color:var(--muted)">✎ ${esc(typed || '(فاضي)')}</div>` };
+  const tt = typed.trim(); const endOk = tt && correct.trim().slice(-1) === tt.slice(-1); const capOk = /^[A-Z]/.test(tt);
+  const commaMiss = Math.max(0, (correct.match(/,/g) || []).length - (tt.match(/,/g) || []).length);
+  const punct = capOk && endOk && !commaMiss;
+  let score = n ? hit / n : 0; if (!capOk || !endOk) score = Math.max(0, score - 0.05); if (commaMiss) score = Math.max(0, score - 0.03 * commaMiss);
+  const notes = []; if (!capOk) notes.push('ابدأ بحرف كبير'); if (!endOk) notes.push(correct.trim().endsWith('?') ? 'الجملة سؤال — لازم علامة استفهام ?' : 'النقطة بالنهاية ناقصة'); if (commaMiss) notes.push('ناقصة ' + (commaMiss > 1 ? commaMiss + ' فواصل' : 'فاصلة') + ' — شوف مكانها بالجملة الصح');
+  return { score, punct, notes, html: parts.join(' ') + `<div style="font-size:13px;color:var(--muted);margin-top:4px">✔ ${esc(correct)}</div><div style="font-size:13px;color:var(--muted)">✎ ${esc(typed || '(فاضي)')}</div>` };
 }
 
 DRILLS.il = function () {
