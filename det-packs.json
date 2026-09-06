@@ -1,14 +1,188 @@
 {
-  "v": 1,
-  "updated": "2026-09-05",
-  "_readme_ar": "حزمة المدرّب: أنا (كلود) أحدّث هذا الملف بناءً على سجل محاولاتك (det-logs). coach = ملاحظات تظهر في تبويب «اليوم». banks = أسئلة إضافية تُضاف لبنوك المدرّب بنفس شكل عناصر كل بنك (fib.items, readselect.real/fake, listentype.items, readcomplete.passages, ireading.sets, writing.photo/interactive/sample/summary, speaking.rts/interactive/sample/photo, grammar_vocab.vocab).",
-  "coach": [
+ "v": 1,
+ "updated": "2026-09-05",
+ "_readme_ar": "حزمة المدرّب: أنا (كلود) أحدّث هذا الملف بناءً على سجل محاولاتك (det-logs). coach = ملاحظات تظهر في تبويب «اليوم». banks = أسئلة إضافية تُضاف لبنوك المدرّب بنفس شكل عناصر كل بنك (fib.items, readselect.real/fake, listentype.items, readcomplete.passages, ireading.sets, writing.photo/interactive/sample/summary, speaking.rts/interactive/sample/photo, grammar_vocab.vocab).",
+ "coach": [
+  {
+   "date": "2026-09-05",
+   "title_ar": "أول ملاحظة — كيف نشتغل مع بعض",
+   "body_ar": "سجّل دخولك في «حسابي والمزامنة» بنفس يوزر وباسورد بوابتك. من هالحين كل محاولة (السؤال وإجابتك ووقتك ونص كتابتك وكلامك) تنحفظ بحسابك الخاص، وأنا أقرأها وأضيف لك هنا ملاحظات وأسئلة جديدة على نفس أخطائك. ابدأ اليوم بـ Listen and Type و Fill in the Blanks (أسرع نقاط)، وسوّ المحاكاة الكاملة مرة وحدة الليلة عشان أعرف مستواك الحقيقي بكل مهارة.",
+   "focus": [
+    "lt",
+    "fib",
+    "wp"
+   ]
+  },
+  {
+   "date": "2026-09-05",
+   "title_ar": "أسئلة من محاكاة حقيقية (فيديو سبتمبر 2026)",
+   "body_ar": "أضفت لك الكلمات والجمل اللي ظهرت في محاكاة الاختبار: كلمات Read and Select (ignore / xplay / oring)، 6 جمل فراغات (acclaimed, delay, distinguish, teeth, recommend, flutter)، 6 جمل إملاء بنفس الفخاخ (There's = There is مقبولة، الفاصلة بعد الشرط والعبارة الافتتاحية، وعلامة الاستفهام مع aren't you?)، ومجموعة محادثة تفاعلية عن المواقع السياحية والكوميديا، وسؤال Writing Sample من نوع «احكِ موقفًا». والإملاء صار مثل الاختبار: أول تشغيل تلقائي والمؤقت يبدأ فورًا، ولهجات مختلطة.",
+   "focus": [
+    "lt",
+    "fib",
+    "is",
+    "ws"
+   ]
+  }
+ ],
+ "banks": {
+  "readselect": {
+   "real": [
     {
-      "date": "2026-09-05",
-      "title_ar": "أول ملاحظة — كيف نشتغل مع بعض",
-      "body_ar": "سجّل دخولك في «حسابي والمزامنة» بنفس يوزر وباسورد بوابتك. من هالحين كل محاولة (السؤال وإجابتك ووقتك ونص كتابتك وكلامك) تنحفظ بحسابك الخاص، وأنا أقرأها وأضيف لك هنا ملاحظات وأسئلة جديدة على نفس أخطائك. ابدأ اليوم بـ Listen and Type و Fill in the Blanks (أسرع نقاط)، وسوّ المحاكاة الكاملة مرة وحدة الليلة عشان أعرف مستواك الحقيقي بكل مهارة.",
-      "focus": ["lt", "fib", "wp"]
+     "w": "ignore",
+     "ar": "يتجاهل",
+     "level": "B1"
     }
-  ],
-  "banks": {}
+   ],
+   "fake": [
+    {
+     "w": "xplay",
+     "type": "invented",
+     "why_ar": "تبدأ بـ x ثم play — تركيب غريب وما له معنى"
+    },
+    {
+     "w": "oring",
+     "type": "invented",
+     "why_ar": "شكلها إنجليزي (تشبه ring) لكنها بلا معنى — كلمة ما شفتها قبل = No"
+    }
+   ]
+  },
+  "fib": {
+   "items": [
+    {
+     "sentence": "According to online reviews, the new restaurant downtown was widely acclaimed as the best in the city.",
+     "answer": "acclaimed",
+     "stem": "acc",
+     "hint_ar": "حاز على إشادة واسعة",
+     "clue_ar": "القرينة: widely … as the best in the city — مدح واسع من الناس = acclaimed.",
+     "level": "B2"
+    },
+    {
+     "sentence": "Sorry to barge in, but we need to delay our meeting until tomorrow.",
+     "answer": "delay",
+     "stem": "de",
+     "hint_ar": "يؤجّل",
+     "clue_ar": "القرينة: until tomorrow — تأجيل الاجتماع ليوم ثاني.",
+     "level": "B1"
+    },
+    {
+     "sentence": "She can hardly distinguish the cat's outline from the wall behind it.",
+     "answer": "distinguish",
+     "stem": "disti",
+     "hint_ar": "يميّز شيئًا عن شيء",
+     "clue_ar": "القرينة: … from the wall — تمييز شكل القطة عن الجدار.",
+     "level": "B2"
+    },
+    {
+     "sentence": "They combed their hair and brushed their teeth before leaving the house.",
+     "answer": "teeth",
+     "stem": "te",
+     "hint_ar": "أسنان",
+     "clue_ar": "القرينة: brushed — تفريش الأسنان قبل الخروج.",
+     "level": "A2"
+    },
+    {
+     "sentence": "I would strongly recommend this hotel to anyone visiting the city.",
+     "answer": "recommend",
+     "stem": "reco",
+     "hint_ar": "ينصح بـ / يوصي",
+     "clue_ar": "القرينة: strongly … to anyone — توصية قوية بالفندق.",
+     "level": "B1"
+    },
+    {
+     "sentence": "The butterfly began to flutter around the garden as soon as the sun came out.",
+     "answer": "flutter",
+     "stem": "flu",
+     "hint_ar": "يرفرف بجناحيه",
+     "clue_ar": "القرينة: butterfly … around — رفرفة الفراشة في الحديقة.",
+     "level": "B2"
+    }
+   ]
+  },
+  "listentype": {
+   "items": [
+    {
+     "text": "There's a restaurant in the hotel.",
+     "trap_ar": "There's = There is والاثنان مقبولان — لا تنسَ الفاصلة العليا والنقطة.",
+     "level": "A2"
+    },
+    {
+     "text": "He has written several criticisms of that play.",
+     "trap_ar": "written بحرفي t، وcriticisms جمع بـ s. اكتب اللي سمعته حتى لو مو متأكد من الإملاء — الدرجة جزئية.",
+     "level": "B2"
+    },
+    {
+     "text": "If they don't want to do it, give them an alternate task.",
+     "trap_ar": "جملة شرطية: الفاصلة بعد it إجبارية. alternate = بديل.",
+     "level": "B1+"
+    },
+    {
+     "text": "The friends shared similar tastes in music.",
+     "trap_ar": "بالاختبار الحقيقي جات بلهجة بريطانية — tastes بـ s (أذواق).",
+     "level": "B1"
+    },
+    {
+     "text": "Despite graduating years ago, he still has access to his university email account.",
+     "trap_ar": "فاصلة بعد ago لأن الجملة تبدأ بعبارة Despite… . access بحرفي c.",
+     "level": "B2+"
+    },
+    {
+     "text": "You are a school teacher, aren't you?",
+     "trap_ar": "سؤال ذيلي: فاصلة قبل aren't وعلامة استفهام بالنهاية — بدونها تخسر نقاط الترقيم.",
+     "level": "A2"
+    }
+   ]
+  },
+  "speaking": {
+   "interactive": [
+    {
+     "topics": [
+      "Tourist sites",
+      "Humor and comedy"
+     ],
+     "questions": [
+      {
+       "q": "Tell me about a well-known tourist site.",
+       "model": "One well-known tourist site is Big Ben and the Houses of Parliament in London. Millions of people visit it every year. Big Ben is actually the clock tower, and the Houses of Parliament is a huge Gothic building where the UK government meets. I would love to see it because it appears in so many films and photos.",
+       "tip_ar": "ابدأ بالجواب مباشرة (اسم المكان)، ثم رقم أو حقيقة، ثم سبب شخصي."
+      },
+      {
+       "q": "Explain the benefits and drawbacks of guided tours at tourist sites.",
+       "model": "Guided tours have clear benefits: you see a lot in a short time, everything is organized, and you don't get lost. However, there are drawbacks too. They can cause over-tourism, and people are often rushed from place to place, so they don't really appreciate what they are seeing. In short, guided tours are convenient but less personal.",
+       "tip_ar": "كلمتا السؤال benefits و drawbacks هما هيكلك: ميزتان ثم عيبان ثم In short."
+      },
+      {
+       "q": "How can places with tourist sites balance the needs of tourists with those of residents?",
+       "model": "This is a tricky issue. One option is to limit the number of tourists with a yearly quota, so residents can live normally. On the other hand, tourism is often the strongest part of the local economy, and small businesses like hotels and cafés would suffer if the limits were too strict. So I think cities need a balance: limits in peak season, plus better public transport for everyone.",
+       "tip_ar": "اعترف إن السؤال صعب (It's a tricky issue)، ثم حل، ثم الرأي المضاد، ثم رأيك النهائي."
+      },
+      {
+       "q": "Do you enjoy watching comedy? Why or why not?",
+       "model": "Yes, I do. I enjoy comedy because it helps me relax after a long day at work. For example, I often watch short comedy clips with my family, and we laugh together, which is good for our mood. In short, comedy is my favorite way to switch off.",
+       "tip_ar": "OREO: رأي ← سبب ← مثال ← In short."
+      },
+      {
+       "q": "Some people say British humor is different from American humor. What do you think?",
+       "model": "I think there is a difference. British humor is often dry and sarcastic, so you have to listen carefully to understand the joke. American humor tends to be more direct and louder, with more physical comedy. Personally, I prefer the dry style because it feels clever, but both can be funny.",
+       "tip_ar": "قارن بنقطتين واضحتين ثم رأيك الشخصي."
+      },
+      {
+       "q": "Is it important for people to laugh at work? Why?",
+       "model": "Yes, I believe it is important. When colleagues laugh together, the atmosphere becomes friendlier and less stressful, and people communicate more easily. In my hospital, a small joke during a busy shift often helps the team stay calm. Of course, humor should be respectful, but overall it makes work better.",
+       "tip_ar": "جواب مباشر ثم سبب ثم مثال من شغلك ثم تحفّظ صغير (Of course…) ثم الخلاصة."
+      }
+     ]
+    }
+   ]
+  },
+  "writing": {
+   "sample": [
+    {
+     "prompt": "Describe a time when you had to solve a problem at work or school quickly. What was the problem, what did you do, and what did you learn from the experience?",
+     "plan_ar": "نوع «احكِ موقفًا» (Recount): جملة تحدد الزمان والمكان ← المشكلة بجملتين ← وش سويت بالترتيب (First, Then, Finally) ← النتيجة ← الدرس بجملة تبدأ بـ This experience taught me… . كله بالماضي البسيط، و120+ كلمة.",
+     "model_90": "Last year, the information system at my hospital suddenly stopped working during a busy morning. Doctors could not see test results, and patients were waiting in the corridor. First, I told my team to switch to the paper forms that we keep for emergencies. Then I called the IT department and explained exactly which services were down. While they were fixing the problem, I checked the most urgent patients myself and wrote their results by hand. Finally, after about two hours, the system came back, and we entered all the paper records carefully. Nobody was harmed, and the manager thanked the team. This experience taught me that a simple backup plan and clear communication are more important than panic. Now we practice the paper procedure every few months."
+    }
+   ]
+  }
+ }
 }
