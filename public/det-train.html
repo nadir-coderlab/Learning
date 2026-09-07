@@ -245,7 +245,7 @@ body.exam .drill .hl-tip,body.exam .drill .arnote,body.exam .drill .note:not(.st
   </div>
   <div class="card">
     <h3>🎲 المحاكاة</h3>
-    <div class="lead" style="margin:0 0 8px"><b>المصغّرة (~25 دقيقة):</b> 8 تمارين متتالية بمؤقتاتها مع التلميحات. <b>الكاملة (~50 دقيقة):</b> 14 تمرين بترتيب الاختبار الحقيقي، بدون أي تلميح ولا نتيجة حتى النهاية — تطلع لك درجة كل مهارة وتقدير تقريبي للدرجة الكلية. سوّ الكاملة مرة قبل الاختبار بيوم.</div>
+    <div class="lead" style="margin:0 0 8px"><b>كل مرة أسئلة جديدة:</b> المدرّب يتذكر كل سؤال شفته وما يعيده عليك إلا بعد ما تخلص الباقي، ويجيب لك أسئلة <b>تشبه أخطاءك</b> (نفس الفخ أو نفس عائلة الكلمة) مو نفس الجملة. <b>المصغّرة (~25 دقيقة):</b> 8 تمارين متتالية بمؤقتاتها مع التلميحات. <b>الكاملة (~50 دقيقة):</b> 14 تمرين بترتيب الاختبار الحقيقي، بدون أي تلميح ولا نتيجة حتى النهاية — تطلع لك درجة كل مهارة وتقدير تقريبي للدرجة الكلية. سوّ الكاملة مرة قبل الاختبار بيوم.</div>
     <div class="row"><button class="btn" id="mockBtn">▶️ محاكاة مصغّرة</button><button class="btn" id="fullMockBtn" style="background:#111827">🧪 محاكاة كاملة</button></div>
     <div id="mockResult"></div>
   </div>
@@ -346,6 +346,7 @@ let S = store.get(SK, { best: {}, done: {}, vocab: {}, lessons: {}, plan: {} });
 fixState();
 function fixState() {
   ['hist', 'miss', 'mastered', 'ab', 'best', 'done', 'vocab', 'lessons', 'plan'].forEach(k => { if (!S[k] || typeof S[k] !== 'object' || Array.isArray(S[k])) S[k] = {}; }); ['log', 'mocks'].forEach(k => { if (!Array.isArray(S[k])) S[k] = []; });
+  if (!S.seen || typeof S.seen !== 'object' || Array.isArray(S.seen)) S.seen = {}; if (!Number.isFinite(S.sq)) S.sq = 0;
   /* تنظيف القيم التالفة (استرجاع قديم أو تعديل يدوي) */
   ['best', 'done', 'ab'].forEach(k => Object.keys(S[k]).forEach(x => { if (!Number.isFinite(S[k][x])) delete S[k][x]; }));
   Object.keys(S.hist).forEach(k => { if (!Array.isArray(S.hist[k])) delete S.hist[k]; else S.hist[k] = S.hist[k].filter(h => h && Number.isFinite(h.s)); });
@@ -382,6 +383,79 @@ document.addEventListener('click', (e) => {
 });
 /* يفضّل العناصر اللي غلطت فيها قبل (حتى max)، ويكمل الباقي عشوائيًا */
 function prefer(pool, keyFn, kinds, n, max) { const pri = pool.filter(x => kinds.some(k => S.miss[missId(k, keyFn(x))])); const top = shuffle(pri).slice(0, max); const rest = shuffle(pool.filter(x => !top.includes(x))).slice(0, Math.max(0, n - top.length)); return shuffle(top.concat(rest)); }
+
+/* =========================================================
+   ذاكرة «شفته قبل» — ما يتكرر عليك سؤال إلا بعد ما تخلص الباقي
+   ========================================================= */
+const seenKey = (kind, k) => kind + '|' + norm(String(k));
+const seenAt = (kind, k) => S.seen[seenKey(kind, k)] || 0;
+function markSeen(kind, keys) {
+  S.sq = (S.sq || 0) + 1;
+  keys.forEach(k => { S.seen[seenKey(kind, k)] = S.sq; });
+  const ks = Object.keys(S.seen);
+  if (ks.length > 4000) ks.sort((a, b) => S.seen[a] - S.seen[b]).slice(0, ks.length - 3000).forEach(k => delete S.seen[k]);
+  save();
+}
+/* =========================================================
+   «مثل غلطتك مو نفسها»: وسوم لكل عنصر، ونختار عناصر تشارك نفس الوسم
+   ========================================================= */
+let VTHEME = null;
+function vocabTheme(w) { if (!VTHEME) { VTHEME = {}; (BANKS.grammar_vocab.vocab || []).forEach(v => { VTHEME[String(v.w).toLowerCase()] = v.theme; }); } return VTHEME[String(w || '').toLowerCase()] || ''; }
+const SUFFIX = [['tion', 'n-tion'], ['sion', 'n-tion'], ['ment', 'n-ment'], ['ness', 'n-ness'], ['ity', 'n-ity'], ['ance', 'n-ance'], ['ence', 'n-ance'], ['able', 'adj-able'], ['ible', 'adj-able'], ['ous', 'adj-ous'], ['ive', 'adj-ive'], ['ful', 'adj-ful'], ['less', 'adj-less'], ['ing', 'v-ing'], ['ate', 'v-ate'], ['ise', 'v-ize'], ['ize', 'v-ize'], ['ify', 'v-ify'], ['ly', 'adv-ly'], ['ed', 'v-ed']];
+function tagsOf(kind, x) {
+  const t = []; if (!x) return t;
+  if (kind === 'lt') {
+    const q = String(x.text != null ? x.text : x);
+    if (/[’']\s?(s|t|re|ve|ll|d|m)\b/i.test(q)) t.push('contraction');
+    if (/,/.test(q)) t.push('comma');
+    if (/\?\s*$/.test(q)) t.push('question');
+    if (/,\s*(aren't|isn't|don't|doesn't|didn't|won't|can't|haven't|hasn't|wasn't|weren't|will|would)\s+\w+\s*\?/i.test(q)) t.push('tagq');
+    if (/^(if|although|though|despite|unless|whereas|while|since|because|after|before|when)\b/i.test(q.trim())) t.push('opening-clause');
+    if (/\b(was|were|had|went|took|made|saw|said|came|got|found|thought|brought|wrote|spent|left|kept|told|began|became|gave|knew)\b/i.test(q)) t.push('past');
+    if (/\b\w{3,}ed\b/i.test(q)) t.push('ed');
+    if (/\b(their|there|they're|its|it's|too|two|your|you're|whose|who's|weather|whether|hear|here)\b/i.test(q)) t.push('homophone');
+    if (/\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|twenty|thirty|forty|fifty|hundred|thousand|o'clock|half|quarter)\b/i.test(q)) t.push('numbers');
+    if (/\b(a few|several|most of|a lot of|plenty of|both|either|neither|each|every|none of)\b/i.test(q)) t.push('quantifier');
+    if (/\b(will|would|could|should|might|must|can|may)\b/i.test(q)) t.push('modal');
+    if (/\b(receipt|island|though|through|thought|neighbour|neighbor|business|schedule|colleague|foreign|weight|height|answer|honest)\b/i.test(q)) t.push('silent');
+  } else if (kind === 'fib') {
+    const a = String(x.answer != null ? x.answer : x).toLowerCase();
+    t.push('len' + (a.length < 6 ? 'S' : a.length < 9 ? 'M' : 'L'));
+    SUFFIX.forEach(p => { if (a.length > p[0].length + 2 && a.endsWith(p[0])) t.push(p[1]); });
+    const th = vocabTheme(a);
+    if (th) t.push('th:' + th);
+    else { /* لو الكلمة مو في بنك المفردات ناخذ موضوع الجملة من بقية كلماتها */
+      const ws = String(x.sentence || '').toLowerCase().match(/[a-z]{4,}/g) || [];
+      for (let i = 0; i < ws.length; i++) { const t2 = vocabTheme(ws[i]); if (t2) { t.push('th:' + t2); break; } }
+    }
+  } else if (kind === 'rs') {
+    if (x && x.type) t.push('fake:' + x.type);
+    else { const th = vocabTheme(x && x.w != null ? x.w : x); if (th) t.push('th:' + th); }
+  } else if (x.genre) t.push('g:' + x.genre);
+  const lv = x && x.level; if (lv) t.push('lv:' + lvlName(lvlNum(lv)));
+  return t;
+}
+const tagW = (t) => /^th:|^fake:/.test(t) ? 3 : /^lv:/.test(t) ? 1 : /^len/.test(t) ? 0.5 : 2.5;
+/* عناصر تشبه أخطاءك (نفس الفخ/العائلة/الموضوع) بدون تكرار نفس السؤال */
+function related(kind, pool, keyFn, missKinds, max, fresh) {
+  if (!max) return [];
+  const missed = Object.values(S.miss).filter(m => missKinds.indexOf(m.kind) >= 0);
+  if (!missed.length) return [];
+  const idx = {}; pool.forEach(x => { idx[norm(String(keyFn(x)))] = x; });
+  const want = {}, skip = {};
+  missed.forEach(m => {
+    const key = norm(String(m.w)); skip[key] = 1;
+    const src = idx[key] || (kind === 'fib' ? { answer: m.w } : kind === 'lt' ? { text: m.w } : { w: m.w });
+    const boost = 1 + Math.min(3, m.n || 1) * 0.5;
+    tagsOf(kind, src).forEach(t => { want[t] = (want[t] || 0) + tagW(t) * boost; });
+  });
+  if (!Object.keys(want).length) return [];
+  const scored = pool.filter(x => !skip[norm(String(keyFn(x)))]).map(x => {
+    let sc = 0; tagsOf(kind, x).forEach(t => { if (want[t]) sc += want[t]; });
+    return { x, sc: sc * fresh(x) };
+  }).filter(r => r.sc > 0).sort((a, b) => b.sc - a.sc);
+  return shuffle(scored.slice(0, Math.max(max * 3, 6)).map(r => r.x)).slice(0, max);
+}
 const SKILLS = { reading: { ar: 'القراءة', d: ['rs', 'fib', 'rc', 'ir'] }, listening: { ar: 'الاستماع', d: ['lt', 'il'] }, writing: { ar: 'الكتابة', d: ['wp', 'iw', 'ws', 'sum'] }, speaking: { ar: 'المحادثة', d: ['sp', 'rts', 'is', 'ss'] } };
 const DRILL_META = { rs: ['🔤 Read and Select', 'read/rs'], fib: ['✏️ Fill in the Blanks', 'read/fib'], rc: ['🧩 Read and Complete', 'read/rc'], ir: ['📄 Interactive Reading', 'read/ir'], lt: ['⌨️ Listen and Type', 'listen/lt'], il: ['💬 Interactive Listening', 'listen/il'], wp: ['🖼️ Write About the Photo', 'write/wp'], iw: ['📝 Interactive Writing', 'write/iw'], ws: ['📜 Writing Sample', 'write/ws'], sum: ['🗒️ Summarize', 'write/sum'], sp: ['🖼️ Speak About the Photo', 'speak/sp'], rts: ['📖 Read Then Speak', 'speak/rts'], is: ['🤖 Interactive Speaking', 'speak/is'], ss: ['🎥 Speaking Sample', 'speak/ss'] };
 function recent(key, n = 3) { const h = S.hist[key] || []; if (!h.length) return null; const last = h.slice(-n); return Math.round(last.reduce((a, x) => a + x.s, 0) / last.length); }
@@ -402,7 +476,7 @@ function profileText() {
   const lv = Object.keys(SKILLS).map(k => skillLevel(k) ? `${SKILLS[k].ar} \u2066${skillLevel(k)}\u2069` : null).filter(Boolean); if (lv.length) lines.push('المستوى التقديري (تكيفي): ' + lv.join(' · '));
   lines.push(`محاولات مسجّلة: ${S.log.length} (مرفوعة: ${S.log.filter(x => x.syn).length})` + (S.mocks.length ? ` · آخر محاكاة كاملة: ${S.mocks[S.mocks.length - 1].overall}% ≈ \u2066${S.mocks[S.mocks.length - 1].est.lo}–${S.mocks[S.mocks.length - 1].est.hi}\u2069` : ''));
   const dr = Object.keys(DRILL_META).filter(k => S.hist[k]).map(k => `${DRILL_META[k][0]}: ${S.hist[k].map(x => x.s).join('→')}`); if (dr.length) lines.push('تاريخ الدرجات: ' + dr.join(' | '));
-  lines.push(`عناصر بالمراجعة: ${activeMiss().length} (أتقنها: ${Object.keys(S.mastered).length})`);
+  lines.push(`عناصر بالمراجعة: ${activeMiss().length} (أتقنها: ${Object.keys(S.mastered).length}) · أسئلة شافها: ${Object.keys(S.seen).length}`);
   if (a.topMiss.length) lines.push('أكثر ما يغلط فيه: ' + a.topMiss.map(m => `${m.w} (${KIND_AR[m.kind] || m.kind} ×${m.n})`).join('، '));
   if (Object.keys(a.lessonMiss).length) lines.push('دروس فيها أخطاء: ' + Object.entries(a.lessonMiss).map(([l, n]) => `درس ${l} (${n})`).join('، '));
   lines.push(`مفردات يعرفها: ${Object.values(S.vocab).filter(v => v === 'know').length} · دروس مكتملة: ${Object.keys(S.lessons).length}/10`);
@@ -498,11 +572,27 @@ function learn(kind, lvl, ok) { const ab = ability(kind); const p = 1 / (1 + Mat
 function skillLevel(k) { const v = SKILLS[k].d.filter(d => S.ab[d] != null).map(d => S.ab[d]); return v.length ? lvlName(v.reduce((a, b) => a + b, 0) / v.length) : null; }
 /* يختار عناصر قريبة من مستواك (وشوي أصعب) + يقدّم اللي غلطت فيه قبل */
 function adaptPick(pool, lvlFn, kind, n, o) {
-  o = o || {}; const ab = ability(kind);
-  const top = o.kinds ? shuffle(pool.filter(x => o.kinds.some(k => S.miss[missId(k, o.keyFn(x))]))).slice(0, o.max || 0) : [];
-  const rest = pool.filter(x => !top.includes(x)).map(x => { const d = lvlNum(lvlFn(x)) - ab; return { x, w: (Math.exp(-Math.abs(d - 0.3) * 1.1) + 0.05) * (0.6 + Math.random()) }; }).sort((a, b) => b.w - a.w).slice(0, Math.max(0, n - top.length)).map(r => r.x);
-  return shuffle(top.concat(rest));
+  o = o || {}; const ab = ability(kind); pool = (pool || []).filter(Boolean); if (!pool.length) return [];
+  const keyFn = o.keyFn || ((x) => x.w || x.answer || x.text || x.title || x.prompt || x.scenario || JSON.stringify(x));
+  /* الدورة: كم اختيار لازم يمر قبل ما يرجع نفس العنصر */
+  const cycle = Math.max(2, Math.ceil(pool.length / Math.max(1, n)));
+  const fresh = (x) => { const at = seenAt(kind, keyFn(x)); if (!at) return 1; return Math.max(0.06, Math.min(1, ((S.sq || 0) - at) / cycle)); }; /* 1 = صار جاهز يتكرر */
+  const top = o.kinds ? related(kind, pool, keyFn, o.kinds, o.max || 0, fresh) : [];
+  /* نفس السؤال اللي غلطت فيه ما يتكرر هنا (مكانه «مراجعتي») — نجيب مشابهه بدله */
+  const dup = (x) => (o.kinds && o.kinds.some(k => S.miss[missId(k, keyFn(x))])) ? 0.25 : 1;
+  const wOf = (x) => { const d = lvlNum(lvlFn(x)) - ab; return (Math.exp(-Math.abs(d - 0.3) * 1.1) + 0.05) * dup(x) * (0.6 + Math.random()); };
+  /* قاعدة صارمة: ما يرجع لك سؤال إلا بعد ما تمر على الباقي — واللي على مستواك يجي أول */
+  const need = Math.max(0, n - top.length);
+  const cand = pool.filter(x => top.indexOf(x) < 0);
+  const ok = cand.filter(x => fresh(x) >= 1);
+  const rest = ok.map(x => ({ x, w: wOf(x) })).sort((a, b) => b.w - a.w).slice(0, need).map(r => r.x);
+  if (rest.length < need) cand.filter(x => ok.indexOf(x) < 0).sort((a, b) => seenAt(kind, keyFn(a)) - seenAt(kind, keyFn(b))).slice(0, need - rest.length).forEach(x => rest.push(x));
+  const out = shuffle(top.concat(rest));
+  markSeen(kind, out.map(keyFn));
+  return out;
 }
+/* عنصر واحد جديد عليك (قطعة/سيناريو/سؤال كتابة أو محادثة) */
+const pickNew = (pool, kind, keyFn) => adaptPick(pool, (x) => x.level, kind, 1, keyFn ? { keyFn } : null)[0];
 
 /* ---------- معاني الكلمات من كل البنوك + إيجاد الجملة اللي فيها الكلمة ---------- */
 let WORD_AR = null;
@@ -521,11 +611,21 @@ const rvItem = (bad, title, body, why) => `<div class="rv-item ${bad ? 'bad' : '
 /* ---------- الصور الحقيقية + حزم المدرّب (det-packs.json) ---------- */
 let PHOTOS = [], PACKS = { coach: [], banks: {} }, PHOTOS_READY = null;
 async function loadPhotos() { PHOTOS_READY = (async () => { try { const r = await fetch('assets/det/photos.json?v=' + Date.now(), { cache: 'no-store' }); if (r.ok) { const j = await r.json(); PHOTOS = (j.photos || []).filter(p => p && p.file); } } catch (e) {} })(); return PHOTOS_READY; }
+function mergeBanks(banks) {
+  Object.entries(banks || {}).forEach(([bank, groups]) => Object.entries(groups || {}).forEach(([g, arr]) => {
+    if (BANKS[bank] && Array.isArray(BANKS[bank][g]) && Array.isArray(arr)) {
+      const keyOf = (x) => norm(String(x && (x.w || x.answer || x.text || x.title || x.prompt || x.scenario || x.context_ar || x.scene_ar) || JSON.stringify(x)));
+      const seen = new Set(BANKS[bank][g].map(keyOf));
+      arr.forEach(x => { if (x && typeof x === 'object' && !seen.has(keyOf(x))) { seen.add(keyOf(x)); BANKS[bank][g].push(x); } });
+    }
+  }));
+  WORD_AR = null; VTHEME = null;
+}
 async function loadPacks() {
-  try { const r = await fetch('det-packs.json?v=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return; const P = await r.json(); PACKS = Object.assign({ coach: [], banks: {} }, P || {});
-    Object.entries(PACKS.banks || {}).forEach(([bank, groups]) => Object.entries(groups || {}).forEach(([g, arr]) => { if (BANKS[bank] && Array.isArray(BANKS[bank][g]) && Array.isArray(arr)) { const keyOf = (x) => norm(String(x && (x.w || x.answer || x.text || x.title || x.prompt || x.scenario) || JSON.stringify(x))); const seen = new Set(BANKS[bank][g].map(keyOf)); arr.forEach(x => { if (x && typeof x === 'object' && !seen.has(keyOf(x))) { seen.add(keyOf(x)); BANKS[bank][g].push(x); } }); } }));
-    renderCoach(); renderMenus();
-  } catch (e) {}
+  /* البنك الثاني (أسئلة إضافية عشان ما يتكرر عليك شي) ثم حزمة المدرّب */
+  try { const r2 = await fetch('det-bank2.json?v=' + Date.now(), { cache: 'no-store' }); if (r2.ok) mergeBanks(await r2.json()); } catch (e) {}
+  try { const r = await fetch('det-packs.json?v=' + Date.now(), { cache: 'no-store' }); if (r.ok) { const P = await r.json(); PACKS = Object.assign({ coach: [], banks: {} }, P || {}); mergeBanks(PACKS.banks); } } catch (e) {}
+  try { renderCoach(); renderMenus(); } catch (e) { console.error(e); }
 }
 function renderCoach() {
   const card = $('coachCard'), box = $('coachBox'); if (!card) return; const notes = (PACKS.coach || []).slice(-3).reverse();
@@ -751,7 +851,7 @@ function renderHome() {
    ========================================================= */
 function menu(boxId, items) {
   const box = $(boxId); box.innerHTML = '';
-  items.forEach(it => { const b = el('button', 'mi'); b.innerHTML = `<span class="ic">${it.ic}</span><span><b>${it.t}</b><small>${it.s}</small></span>${bestBadge(it.key)}`; b.addEventListener('click', () => { location.hash = it.hash; }); box.appendChild(b); });
+  items.forEach(it => { const b = el('button', 'mi'); b.innerHTML = `<span class="ic">${it.ic}</span><span><b>${it.t}</b><small>${it.s}</small></span>${bestBadge(it.key)}`; b.addEventListener('click', () => { const h = it.hash.split('/'); nav(h[0], h[1]); }); box.appendChild(b); });
 }
 function renderMenus() {
   menu('readMenu', [
@@ -874,7 +974,7 @@ DRILLS.fib = function () {
 };
 
 DRILLS.rc = function () {
-  const p = adaptPick(BANKS.readcomplete.passages, x => x.level, 'rc', 1)[0]; const t0 = Date.now();
+  const p = adaptPick(BANKS.readcomplete.passages, x => x.level, 'rc', 1, { keyFn: x => x.title })[0]; const t0 = Date.now();
   const f = frame('readDrill', '🧩 Read and Complete', 180, () => check());
   const gaps = []; let n = 0;
   const html = esc(p.text).replace(/\{([^}]+)\}/g, (m, w) => { const stem = w.slice(0, Math.floor(w.length / 2)); const miss = w.length - stem.length; gaps.push({ w, stem, miss, id: 'rc' + (n++) }); return `<span class="gap"><span class="stem">${esc(stem)}</span><input id="${'rc' + (n - 1)}" maxlength="${miss}" size="${miss}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${'_'.repeat(miss)}"></span>`; });
@@ -892,7 +992,7 @@ DRILLS.rc = function () {
 };
 
 DRILLS.ir = function () {
-  const s = adaptPick(BANKS.ireading.sets, x => x.level, 'ir', 1)[0]; const t0 = Date.now();
+  const s = adaptPick(BANKS.ireading.sets, x => x.level, 'ir', 1, { keyFn: x => x.title })[0]; const t0 = Date.now();
   const gaps = []; let gi = 0;
   const p1html = esc(s.part1).replace(/\{([^}]+)\}/g, (m, body) => { const o = body.split('|'); const id = 'ir' + (gi++); gaps.push({ id, correct: o[0], opts: shuffle(o) }); return `<select id="${id}"><option value="">…</option>${gaps[gaps.length - 1].opts.map(x => `<option>${esc(x)}</option>`).join('')}</select>`; });
   const secs = gaps.length >= 6 ? 480 : 420;
@@ -1000,7 +1100,7 @@ function scoreDictation(typed, correct) {
 
 DRILLS.il = function () {
   if (!TTS.ok()) { $('listenDrill').innerHTML = '<div class="note r">متصفحك ما يدعم النطق الآلي — جرّب كروم أو سفاري.</div>'; return; }
-  const sc = pick(BANKS.ilistening.scenarios, 1)[0];
+  const sc = pickNew(BANKS.ilistening.scenarios, 'il', x => x.scenario);
   const f = frame('listenDrill', '💬 Interactive Listening', 390, () => { toast('انتهت 6:30 — ننتقل للملخص'); toSummary(); });
   f.timer.start();
   const res = { complete: 0, turns: 0 };
@@ -1053,7 +1153,7 @@ function writingBox(body, target, secs, onDone, opts = {}) {
 function writeScore(n, target, sig, maxSig) { return Math.round(100 * (Math.min(1, n / target) * 0.65 + Math.min(1, sig.length / maxSig) * 0.35)); }
 
 DRILLS.wp = function () {
-  const ph = pickPhoto(); const sc = ph ? null : pick(BANKS.writing.photo, 1)[0]; let own = false;
+  const ph = pickPhoto(); const sc = ph ? null : pickNew(BANKS.writing.photo, 'wp', x => x.scene_ar); let own = false;
   const f = frame('writeDrill', '🖼️ Write About the Photo', 60);
   f.body.innerHTML = photoBlock(ph, sc) + `<div class="hl-tip">3 جمل: ① مشهد عام ② زوم على شخص/فعل بصيغة الاستمرار + مكان (in the foreground / background) ③ تخمين (probably / It looks like). 40+ كلمة. وصف بلا رأي.</div>`;
   wirePhoto(f.body, () => { own = true; }, DRILLS.wp);
@@ -1068,7 +1168,7 @@ DRILLS.wp = function () {
   f.timer.start();
 };
 DRILLS.iw = function () {
-  const it = pick(BANKS.writing.interactive, 1)[0];
+  const it = pickNew(BANKS.writing.interactive, 'iw', x => x.prompt);
   const f = frame('writeDrill', '📝 Interactive Writing — الجزء 1', 300);
   f.body.innerHTML = `<div class="sent" style="font-size:15px">${esc(it.prompt)}</div><div class="hl-tip">موقفك مباشرة ← سببان كل واحد بمثال شخصي ← Overall. الهدف 110+ كلمة (150 لـ120). آخر دقيقة مراجعة إملاء.</div>`;
   writingBox(f.body, 110, null, (t1, n1, s1) => {
@@ -1087,7 +1187,7 @@ DRILLS.iw = function () {
   f.timer.start();
 };
 DRILLS.ws = function () {
-  const it = pick(BANKS.writing.sample, 1)[0];
+  const it = pickNew(BANKS.writing.sample, 'ws', x => x.prompt);
   const f = frame('writeDrill', '📜 Writing Sample', 300);
   f.body.innerHTML = `<div class="sent" style="font-size:15px">${esc(it.prompt)}</div><div class="hl-tip">جاوب <b>كل</b> الأسئلة الفرعية. 120+ كلمة. فقرات متصلة. آخر 45 ثانية مراجعة.</div>`;
   writingBox(f.body, 120, null, (txt, n, sig) => {
@@ -1100,7 +1200,7 @@ DRILLS.ws = function () {
   f.timer.start();
 };
 DRILLS.sum = function () {
-  const it = pick(BANKS.writing.summary, 1)[0];
+  const it = pickNew(BANKS.writing.summary, 'sum', x => x.context_ar);
   const f = frame('writeDrill', '🗒️ Summarize the Conversation', 75);
   f.body.innerHTML = `<div class="note g stim" style="margin-top:0"><b>الموقف</b>${bidi(it.context_ar)}</div><div class="hl-tip">3 جمل بالماضي: In this conversation, I talked with … about … + المشكلة + القرار. 40+ كلمة.</div>`;
   writingBox(f.body, 40, null, (txt, n) => {
@@ -1140,7 +1240,7 @@ function speakResult(body, r, target, extra, rep) {
   return s;
 }
 DRILLS.sp = function () {
-  const ph = pickPhoto(); const sc = ph ? null : pick(BANKS.speaking.photo, 1)[0]; let own = false;
+  const ph = pickPhoto(); const sc = ph ? null : pickNew(BANKS.speaking.photo, 'sp', x => x.scene_ar); let own = false;
   const f = frame('speakDrill', '🖼️ Speak About the Photo', 0);
   f.body.innerHTML = photoBlock(ph, sc) + `<div class="hl-tip">20 ثانية تحضير ثم 90 ثانية كلام. 0–20ث نظرة عامة · 20–60ث تفاصيل (مين يسوي وش، أمامية/خلفية، ملابس) · 60–90ث تخمين (must / might / probably). لا توقف قبل النهاية.</div>`;
   wirePhoto(f.body, () => { own = true; }, DRILLS.sp);
@@ -1152,7 +1252,7 @@ DRILLS.sp = function () {
   });
 };
 DRILLS.rts = function () {
-  const it = pick(BANKS.speaking.rts, 1)[0];
+  const it = pickNew(BANKS.speaking.rts, 'rts', x => x.prompt);
   const f = frame('speakDrill', '📖 Read Then Speak', 0);
   f.body.innerHTML = `<div class="sent" style="font-size:15px"><b>${esc(it.prompt)}</b><ul style="margin:6px 0 0 18px">${it.bullets.map(b => `<li>${esc(b)}</li>`).join('')}</ul></div><div class="hl-tip">20 ثانية تحضير: فكرة لكل نقطة. ثم جاوب النقاط بالترتيب (~20 ثانية لكل وحدة) وأعلن الانتقال: About …, I would say …</div>`;
   speakBox(f.body, 20, 90, (r) => {
@@ -1164,7 +1264,7 @@ DRILLS.rts = function () {
 };
 DRILLS.is = function () {
   if (!TTS.ok()) { $('speakDrill').innerHTML = '<div class="note r">متصفحك ما يدعم النطق الآلي.</div>'; return; }
-  const set = pick(BANKS.speaking.interactive, 1)[0]; let i = 0; const rs = [];
+  const set = pickNew(BANKS.speaking.interactive, 'is', x => x.topics.join('+')); let i = 0; const rs = [];
   const f = frame('speakDrill', '🤖 Interactive Speaking', 0);
   function show() {
     if (i >= set.questions.length) return finish();
@@ -1180,7 +1280,7 @@ DRILLS.is = function () {
   show();
 };
 DRILLS.ss = function () {
-  const it = pick(BANKS.speaking.sample, 1)[0];
+  const it = pickNew(BANKS.speaking.sample, 'ss', x => x.prompt);
   const f = frame('speakDrill', '🎥 Speaking Sample', 0);
   f.body.innerHTML = `<div class="sent" style="font-size:15px"><b>${esc(it.prompt)}</b></div><div class="hl-tip">30 ثانية تحضير: اختر 2–3 أفكار. ثم 3 دقائق: مقدمة تجاوب مباشرة ← نقطتان بمثال حقيقي ← خاتمة. الفيديو يشوفه مسؤول القبول — اجلس عدل وابتسم.</div>`;
   speakBox(f.body, 30, 180, (r) => {
