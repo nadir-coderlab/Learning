@@ -851,7 +851,7 @@ function renderHome() {
    ========================================================= */
 function menu(boxId, items) {
   const box = $(boxId); box.innerHTML = '';
-  items.forEach(it => { const b = el('button', 'mi'); b.innerHTML = `<span class="ic">${it.ic}</span><span><b>${it.t}</b><small>${it.s}</small></span>${bestBadge(it.key)}`; b.addEventListener('click', () => { location.hash = it.hash; }); box.appendChild(b); });
+  items.forEach(it => { const b = el('button', 'mi'); b.innerHTML = `<span class="ic">${it.ic}</span><span><b>${it.t}</b><small>${it.s}</small></span>${bestBadge(it.key)}`; b.addEventListener('click', () => { const h = it.hash.split('/'); nav(h[0], h[1]); }); box.appendChild(b); });
 }
 function renderMenus() {
   menu('readMenu', [
