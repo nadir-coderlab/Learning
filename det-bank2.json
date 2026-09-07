@@ -1,0 +1,3 @@
+{
+  "_readme_ar": "البنك الثاني: أسئلة إضافية تُدمج مع بنوك المدرّب عند فتح الصفحة، عشان ما يتكرر عليك سؤال في المحاكاة. نفس شكل عناصر كل بنك (readcomplete.passages, ireading.sets, ilistening.scenarios, listentype.items, fib.items, readselect.real/fake, writing.sample/interactive/summary, speaking.rts/interactive/sample). يُحدَّث من كلود."
+}
