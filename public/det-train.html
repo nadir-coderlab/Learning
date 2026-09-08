@@ -3,15 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>مدرّب ديولينجو 90+</title>
+<title>مدرّب ديولينجو · مسار 120</title>
 <meta name="description" content="مدرّب تفاعلي لاختبار Duolingo English Test: تمارين موقّتة لكل نوع سؤال، إملاء بالصوت، مدرّب كتابة ومحادثة، دروس ومفردات — كل شي في صفحة وحدة.">
 <meta name="theme-color" content="#0f766e">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ar_AR">
-<meta property="og:title" content="مدرّب ديولينجو 90+">
-<meta property="og:description" content="تمارين موقّتة لكل نوع سؤال، إملاء بالصوت، مدرّب كتابة ومحادثة، دروس ومفردات — للوصول إلى 90+ في Duolingo English Test.">
+<meta property="og:title" content="مدرّب ديولينجو · مسار 120">
+<meta property="og:description" content="تمارين موقّتة لكل نوع سؤال، إملاء بالصوت، مدرّب كتابة ومحادثة، دروس ومفردات — للتدرب نحو 120 في Duolingo English Test.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="det-path120.css">
+<script src="det-path120.js"></script>
+<script src="det-path120-bank.js"></script>
+<script src="det-path120-drills.js"></script>
 <style>
 :root{
   --grad:linear-gradient(135deg,#0f766e 0%,#0d9488 50%,#22c55e 100%);
@@ -210,7 +214,7 @@ body.exam .drill .hl-tip,body.exam .drill .arnote,body.exam .drill .note:not(.st
 <body>
 
 <header class="top"><div class="wrap">
-  <div><h1>🎯 مدرّب ديولينجو 90+</h1><div class="sub">كل التمارين هنا — ما تحتاج تفتح أي شي ثاني</div></div>
+  <div><h1>🎯 مدرّب ديولينجو · مسار 120</h1><div class="sub">تدريب مخصص · مراجعة الأخطاء · متابعة التقدم</div></div>
   <div class="row" style="margin:0;gap:6px"><button class="lnk" id="hdrSync" type="button" title="مزامنة فورية لحسابك">☁️ …</button><a class="lnk" href="det.html">📋 الخطة</a></div>
 </div></header>
 <div id="examBar"><span>🧪 محاكاة كاملة — بدون تلميحات · <span id="examLeft"></span></span><button id="examStop" type="button">إنهاء</button></div>
@@ -219,7 +223,7 @@ body.exam .drill .hl-tip,body.exam .drill .arnote,body.exam .drill .note:not(.st
 
 <!-- ======================= اليوم ======================= -->
 <section class="view on" id="v-home">
-  <div class="note a"><b>وضعك الحالي: 60–80 في التجريبي ≈ 70–75 حقيقي</b>الهدف الواقعي خلال 36 ساعة: <strong>90+</strong>. نص الدرجة كتابة ومحادثة، وهذي ترتفع بالطول والهيكل وعدم السكوت — مو بمستوى الإنجليزي. الأولوية بالترتيب: ① لا تترك فراغ أبدًا ② اكتب وتكلم أطول وبهيكل ③ الإملاء (نقاط سهلة) ④ الشكل والسرعة.</div>
+  <div class="card" id="path120"></div>
 
   <div class="card">
     <h3>📊 تقدمك</h3>
@@ -245,24 +249,24 @@ body.exam .drill .hl-tip,body.exam .drill .arnote,body.exam .drill .note:not(.st
   </div>
   <div class="card">
     <h3>🎲 المحاكاة</h3>
-    <div class="lead" style="margin:0 0 8px"><b>كل مرة أسئلة جديدة:</b> المدرّب يتذكر كل سؤال شفته وما يعيده عليك إلا بعد ما تخلص الباقي، ويجيب لك أسئلة <b>تشبه أخطاءك</b> (نفس الفخ أو نفس عائلة الكلمة) مو نفس الجملة. <b>المصغّرة (~25 دقيقة):</b> 8 تمارين متتالية بمؤقتاتها مع التلميحات. <b>الكاملة (~50 دقيقة):</b> 14 تمرين بترتيب الاختبار الحقيقي، بدون أي تلميح ولا نتيجة حتى النهاية — تطلع لك درجة كل مهارة وتقدير تقريبي للدرجة الكلية. سوّ الكاملة مرة قبل الاختبار بيوم.</div>
+    <div class="lead" style="margin:0 0 8px"><b>كل مرة أسئلة جديدة:</b> المدرّب يتذكر كل سؤال شفته وما يعيده عليك إلا بعد ما تخلص الباقي، ويجيب لك أسئلة <b>تشبه أخطاءك</b> (نفس الفخ أو نفس عائلة الكلمة) مو نفس الجملة. <b>المصغّرة (~25 دقيقة):</b> 8 تمارين متتالية بمؤقتاتها مع التلميحات. <b>الكاملة (~50 دقيقة):</b> 14 تمرينا في تسلسل تدريبي، بدون أي تلميح ولا نتيجة حتى النهاية — تعرض نسب أداء تدريبية لكل مهارة دون تحويلها إلى درجة DET. سوّ الكاملة مرة قبل الاختبار بيوم.</div>
     <div class="row"><button class="btn" id="mockBtn">▶️ محاكاة مصغّرة</button><button class="btn" id="fullMockBtn" style="background:#111827">🧪 محاكاة كاملة</button></div>
     <div id="mockResult"></div>
   </div>
   <div class="card">
     <h3>📖 كيف تستخدم المدرّب</h3>
     <ul class="t">
-      <li>التبويبات تحت: قراءة · استماع · كتابة · محادثة · مهارات. كل تمرين بمؤقت الاختبار الحقيقي، وبعده تشوف الجواب أو نموذجًا بمستوى 90.</li>
+      <li>التبويبات تحت: قراءة · استماع · كتابة · محادثة · مهارات. التمارين موقّتة للتدرب على إدارة الوقت، وبعده تشوف الجواب أو نموذجًا بمستوى 90.</li>
       <li>أفضل درجة لكل تمرين تنحفظ وتظهر بجانب اسمه. أي تمرين أقل من 70% أعده مرة ثانية.</li>
       <li>صوت الإملاء والمحادثة من متصفحك — اسمح بالمايك أول مرة، واستخدم كروم للحصول على النص المحوّل وسرعة الكلام.</li>
     </ul>
   </div>
 
-  <h2>📅 خطة الـ36 ساعة</h2>
+  <h2>📅 مراحل التدريب</h2>
   <p class="lead">علّم على اللي تخلصه. كل مهمة لها رابط يوديك للتمرين مباشرة.</p>
   <div id="plan"></div>
 
-  <div class="note g"><b>نصيحة الشراء (مهمة بوضعك)</b>اشترِ <strong>باقة الاختبارين ($118)</strong>. إذا جبت 85–90 بأول محاولة، عندك 21 يوم للمحاولة الثانية بعد نتيجتك — وتذاكر من نفس المدرّب. الهدف 120 يصير ممكن بالمحاولة الثانية مو الأولى.</div>
+  <div class="note g"><b>قرار الإعادة</b>اعتمد على نتائج التجريبي الرسمي وعلى تحسن أدائك في أسئلة جديدة. لا يوجد عدد أيام أو كلمات يضمن درجة 120.</div>
 </section>
 
 <!-- ======================= قراءة ======================= -->
@@ -301,7 +305,7 @@ body.exam .drill .hl-tip,body.exam .drill .arnote,body.exam .drill .note:not(.st
 <!-- ======================= مهارات ======================= -->
 <section class="view" id="v-skills">
   <h2>📚 مهارات B1 → B2</h2>
-  <p class="lead">10 دروس صغيرة (5–8 دقائق) بالعربي مع تمارين، وبطاقات مفردات بالمعنى والمثال. هذي «الإشارات» اللي ترفعك من 70 إلى 90.</p>
+  <p class="lead">10 دروس صغيرة (5–8 دقائق) بالعربي مع تمارين، وبطاقات مفردات بالمعنى والمثال. طبّق كل قاعدة في جملة جديدة ثم راجع استخدامها داخل إجابة كاملة.</p>
   <div class="menu" id="skillsMenu"></div>
   <div id="skillsDrill"></div>
 </section>
@@ -351,7 +355,7 @@ function fixState() {
   ['best', 'done', 'ab'].forEach(k => Object.keys(S[k]).forEach(x => { if (!Number.isFinite(S[k][x])) delete S[k][x]; }));
   Object.keys(S.hist).forEach(k => { if (!Array.isArray(S.hist[k])) delete S.hist[k]; else S.hist[k] = S.hist[k].filter(h => h && Number.isFinite(h.s)); });
   Object.keys(S.miss).forEach(k => { const m = S.miss[k]; if (!m || typeof m !== 'object' || !m.w) delete S.miss[k]; else { m.n = Number.isFinite(m.n) ? m.n : 1; m.box = Number.isFinite(m.box) ? m.box : 0; m.due = Number.isFinite(m.due) ? m.due : 0; m.id = m.id || k; } });
-  S.log = S.log.filter(x => x && typeof x === 'object'); S.mocks = S.mocks.filter(m => m && typeof m === 'object' && m.est && Number.isFinite(m.overall));
+  S.log = S.log.filter(x => x && typeof x === 'object'); S.mocks = S.mocks.filter(m => m && typeof m === 'object' && Number.isFinite(m.overall));
 }
 function trimLog(hard) { const lim = hard ? 6e5 : 1.6e6; let guard = 0; while (S.log.length && JSON.stringify(S.log).length > lim && guard++ < 5000) { const i = S.log.findIndex(a => a.syn); S.log.splice(i >= 0 ? i : 0, 1); } }
 const save = () => { S.ts = Date.now(); if (!store.set(SK, S)) { trimLog(true); if (!store.set(SK, S) && !save.warned) { save.warned = true; toast('⚠️ ذاكرة المتصفح ممتلئة — سجّل دخولك عشان يرتفع السجل وينظّف'); } } SYNC.dirty(); };
@@ -361,7 +365,7 @@ function bestBadge(key) { const b = S.best[key]; return b == null ? '' : `<span 
 /* =========================================================
    نظام المراجعة (تكرار متباعد) + تحليل الضعف
    ========================================================= */
-const KIND_AR = { rs: 'كلمات', fib: 'فراغات', rc: 'فقرة مثقوبة', lt: 'إملاء', vocab: 'مفردات', lesson: 'قواعد' };
+const KIND_AR = { evidence: 'استنتاج ودليل', rs: 'كلمات', fib: 'فراغات', rc: 'فقرة مثقوبة', lt: 'إملاء', vocab: 'مفردات', lesson: 'قواعد' };
 const BOX_WAIT = [0, 4 * 3600e3, 20 * 3600e3];
 const missId = (kind, w) => kind + ':' + norm(String(w));
 function addMiss(kind, w, ar, note, src) {
@@ -458,8 +462,8 @@ function related(kind, pool, keyFn, missKinds, max, fresh) {
   }).filter(r => r.sc > 0).sort((a, b) => b.sc - a.sc);
   return shuffle(scored.slice(0, Math.max(max * 3, 6)).map(r => r.x)).slice(0, max);
 }
-const SKILLS = { reading: { ar: 'القراءة', d: ['rs', 'fib', 'rc', 'ir'] }, listening: { ar: 'الاستماع', d: ['lt', 'il'] }, writing: { ar: 'الكتابة', d: ['wp', 'iw', 'ws', 'sum'] }, speaking: { ar: 'المحادثة', d: ['sp', 'rts', 'is', 'ss'] } };
-const DRILL_META = { rs: ['🔤 Read and Select', 'read/rs'], fib: ['✏️ Fill in the Blanks', 'read/fib'], rc: ['🧩 Read and Complete', 'read/rc'], ir: ['📄 Interactive Reading', 'read/ir'], lt: ['⌨️ Listen and Type', 'listen/lt'], il: ['💬 Interactive Listening', 'listen/il'], wp: ['🖼️ Write About the Photo', 'write/wp'], iw: ['📝 Interactive Writing', 'write/iw'], ws: ['📜 Writing Sample', 'write/ws'], sum: ['🗒️ Summarize', 'write/sum'], sp: ['🖼️ Speak About the Photo', 'speak/sp'], rts: ['📖 Read Then Speak', 'speak/rts'], is: ['🤖 Interactive Speaking', 'speak/is'], ss: ['🎥 Speaking Sample', 'speak/ss'] };
+const SKILLS = { reading: { ar: 'القراءة', d: ['rs', 'fib', 'rc', 'ir', 'evidence'] }, listening: { ar: 'الاستماع', d: ['lt', 'il'] }, writing: { ar: 'الكتابة', d: ['wp', 'iw', 'ws', 'sum', 'rewrite'] }, speaking: { ar: 'المحادثة', d: ['sp', 'rts', 'is', 'ss'] } };
+const DRILL_META = { evidence: ['الاستنتاج والدليل', 'read/evidence'], rewrite: ['إعادة صياغة إجاباتي', 'write/rewrite'], rs: ['🔤 Read and Select', 'read/rs'], fib: ['✏️ Fill in the Blanks', 'read/fib'], rc: ['🧩 Read and Complete', 'read/rc'], ir: ['📄 Interactive Reading', 'read/ir'], lt: ['⌨️ Listen and Type', 'listen/lt'], il: ['💬 Interactive Listening', 'listen/il'], wp: ['🖼️ Write About the Photo', 'write/wp'], iw: ['📝 Interactive Writing', 'write/iw'], ws: ['📜 Writing Sample', 'write/ws'], sum: ['🗒️ Summarize', 'write/sum'], sp: ['🖼️ Speak About the Photo', 'speak/sp'], rts: ['📖 Read Then Speak', 'speak/rts'], is: ['🤖 Interactive Speaking', 'speak/is'], ss: ['🎥 Speaking Sample', 'speak/ss'] };
 function recent(key, n = 3) { const h = S.hist[key] || []; if (!h.length) return null; const last = h.slice(-n); return Math.round(last.reduce((a, x) => a + x.s, 0) / last.length); }
 function analyze() {
   const skills = Object.entries(SKILLS).map(([k, v]) => { const vals = v.d.map(d => recent(d)).filter(x => x != null); return { k, ar: v.ar, avg: vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : null, tried: vals.length, total: v.d.length }; });
@@ -476,12 +480,13 @@ function profileText() {
   a.skills.forEach(sk => lines.push(`${sk.ar}: ${sk.avg == null ? 'لم يُجرَّب' : sk.avg + '% (متوسط آخر 3 جلسات)'}`));
   if (a.weakest) lines.push(`أضعف مهارة: ${a.weakest.ar}`);
   const lv = Object.keys(SKILLS).map(k => skillLevel(k) ? `${SKILLS[k].ar} \u2066${skillLevel(k)}\u2069` : null).filter(Boolean); if (lv.length) lines.push('المستوى التقديري (تكيفي): ' + lv.join(' · '));
-  lines.push(`محاولات مسجّلة: ${S.log.length} (مرفوعة: ${S.log.filter(x => x.syn).length})` + (S.mocks.length ? ` · آخر محاكاة كاملة: ${S.mocks[S.mocks.length - 1].overall}% ≈ \u2066${S.mocks[S.mocks.length - 1].est.lo}–${S.mocks[S.mocks.length - 1].est.hi}\u2069` : ''));
+  lines.push(`محاولات مسجّلة: ${S.log.length} (مرفوعة: ${S.log.filter(x => x.syn).length})` + (S.mocks.length ? ` · آخر محاكاة كاملة: ${S.mocks[S.mocks.length - 1].overall}% تدريب فقط` : ''));
   const dr = Object.keys(DRILL_META).filter(k => S.hist[k]).map(k => `${DRILL_META[k][0]}: ${S.hist[k].map(x => x.s).join('→')}`); if (dr.length) lines.push('تاريخ الدرجات: ' + dr.join(' | '));
   lines.push(`عناصر بالمراجعة: ${activeMiss().length} (أتقنها: ${Object.keys(S.mastered).length}) · أسئلة شافها: ${Object.keys(S.seen).length}`);
   if (a.topMiss.length) lines.push('أكثر ما يغلط فيه: ' + a.topMiss.map(m => `${m.w} (${KIND_AR[m.kind] || m.kind} ×${m.n})`).join('، '));
   if (Object.keys(a.lessonMiss).length) lines.push('دروس فيها أخطاء: ' + Object.entries(a.lessonMiss).map(([l, n]) => `درس ${l} (${n})`).join('، '));
   lines.push(`مفردات يعرفها: ${Object.values(S.vocab).filter(v => v === 'know').length} · دروس مكتملة: ${Object.keys(S.lessons).length}/10`);
+  if (window.DetPath120) lines.push(DetPath120.report(S));
   return lines.join('\n');
 }
 
@@ -552,7 +557,7 @@ function renderSync() {
   if (box.dataset.sig === sig) return; box.dataset.sig = sig;
   if (!D) { box.innerHTML = (initSync.n || 0) >= 60 ? '<div class="hl-tip">⚠️ ما قدرت أحمّل المزامنة (الإنترنت أو الحاجب). التدريب شغال وكل شي محفوظ بجهازك — والمحاولات بتترفع أول ما تشتغل.</div>' : '<div class="hl-tip">⏳ جاري تحميل المزامنة…</div>'; return; }
   if (!D.user) {
-    box.innerHTML = `<div class="hl-tip">سجّل دخولك بنفس يوزر وباسورد بوابتك (أو أي حساب من موقع البنات) عشان كل محاولة وإجابة تنحفظ بحسابك الخاص — ما يشوفها غيرك، وأنا أقرأها لأطوّر تمارينك على أخطائك.</div><div class="row"><input class="in" id="syU" placeholder="اليوزر" autocomplete="username" style="max-width:150px;direction:ltr"><input class="in" id="syP" type="password" placeholder="الباسورد" autocomplete="current-password" style="max-width:150px;direction:ltr"><button class="btn sm" id="syGo">دخول</button></div><div class="hl-tip" id="syErr" style="color:var(--red)"></div>${pend ? `<div class="hl-tip">${pend} محاولة محفوظة بجهازك بانتظار الدخول عشان ترتفع.</div>` : ''}`;
+    box.innerHTML = `<div class="hl-tip">سجّل دخولك بنفس يوزر وباسورد بوابتك (أو أي حساب من موقع البنات) عشان كل محاولة وإجابة تنحفظ بحسابك الخاص — تبقى مرتبطة بحسابك. شارك ملخصك أو ملف التصدير عندما تريد مراجعة خارج الموقع.</div><div class="row"><input class="in" id="syU" placeholder="اليوزر" autocomplete="username" style="max-width:150px;direction:ltr"><input class="in" id="syP" type="password" placeholder="الباسورد" autocomplete="current-password" style="max-width:150px;direction:ltr"><button class="btn sm" id="syGo">دخول</button></div><div class="hl-tip" id="syErr" style="color:var(--red)"></div>${pend ? `<div class="hl-tip">${pend} محاولة محفوظة بجهازك بانتظار الدخول عشان ترتفع.</div>` : ''}`;
     $('syGo').onclick = async () => { const b = $('syGo'); b.disabled = true; $('syErr').textContent = ''; try { await D.login($('syU').value, $('syP').value); toast('تم الدخول ✓'); await onLogin(); } catch (e) { $('syErr').textContent = (e && e.message) || 'ما قدرت أدخل'; } b.disabled = false; };
     $('syP').onkeydown = (e) => { if (e.key === 'Enter') $('syGo').click(); };
     return;
@@ -653,7 +658,7 @@ function gradeSpeaking(r, o) { if (window.DetScore && DetScore.speaking) { try {
 function rubricHtml(rep) {
   if (!rep) return '<div class="hl-tip">⚠️ محرك التقييم ما تحمّل — الدرجة هنا بالطول والإشارات فقط.</div>';
   const sub = rep.subscores || {};
-  return `<div class="rubric"><div class="stat">${Object.keys(RUB_AR).map(k => `<div><b>${sub[k] == null ? '—' : sub[k]}</b><small>${RUB_AR[k]}</small></div>`).join('')}</div><div class="hl-tip">${esc(rep.band || '')} — تقدير من المدرّب بمعايير ديولينجو، مو درجة رسمية</div>${rep.html || ''}</div>`;
+  return `<div class="rubric"><div class="stat">${Object.keys(RUB_AR).map(k => `<div><b>${sub[k] == null ? '—' : sub[k]}</b><small>${RUB_AR[k]}</small></div>`).join('')}</div><div class="hl-tip">${esc(rep.band || '')} — مؤشر نصي تدريبي محدود. ليس تقييما معتمدا ولا توقعا لدرجة الاختبار</div>${rep.html || ''}</div>`;
 }
 const rubricExtra = (rep, more) => Object.assign({}, more || {}, rep ? { score: rep.score, band: rep.band, sub: rep.subscores, ttr: rep.ttr, wpm: rep.wpm, issues: (rep.issues || []).slice(0, 10).map(i => ({ type: i.type, text: i.text, fix: i.fix })) } : {});
 
@@ -675,7 +680,6 @@ function mockRecord(key, score) {
   setTimeout(() => { document.querySelectorAll('.drill #body').forEach(b => b.innerHTML = WAIT_HTML); document.body.classList.remove('exam-wait'); }, 30);
   setTimeout(() => { if (!MOCK.full) return; if (Rec.on) Rec.stop().catch(() => {}); if (MOCK.queue.length) { const [v, k] = MOCK.queue.shift(); MOCK.cur = k; nav(v, k); } else finishFullMock(false); }, 1400);
 }
-const detEstimate = (pct) => { const c = Math.max(10, Math.min(160, 10 + pct * 1.35)); const r5 = (x) => Math.max(10, Math.min(160, Math.round(x / 5) * 5)); return { lo: r5(c - 10), hi: r5(c + 10) }; };
 function finishFullMock(aborted) {
   const res = MOCK.results.slice(); MOCK.full = false; MOCK.on = false; MOCK.queue = []; MOCK.cur = null; document.body.classList.remove('exam'); document.body.classList.remove('exam-wait');
   if (activeTimer) { activeTimer.stop(); activeTimer = null; }
@@ -684,15 +688,15 @@ function finishFullMock(aborted) {
   const by = {}; res.forEach(r => by[r.key] = r.sc);
   const skills = Object.entries(SKILLS).map(([k, v]) => { const vals = v.d.map(d => by[d]).filter(x => x != null); return [k, vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : null]; });
   const have = skills.filter(x => x[1] != null); const overall = have.length ? Math.round(have.reduce((a, x) => a + x[1], 0) / have.length) : 0;
-  const m = { t: Date.now(), by, skills, overall, est: detEstimate(overall), mins: Math.round((Date.now() - MOCK.t0) / 60000), partial: !!aborted };
+  const m = { t: Date.now(), by, skills, overall, mins: Math.round((Date.now() - MOCK.t0) / 60000), partial: !!aborted };
   S.mocks.push(m); if (S.mocks.length > 20) S.mocks.shift(); save();
-  logAttempt('mock', { q: aborted ? 'partial' : 'full', a: JSON.stringify(by), sc: overall, extra: { skills: Object.fromEntries(skills), est: m.est, mins: m.mins } });
+  logAttempt('mock', { q: aborted ? 'partial' : 'full', a: JSON.stringify(by), sc: overall, extra: { skills: Object.fromEntries(skills), mins: m.mins } });
   location.hash = 'home'; showView('home'); renderMock(); setTimeout(() => { const c = $('mockResult'); c && c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
 }
 function renderMock() {
   const box = $('mockResult'); if (!box) return; if (!S.mocks.length) { box.innerHTML = ''; return; }
   const m = S.mocks[S.mocks.length - 1];
-  box.innerHTML = `<div class="res" style="margin-top:8px"><div class="score">${m.overall}%</div><div style="text-align:center;font-weight:800">آخر محاكاة${m.partial ? ' (جزئية)' : ''} · ${new Date(m.t).toLocaleDateString('ar')} · ${m.mins} دقيقة</div><div style="text-align:center;font-weight:800;color:var(--teal);font-size:18px;margin-top:4px">تقدير الدرجة: <bdi dir="ltr">${m.est.lo}–${m.est.hi}</bdi></div><div class="hl-tip" style="text-align:center">تقدير تقريبي جدًا من نسبك بالتمارين — الاختبار الحقيقي تكيفي ويحسب بطريقة ثانية. الهدف: 90+</div></div><div class="stat">${m.skills.map(([k, avg]) => `<div><b>${avg == null ? '—' : avg + '%'}</b><small>${SKILLS[k].ar}</small></div>`).join('')}</div><table class="wtable">${Object.entries(m.by).map(([k, sc]) => `<tr><td>${DRILL_META[k] ? DRILL_META[k][0] : k}</td><td style="width:70px"><b style="color:${sc < 60 ? '#ef4444' : sc < 75 ? '#f59e0b' : 'var(--teal)'}">${sc}%</b></td></tr>`).join('')}</table>${S.mocks.length > 1 ? '<div class="hl-tip">محاكاتك السابقة: ' + S.mocks.slice(0, -1).map(x => new Date(x.t).toLocaleDateString('ar') + ' — ' + x.overall + '% (<bdi dir="ltr">' + x.est.lo + '–' + x.est.hi + '</bdi>)').join(' · ') + '</div>' : ''}`;
+  box.innerHTML = `<div class="res" style="margin-top:8px"><div class="score">${m.overall}%</div><div style="text-align:center">آخر محاكاة${m.partial ? ' (جزئية)' : ''} · ${new Date(m.t).toLocaleDateString('ar')} · ${m.mins} دقيقة</div><p class="hl-tip">نسبة أداء تدريبية فقط. لا توجد معادلة موثوقة لتحويل هذه النسبة إلى درجة DET. سجل نتيجة التجريبي الرسمي في مسار 120.</p></div><div class="stat">${m.skills.map(([k, avg]) => `<div><b>${avg == null ? '—' : avg + '%'}</b><small>${SKILLS[k].ar}</small></div>`).join('')}</div><table class="wtable">${Object.entries(m.by).map(([k, sc]) => `<tr><td>${DRILL_META[k] ? DRILL_META[k][0] : esc(k)}</td><td>${sc}%</td></tr>`).join('')}</table>`;
 }
 
 /* ---------- كل الكلمات بصفحة وحدة ---------- */
@@ -769,48 +773,107 @@ function routeHash() { const h = location.hash.replace('#', ''); if (!h) return;
    الخطة (36 ساعة)
    ========================================================= */
 const PLAN = [
-  { id: 'n', name: 'الليلة — الأساس (4–5 ساعات)', goal: 'اعرف الشكل، ثبّت «لا فراغ»، وابدأ الإنتاج', tasks: [
-    { id: 'n1', t: 'اقرأ صفحة الخطة كاملة مرة وحدة (الحقائق الثلاث + القواعد الذهبية + تريكات الأقسام)', m: '40 د', link: 'det.html' },
-    { id: 'n2', t: 'درس 1 الروابط + درس 7 الأدوات a/the — مع التمارين', m: '20 د', go: 'skills/lessons' },
-    { id: 'n3', t: 'Read and Select: 3 جولات (54 كلمة) — الهدف 75%+', m: '15 د', go: 'read/rs' },
-    { id: 'n4', t: 'Fill in the Blanks: جولتان — الهدف 6/10', m: '15 د', go: 'read/fib' },
-    { id: 'n5', t: 'Listen and Type: 12 جملة — الهدف 80% كلمات صح', m: '25 د', go: 'listen/lt' },
-    { id: 'n6', t: 'Write About the Photo ×3 (صور من جوالك) — 40+ كلمة لكل صورة', m: '15 د', go: 'write/wp' },
-    { id: 'n7', t: 'Speak About the Photo ×2 — 90 ثانية كاملة بلا سكوت', m: '10 د', go: 'speak/sp' },
-    { id: 'n8', t: 'Read and Complete: فقرتان', m: '15 د', go: 'read/rc' },
-    { id: 'n9', t: 'مفردات: 40 بطاقة (التعليم + التقنية) — علّم اللي ما تعرفها', m: '20 د', go: 'skills/vocab' },
-    { id: 'n10', t: 'Writing Sample واحد كامل (5 د، 120+ كلمة) ثم قارن بالنموذج', m: '10 د', go: 'write/ws' },
-    { id: 'n10b', t: '🔁 مراجعتي: راجع كل اللي غلطت فيه الليلة (بطاقات المستحق)', m: '10 د', go: 'skills/review' },
-    { id: 'n11', t: 'نم 6 ساعات على الأقل — الدماغ يثبّت اللي ذاكرته وأنت نايم', m: '💤' },
-  ]},
-  { id: 'd', name: 'بكرة — الإنتاج والمحاكاة (7–8 ساعات)', goal: 'ثبّت نص الدرجة (كتابة + محادثة) ثم محاكاة كاملة', tasks: [
-    { id: 'd1', t: 'إحماء: Read and Select جولة + Listen and Type 6 جمل', m: '15 د', go: 'read/rs' },
-    { id: 'd2', t: 'درس 3 (المضارع التام) + درس 4 (الشرطية) + درس 5 (المبني للمجهول) — هذي إشارات 90+', m: '30 د', go: 'skills/lessons' },
-    { id: 'd3', t: 'Interactive Writing كامل (5+3 د) ثم اقرأ نموذج 90 والترقية', m: '15 د', go: 'write/iw' },
-    { id: 'd4', t: 'Writing Sample ×2 بمواضيع مختلفة — 120+ كلمة وجواب على كل سؤال فرعي', m: '15 د', go: 'write/ws' },
-    { id: 'd5', t: 'Read Then Speak ×3 — سجّل واسمع نفسك: هل عبّيت 90 ثانية؟', m: '20 د', go: 'speak/rts' },
-    { id: 'd6', t: 'Interactive Speaking: مجموعتان (12 سؤال) بصيغة OREO', m: '20 د', go: 'speak/is' },
-    { id: 'd7', t: 'Interactive Reading: قطعتان بالمؤقت', m: '20 د', go: 'read/ir' },
-    { id: 'd8', t: 'Interactive Listening: سيناريوهان + الملخص', m: '20 د', go: 'listen/il' },
-    { id: 'd9', t: 'استراحة حقيقية 45 دقيقة (أكل، مشي) — التعب الذهني أكبر سارق درجات', m: '☕' },
-    { id: 'd10', t: 'Speaking Sample ×2 (3 دقائق كاملة) + جهّز قصصك الست كنقاط', m: '20 د', go: 'speak/ss' },
-    { id: 'd11', t: 'مفردات: راجع بطاقات «أراجعها» + 40 بطاقة جديدة (البيئة + العمل)', m: '20 د', go: 'skills/vocab' },
-    { id: 'd12', t: 'الاختبار التجريبي الرسمي مرة ثانية (الاستثناء الوحيد خارج المدرّب) — قارن بـ60–80', m: '45 د', link: 'https://englishtest.duolingo.com/practice' },
-    { id: 'd13', t: 'راجع أخطاءك: افتح «نقاط ضعفك» بالرئيسية وأعد التمارين اللي يوصي فيها', m: '30 د' },
-    { id: 'd13b', t: '🔁 مراجعتي: المستحق + اختبار سريع على أخطائك', m: '15 د', go: 'skills/review' },
-    { id: 'd14', t: 'درس 8 (الجمع و-s) + درس 9 (الأسئلة) — لأخطاء الإملاء', m: '15 د', go: 'skills/lessons' },
-    { id: 'd15', t: 'بروفة الغرفة والجوال والكاميرا الثانية (قسم قوانين المراقبة بصفحة الخطة)', m: '30 د', link: 'det.html#proctor' },
-    { id: 'd16', t: 'نوم أو قيلولة 90 دقيقة على الأقل قبل الاختبار — لا تدخل الاختبار وأنت ساهر', m: '💤' },
-  ]},
-  { id: 'x', name: 'قبل الاختبار بساعة', goal: 'روتين ما قبل البدء + إحماء خفيف', tasks: [
-    { id: 'x1', t: 'إحماء 15 دقيقة فقط: Listen and Type 4 جمل + تكلم بالإنجليزي دقيقتين عن يومك', m: '15 د', go: 'listen/lt' },
-    { id: 'x1b', t: '🔁 مراجعتي: نظرة أخيرة على أكثر ما غلطت فيه (بطاقات فقط، بلا اختبار)', m: '5 د', go: 'skills/review' },
-    { id: 'x2', t: 'أعد تشغيل الكمبيوتر واقفل كل البرامج وعطّل التصحيح التلقائي', m: 'إلزامي' },
-    { id: 'x3', t: 'الجوال: شاحن + عدم إزعاج + حامل ثابت ~75 سم يصور الشاشة والكيبورد وجسمك', m: 'إلزامي' },
-    { id: 'x4', t: 'المكتب فاضي إلا الكمبيوتر والجوال والهوية الأصلية · حمام · مويه', m: 'إلزامي' },
-    { id: 'x5', t: 'تذكير أخير: لا فراغ أبدًا · املأ كل ثانية كلام · 120+ كلمة بالمقالات · عيونك على الشاشة', m: '🎯' },
-  ]},
+  {
+    "id": "foundation120",
+    "name": "المحطة الأولى · تثبيت الأساس نحو 95",
+    "goal": "ركز على القراءة والكتابة مع تدريب بقية المهارات يوميا",
+    "tasks": [
+      {
+        "id": "p120-a1",
+        "t": "جلسة قراءة: فراغات ثم قطعة مع تحديد الدليل",
+        "m": "20 د",
+        "go": "read/evidence"
+      },
+      {
+        "id": "p120-a2",
+        "t": "راجع إجابة سابقة وأعد صياغتها مع تصحيح الأزمنة",
+        "m": "15 د",
+        "go": "write/rewrite"
+      },
+      {
+        "id": "p120-a3",
+        "t": "تحدث: جواب مباشر ثم سبب ومثال دون تكرار",
+        "m": "10 د",
+        "go": "speak/is"
+      },
+      {
+        "id": "p120-a4",
+        "t": "استماع: افهم القرار وسبب اتخاذه ثم لخّصه",
+        "m": "10 د",
+        "go": "listen/il"
+      },
+      {
+        "id": "p120-a5",
+        "t": "راجع الأخطاء المستحقة واستخدم المفردة في جملة جديدة",
+        "m": "5 د",
+        "go": "skills/review"
+      }
+    ]
+  },
+  {
+    "id": "develop120",
+    "name": "المحطة الثانية · توسيع الإجابات نحو 110",
+    "goal": "كرر هذه الدورة بمواضيع مختلفة بعد تحسن الأساس",
+    "tasks": [
+      {
+        "id": "p120-b1",
+        "t": "حل قراءة تفاعلية وحدد الفكرة والدليل والكلمات المرجعية",
+        "m": "15 د",
+        "go": "read/ir"
+      },
+      {
+        "id": "p120-b2",
+        "t": "اكتب رأيك مع تفسير ومثال ثم أجب عن سؤال المتابعة",
+        "m": "15 د",
+        "go": "write/iw"
+      },
+      {
+        "id": "p120-b3",
+        "t": "تحدث عن موضوع غير مألوف ثم استمع لتسجيلك وراجع الوضوح",
+        "m": "15 د",
+        "go": "speak/rts"
+      },
+      {
+        "id": "p120-b4",
+        "t": "إملاء: راجع الكلمات الصغيرة والنهايات التي فاتتك",
+        "m": "10 د",
+        "go": "listen/lt"
+      }
+    ]
+  },
+  {
+    "id": "transfer120",
+    "name": "المحطة الثالثة · تطبيق مستقل نحو 120",
+    "goal": "قارن أداءك في أسئلة جديدة ونتائج التجريبي الرسمي عبر أيام مختلفة",
+    "tasks": [
+      {
+        "id": "p120-c1",
+        "t": "قطعة جديدة: استنتاج وفهم حدود الادعاء",
+        "m": "10 د",
+        "go": "read/evidence"
+      },
+      {
+        "id": "p120-c2",
+        "t": "إجابة كتابة جديدة ثم مراجعة التنظيم والدقة والارتباط بالسؤال",
+        "m": "15 د",
+        "go": "write/ws"
+      },
+      {
+        "id": "p120-c3",
+        "t": "وصف صورة بملاحظات محددة دون اختراع تفاصيل",
+        "m": "10 د",
+        "go": "speak/sp"
+      },
+      {
+        "id": "p120-c4",
+        "t": "خذ التجريبي الرسمي وسجل نطاقه في مسار 120",
+        "m": "حسب الاختبار",
+        "link": "https://englishtest.duolingo.com/readiness"
+      }
+    ]
+  }
 ];
+
 function renderPlan() {
   const box = $('plan'); box.innerHTML = '';
   PLAN.forEach(day => {
@@ -845,6 +908,7 @@ function renderHome() {
   const miss = a.topMiss.map(m => `<span class="pill" style="direction:ltr">${esc(m.w)} ×${m.n}</span>`).join(' ');
   const due = dueMiss().length, act = activeMiss().length;
   renderSync(); renderMock();
+  if (window.DetPath120) DetPath120.mount({ state: () => S, save, toast });
   $('weakCard').innerHTML = `<h3>🎯 نقاط ضعفك — يتحدّث تلقائيًا من درجاتك</h3>${bars}<h3 style="margin-top:12px">ركّز اليوم على</h3><div class="row rec">${rec || '<span class="hl-tip">جرّب أي تمرين وبيظهر لك التوجيه هنا</span>'}</div>${act ? `<h3 style="margin-top:12px">🔁 مراجعتي: ${due} مستحقة الآن من ${act}</h3><div class="row rec"><a class="btn sm" href="#skills/review">راجع الآن</a></div>${miss ? '<div class="hl-tip" style="margin-top:6px">أكثر ما تغلط فيه: ' + miss + '</div>' : ''}` : '<div class="hl-tip" style="margin-top:8px">🔁 كل غلطة بأي تمرين تنحفظ تلقائيًا في «مراجعتي»، وتقدر تضيف أي كلمة بزر «راجعها» من نتائج التمارين.</div>'}`;
 }
 
@@ -857,6 +921,7 @@ function menu(boxId, items) {
 }
 function renderMenus() {
   menu('readMenu', [
+    { ic: '🔎', t: 'الاستنتاج والدليل', s: '12 قطعة متدرجة · 24 سؤالا مع شرح الدليل', key: 'evidence', hash: 'read/evidence' },
     { ic: '🔤', t: 'Read and Select', s: '18 كلمة × 5 ثوانٍ — حقيقية أم وهمية؟', key: 'rs', hash: 'read/rs' },
     { ic: '✏️', t: 'Fill in the Blanks', s: '10 جمل × 20 ثانية — كمّل نهاية الكلمة', key: 'fib', hash: 'read/fib' },
     { ic: '🧩', t: 'Read and Complete', s: 'فقرة مثقوبة × 3 دقائق', key: 'rc', hash: 'read/rc' },
@@ -867,6 +932,7 @@ function renderMenus() {
     { ic: '💬', t: 'Interactive Listening', s: 'سيناريو جامعي + محادثة + ملخص 75 ث', key: 'il', hash: 'listen/il' },
   ]);
   menu('writeMenu', [
+    { ic: '🛠️', t: 'ورشة إعادة كتابة إجاباتي', s: 'راجع إجابتك السابقة ثم أعد صياغتها وطبق على سؤال جديد', key: 'rewrite', hash: 'write/rewrite' },
     { ic: '🖼️', t: 'Write About the Photo', s: '60 ثانية — الهدف 40+ كلمة', key: 'wp', hash: 'write/wp' },
     { ic: '📝', t: 'Interactive Writing', s: '5 دقائق + 3 دقائق — 110 + 80 كلمة', key: 'iw', hash: 'write/iw' },
     { ic: '📜', t: 'Writing Sample', s: '5 دقائق — الهدف 120+ كلمة', key: 'ws', hash: 'write/ws' },
@@ -1172,7 +1238,7 @@ DRILLS.wp = function () {
 DRILLS.iw = function () {
   const it = pickNew(BANKS.writing.interactive, 'iw', x => x.prompt);
   const f = frame('writeDrill', '📝 Interactive Writing — الجزء 1', 300);
-  f.body.innerHTML = `<div class="sent" style="font-size:15px">${esc(it.prompt)}</div><div class="hl-tip">موقفك مباشرة ← سببان كل واحد بمثال شخصي ← Overall. الهدف 110+ كلمة (150 لـ120). آخر دقيقة مراجعة إملاء.</div>`;
+  f.body.innerHTML = `<div class="sent" style="font-size:15px">${esc(it.prompt)}</div><div class="hl-tip">موقفك مباشرة ← سببان كل واحد بمثال شخصي ← Overall. الهدف 110+ كلمة (عدد تدريبي مرن). آخر دقيقة مراجعة إملاء.</div>`;
   writingBox(f.body, 110, null, (t1, n1, s1) => {
     const rep1 = gradeWriting(t1, { prompt: it.prompt, keywords: kwFrom(it.prompt + ' ' + it.model1_90), min: 110, kind: 'interactive' });
     const f2 = frame('writeDrill', '📝 Interactive Writing — الجزء 2 (سؤال المتابعة)', 180);
@@ -1426,9 +1492,11 @@ DRILLS.words = function () {
 DRILLS.frames = function () {
   const box = $('skillsDrill'); const F = BANKS.writing.frames, R = BANKS.speaking.rescue;
   const groups = [...new Set(F.map(f => f.group))];
-  box.innerHTML = `<h3>🧱 العبارات الآمنة (كلها أقصر من 5 كلمات)</h3><div class="hl-tip">هذي مسموح تحفظها. الجمل الطويلة المحفوظة ممنوعة — النظام يقارنك بكل المتقدمين.</div>` + groups.map(g => `<div class="card"><h3>${esc(g)}</h3>${F.filter(f => f.group === g).map(f => `<div class="li"><span class="w" style="min-width:0">${esc(f.en)}</span><span>${esc(f.ar)}</span></div>`).join('')}</div>`).join('') + `<div class="card"><h3>🛟 عبارات إنقاذ بالمحادثة</h3>${R.map(r => `<div class="li"><span class="w" style="min-width:0">${esc(r.en)}</span><span>${esc(r.ar)} — <em>${bidi(r.when_ar)}</em></span></div>`).join('')}</div>`;
+  box.innerHTML = `<h3>🧱 العبارات الآمنة (كلها أقصر من 5 كلمات)</h3><div class="hl-tip">استخدم العبارات القصيرة لتنظيم إجابة أصلية مرتبطة بالسؤال. تجنب نسخ إجابة محفوظة لا تناسب المطلوب.</div>` + groups.map(g => `<div class="card"><h3>${esc(g)}</h3>${F.filter(f => f.group === g).map(f => `<div class="li"><span class="w" style="min-width:0">${esc(f.en)}</span><span>${esc(f.ar)}</span></div>`).join('')}</div>`).join('') + `<div class="card"><h3>🛟 عبارات إنقاذ بالمحادثة</h3>${R.map(r => `<div class="li"><span class="w" style="min-width:0">${esc(r.en)}</span><span>${esc(r.ar)} — <em>${bidi(r.when_ar)}</em></span></div>`).join('')}</div>`;
 };
 
+/* مسار 120 يستخدم الحالة نفسها والمزامنة الحالية دون مسح البيانات السابقة. */
+if (window.installPath120Drills) installPath120Drills({ state: () => S, drills: DRILLS, frame, pick: adaptPick, learn, log: logAttempt, best: setBest, miss: addMiss, save, keywords: kwFrom, grade: gradeWriting, rubric: rubricHtml });
 /* التهيئة */
 $('mockBtn').addEventListener('click', startMock);
 $('fullMockBtn').addEventListener('click', startFullMock);
@@ -1443,3 +1511,4 @@ window.addEventListener('load', () => { if (window.DetScore && DetScore.loadWord
 </script>
 </body>
 </html>
+

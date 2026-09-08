@@ -22,6 +22,7 @@ on:
     paths:
       - "public/det.html"
       - "public/det-train.html"
+      - "public/det-path120*"
       - "public/study.html"
       - "public/det-study.js"
       - "public/det-study.css"
@@ -62,7 +63,7 @@ jobs:
           git show origin/main:public/det-study.js > det-study.js
           git show origin/main:public/det-study.css > det-study.css
           # ملفات المدرّب الإضافية: محرك التقييم، المزامنة، قائمة الكلمات، حزمة المدرّب، والصور
-          for f in det-scoring.js det-sync.js det-words.txt det-packs.json det-bank2.json; do
+          for f in det-path120.js det-path120.css det-path120-bank.js det-path120-drills.js det-scoring.js det-sync.js det-words.txt det-packs.json det-bank2.json; do
             git show "origin/main:public/$f" > "$f" 2>/dev/null || rm -f "$f"
           done
           rm -rf assets/det && mkdir -p assets
@@ -73,10 +74,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A index.html det.html det-train.html study.html det-study.js det-study.css det-scoring.js det-sync.js det-words.txt det-packs.json det-bank2.json assets/det .nojekyll
+          git add -A det-path120.js det-path120.css det-path120-bank.js det-path120-drills.js index.html det.html det-train.html study.html det-study.js det-study.css det-scoring.js det-sync.js det-words.txt det-packs.json det-bank2.json assets/det .nojekyll
           if git diff --staged --quiet; then
             echo "::notice title=لا تغيير::صفحات النشر مطابقة للمصدر بالفعل."
             exit 0
           fi
           git commit -m "تحديث صفحات الخطة من ${GITHUB_SHA::7}"
           git push origin HEAD:gh-pages
+
