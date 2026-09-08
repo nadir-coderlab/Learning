@@ -387,7 +387,9 @@ function prefer(pool, keyFn, kinds, n, max) { const pri = pool.filter(x => kinds
 /* =========================================================
    ذاكرة «شفته قبل» — ما يتكرر عليك سؤال إلا بعد ما تخلص الباقي
    ========================================================= */
-const seenKey = (kind, k) => kind + '|' + norm(String(k));
+/* مفتاح نصي يحفظ العربي (norm يشيل غير اللاتيني فتتساوى كل النصوص العربية) */
+const keyStr = (v) => String(v == null ? '' : v).toLowerCase().replace(/\s+/g, ' ').trim();
+const seenKey = (kind, k) => kind + '|' + keyStr(k);
 const seenAt = (kind, k) => S.seen[seenKey(kind, k)] || 0;
 function markSeen(kind, keys) {
   S.sq = (S.sq || 0) + 1;
@@ -614,7 +616,7 @@ async function loadPhotos() { PHOTOS_READY = (async () => { try { const r = awai
 function mergeBanks(banks) {
   Object.entries(banks || {}).forEach(([bank, groups]) => Object.entries(groups || {}).forEach(([g, arr]) => {
     if (BANKS[bank] && Array.isArray(BANKS[bank][g]) && Array.isArray(arr)) {
-      const keyOf = (x) => norm(String(x && (x.w || x.answer || x.text || x.title || x.prompt || x.scenario || x.context_ar || x.scene_ar) || JSON.stringify(x)));
+      const keyOf = (x) => keyStr(x && (x.w || x.answer || x.text || x.title || x.prompt || x.scenario || x.context_ar || x.scene_ar) || JSON.stringify(x));
       const seen = new Set(BANKS[bank][g].map(keyOf));
       arr.forEach(x => { if (x && typeof x === 'object' && !seen.has(keyOf(x))) { seen.add(keyOf(x)); BANKS[bank][g].push(x); } });
     }
