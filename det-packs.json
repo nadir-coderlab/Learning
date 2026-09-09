@@ -1,7 +1,32 @@
 {
- "v": 1,
+ "v": 2,
  "updated": "2026-09-08",
- "_readme_ar": "حزمة المدرّب: أنا (كلود) أحدّث هذا الملف بناءً على سجل محاولاتك (det-logs). coach = ملاحظات تظهر في تبويب «اليوم». banks = أسئلة إضافية تُضاف لبنوك المدرّب بنفس شكل عناصر كل بنك (fib.items, readselect.real/fake, listentype.items, readcomplete.passages, ireading.sets, writing.photo/interactive/sample/summary, speaking.rts/interactive/sample/photo, grammar_vocab.vocab).",
+ "_readme_ar": "حزمة المدرّب: أنا (كلود) أحدّث هذا الملف بناءً على سجل محاولاتك (det-logs). profile = نتائجك الرسمية وأهداف كل مهارة (تظهر في بطاقة «طريقك إلى 110»). coach = ملاحظات تظهر في تبويب «اليوم». banks = أسئلة إضافية تُضاف لبنوك المدرّب بنفس شكل عناصر كل بنك (fib.items, readselect.real/fake, listentype.items, readcomplete.passages, ireading.sets, writing.photo/interactive/sample/summary, speaking.rts/interactive/sample/photo, grammar_vocab.vocab).",
+ "profile": {
+  "targets": {
+   "overall": 110,
+   "reading": 100,
+   "writing": 105,
+   "speaking": 110,
+   "listening": 125
+  },
+  "official": [
+   {
+    "date": "2026-09-07",
+    "overall": 85,
+    "cefr": "B1",
+    "reading": 75,
+    "writing": 80,
+    "speaking": 90,
+    "listening": 100,
+    "literacy": 80,
+    "comprehension": 90,
+    "conversation": 95,
+    "production": 85,
+    "src": "certificate"
+   }
+  ]
+ },
  "coach": [
   {
    "date": "2026-09-05",
@@ -32,6 +57,17 @@
     "rc",
     "ir",
     "il"
+   ]
+  },
+  {
+   "date": "2026-09-08",
+   "title_ar": "نتيجتك 85 → الهدف 110: وين تنسرق درجاتك ووش سويت لك",
+   "body_ar": "قرأت شهادتك: القراءة 75 (الأضعف)، الكتابة 80، المحادثة 90، الاستماع 100. الـLiteracy عندك 80 يعني القراءة والكتابة هما اللي يسحبونك تحت 95. عشان 110 تحتاج تقريبًا: قراءة 100، كتابة 105، محادثة 110، استماع 125. درست 16 محاضرة ومحاكاة (2025–2026) وحطيت خلاصتها في «تكنيكات 110» بالرئيسية، والأهم: صار فيه «مدرّب حي» يوجهك أثناء الكتابة والكلام — يشيّك الهيكل جملة جملة (جواب مباشر ← سبب ← مثال ← فكرة ثانية ← جملة مركّبة ← خاتمة)، ويحسب وتيرتك مقابل الوقت، ويعلّم لك الأخطاء وأنت تكتب. والفقرة المثقوبة صارت بحجم الاختبار (12–16 فراغ) مع طريقة الحل بالوقت. ابدأ اليوم بـRead and Complete ×2 ثم Writing Sample مع المدرّب الحي، وسوّ «محاكاة كاملة مدرّبة» بنهاية الأسبوع.",
+   "focus": [
+    "rc",
+    "ws",
+    "iw",
+    "lt"
    ]
   }
  ],
