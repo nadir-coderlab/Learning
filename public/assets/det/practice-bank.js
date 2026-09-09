@@ -165,6 +165,24 @@
       'فصل المهام المستقلة عن المترابطة قلل التعطل. تعديل الموعد استند لتفسير واضح للاعتماديات.',
       'عائق|مواصفات|موافقة|بلا عمل|مبرر منطقي|اعتماديات|قابل للإدارة|تخطيط']
   ];
+  // كل جملة إملاء تحمل ملاحظة عربية من فخاخها الفعلية (الترقيم درجة جزئية بالاختبار).
+  function dictationNote(text) {
+    const notes = [];
+    if (/[?]\s*$/.test(text)) notes.push('الجملة سؤال: علامة استفهام بالنهاية، مو نقطة');
+    const opener = text.match(/^(Although|Though|While|When|After|Before|If|Since|Because|Despite|Whenever|As)\b/i);
+    if (opener && /,/.test(text)) notes.push('فاصلة بعد العبارة الافتتاحية «' + opener[1] + '…»');
+    else if (/,/.test(text)) notes.push('فيها فاصلة — لا تنساها');
+    const c = text.match(/\b(?:\w+n't|(?:it|that|there|he|she|who|what|let)'s|(?:I|we|you|they)'(?:re|ll|ve|d)|I'm)\b/i);
+    if (c) notes.push('اختصار ' + c[0] + ' — الصيغة الكاملة مقبولة أيضًا، بس لا تنسَ الفاصلة العليا');
+    else { const poss = text.match(/\b\w+'s\b/); if (poss) notes.push('ملكية ' + poss[0] + ' — الفاصلة العليا قبل الـ s'); }
+    if (/\b\d/.test(text) || /\b(one|two|three|ten|twenty|thirty|several|few)\b/i.test(text)) notes.push('فيها عدد — اكتبه كما سمعته');
+    const proper = (text.match(/(?!^)\b[A-Z][a-z]{2,}\b/g) || []).filter(w => !/^(The|A|An|This|That|These|Those|He|She|It|They|We|I)$/.test(w));
+    if (proper.length) notes.push('اسم بحرف كبير: ' + proper[0]);
+    const esWord = (text.match(/\b[a-z]{4,}s\b/g) || []).filter(w => !/(ss|us|is|ous)$/.test(w));
+    if (esWord.length) notes.push('نهاية ‏-s في «' + esWord[0] + '» — تُسمع خفيفة وتُنسى كثيرًا');
+    notes.push('حرف كبير بالبداية ونقطة بالنهاية');
+    return notes.slice(0, 3).join('. ') + '.';
+  }
   const banks = { readcomplete: { passages: [] }, fib: { items: [] }, listentype: { items: [] } };
   rows.forEach(([title, level, text, gist_ar, meanings], index) => {
     const gaps = Array.from(text.matchAll(/\{([^}]+)\}/g), m => m[1]);
@@ -178,7 +196,7 @@
       const sentence = sentences.find(s => new RegExp('\\b' + answer + '\\b').test(s));
       banks.fib.items.push({ sentence, answer, stem: answer.slice(0, Math.max(1, Math.floor(answer.length / 2))), hint_ar: ar[i], clue_ar: 'المعنى: ' + ar[i] + '. سياق القطعة: ' + gist_ar, level });
     });
-    [sentences[0], sentences[sentences.length - 1]].forEach(text => banks.listentype.items.push({ text, level }));
+    [sentences[0], sentences[sentences.length - 1]].forEach(text => banks.listentype.items.push({ text, level, trap_ar: dictationNote(text) }));
   });
   root.DetPracticeBank = { banks, meta: { passages: rows.length, fillInBlanks: rows.length * 2, dictation: rows.length * 2, total: rows.length * 5, official: false } };
 })(typeof window === 'undefined' ? globalThis : window);

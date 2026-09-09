@@ -655,7 +655,7 @@ function renderSync() {
 }
 
 /* ---------- المحرك التكيفي: مستواك التقديري لكل نوع سؤال (0.5 = A1 … 4.5 = C1+) ---------- */
-const LVL = { 'A1': 0.5, 'A2': 1, 'A2-B1': 1.5, 'B1': 2, 'B1+': 2.5, 'B1-B2': 2.5, 'B2': 3, 'B2+': 3.5, 'C1': 4, 'C1+': 4.5 };
+const LVL = { 'A1': 0.5, 'A2': 1, 'A2-B1': 1.5, 'B1': 2, 'B1+': 2.5, 'B1-B2': 2.5, 'B2': 3, 'B2+': 3.5, 'B2-C1': 3.5, 'C1': 4, 'C1+': 4.5 };
 const FAKE_LVL = { invented: 1.2, swap: 2.2, affix: 3, blend: 3 };
 const lvlNum = (l) => typeof l === 'number' ? l : (LVL[l] != null ? LVL[l] : 2);
 const lvlName = (x) => x < 1.25 ? 'A2' : x < 1.75 ? 'A2+' : x < 2.25 ? 'B1' : x < 2.75 ? 'B1+' : x < 3.25 ? 'B2' : x < 3.75 ? 'B2+' : 'C1';
@@ -1255,7 +1255,7 @@ const Rec = {
 /* التنقل */
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => { if (MOCK.full) { if (!confirm('أنت في المحاكاة الكاملة. تطلع منها؟ (النتيجة تنحسب على اللي خلصته)')) return; finishFullMock(true); return; } showView(b.dataset.v); }));
 function showView(v) {
-  window.DetHighlight.dispose();
+  if (window.DetHighlight) window.DetHighlight.dispose();
   document.querySelectorAll('.view').forEach(x => x.classList.toggle('on', x.id === 'v-' + v));
   document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x.dataset.v === v));
   window.scrollTo({ top: 0 });
@@ -1627,17 +1627,20 @@ DRILLS.ir = function () {
     $('hl-tap').onclick = () => { selection.tapMode(); $('hl-tap').disabled = true; };
     $('hl-clear').onclick = () => selection.clear();
     $('nx').addEventListener('pointerdown', selection.capture);
+    let warned = false;
     $('nx').onclick = () => {
       const sel = selection.value();
-      if (!sel) { toast('حدد الإجابة أولًا أو استخدم زر التحديد باللمس.'); return; }
+      /* التحديد الفاضي ما يُحتسب غلطًا بالخطأ — لكن الضغط مرة ثانية يعديك (لا تعلق بالمحاكاة الموقوتة) */
+      if (!sel && !warned) { warned = true; toast('حدد الإجابة أولًا أو استخدم «تحديد باللمس» — واضغط «تحقق» مرة ثانية للتخطي.'); return; }
       selection.destroy();
       const a = new Set(norm(q.answer).split(' ')), b = new Set(norm(sel).split(' ').filter(Boolean));
       let inter = 0; a.forEach(w => { if (b.has(w)) inter++; });
       const sc = b.size > a.size * 4 ? 0 : inter / Math.max(a.size, b.size);
       scores.hl[k] = sc; (scores.hlSel = scores.hlSel || [])[k] = sel;
       $('hl-tap').disabled = true; $('hl-clear').disabled = true;
+      if (!sel) $('hl-preview').textContent = 'تخطيت هذا السؤال بدون تحديد.';
       $('ptx').innerHTML = esc(full).replace(esc(q.answer), '<mark>' + esc(q.answer) + '</mark>');
-      f.body.querySelector('.hl-tip').innerHTML = `<b>تقييم التدريب ${Math.round(sc * 100)}%</b> — الإجابة الصحيحة مظللة بالأخضر. حددت: <span class="en">${esc(sel)}</span>`;
+      f.body.querySelector('.hl-tip').innerHTML = `<b>تقييم التدريب ${Math.round(sc * 100)}%</b> — الإجابة الصحيحة مظللة بالأخضر. ${sel ? 'حددت: <span class="en">' + esc(sel) + '</span>' : 'ما حددت شي.'}`;
       $('nx').textContent = 'التالي'; $('nx').onclick = next;
     };
   }
@@ -1648,7 +1651,7 @@ DRILLS.ir = function () {
   function next() { step++; if (step < steps.length) steps[step](); else finish(); }
   let fin = false;
   function finish() {
-    if (fin) return; fin = true; f.timer.stop(); window.DetHighlight.dispose();
+    if (fin) return; fin = true; f.timer.stop(); if (window.DetHighlight) window.DetHighlight.dispose();
     const total = (scores.gaps * gaps.length + scores.missing + scores.hl[0] + scores.hl[1] + scores.idea + scores.title) / (gaps.length + 5);
     const sc = Math.round(100 * total); learn('ir', s.level, sc >= 70); logAttempt('ir', { q: s.title, a: JSON.stringify(scores), sc, ms: Date.now() - t0, lvl: s.level, extra: scores }); setBest('ir', sc);
     const rv = [];
@@ -1688,8 +1691,8 @@ DRILLS.lt = function () {
   }
   function finish() {
     const sc = Math.round(100 * sum / items.length); setBest('lt', sc);
-    log.forEach(l => { if (l.r.score < 0.8) addMiss('lt', l.it.text, l.it.trap_ar, 'إملاء'); });
-    const rows = log.map(l => `<div class="card" style="padding:10px 12px"><div class="diff">${l.r.html}</div><div class="hl-tip" style="margin-top:4px">درجتك ${Math.round(l.r.score * 100)}% · ${l.r.punct ? '' : '⚠️ ' + (l.r.notes || []).join(' · ') + ' · '}${bidi(l.it.trap_ar)} ${flagBtn('lt', l.it.text, l.it.trap_ar, 'إملاء')}</div></div>`).join('');
+    log.forEach(l => { if (l.r.score < 0.8) addMiss('lt', l.it.text, l.it.trap_ar || '', 'إملاء'); });
+    const rows = log.map(l => `<div class="card" style="padding:10px 12px"><div class="diff">${l.r.html}</div><div class="hl-tip" style="margin-top:4px">درجتك ${Math.round(l.r.score * 100)}% · ${l.r.punct ? '' : '⚠️ ' + (l.r.notes || []).join(' · ') + ' · '}${bidi(l.it.trap_ar || '')} ${flagBtn('lt', l.it.text, l.it.trap_ar || '', 'إملاء')}</div></div>`).join('');
     result(f.body, sc, 'متوسط تطابق الكلمات', `<div class="hl-tip">🟩 صح · 🟨 كلمة كتبتها غلط · 🟥 كلمة فاتتك (تنقّص أكثر من الغلط — اكتب أي تخمين دائمًا)</div>${rows}`);
     again(f.body, DRILLS.lt, '🔄 6 جمل جديدة');
   }
