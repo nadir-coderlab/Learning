@@ -16,6 +16,8 @@
 <script src="det-path120.js"></script>
 <script src="det-path120-bank.js"></script>
 <script src="det-path120-drills.js"></script>
+<script src="assets/det/highlight.js?v=20260909"></script>
+<script src="assets/det/practice-bank.js?v=20260909"></script>
 <style>
 :root{
   --grad:linear-gradient(135deg,#0f766e 0%,#0d9488 50%,#22c55e 100%);
@@ -272,6 +274,10 @@ body.exam-coach #examBar{background:#7c2d12}
 .vchip{display:inline-block;font-family:"Baloo 2",sans-serif;font-size:13px;font-weight:800;background:#fff;border:1px solid var(--line);border-radius:999px;padding:2px 10px;margin:2px;direction:ltr}
 .vchip small{font-family:Cairo,sans-serif;color:var(--muted);font-weight:700;direction:rtl;unicode-bidi:isolate}
 body.exam:not(.exam-coach) .drill .ideaWrap{display:none!important}
+.hl-word{font:inherit;color:inherit;background:transparent;border:0;border-radius:3px;padding:3px 1px;min-height:44px;cursor:pointer;touch-action:manipulation}
+.hl-word.hl-selected{background:#bbf7d0;color:#14532d}
+.hl-word:focus-visible{outline:2px solid #0369a1}
+.hl-preview{padding:10px;border:1px solid #94a3b8;border-radius:8px;min-height:44px;font-size:16px;direction:ltr;unicode-bidi:plaintext;white-space:pre-wrap}
 </style>
 <script src="det-scoring.js" defer></script>
 <script type="module" src="det-sync.js"></script>
@@ -700,7 +706,7 @@ async function loadPhotos() { PHOTOS_READY = (async () => { try { const r = awai
 function mergeBanks(banks) {
   Object.entries(banks || {}).forEach(([bank, groups]) => Object.entries(groups || {}).forEach(([g, arr]) => {
     if (BANKS[bank] && Array.isArray(BANKS[bank][g]) && Array.isArray(arr)) {
-      const keyOf = (x) => keyStr(x && (x.w || x.answer || x.text || x.title || x.prompt || x.scenario || x.context_ar || x.scene_ar) || JSON.stringify(x));
+      const keyOf = (x) => keyStr(x && (x.sentence ? x.sentence + '|' + x.answer : (x.w || x.answer || x.text || x.title || x.prompt || x.scenario || x.context_ar || x.scene_ar)) || JSON.stringify(x));
       const seen = new Set(BANKS[bank][g].map(keyOf));
       arr.forEach(x => { if (x && typeof x === 'object' && !seen.has(keyOf(x))) { seen.add(keyOf(x)); BANKS[bank][g].push(x); } });
     }
@@ -708,6 +714,7 @@ function mergeBanks(banks) {
   WORD_AR = null; VTHEME = null;
 }
 async function loadPacks() {
+  if (window.DetPracticeBank) mergeBanks(window.DetPracticeBank.banks);
   /* البنك الثاني (أسئلة إضافية عشان ما يتكرر عليك شي) ثم حزمة المدرّب */
   try { const r2 = await fetch('det-bank2.json?v=' + Date.now(), { cache: 'no-store' }); if (r2.ok) mergeBanks(await r2.json()); } catch (e) {}
   try { const r = await fetch('det-packs.json?v=' + Date.now(), { cache: 'no-store' }); if (r.ok) { const P = await r.json(); PACKS = Object.assign({ coach: [], banks: {} }, P || {}); mergeBanks(PACKS.banks); } } catch (e) {}
@@ -1248,6 +1255,7 @@ const Rec = {
 /* التنقل */
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => { if (MOCK.full) { if (!confirm('أنت في المحاكاة الكاملة. تطلع منها؟ (النتيجة تنحسب على اللي خلصته)')) return; finishFullMock(true); return; } showView(b.dataset.v); }));
 function showView(v) {
+  window.DetHighlight.dispose();
   document.querySelectorAll('.view').forEach(x => x.classList.toggle('on', x.id === 'v-' + v));
   document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x.dataset.v === v));
   window.scrollTo({ top: 0 });
@@ -1614,8 +1622,24 @@ DRILLS.ir = function () {
   ];
   function hl(k) {
     const q = s.highlight[k];
-    f.body.innerHTML = `<div class="prog">${3 + k}/6 · Highlight the Answer — ظلّل بإصبعك/الماوس الجزء اللي يجاوب السؤال ثم اضغط «تحقق»</div><div class="sent" style="margin-bottom:8px"><b>${esc(q.q)}</b></div><div class="passage" id="ptx">${esc(full)}</div><div class="hl-tip">ظلّل العبارة المجيبة فقط، مو الفقرة كلها. تظليل أوسع شوي = درجة جزئية؛ فقرة كاملة = صفر.</div><div class="row"><button class="btn" id="nx">تحقق</button></div>`;
-    $('nx').onclick = () => { const sel = (window.getSelection ? window.getSelection().toString() : '').trim(); const a = new Set(norm(q.answer).split(' ')); const b = new Set(norm(sel).split(' ').filter(Boolean)); let inter = 0; a.forEach(w => { if (b.has(w)) inter++; }); const sc = b.size === 0 ? 0 : (b.size > a.size * 4 ? 0 : inter / Math.max(a.size, b.size)); scores.hl[k] = sc; (scores.hlSel = scores.hlSel || [])[k] = sel; f.body.querySelector('#ptx').innerHTML = esc(full).replace(esc(q.answer), '<mark>' + esc(q.answer) + '</mark>'); f.body.querySelector('.hl-tip').innerHTML = `<b>درجتك ${Math.round(sc * 100)}%</b> — الإجابة الصحيحة مظللة بالأخضر.${sel ? ' ظللت: <span class="en">' + esc(sel) + '</span>' : ' ما ظللت شي.'}`; $('nx').textContent = 'التالي'; $('nx').onclick = next; };
+    f.body.innerHTML = `<div class="prog">${3 + k}/6 · Highlight the Answer — تحديد الإجابة</div><div class="sent" style="margin-bottom:8px"><b>${esc(q.q)}</b></div><div class="row"><button class="btn ghost sm" id="hl-tap">تحديد باللمس: أول كلمة ثم آخر كلمة</button><button class="btn ghost sm" id="hl-clear">مسح التحديد</button></div><div class="passage" id="ptx">${esc(full)}</div><div class="hl-tip">حدد العبارة التي تجيب السؤال فقط. يظهر النص المحفوظ أدناه قبل التصحيح. النسبة تقييم تدريبي وليست درجة دولينجو الرسمية.</div><div class="hl-preview" id="hl-preview" role="status" aria-live="polite">لم تحدد إجابة بعد.</div><div class="row"><button class="btn" id="nx">تحقق</button></div>`;
+    const selection = window.DetHighlight.mount($('ptx'), $('hl-preview'), full);
+    $('hl-tap').onclick = () => { selection.tapMode(); $('hl-tap').disabled = true; };
+    $('hl-clear').onclick = () => selection.clear();
+    $('nx').addEventListener('pointerdown', selection.capture);
+    $('nx').onclick = () => {
+      const sel = selection.value();
+      if (!sel) { toast('حدد الإجابة أولًا أو استخدم زر التحديد باللمس.'); return; }
+      selection.destroy();
+      const a = new Set(norm(q.answer).split(' ')), b = new Set(norm(sel).split(' ').filter(Boolean));
+      let inter = 0; a.forEach(w => { if (b.has(w)) inter++; });
+      const sc = b.size > a.size * 4 ? 0 : inter / Math.max(a.size, b.size);
+      scores.hl[k] = sc; (scores.hlSel = scores.hlSel || [])[k] = sel;
+      $('hl-tap').disabled = true; $('hl-clear').disabled = true;
+      $('ptx').innerHTML = esc(full).replace(esc(q.answer), '<mark>' + esc(q.answer) + '</mark>');
+      f.body.querySelector('.hl-tip').innerHTML = `<b>تقييم التدريب ${Math.round(sc * 100)}%</b> — الإجابة الصحيحة مظللة بالأخضر. حددت: <span class="en">${esc(sel)}</span>`;
+      $('nx').textContent = 'التالي'; $('nx').onclick = next;
+    };
   }
   function choose(label, opts, correct, key) {
     f.body.innerHTML = `<div class="prog">${label}</div><div class="passage" style="font-size:14px;line-height:1.7">${esc(full)}</div><div class="opts" id="op"></div>`;
@@ -1624,7 +1648,7 @@ DRILLS.ir = function () {
   function next() { step++; if (step < steps.length) steps[step](); else finish(); }
   let fin = false;
   function finish() {
-    if (fin) return; fin = true; f.timer.stop();
+    if (fin) return; fin = true; f.timer.stop(); window.DetHighlight.dispose();
     const total = (scores.gaps * gaps.length + scores.missing + scores.hl[0] + scores.hl[1] + scores.idea + scores.title) / (gaps.length + 5);
     const sc = Math.round(100 * total); learn('ir', s.level, sc >= 70); logAttempt('ir', { q: s.title, a: JSON.stringify(scores), sc, ms: Date.now() - t0, lvl: s.level, extra: scores }); setBest('ir', sc);
     const rv = [];
@@ -2054,4 +2078,3 @@ window.addEventListener('load', () => { if (window.DetScore && DetScore.loadWord
 </script>
 </body>
 </html>
-
