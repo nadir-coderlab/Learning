@@ -16,6 +16,8 @@
 <script src="det-path120.js"></script>
 <script src="det-path120-bank.js"></script>
 <script src="det-path120-drills.js"></script>
+<script src="assets/det/highlight.js?v=20260909"></script>
+<script src="assets/det/practice-bank.js?v=20260909"></script>
 <style>
 :root{
   --grad:linear-gradient(135deg,#0f766e 0%,#0d9488 50%,#22c55e 100%);
@@ -254,6 +256,28 @@ body.exam-coach #examBar{background:#7c2d12}
 .skrow .nm{font-weight:900;min-width:70px}
 .skrow a{font-size:12px;font-weight:800;background:#fff;border:1px solid var(--line);border-radius:999px;padding:1px 10px;text-decoration:none;color:var(--ink)}
 .skrow a.low{border-color:#eaa9a1;background:var(--red-soft)}
+/* ===== v5: محاكاة قسم · أفكار · عدة الحفظ ===== */
+.secChips{display:flex;flex-wrap:wrap;gap:6px}
+.secChip{font-family:inherit;font-size:14px;font-weight:800;border-radius:999px;padding:6px 14px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+.secChip.on{background:var(--teal);border-color:var(--teal);color:#fff}
+.prep{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin:8px 0}
+.prepCol{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:13.5px;line-height:1.7}
+.prepCol b{display:block;margin-bottom:2px}
+.prepCol ul{margin:0 16px 0 0;padding:0}
+.ideaWrap{margin:6px 0}
+.ideaBox{background:#f5f3ff;border:1px solid #c4b5fd;border-radius:12px;padding:8px 10px;margin-top:6px;font-size:13.5px;line-height:1.8}
+.ideaSec{margin:4px 0 8px}.ideaSec>b{display:block;margin-bottom:2px}
+.kitRow{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:4px 0;border-bottom:1px dashed var(--line)}
+.kitRow .en2{font-size:14px}.kitRow .kitAr{flex:1;min-width:140px;font-size:13px;color:var(--muted);font-weight:700}
+.kitRow .wbtn.on{background:var(--ok-soft);border-color:#22c55e;color:#166534}
+.kitTopic{margin:6px 0}.kitTopic b{display:block}
+.vchip{display:inline-block;font-family:"Baloo 2",sans-serif;font-size:13px;font-weight:800;background:#fff;border:1px solid var(--line);border-radius:999px;padding:2px 10px;margin:2px;direction:ltr}
+.vchip small{font-family:Cairo,sans-serif;color:var(--muted);font-weight:700;direction:rtl;unicode-bidi:isolate}
+body.exam:not(.exam-coach) .drill .ideaWrap{display:none!important}
+.hl-word{font:inherit;color:inherit;background:transparent;border:0;border-radius:3px;padding:3px 1px;min-height:44px;cursor:pointer;touch-action:manipulation}
+.hl-word.hl-selected{background:#bbf7d0;color:#14532d}
+.hl-word:focus-visible{outline:2px solid #0369a1}
+.hl-preview{padding:10px;border:1px solid #94a3b8;border-radius:8px;min-height:44px;font-size:16px;direction:ltr;unicode-bidi:plaintext;white-space:pre-wrap}
 </style>
 <script src="det-scoring.js" defer></script>
 <script type="module" src="det-sync.js"></script>
@@ -299,6 +323,12 @@ body.exam-coach #examBar{background:#7c2d12}
   <div class="card" id="coachCard" style="display:none">
     <h3>🧑‍🏫 ملاحظات المدرّب</h3>
     <div id="coachBox"></div>
+  </div>
+  <div class="card">
+    <h3>🎯 محاكاة قسم — تتكرر لين تتقنه</h3>
+    <div class="lead" style="margin:0 0 6px">اختر قسمًا (أو تمرينًا واحدًا) ويعطيك جولة كاملة منه بأسئلة جديدة كل مرة، ومعها وش تحفظ ووش تتدرب ووش تسوي يوم الاختبار. بعد كل جولة تشوف نسبتك مقارنة بالجولة السابقة وزر «كرر». داخل التمرين زر <b>💡 أفكار للموضوع</b> يعطيك بذور أفكار وأمثلة وكلمات الموضوع.</div>
+    <div id="secPick"></div>
+    <div id="secResult"></div>
   </div>
   <div class="card">
     <h3>🎲 المحاكاة</h3>
@@ -404,7 +434,7 @@ fixState();
 function fixState() {
   ['hist', 'miss', 'mastered', 'ab', 'best', 'done', 'vocab', 'lessons', 'plan'].forEach(k => { if (!S[k] || typeof S[k] !== 'object' || Array.isArray(S[k])) S[k] = {}; }); ['log', 'mocks'].forEach(k => { if (!Array.isArray(S[k])) S[k] = []; });
   if (!S.seen || typeof S.seen !== 'object' || Array.isArray(S.seen)) S.seen = {}; if (!Number.isFinite(S.sq)) S.sq = 0;
-  if (!Array.isArray(S.official)) S.official = []; S.official = S.official.filter(o => o && typeof o === 'object' && Number.isFinite(o.overall)); if (S.coach == null) S.coach = true;
+  if (!S.sec || typeof S.sec !== 'object' || Array.isArray(S.sec)) S.sec = {}; if (!Array.isArray(S.official)) S.official = []; S.official = S.official.filter(o => o && typeof o === 'object' && Number.isFinite(o.overall)); if (S.coach == null) S.coach = true;
   /* تنظيف القيم التالفة (استرجاع قديم أو تعديل يدوي) */
   ['best', 'done', 'ab'].forEach(k => Object.keys(S[k]).forEach(x => { if (!Number.isFinite(S[k][x])) delete S[k][x]; }));
   Object.keys(S.hist).forEach(k => { if (!Array.isArray(S.hist[k])) delete S.hist[k]; else S.hist[k] = S.hist[k].filter(h => h && Number.isFinite(h.s)); });
@@ -414,12 +444,12 @@ function fixState() {
 function trimLog(hard) { const lim = hard ? 6e5 : 1.6e6; let guard = 0; while (S.log.length && JSON.stringify(S.log).length > lim && guard++ < 5000) { const i = S.log.findIndex(a => a.syn); S.log.splice(i >= 0 ? i : 0, 1); } }
 const save = () => { S.ts = Date.now(); if (!store.set(SK, S)) { trimLog(true); if (!store.set(SK, S) && !save.warned) { save.warned = true; toast('⚠️ ذاكرة المتصفح ممتلئة — سجّل دخولك عشان يرتفع السجل وينظّف'); } } SYNC.dirty(); };
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', 1800); }
-function setBest(key, score) { const b = S.best[key]; if (b == null || score > b) S.best[key] = score; S.done[key] = (S.done[key] || 0) + 1; (S.hist[key] = S.hist[key] || []).push({ t: Date.now(), s: score }); if (S.hist[key].length > 40) S.hist[key].splice(0, S.hist[key].length - 40); save(); renderHome(); if (MOCK.full) mockRecord(key, score); }
+function setBest(key, score) { const b = S.best[key]; if (b == null || score > b) S.best[key] = score; S.done[key] = (S.done[key] || 0) + 1; (S.hist[key] = S.hist[key] || []).push({ t: Date.now(), s: score }); if (S.hist[key].length > 40) S.hist[key].splice(0, S.hist[key].length - 40); save(); renderHome(); if (MOCK.full) mockRecord(key, score); else if (MOCK.section && MOCK.on) MOCK.results.push({ key, sc: score }); }
 function bestBadge(key) { const b = S.best[key]; return b == null ? '' : `<span class="best">أفضل: ${b}%</span>`; }
 /* =========================================================
    نظام المراجعة (تكرار متباعد) + تحليل الضعف
    ========================================================= */
-const KIND_AR = { evidence: 'استنتاج ودليل', rs: 'كلمات', fib: 'فراغات', rc: 'فقرة مثقوبة', lt: 'إملاء', vocab: 'مفردات', lesson: 'قواعد' };
+const KIND_AR = { kit: 'عدة الحفظ', evidence: 'استنتاج ودليل', rs: 'كلمات', fib: 'فراغات', rc: 'فقرة مثقوبة', lt: 'إملاء', vocab: 'مفردات', lesson: 'قواعد' };
 const BOX_WAIT = [0, 4 * 3600e3, 20 * 3600e3];
 const missId = (kind, w) => kind + ':' + norm(String(w));
 function addMiss(kind, w, ar, note, src) {
@@ -517,7 +547,7 @@ function related(kind, pool, keyFn, missKinds, max, fresh) {
   return shuffle(scored.slice(0, Math.max(max * 3, 6)).map(r => r.x)).slice(0, max);
 }
 const SKILLS = { reading: { ar: 'القراءة', d: ['rs', 'fib', 'rc', 'ir', 'evidence'] }, listening: { ar: 'الاستماع', d: ['lt', 'il'] }, writing: { ar: 'الكتابة', d: ['wp', 'iw', 'ws', 'sum', 'rewrite'] }, speaking: { ar: 'المحادثة', d: ['sp', 'rts', 'is', 'ss'] } };
-const DRILL_META = { evidence: ['الاستنتاج والدليل', 'read/evidence'], rewrite: ['إعادة صياغة إجاباتي', 'write/rewrite'], rs: ['🔤 Read and Select', 'read/rs'], fib: ['✏️ Fill in the Blanks', 'read/fib'], rc: ['🧩 Read and Complete', 'read/rc'], ir: ['📄 Interactive Reading', 'read/ir'], lt: ['⌨️ Listen and Type', 'listen/lt'], il: ['💬 Interactive Listening', 'listen/il'], wp: ['🖼️ Write About the Photo', 'write/wp'], iw: ['📝 Interactive Writing', 'write/iw'], ws: ['📜 Writing Sample', 'write/ws'], sum: ['🗒️ Summarize', 'write/sum'], sp: ['🖼️ Speak About the Photo', 'speak/sp'], rts: ['📖 Read Then Speak', 'speak/rts'], is: ['🤖 Interactive Speaking', 'speak/is'], ss: ['🎥 Speaking Sample', 'speak/ss'] };
+const DRILL_META = { evidence: ['الاستنتاج والدليل', 'read/evidence'], rewrite: ['إعادة صياغة إجاباتي', 'write/rewrite'], ideas: ['⚡ الأفكار السريعة', 'skills/ideas'], kit: ['📦 عدة الحفظ', 'skills/kit'], typing: ['⌨️ سرعة الطباعة', 'skills/typing'], rs: ['🔤 Read and Select', 'read/rs'], fib: ['✏️ Fill in the Blanks', 'read/fib'], rc: ['🧩 Read and Complete', 'read/rc'], ir: ['📄 Interactive Reading', 'read/ir'], lt: ['⌨️ Listen and Type', 'listen/lt'], il: ['💬 Interactive Listening', 'listen/il'], wp: ['🖼️ Write About the Photo', 'write/wp'], iw: ['📝 Interactive Writing', 'write/iw'], ws: ['📜 Writing Sample', 'write/ws'], sum: ['🗒️ Summarize', 'write/sum'], sp: ['🖼️ Speak About the Photo', 'speak/sp'], rts: ['📖 Read Then Speak', 'speak/rts'], is: ['🤖 Interactive Speaking', 'speak/is'], ss: ['🎥 Speaking Sample', 'speak/ss'] };
 function recent(key, n = 3) { const h = S.hist[key] || []; if (!h.length) return null; const last = h.slice(-n); return Math.round(last.reduce((a, x) => a + x.s, 0) / last.length); }
 function analyze() {
   const skills = Object.entries(SKILLS).map(([k, v]) => { const vals = v.d.map(d => recent(d)).filter(x => x != null); return { k, ar: v.ar, avg: vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : null, tried: vals.length, total: v.d.length }; });
@@ -676,7 +706,7 @@ async function loadPhotos() { PHOTOS_READY = (async () => { try { const r = awai
 function mergeBanks(banks) {
   Object.entries(banks || {}).forEach(([bank, groups]) => Object.entries(groups || {}).forEach(([g, arr]) => {
     if (BANKS[bank] && Array.isArray(BANKS[bank][g]) && Array.isArray(arr)) {
-      const keyOf = (x) => keyStr(x && (x.w || x.answer || x.text || x.title || x.prompt || x.scenario || x.context_ar || x.scene_ar) || JSON.stringify(x));
+      const keyOf = (x) => keyStr(x && (x.sentence ? x.sentence + '|' + x.answer : (x.w || x.answer || x.text || x.title || x.prompt || x.scenario || x.context_ar || x.scene_ar)) || JSON.stringify(x));
       const seen = new Set(BANKS[bank][g].map(keyOf));
       arr.forEach(x => { if (x && typeof x === 'object' && !seen.has(keyOf(x))) { seen.add(keyOf(x)); BANKS[bank][g].push(x); } });
     }
@@ -684,9 +714,12 @@ function mergeBanks(banks) {
   WORD_AR = null; VTHEME = null;
 }
 async function loadPacks() {
+  if (window.DetPracticeBank) mergeBanks(window.DetPracticeBank.banks);
   /* البنك الثاني (أسئلة إضافية عشان ما يتكرر عليك شي) ثم حزمة المدرّب */
   try { const r2 = await fetch('det-bank2.json?v=' + Date.now(), { cache: 'no-store' }); if (r2.ok) mergeBanks(await r2.json()); } catch (e) {}
   try { const r = await fetch('det-packs.json?v=' + Date.now(), { cache: 'no-store' }); if (r.ok) { const P = await r.json(); PACKS = Object.assign({ coach: [], banks: {} }, P || {}); mergeBanks(PACKS.banks); } } catch (e) {}
+  /* عدة الحفظ ومولّد الأفكار (بذور أفكار وأمثلة وكلمات لكل موضوع) */
+  try { const rk = await fetch('det-kit.json?v=' + Date.now(), { cache: 'no-store' }); if (rk.ok) { const K = await rk.json(); if (K && Array.isArray(K.topics)) KIT = Object.assign({ topics: [], frames: [], photo: [], colloc: [] }, K); } } catch (e) {}
   try { renderCoach(); renderMenus(); render110(); renderTech(); } catch (e) { console.error(e); }
 }
 function renderCoach() {
@@ -945,6 +978,184 @@ function rcCoach(body, gaps, timer) {
   return { stop() { stopped = true; clearInterval(h); gaps.forEach(g => { const inp = $(g.id); inp && inp.parentNode.classList.remove('empty'); }); }, el: p };
 }
 
+/* =========================================================
+   v5 — محاكاة قسم تتكرر · مولّد الأفكار · عدة الحفظ · تحضير كل قسم · سرعة الطباعة
+   ========================================================= */
+let KIT = { topics: [], frames: [], photo: [], colloc: [] };
+const SEC_AR = { reading: 'القراءة', listening: 'الاستماع', writing: 'الكتابة', speaking: 'المحادثة' };
+const SEC_SEQ = {
+  reading: [['read', 'rs'], ['read', 'fib'], ['read', 'rc'], ['read', 'ir']],
+  listening: [['listen', 'lt'], ['listen', 'il'], ['listen', 'lt']],
+  writing: [['write', 'wp'], ['write', 'wp'], ['write', 'iw'], ['write', 'sum'], ['write', 'ws']],
+  speaking: [['speak', 'sp'], ['speak', 'rts'], ['speak', 'is'], ['speak', 'ss']],
+};
+/* تحضير كل قسم: وش تحفظ، وش تتدرب، ووش تسوي يوم الاختبار */
+const PREP = {
+  reading: { memorize: ['الكلمات النحوية (the / and / that / which / is / has …) — أغلب فراغات Read and Complete تنعبّي منها بلا تفكير', 'عائلات الكلمات الشائعة (recommend → recommendation، decide → decision) لـ Fill in the Blanks', 'كلمات المواضيع بجملها من «عدة الحفظ ← كلمات الموضوع» — مو قوائم مجردة'], practice: ['Read and Complete ×2 يوميًا بالطريقة (العنوان وأول وآخر جملة ← السهل ← القرائن ← خمّن)', 'Fill in the Blanks جولة بالغريزة', 'Interactive Reading قطعة: ظلّل العبارة المجيبة فقط', 'الاستنتاج والدليل قطعة'], day: ['Read and Select: أعرف معناها؟ لا = No، وما فيه خصم على الغلط', 'لا تترك فراغًا أبدًا — الفاضي صفر أكيد', 'الإملاء الأمريكي في Read and Complete (color مو colour)'] },
+  listening: { memorize: ['قواعد الترقيم للإملاء: حرف كبير بالبداية، نقطة أو ؟ بالنهاية، فاصلة بعد If… / Despite… / When…', 'الاختصارات والصيغ الكاملة: There\'s = There is، I\'d = I would — الاثنان مقبولان', 'أصوات اللهجة البريطانية: can\'t / water / schedule تختلف — اسمع الجملة كاملة قبل ما تكتب'], practice: ['Listen and Type 6–9 جمل يوميًا (يجي 9 مرات بالاختبار)', 'Interactive Listening سيناريو + الملخص بـ75 ثانية'], day: ['التشغيل الأول تلقائي: ابدأ الكتابة من أول سماع، والتشغيلتان الباقيتان للتصحيح', 'كلمة ما تأكدت منها: اكتب اللي سمعته — الدرجة جزئية', 'بالمحادثة الجامعية: الجواب الصح يعيد كلمات السيناريو'] },
+  writing: { memorize: ['هياكل الجواب: جواب مباشر ← سبب ← مثال ← فكرة ثانية ← جملة مركّبة ← خاتمة (عدة الحفظ ← هياكل)', 'عبارات الصورة: In the foreground / background · is wearing · looks like · probably', 'قالب «احكِ موقفًا»: Last year … The problem was … First … Then … Finally … This experience taught me …', '30 collocation عامة (make a decision · meet a deadline · take responsibility)'], practice: ['Writing Sample أو Interactive Writing يوميًا مع المدرّب الحي', 'Write About the Photo ×2 — 3 جمل وصف', 'ورشة إعادة كتابة إجابة أمس', 'سرعة الطباعة 5 دقائق'], day: ['أول جملة = الجواب مباشرة، وآخر 30 ثانية للإملاء والنقاط', 'الصورة: وصف مو قائمة أشياء، وجملتان تكفي لو ضاق الوقت', 'الجزء الثاني بالتفاعلية: As I mentioned, … ثم معلومة جديدة فقط', 'ممنوع النسخ واللصق — والعيّنة تروح للجامعة'] },
+  speaking: { memorize: ['OREO: I think … / The main reason is … / For example … / So overall …', 'PPF: When I was … / These days … / In the future, I\'m going to …', 'عبارات الانتقال بين النقاط: In regard to the second question … / As for the final question … / Returning to the first question …', 'عبارات «ما أعرف الموضوع»: To be honest, I don\'t know much about this, but I guess …'], practice: ['Interactive Speaking مجموعة يوميًا (35 ثانية × 6)', 'Speak About the Photo أو Read Then Speak — 90 ثانية كاملة', 'تمرين الأفكار السريعة: 3 أفكار بـ30 ثانية', 'Speaking Sample أسبوعيًا (90 ثانية على الأقل)'], day: ['اضغط Record فورًا، ولا تسكت أبدًا — الصمت أسوأ من الغلط', 'إنجليزي طبيعي بسيط، لا كلمات فخمة محفوظة', '110+ كلمة/دقيقة وجمل قصيرة بدل um / uh', 'تخيّل إنسانًا قدامك مو كمبيوتر — النبرة محسوبة'] },
+};
+function prepHtml(sec) {
+  const p = PREP[sec]; if (!p) return '';
+  const ul = (t, arr) => `<div class="prepCol"><b>${t}</b><ul>${arr.map(x => `<li>${bidi(x)}</li>`).join('')}</ul></div>`;
+  return `<div class="prep">${ul('📦 احفظ', p.memorize)}${ul('🏋️ تدرّب', p.practice)}${ul('🎯 يوم الاختبار', p.day)}</div><div class="row" style="margin-top:6px"><a class="btn sm ghost" href="#skills/kit">📦 افتح عدة الحفظ</a><a class="btn sm ghost" href="#skills/ideas">⚡ تمرين الأفكار</a></div>`;
+}
+
+/* ---------- محاكاة قسم تتكرر ---------- */
+function secSeq(sec, drill) {
+  if (drill && DRILL_META[drill]) { const [v, k] = DRILL_META[drill][1].split('/'); return [[v, k], [v, k], [v, k]]; }
+  return (SEC_SEQ[sec] || SEC_SEQ.writing).slice();
+}
+function startSectionMock(sec, mode, drill) {
+  if (MOCK.full) return toast('خلّص المحاكاة الجارية أول');
+  const seq = secSeq(sec, drill); const label = drill && DRILL_META[drill] ? DRILL_META[drill][0] : 'قسم ' + SEC_AR[sec];
+  MOCK.on = true; MOCK.section = sec; MOCK.secDrill = drill || null; MOCK.mode = mode; MOCK.results = []; MOCK.t0 = Date.now(); MOCK.round = ((S.sec[sec] || []).length) + 1;
+  S.secPick = { sec, drill: drill || null, mode }; save();
+  if (mode === 'practice') { MOCK.full = false; MOCK.coach = false; MOCK.queue = seq.slice(1); toast(`${label}: ${seq.length} تمارين متتالية — المراجعة بعد كل تمرين، وبالنهاية ملخص الجولة`); nav(seq[0][0], seq[0][1]); return; }
+  MOCK.full = true; MOCK.coach = mode === 'coach'; MOCK.locked = false; MOCK.queue = seq.slice(1); MOCK.cur = seq[0][1];
+  document.body.classList.add('exam'); document.body.classList.toggle('exam-coach', MOCK.coach);
+  $('examTitle').textContent = (MOCK.coach ? '🧑‍🏫 ' : '🧪 ') + label + (MOCK.coach ? ' — مدرّبة، النتائج بالنهاية' : ' — صارمة'); $('examLeft').textContent = seq.length + ' تمارين';
+  nav(seq[0][0], seq[0][1]);
+}
+function finishSection(body) {
+  const sec = MOCK.section, drill = MOCK.secDrill, mode = MOCK.mode, res = MOCK.results.slice();
+  MOCK.on = false; MOCK.section = null; MOCK.secDrill = null; MOCK.queue = [];
+  if (!res.length) { toast('انتهت الجولة بدون نتيجة'); return; }
+  const by = {}; res.forEach(r => { (by[r.key] = by[r.key] || []).push(r.sc); });
+  const avg = Math.round(res.reduce((a, r) => a + r.sc, 0) / res.length);
+  const rec = { t: Date.now(), sec, drill: drill || null, mode, by, avg, mins: Math.round((Date.now() - MOCK.t0) / 60000) };
+  (S.sec[sec] = S.sec[sec] || []).push(rec); if (S.sec[sec].length > 30) S.sec[sec].shift(); save();
+  logAttempt('section', { q: sec + (drill ? ':' + drill : '') + ' ' + mode, a: JSON.stringify(by), sc: avg, extra: { mins: rec.mins, round: S.sec[sec].length } });
+  const html = secSummaryHtml(sec);
+  if (body) { const d = el('div'); d.innerHTML = html; body.appendChild(d); wireSecButtons(d); }
+  renderSection();
+}
+function secSummaryHtml(sec) {
+  const list = S.sec[sec] || []; if (!list.length) return '';
+  const m = list[list.length - 1], prev = list[list.length - 2];
+  const delta = prev ? m.avg - prev.avg : null;
+  const rows = Object.entries(m.by).map(([k, arr]) => { const pv = prev && prev.by[k] ? Math.round(prev.by[k].reduce((a, b) => a + b, 0) / prev.by[k].length) : null; const cur = Math.round(arr.reduce((a, b) => a + b, 0) / arr.length); return `<tr><td>${DRILL_META[k] ? DRILL_META[k][0] : esc(k)}${arr.length > 1 ? ' ×' + arr.length : ''}</td><td><b style="color:${cur < 60 ? '#ef4444' : cur < 75 ? '#f59e0b' : 'var(--teal)'}">${cur}%</b>${pv != null ? ` <small class="hl-tip">(قبلها ${pv}%)</small>` : ''}</td></tr>`; }).join('');
+  const trend = list.slice(-6).map(x => x.avg + '%').join(' ← ');
+  return `<div class="res" style="margin-top:8px"><div class="score">${m.avg}%</div><div style="text-align:center;font-weight:800">جولة ${list.length} · ${m.drill && DRILL_META[m.drill] ? DRILL_META[m.drill][0] : 'قسم ' + SEC_AR[sec]} (${m.mode === 'practice' ? 'تدريب' : m.mode === 'coach' ? 'مدرّبة' : 'صارمة'}) · ${m.mins} دقيقة${delta != null ? ` · ${delta >= 0 ? '⬆️ +' : '⬇️ '}${delta} عن الجولة السابقة` : ''}</div></div><table class="wtable">${rows}</table>${list.length > 1 ? `<div class="hl-tip">جولاتك: ${trend} — نسب تدريبية، مو درجة DET</div>` : ''}<div class="row secBtns" data-sec="${sec}"><button class="btn" data-act="repeat" data-mode="${m.mode}" data-drill="${m.drill || ''}">🔁 كرر بأسئلة جديدة</button><button class="btn ghost sm" data-act="pick">🎯 قسم أو وضع ثاني</button></div>`;
+}
+function wireSecButtons(root) {
+  root.querySelectorAll('.secBtns [data-act]').forEach(b => { const box = b.closest('.secBtns'); b.onclick = () => { if (b.dataset.act === 'repeat') startSectionMock(box.dataset.sec, b.dataset.mode, b.dataset.drill || null); else { location.hash = 'home'; showView('home'); setTimeout(() => { const c = $('secPick'); c && c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); } }; });
+}
+function renderSection() {
+  const pick = $('secPick'), out = $('secResult'); if (!pick) return;
+  const cur = S.secPick || { sec: 'writing', drill: null, mode: 'practice' };
+  const drills = Object.keys(DRILL_META).filter(k => Object.values(SKILLS).some(s => s.d.includes(k)));
+  pick.innerHTML = `<div class="secChips">${Object.keys(SEC_AR).map(k => `<button type="button" class="secChip${cur.sec === k && !cur.drill ? ' on' : ''}" data-sec="${k}">${{ reading: '📖', listening: '🎧', writing: '✍️', speaking: '🗣️' }[k]} ${SEC_AR[k]}</button>`).join('')}</div>
+  <div class="row" style="margin:6px 0"><label class="hl-tip">أو تمرين واحد يتكرر: <select id="secDrillSel" class="in" style="width:auto;display:inline-block">${['<option value="">— القسم كامل —</option>'].concat(drills.map(k => `<option value="${k}"${cur.drill === k ? ' selected' : ''}>${DRILL_META[k][0]}</option>`)).join('')}</select></label></div>
+  <div id="secPrep">${prepHtml(cur.sec)}</div>
+  <div class="row" style="margin-top:8px"><button class="btn" data-mode="practice">🏋️ تدريب — مراجعة بعد كل تمرين</button><button class="btn" style="background:#7c2d12" data-mode="coach">🧑‍🏫 مدرّبة — النتائج بالنهاية</button><button class="btn" style="background:#111827" data-mode="strict">🧪 صارمة</button></div>
+  <div class="hl-tip" style="margin-top:4px">كل جولة أسئلة مختلفة (المدرّب يتذكر اللي شفته). بالتدريب والمدرّبة يظهر المدرّب الحي وزر «💡 أفكار». كرّر القسم حتى تستقر نسبك فوق 80% ثم انتقل للأصعب.</div>`;
+  pick.querySelectorAll('.secChip').forEach(b => b.onclick = () => { S.secPick = Object.assign({}, cur, { sec: b.dataset.sec, drill: null }); save(); renderSection(); });
+  $('secDrillSel').onchange = (e) => { const d = e.target.value || null; const sec = d ? (Object.keys(SKILLS).find(k => SKILLS[k].d.includes(d)) || cur.sec) : cur.sec; S.secPick = Object.assign({}, cur, { sec, drill: d }); save(); renderSection(); };
+  pick.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => startSectionMock(cur.sec, b.dataset.mode, cur.drill));
+  if (out) { out.innerHTML = secSummaryHtml(cur.sec); wireSecButtons(out); }
+}
+
+/* ---------- مولّد الأفكار: يكتشف موضوع السؤال ويعطيك بذور أفكار وأمثلة وكلمات ---------- */
+function topicOf(text) {
+  const t = ' ' + String(text || '').toLowerCase().replace(/[^a-z0-9' ]+/g, ' ').replace(/\s+/g, ' ') + ' ';
+  const scored = (KIT.topics || []).map(tp => ({ tp, sc: (tp.keys || []).reduce((a, k) => a + (t.includes(' ' + String(k).toLowerCase() + ' ') ? (k.includes(' ') ? 2 : 1) : 0), 0) })).filter(x => x.sc > 0).sort((a, b) => b.sc - a.sc);
+  return scored.slice(0, 2).map(x => x.tp);
+}
+const RESCUE_FRAMES = [['To be honest, I don\'t know much about this, but I guess …', 'بصراحة ما أعرف كثير عن الموضوع، بس أتوقع …'], ['I\'m not very familiar with this topic. However, I\'d guess that …', 'الموضوع مو مألوف لي، لكن أتوقع إن …'], ['That\'s a tricky question. One thing I can say is …', 'سؤال صعب. الشي الوحيد اللي أقدر أقوله …'], ['It depends on the situation, but in general …', 'يعتمد على الموقف، لكن بشكل عام …']];
+function ideaHtml(promptText, kind) {
+  if (kind === 'photo') {
+    const ph = KIT.photo || [];
+    return `<div class="ideaSec"><b>🖼️ عبارات الصورة (عدّل الكلمات على صورتك)</b>${ph.length ? ph.map(x => `<div class="kitRow"><span class="en2">${esc(x.en)}</span><span class="kitAr">${esc(x.ar)}</span></div>`).join('') : '<div class="hl-tip">⏳ ما تحمّلت عدة الحفظ بعد</div>'}</div><div class="ideaSec"><b>🧭 الترتيب</b><div class="hl-tip">عام (This photo shows …) ← مين يسوي وش بصيغة -ing + صفات ← وين (foreground / background / on the left) ← تخمين (probably / looks like / might be) — بالكلام: 0–20 ث عام، 20–60 تفاصيل، 60–90 تخمين ورأي.</div></div>`;
+  }
+  const tps = topicOf(promptText);
+  if (!tps.length) return `<div class="ideaSec"><b>💡 ما لقيت موضوعًا محددًا — استخدم الهيكل العام</b><div class="hl-tip">OREO: رأيك مباشرة ← السبب ← مثال من حياتك (شغلك، مدينتك، عائلتك) ← الخلاصة. أو PPF: كيف كان الشي قبل؟ كيف هو الحين؟ كيف بيصير؟</div></div><div class="ideaSec"><b>🛟 ما تعرف الموضوع؟</b>${RESCUE_FRAMES.map(([en, ar]) => `<div class="kitRow"><span class="en2">${esc(en)}</span><span class="kitAr">${esc(ar)}</span></div>`).join('')}</div>`;
+  const side = (s) => s === 'pro' ? '✅' : s === 'con' ? '❌' : '•';
+  return tps.map((tp, i) => `<div class="ideaSec"><b>💡 ${esc(tp.ar)}${i ? ' (موضوع ثانوي)' : ''} — بذور أفكار: خذ وحدة أو ثنتين وعدّلها بكلامك</b>${(tp.ideas || []).slice(0, i ? 3 : 8).map(x => `<div class="kitRow"><span class="en2">${side(x.side)} ${esc(x.en)}</span><span class="kitAr">${esc(x.ar)}</span></div>`).join('')}</div>` + (i ? '' : `<div class="ideaSec"><b>👤 مثال شخصي تبني عليه</b>${(tp.examples || []).map(x => `<div class="kitRow"><span class="en2">${esc(x.en)}</span><span class="kitAr">${esc(x.ar)}</span></div>`).join('')}</div><div class="ideaSec"><b>⏳ ماضي · حاضر · مستقبل (عشان ما تخلص أفكارك)</b>${tp.ppf ? ['past', 'present', 'future'].map(k => `<div class="kitRow"><span class="en2">${esc(tp.ppf[k])}</span></div>`).join('') : ''}</div><div class="ideaSec"><b>🔤 كلمات الموضوع</b><div class="chips" style="direction:ltr">${(tp.vocab || []).map(v => `<span class="vchip" title="${esc(v.ex || '')}">${esc(v.w)} <small>${esc(v.ar)}</small></span>`).join('')}</div></div>`)).join('') + `<div class="ideaSec"><b>🛟 ما تعرف الموضوع؟</b>${RESCUE_FRAMES.slice(0, 2).map(([en, ar]) => `<div class="kitRow"><span class="en2">${esc(en)}</span><span class="kitAr">${esc(ar)}</span></div>`).join('')}</div>`;
+}
+const ideaWrap = (promptText, kind) => `<div class="ideaWrap"><button type="button" class="btn sm ghost ideaBtn" data-kind="${esc(kind || 'topic')}" data-prompt="${esc(String(promptText || '').slice(0, 600))}">💡 أفكار للموضوع</button><div class="ideaBox" hidden></div></div>`;
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('.ideaBtn'); if (!b) return;
+  const box = b.parentNode.querySelector('.ideaBox'); if (!box) return;
+  if (box.hidden) { box.innerHTML = ideaHtml(b.dataset.prompt, b.dataset.kind); box.hidden = false; b.textContent = '💡 إخفاء الأفكار'; logAttempt('ideas-open', { q: (b.dataset.prompt || b.dataset.kind).slice(0, 120), a: topicOf(b.dataset.prompt).map(t => t.id).join(',') || b.dataset.kind, ok: true }); }
+  else { box.hidden = true; b.textContent = '💡 أفكار للموضوع'; }
+});
+
+/* ---------- تمرين الأفكار السريعة: 3 أفكار بـ30 ثانية ---------- */
+function allPrompts() {
+  const out = [];
+  (KIT.topics || []).forEach(tp => (tp.questions || []).forEach(q => out.push({ q, topic: tp })));
+  (BANKS.writing.sample || []).forEach(x => out.push({ q: x.prompt })); (BANKS.writing.interactive || []).forEach(x => out.push({ q: x.prompt }));
+  (BANKS.speaking.rts || []).forEach(x => out.push({ q: x.prompt })); (BANKS.speaking.sample || []).forEach(x => out.push({ q: x.prompt }));
+  (BANKS.speaking.interactive || []).forEach(s => (s.questions || []).forEach(x => out.push({ q: x.q })));
+  return out;
+}
+function drillIdeas() {
+  const pool = allPrompts(); if (!pool.length) { $('skillsDrill').innerHTML = '<div class="note r">ما فيه أسئلة بعد.</div>'; return; }
+  const it = adaptPick(pool, () => 2, 'ideas', 1, { keyFn: x => x.q })[0]; const t0 = Date.now();
+  const f = frame('skillsDrill', '⚡ تمرين الأفكار السريعة', 30, () => done());
+  f.body.innerHTML = `<div class="sent" style="font-size:15px"><b>${esc(it.q)}</b></div><div class="hl-tip">30 ثانية: اكتب <b>3 أفكار</b> (سطر لكل فكرة — كلمتين أو جملة قصيرة، عربي أو إنجليزي). هذا تدريب على «الفكرة تجي بسرعة» — نفس اللي يصير لك بالاختبار بعد السؤال مباشرة. الأفكار الجاهزة تظهر بعد الوقت.</div><textarea class="ta" id="ideaTa" placeholder="1. …&#10;2. …&#10;3. …" style="min-height:110px"></textarea><div class="row"><button class="btn" id="ideaDone">خلصت</button></div>`;
+  f.timer.start(); const ta = $('ideaTa'); ta.focus(); $('ideaDone').onclick = done; let fin = false;
+  function done() {
+    if (fin) return; fin = true; f.timer.stop();
+    const lines = ta.value.split(/\n+/).map(x => x.replace(/^\s*[\d\-•.)]+\s*/, '').trim()).filter(x => x.length >= 3);
+    const sc = Math.min(100, Math.round(100 * Math.min(3, lines.length) / 3)); setBest('ideas', sc);
+    logAttempt('ideas', { q: it.q, a: lines.join(' | '), sc, ms: Date.now() - t0, extra: { n: lines.length, topic: (topicOf(it.q)[0] || {}).id || null } });
+    result(f.body, sc, `${lines.length} فكرة بـ${Math.min(30, Math.round((Date.now() - t0) / 1000))} ثانية${lines.length >= 3 ? ' ✓' : ' — الهدف 3'}`, `<h3>أفكارك</h3><div class="model">${esc(lines.join('\n')) || '(فاضي)'}</div><h3>أفكار جاهزة للمقارنة</h3>${ideaHtml(it.q, 'topic')}<div class="hl-tip" style="margin-top:6px">الفكرة ما تحتاج تكون ذكية — تحتاج تكون واضحة وتقدر تعطي عليها سبب ومثال. لو ما جتك فكرة: خذ «رأي ← سبب ← مثال من شغلك» أو «قبل ← الحين ← بعدين».</div>`);
+    again(f.body, DRILLS.ideas, '🔄 سؤال جديد');
+  }
+};
+
+/* ---------- عدة الحفظ: العبارات والكلمات اللي ينفع تحفظها (قصيرة، مو أجوبة كاملة) ---------- */
+const KIT_GROUPS = [['openers', '🗣️ ابدأ الجواب مباشرة'], ['reasons', '🧩 السبب'], ['examples', '👤 المثال'], ['contrast', '⚖️ الرأي الثاني'], ['closers', '🏁 الخاتمة'], ['transitions', '🔀 الانتقال بين الأسئلة/النقاط'], ['unknown', '🛟 ما تعرف الموضوع'], ['time', '⏳ ماضي · حاضر · مستقبل'], ['complex', '🔗 جملة مركّبة (بند بالتصحيح)'], ['recount', '📖 قالب «احكِ موقفًا»'], ['summary', '🗒️ ملخص المحادثة'], ['photo', '🖼️ وصف الصورة'], ['colloc', '🧲 collocations عامة'], ['punct', '⌨️ ترقيم الإملاء'], ['func', '🧩 كلمات Read and Complete النحوية']];
+function kitItems() {
+  const out = [];
+  const F = BANKS.writing.frames || []; F.forEach(f => out.push({ g: f.group === 'connectors' ? 'reasons' : f.group === 'guesses' ? 'photo' : f.group, en: f.en, ar: f.ar }));
+  (BANKS.speaking.rescue || []).forEach(r => out.push({ g: 'unknown', en: r.en, ar: r.ar + (r.when_ar ? ' — ' + r.when_ar : '') }));
+  (KIT.frames || []).forEach(f => out.push({ g: f.g, en: f.en, ar: f.ar }));
+  (KIT.photo || []).forEach(x => out.push({ g: 'photo', en: x.en, ar: x.ar }));
+  (KIT.colloc || []).forEach(x => out.push({ g: 'colloc', en: x.en, ar: x.ar }));
+  Object.entries(FUNC_AR).slice(0, 30).forEach(([w, ar]) => out.push({ g: 'func', en: w, ar }));
+  const seen = new Set(); return out.filter(x => x.en && !seen.has(x.g + '|' + x.en.toLowerCase()) && seen.add(x.g + '|' + x.en.toLowerCase()));
+}
+function drillKit() {
+  const box = $('skillsDrill'); const items = kitItems(); const byG = {}; items.forEach(x => (byG[x.g] = byG[x.g] || []).push(x));
+  const known = (en) => !!S.mastered['kit:' + norm(en)]; const inRev = (en) => !!S.miss['kit:' + norm(en)];
+  const row = (x) => `<div class="kitRow" data-en="${esc(x.en)}"><span class="en2">${esc(x.en)}</span><span class="kitAr">${bidi(x.ar || '')}</span><button type="button" class="wbtn kitRev${inRev(x.en) ? ' on' : ''}">${inRev(x.en) ? '✓ بالمراجعة' : known(x.en) ? '✓ أتقنتها' : '🔁 أحفظها'}</button></div>`;
+  box.innerHTML = `<div class="card"><h3>📦 عدة الحفظ — اللي فعلًا ينفع تحفظه</h3><div class="hl-tip">مسموح تحفظ <b>عبارات قصيرة وهياكل</b> وكلمات بجملها — ممنوع تحفظ أجوبة كاملة (النظام يكشف النص المحفوظ وينزّل الدرجة). اضغط «🔁 أحفظها» على أي عبارة وتدخل «مراجعتي» بالتكرار المتباعد. كلمات كل موضوع موجودة في زر «💡 أفكار» داخل التمارين وفي «كل الكلمات».</div><div class="row"><button class="btn sm" id="kitQuiz">🃏 اختبرني على العدة</button><a class="btn sm ghost" href="#skills/review">🔁 مراجعتي</a><a class="btn sm ghost" href="#skills/words">📚 كل الكلمات</a></div></div>` + KIT_GROUPS.filter(([g]) => byG[g] && byG[g].length).map(([g, t]) => `<details class="tech" ${['openers', 'reasons', 'examples', 'closers'].includes(g) ? 'open' : ''}><summary>${t} <small class="hl-tip">(${byG[g].length})</small></summary>${byG[g].map(row).join('')}</details>`).join('') + ((KIT.topics || []).length ? `<details class="tech"><summary>🔤 كلمات المواضيع (${KIT.topics.length} موضوع)</summary>${KIT.topics.map(tp => `<div class="kitTopic"><b>${esc(tp.ar)}</b><div class="chips" style="direction:ltr">${(tp.vocab || []).map(v => `<span class="vchip" title="${esc(v.ex || '')}">${esc(v.w)} <small>${esc(v.ar)}</small></span>`).join('')}</div></div>`).join('')}</details>` : '');
+  box.querySelectorAll('.kitRev').forEach(b => b.onclick = () => { const en = b.closest('.kitRow').dataset.en; const it = items.find(x => x.en === en); if (!it) return; if (inRev(en)) { delete S.miss['kit:' + norm(en)]; save(); b.classList.remove('on'); b.textContent = '🔁 أحفظها'; } else { addMiss('kit', en, it.ar, 'عدة الحفظ: ' + (KIT_GROUPS.find(([g]) => g === it.g) || [])[1]); b.classList.add('on'); b.textContent = '✓ بالمراجعة'; } renderHome(); });
+  $('kitQuiz').onclick = () => kitQuiz(items);
+};
+function kitQuiz(items) {
+  const box = $('skillsDrill'); const pool = shuffle(items.filter(x => x.g !== 'func' && x.ar)).slice(0, 12); let i = 0, right = 0; const t0 = Date.now();
+  const f = frame('skillsDrill', '🃏 اختبار العدة — من العربي للإنجليزي', 0);
+  function show() {
+    if (i >= pool.length) { const sc = Math.round(100 * right / pool.length); setBest('kit', sc); logAttempt('kit', { q: 'quiz', a: right + '/' + pool.length, sc, ms: Date.now() - t0 }); result(f.body, sc, `${right} من ${pool.length}`); again(f.body, () => kitQuiz(items), '🔄 جولة ثانية'); return; }
+    const x = pool[i];
+    f.body.innerHTML = `<div class="prog">${i + 1} / ${pool.length} · ${(KIT_GROUPS.find(([g]) => g === x.g) || ['', ''])[1]}</div><div class="fc" style="min-height:120px"><div class="ar" style="font-size:18px;font-weight:800">${bidi(x.ar.split(' — ')[0])}</div><div id="back" style="display:none;margin-top:8px"><div class="en2" style="font-size:18px">${esc(x.en)}</div></div></div><div class="row"><button class="btn" id="flip">اقلب</button></div>`;
+    $('flip').onclick = () => { $('back').style.display = 'block'; $('flip').replaceWith(el('div', 'row', '<button class="btn sm" id="ok">✓ قلتها صح</button><button class="btn sm danger" id="no">✗ ما عرفتها</button>')); $('ok').onclick = () => { right++; if (S.miss['kit:' + norm(x.en)]) gradeMiss('kit:' + norm(x.en), true); i++; show(); }; $('no').onclick = () => { addMiss('kit', x.en, x.ar, 'عدة الحفظ: ' + (KIT_GROUPS.find(([g]) => g === x.g) || [])[1]); i++; show(); }; };
+  }
+  show();
+}
+
+/* ---------- سرعة الطباعة: 60 ثانية — الطباعة البطيئة تسرق كلمات من كتابتك ---------- */
+function drillTyping() {
+  const src = adaptPick(BANKS.readcomplete.passages, x => x.level, 'typing', 1, { keyFn: x => x.title })[0];
+  const text = src.text.replace(/[{}]/g, '').split(/\s+/).slice(0, 55).join(' '); const t0 = Date.now();
+  const f = frame('skillsDrill', '⌨️ سرعة الطباعة', 60, () => done());
+  f.body.innerHTML = `<div class="hl-tip">اطبع النص تحت بأسرع ما تقدر وبأقل أخطاء (60 ثانية). الهدف: 35+ كلمة/دقيقة صحيحة. بالاختبار عندك 5 دقائق لـ130 كلمة = 26 كلمة/دقيقة <b>مع التفكير</b>، فلازم طباعتك أسرع من كذا.</div><div class="model" id="typSrc">${esc(text)}</div><textarea class="ta" id="typTa" spellcheck="false" autocorrect="off" autocapitalize="off" placeholder="Type here…"></textarea><div class="wc" id="typWc"><b>0</b> words</div><div class="row"><button class="btn" id="typDone">خلصت</button></div>`;
+  const ta = $('typTa'); ta.focus(); let started = false; ta.addEventListener('input', () => { if (!started) { started = true; f.timer.start(); } $('typWc').innerHTML = `<b>${wcount(ta.value)}</b> words`; }); $('typDone').onclick = done; let fin = false;
+  function done() {
+    if (fin) return; fin = true; f.timer.stop(); const secs = Math.max(5, Math.min(60, (Date.now() - t0) / 1000));
+    const want = words(text).map(w => w.toLowerCase().replace(/[^a-z0-9']/g, '')), got = words(ta.value).map(w => w.toLowerCase().replace(/[^a-z0-9']/g, ''));
+    let ok = 0; got.forEach((w, k) => { if (want[k] === w) ok++; }); const wpm = Math.round(ok / (secs / 60)); const acc = got.length ? Math.round(100 * ok / got.length) : 0;
+    const sc = Math.min(100, Math.round(100 * wpm / 40)); setBest('typing', sc); logAttempt('typing', { q: src.title, a: ta.value, sc, ms: Math.round(secs * 1000), extra: { wpm, acc, words: got.length } });
+    result(f.body, sc, `${wpm} كلمة/دقيقة صحيحة · دقة ${acc}%${wpm >= 35 ? ' ✓' : ' — الهدف 35+'}`, `<div class="hl-tip">${wpm < 25 ? 'بطيئة: 10 دقائق يوميًا هنا ترفعها بأسبوع. لا تطالع الكيبورد.' : wpm < 35 ? 'قريبة من الهدف — كرر بنص جديد.' : 'ممتاز — الطباعة ما راح تسرق وقتك بالاختبار.'}</div>`);
+    again(f.body, DRILLS.typing, '🔄 نص جديد');
+  }
+};
+
 /* ---------- المحاكاة الكاملة (14 تمرين بترتيب الاختبار، بلا تلميحات) ---------- */
 const FULL_SEQ = [['read', 'rs'], ['read', 'fib'], ['read', 'rc'], ['listen', 'lt'], ['read', 'ir'], ['listen', 'il'], ['write', 'wp'], ['write', 'iw'], ['speak', 'sp'], ['speak', 'rts'], ['speak', 'is'], ['write', 'sum'], ['write', 'ws'], ['speak', 'ss']];
 /* الانتقال لتمرين حتى لو كان الرابط نفسه (hashchange ما يشتغل عندها) */
@@ -953,20 +1164,22 @@ const WAIT_HTML = '<div class="stim" style="padding:18px;text-align:center;font-
 function startFullMock(coach) {
   if (MOCK.full) return; coach = coach === true;
   if (!confirm(coach ? 'محاكاة كاملة مدرّبة: 14 تمرين متتالي بترتيب الاختبار (~50 دقيقة). الأجوبة والنماذج مخفية للنهاية، لكن المدرّب الحي يوجهك أثناء الكتابة والكلام والفقرة المثقوبة. جهّز المايك والسبيكر. جاهز؟' : 'محاكاة كاملة صارمة: 14 تمرين متتالي بدون أي تلميح ولا توجيه ولا نتائج حتى النهاية (~50 دقيقة) — مثل الاختبار تمامًا. جهّز المايك والسبيكر. جاهز؟')) return;
-  MOCK.on = true; MOCK.full = true; MOCK.coach = coach; MOCK.results = []; MOCK.t0 = Date.now(); MOCK.queue = FULL_SEQ.slice(1); MOCK.cur = 'rs';
+  MOCK.on = true; MOCK.full = true; MOCK.coach = coach; MOCK.locked = false; MOCK.section = null; MOCK.secDrill = null; MOCK.results = []; MOCK.t0 = Date.now(); MOCK.queue = FULL_SEQ.slice(1); MOCK.cur = 'rs';
   document.body.classList.add('exam'); document.body.classList.toggle('exam-coach', coach); $('examTitle').textContent = coach ? '🧑‍🏫 محاكاة مدرّبة — المدرّب يوجهك، والنتائج بالنهاية' : '🧪 محاكاة صارمة — بدون تلميحات'; $('examLeft').textContent = FULL_SEQ.length + ' تمارين'; nav('read', 'rs');
 }
 function mockRecord(key, score) {
-  if (!MOCK.full || key !== MOCK.cur) return; if (MOCK.results.some(r => r.key === key)) return;
+  if (!MOCK.full || key !== MOCK.cur || MOCK.locked) return; MOCK.locked = true; /* نفس التمرين قد يتكرر بمحاكاة القسم، فالقفل بالخطوة مو بالمفتاح */
   MOCK.results.push({ key, sc: score }); MOCK.cur = null; $('examLeft').textContent = MOCK.queue.length + ' متبقي';
   document.body.classList.add('exam-wait');
   setTimeout(() => { document.querySelectorAll('.drill #body').forEach(b => b.innerHTML = WAIT_HTML); document.body.classList.remove('exam-wait'); }, 30);
-  setTimeout(() => { if (!MOCK.full) return; if (Rec.on) Rec.stop().catch(() => {}); if (MOCK.queue.length) { const [v, k] = MOCK.queue.shift(); MOCK.cur = k; nav(v, k); } else finishFullMock(false); }, 1400);
+  setTimeout(() => { if (!MOCK.full) return; if (Rec.on) Rec.stop().catch(() => {}); if (MOCK.queue.length) { const [v, k] = MOCK.queue.shift(); MOCK.cur = k; MOCK.locked = false; nav(v, k); } else finishFullMock(false); }, 1400);
 }
 function finishFullMock(aborted) {
-  const res = MOCK.results.slice(); const wasCoach = !!MOCK.coach; MOCK.full = false; MOCK.on = false; MOCK.coach = false; MOCK.queue = []; MOCK.cur = null; document.body.classList.remove('exam'); document.body.classList.remove('exam-wait'); document.body.classList.remove('exam-coach');
+  const res = MOCK.results.slice(); const wasCoach = !!MOCK.coach; const wasSec = MOCK.section; MOCK.full = false; MOCK.coach = false; MOCK.cur = null; document.body.classList.remove('exam'); document.body.classList.remove('exam-wait'); document.body.classList.remove('exam-coach');
   if (activeTimer) { activeTimer.stop(); activeTimer = null; }
   if (Rec.on) Rec.stop().catch(() => {}); try { speechSynthesis.cancel(); } catch (e) {}
+  if (wasSec) { /* محاكاة قسم (مدرّبة/صارمة): الملخص في بطاقة القسم */ finishSection(null); location.hash = 'home'; showView('home'); setTimeout(() => { const c = $('secResult'); c && c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80); return; }
+  MOCK.on = false; MOCK.queue = [];
   if (aborted && res.length < 3) { toast('انتهت المحاكاة بدون نتيجة (أقل من 3 تمارين)'); location.hash = 'home'; return; }
   const by = {}; res.forEach(r => by[r.key] = r.sc);
   const skills = Object.entries(SKILLS).map(([k, v]) => { const vals = v.d.map(d => by[d]).filter(x => x != null); return [k, vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : null]; });
@@ -1042,6 +1255,7 @@ const Rec = {
 /* التنقل */
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => { if (MOCK.full) { if (!confirm('أنت في المحاكاة الكاملة. تطلع منها؟ (النتيجة تنحسب على اللي خلصته)')) return; finishFullMock(true); return; } showView(b.dataset.v); }));
 function showView(v) {
+  window.DetHighlight.dispose();
   document.querySelectorAll('.view').forEach(x => x.classList.toggle('on', x.id === 'v-' + v));
   document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x.dataset.v === v));
   window.scrollTo({ top: 0 });
@@ -1227,7 +1441,7 @@ function renderHome() {
   const rec = a.rec.map(d => `<a class="btn sm${d.avg == null ? ' ghost' : ''}" href="#${DRILL_META[d.k][1]}">${DRILL_META[d.k][0]}${d.avg == null ? ' · لسا ما جربته' : ' · ' + d.avg + '%'}</a>`).join('');
   const miss = a.topMiss.map(m => `<span class="pill" style="direction:ltr">${esc(m.w)} ×${m.n}</span>`).join(' ');
   const due = dueMiss().length, act = activeMiss().length;
-  renderSync(); renderMock(); try { render110(); } catch (e) { console.error(e); }
+  renderSync(); renderMock(); try { render110(); renderSection(); } catch (e) { console.error(e); }
   if (window.DetPath120) DetPath120.mount({ state: () => S, save, toast });
   $('weakCard').innerHTML = `<h3>🎯 نقاط ضعفك — يتحدّث تلقائيًا من درجاتك</h3>${bars}<h3 style="margin-top:12px">ركّز اليوم على</h3><div class="row rec">${rec || '<span class="hl-tip">جرّب أي تمرين وبيظهر لك التوجيه هنا</span>'}</div>${act ? `<h3 style="margin-top:12px">🔁 مراجعتي: ${due} مستحقة الآن من ${act}</h3><div class="row rec"><a class="btn sm" href="#skills/review">راجع الآن</a></div>${miss ? '<div class="hl-tip" style="margin-top:6px">أكثر ما تغلط فيه: ' + miss + '</div>' : ''}` : '<div class="hl-tip" style="margin-top:8px">🔁 كل غلطة بأي تمرين تنحفظ تلقائيًا في «مراجعتي»، وتقدر تضيف أي كلمة بزر «راجعها» من نتائج التمارين.</div>'}`;
 }
@@ -1269,7 +1483,9 @@ function renderMenus() {
     { ic: '🃏', t: 'بطاقات المفردات', s: `${(BANKS.grammar_vocab?.vocab || []).length} كلمة بالمعنى والمثال`, key: 'vocab', hash: 'skills/vocab' },
     { ic: '🔁', t: 'مراجعتي', s: 'كل اللي غلطت فيه + اللي علّمت عليه — بتكرار متباعد', key: 'review', hash: 'skills/review' },
     { ic: '📚', t: 'كل الكلمات بصفحة وحدة', s: 'مفردات + كلمات التمارين + كلمات الصور — بحث وفلتر «أراجعها»', key: 'words', hash: 'skills/words' },
-    { ic: '🧱', t: 'العبارات الآمنة', s: 'بدايات وروابط وعبارات إنقاذ (أقل من 5 كلمات)', key: 'frames', hash: 'skills/frames' },
+    { ic: '📦', t: 'عدة الحفظ', s: 'الهياكل والعبارات والكلمات اللي فعلًا ينفع تحفظها — مع اختبار وتكرار متباعد', key: 'kit', hash: 'skills/kit' },
+    { ic: '⚡', t: 'الأفكار السريعة', s: '30 ثانية لثلاث أفكار على سؤال حقيقي، ثم بذور الأفكار للمقارنة', key: 'ideas', hash: 'skills/ideas' },
+    { ic: '⌨️', t: 'سرعة الطباعة', s: '60 ثانية — الهدف 35+ كلمة/دقيقة صحيحة', key: 'typing', hash: 'skills/typing' },
   ]);
 }
 
@@ -1291,6 +1507,7 @@ function again(body, fn, label) {
   if (MOCK.full) return;
   const r = el('div', 'row');
   if (MOCK.queue.length) { const n = el('button', 'btn', `➡️ التالي بالمحاكاة (${MOCK.queue.length} متبقي)`); n.addEventListener('click', () => { const [v, k] = MOCK.queue.shift(); nav(v, k); }); r.appendChild(n); }
+  else if (MOCK.on && MOCK.section) { body.appendChild(r); const b0 = el('button', 'btn ghost sm', label || '🔄 جولة جديدة'); b0.addEventListener('click', fn); r.appendChild(b0); finishSection(body); return; }
   else if (MOCK.on) { MOCK.on = false; r.appendChild(el('div', 'note g', '<b>انتهت المحاكاة المصغّرة 🎉</b>ارجع لتبويب «اليوم» وشوف أفضل درجاتك، وأعد أي تمرين نزل عن 70%.')); }
   const b = el('button', 'btn' + (MOCK.queue.length ? ' ghost sm' : ''), label || '🔄 جولة جديدة'); b.addEventListener('click', fn); r.appendChild(b); body.appendChild(r);
 }
@@ -1305,6 +1522,7 @@ function startMock() {
    القراءة
    ========================================================= */
 const DRILLS = {};
+DRILLS.ideas = drillIdeas; DRILLS.kit = drillKit; DRILLS.typing = drillTyping; /* v5 (معرّفة فوق) */
 
 DRILLS.rs = function () {
   const real = adaptPick(BANKS.readselect.real, x => x.level, 'rs', 10, { kinds: ['rs', 'vocab', 'fib'], keyFn: x => x.w, max: 4 }).map(x => ({ ...x, real: true }));
@@ -1404,8 +1622,24 @@ DRILLS.ir = function () {
   ];
   function hl(k) {
     const q = s.highlight[k];
-    f.body.innerHTML = `<div class="prog">${3 + k}/6 · Highlight the Answer — ظلّل بإصبعك/الماوس الجزء اللي يجاوب السؤال ثم اضغط «تحقق»</div><div class="sent" style="margin-bottom:8px"><b>${esc(q.q)}</b></div><div class="passage" id="ptx">${esc(full)}</div><div class="hl-tip">ظلّل العبارة المجيبة فقط، مو الفقرة كلها. تظليل أوسع شوي = درجة جزئية؛ فقرة كاملة = صفر.</div><div class="row"><button class="btn" id="nx">تحقق</button></div>`;
-    $('nx').onclick = () => { const sel = (window.getSelection ? window.getSelection().toString() : '').trim(); const a = new Set(norm(q.answer).split(' ')); const b = new Set(norm(sel).split(' ').filter(Boolean)); let inter = 0; a.forEach(w => { if (b.has(w)) inter++; }); const sc = b.size === 0 ? 0 : (b.size > a.size * 4 ? 0 : inter / Math.max(a.size, b.size)); scores.hl[k] = sc; (scores.hlSel = scores.hlSel || [])[k] = sel; f.body.querySelector('#ptx').innerHTML = esc(full).replace(esc(q.answer), '<mark>' + esc(q.answer) + '</mark>'); f.body.querySelector('.hl-tip').innerHTML = `<b>درجتك ${Math.round(sc * 100)}%</b> — الإجابة الصحيحة مظللة بالأخضر.${sel ? ' ظللت: <span class="en">' + esc(sel) + '</span>' : ' ما ظللت شي.'}`; $('nx').textContent = 'التالي'; $('nx').onclick = next; };
+    f.body.innerHTML = `<div class="prog">${3 + k}/6 · Highlight the Answer — تحديد الإجابة</div><div class="sent" style="margin-bottom:8px"><b>${esc(q.q)}</b></div><div class="row"><button class="btn ghost sm" id="hl-tap">تحديد باللمس: أول كلمة ثم آخر كلمة</button><button class="btn ghost sm" id="hl-clear">مسح التحديد</button></div><div class="passage" id="ptx">${esc(full)}</div><div class="hl-tip">حدد العبارة التي تجيب السؤال فقط. يظهر النص المحفوظ أدناه قبل التصحيح. النسبة تقييم تدريبي وليست درجة دولينجو الرسمية.</div><div class="hl-preview" id="hl-preview" role="status" aria-live="polite">لم تحدد إجابة بعد.</div><div class="row"><button class="btn" id="nx">تحقق</button></div>`;
+    const selection = window.DetHighlight.mount($('ptx'), $('hl-preview'), full);
+    $('hl-tap').onclick = () => { selection.tapMode(); $('hl-tap').disabled = true; };
+    $('hl-clear').onclick = () => selection.clear();
+    $('nx').addEventListener('pointerdown', selection.capture);
+    $('nx').onclick = () => {
+      const sel = selection.value();
+      if (!sel) { toast('حدد الإجابة أولًا أو استخدم زر التحديد باللمس.'); return; }
+      selection.destroy();
+      const a = new Set(norm(q.answer).split(' ')), b = new Set(norm(sel).split(' ').filter(Boolean));
+      let inter = 0; a.forEach(w => { if (b.has(w)) inter++; });
+      const sc = b.size > a.size * 4 ? 0 : inter / Math.max(a.size, b.size);
+      scores.hl[k] = sc; (scores.hlSel = scores.hlSel || [])[k] = sel;
+      $('hl-tap').disabled = true; $('hl-clear').disabled = true;
+      $('ptx').innerHTML = esc(full).replace(esc(q.answer), '<mark>' + esc(q.answer) + '</mark>');
+      f.body.querySelector('.hl-tip').innerHTML = `<b>تقييم التدريب ${Math.round(sc * 100)}%</b> — الإجابة الصحيحة مظللة بالأخضر. حددت: <span class="en">${esc(sel)}</span>`;
+      $('nx').textContent = 'التالي'; $('nx').onclick = next;
+    };
   }
   function choose(label, opts, correct, key) {
     f.body.innerHTML = `<div class="prog">${label}</div><div class="passage" style="font-size:14px;line-height:1.7">${esc(full)}</div><div class="opts" id="op"></div>`;
@@ -1414,7 +1648,7 @@ DRILLS.ir = function () {
   function next() { step++; if (step < steps.length) steps[step](); else finish(); }
   let fin = false;
   function finish() {
-    if (fin) return; fin = true; f.timer.stop();
+    if (fin) return; fin = true; f.timer.stop(); window.DetHighlight.dispose();
     const total = (scores.gaps * gaps.length + scores.missing + scores.hl[0] + scores.hl[1] + scores.idea + scores.title) / (gaps.length + 5);
     const sc = Math.round(100 * total); learn('ir', s.level, sc >= 70); logAttempt('ir', { q: s.title, a: JSON.stringify(scores), sc, ms: Date.now() - t0, lvl: s.level, extra: scores }); setBest('ir', sc);
     const rv = [];
@@ -1550,7 +1784,7 @@ function writeScore(n, target, sig, maxSig) { return Math.round(100 * (Math.min(
 DRILLS.wp = function () {
   const ph = pickPhoto(); const sc = ph ? null : pickNew(BANKS.writing.photo, 'wp', x => x.scene_ar); let own = false;
   const f = frame('writeDrill', '🖼️ Write About the Photo', 60);
-  f.body.innerHTML = photoBlock(ph, sc) + `<div class="hl-tip">3 جمل وصف مو قائمة أشياء: ① مشهد عام ② مين يسوي وش بصيغة الاستمرار + صفات ③ وين الأشياء (in the foreground / background) ← تخمين (probably / It looks like). 40+ كلمة.</div>`;
+  f.body.innerHTML = photoBlock(ph, sc) + `<div class="hl-tip">3 جمل وصف مو قائمة أشياء: ① مشهد عام ② مين يسوي وش بصيغة الاستمرار + صفات ③ وين الأشياء (in the foreground / background) ← تخمين (probably / It looks like). 40+ كلمة.</div>${ideaWrap('', 'photo')}`;
   wirePhoto(f.body, () => { own = true; }, DRILLS.wp);
   writingBox(f.body, 40, null, (txt, n, sig) => {
     const rep = gradeWriting(txt, { prompt: ph ? ph.title_en : '', keywords: own ? [] : ph ? ph.keywords : kwFrom(sc.model_120), min: 40, kind: 'photo' });
@@ -1565,7 +1799,7 @@ DRILLS.wp = function () {
 DRILLS.iw = function () {
   const it = pickNew(BANKS.writing.interactive, 'iw', x => x.prompt);
   const f = frame('writeDrill', '📝 Interactive Writing — الجزء 1', 300);
-  f.body.innerHTML = `<div class="sent" style="font-size:15px">${esc(it.prompt)}</div><div class="hl-tip">موقفك مباشرة ← سببان كل واحد بمثال شخصي ← جملة مركّبة وحدة على الأقل ← Overall. الهدف 110+ كلمة (عدد تدريبي مرن). آخر دقيقة مراجعة إملاء.</div>`;
+  f.body.innerHTML = `<div class="sent" style="font-size:15px">${esc(it.prompt)}</div><div class="hl-tip">موقفك مباشرة ← سببان كل واحد بمثال شخصي ← جملة مركّبة وحدة على الأقل ← Overall. الهدف 110+ كلمة (عدد تدريبي مرن). آخر دقيقة مراجعة إملاء.</div>${ideaWrap(it.prompt, 'topic')}`;
   writingBox(f.body, 110, null, (t1, n1, s1) => {
     const rep1 = gradeWriting(t1, { prompt: it.prompt, keywords: kwFrom(it.prompt + ' ' + it.model1_90), min: 110, kind: 'interactive' });
     const f2 = frame('writeDrill', '📝 Interactive Writing — الجزء 2 (سؤال المتابعة)', 180);
@@ -1585,7 +1819,7 @@ DRILLS.ws = function () {
   const it = pickNew(BANKS.writing.sample, 'ws', x => x.prompt);
   const f = frame('writeDrill', '📜 Writing Sample', 300);
   const wk = writeKindOf('ws', it.prompt);
-  f.body.innerHTML = `<div class="sent" style="font-size:15px">${esc(it.prompt)}</div><div class="hl-tip">${wk === 'recount' ? 'سؤال «احكِ موقفًا»: زمان ومكان ← المشكلة ← First / Then / Finally ← النتيجة ← الدرس. كله بالماضي.' : 'جواب مباشر ← فكرتان كل وحدة بمثال ← جملة مركّبة ← Overall.'} جاوب <b>كل</b> الأسئلة الفرعية. 120+ كلمة. آخر 45 ثانية مراجعة. هذي العيّنة تروح للجامعة.</div>`;
+  f.body.innerHTML = `<div class="sent" style="font-size:15px">${esc(it.prompt)}</div><div class="hl-tip">${wk === 'recount' ? 'سؤال «احكِ موقفًا»: زمان ومكان ← المشكلة ← First / Then / Finally ← النتيجة ← الدرس. كله بالماضي.' : 'جواب مباشر ← فكرتان كل وحدة بمثال ← جملة مركّبة ← Overall.'} جاوب <b>كل</b> الأسئلة الفرعية. 120+ كلمة. آخر 45 ثانية مراجعة. هذي العيّنة تروح للجامعة.</div>${ideaWrap(it.prompt, 'topic')}`;
   writingBox(f.body, 120, null, (txt, n, sig) => {
     const rep = gradeWriting(txt, { prompt: it.prompt, keywords: kwFrom(it.prompt + ' ' + it.model_90), min: 120, kind: 'sample' });
     const s = rep ? rep.score : writeScore(n, 120, sig, 5);
@@ -1640,7 +1874,7 @@ function speakResult(body, r, target, extra, rep) {
 DRILLS.sp = function () {
   const ph = pickPhoto(); const sc = ph ? null : pickNew(BANKS.speaking.photo, 'sp', x => x.scene_ar); let own = false;
   const f = frame('speakDrill', '🖼️ Speak About the Photo', 0);
-  f.body.innerHTML = photoBlock(ph, sc) + `<div class="hl-tip">20 ثانية تحضير ثم 90 ثانية كلام. 0–20ث نظرة عامة · 20–60ث تفاصيل (مين يسوي وش، أمامية/خلفية، ملابس) · 60–90ث تخمين (must / might / probably). لا توقف قبل النهاية.</div>`;
+  f.body.innerHTML = photoBlock(ph, sc) + `<div class="hl-tip">20 ثانية تحضير ثم 90 ثانية كلام. 0–20ث نظرة عامة · 20–60ث تفاصيل (مين يسوي وش، أمامية/خلفية، ملابس) · 60–90ث تخمين (must / might / probably). لا توقف قبل النهاية.</div>${ideaWrap('', 'photo')}`;
   wirePhoto(f.body, () => { own = true; }, DRILLS.sp);
   speakBox(f.body, 20, 90, (r) => {
     const rep = gradeSpeaking(r, { prompt: ph ? ph.title_en : '', keywords: own ? [] : ph ? ph.keywords : kwFrom(sc.model), kind: 'photo' });
@@ -1652,7 +1886,7 @@ DRILLS.sp = function () {
 DRILLS.rts = function () {
   const it = pickNew(BANKS.speaking.rts, 'rts', x => x.prompt);
   const f = frame('speakDrill', '📖 Read Then Speak', 0);
-  f.body.innerHTML = `<div class="sent" style="font-size:15px"><b>${esc(it.prompt)}</b><ul style="margin:6px 0 0 18px">${it.bullets.map(b => `<li>${esc(b)}</li>`).join('')}</ul></div><div class="hl-tip">20 ثانية تحضير: فكرة لكل نقطة (ماضي ← حاضر ← مستقبل ينقذك). ثم جاوب النقاط بالترتيب (~25 ثانية لكل وحدة) واربطها: <span class="en2">In regard to the second question, … · As for the final question, … · Returning to the first question, I'd also like to add that …</span></div>`;
+  f.body.innerHTML = `<div class="sent" style="font-size:15px"><b>${esc(it.prompt)}</b><ul style="margin:6px 0 0 18px">${it.bullets.map(b => `<li>${esc(b)}</li>`).join('')}</ul></div><div class="hl-tip">20 ثانية تحضير: فكرة لكل نقطة (ماضي ← حاضر ← مستقبل ينقذك). ثم جاوب النقاط بالترتيب (~25 ثانية لكل وحدة) واربطها: <span class="en2">In regard to the second question, … · As for the final question, … · Returning to the first question, I'd also like to add that …</span></div>${ideaWrap(it.prompt + ' ' + it.bullets.join(' '), 'topic')}`;
   speakBox(f.body, 20, 90, (r) => {
     const rep = gradeSpeaking(r, { prompt: it.prompt, keywords: kwFrom(it.prompt + ' ' + it.bullets.join(' ') + ' ' + it.model), kind: 'rts' });
     const s = speakResult(f.body, r, 90, `<h3>مخطط الإجابة</h3><div class="arnote explain">${bidi(it.outline_ar)}</div><h3>نموذج (~140 كلمة)</h3><div class="model">${esc(it.model)}</div>`, rep);
@@ -1667,7 +1901,7 @@ DRILLS.is = function () {
   function show() {
     if (i >= set.questions.length) return finish();
     const q = set.questions[i]; let played = false;
-    f.body.innerHTML = `<div class="prog">السؤال ${i + 1} من ${set.questions.length} · الموضوع: ${esc(set.topics[i < 3 ? 0 : 1])}</div><div class="hl-tip">تسمع السؤال <b>مرة وحدة</b> ثم يبدأ التسجيل تلقائيًا (35 ث). OREO: رأي ← سبب ← مثال ← So overall. الجواب القصير أكبر خطأ — تكلم 25–35 ثانية. ما تعرف الموضوع؟ <span class="en2">To be honest, I don't know much about this, but I guess …</span></div><div class="row"><button class="btn" id="pq">▶️ اسمع السؤال</button></div><div id="sb"></div>`;
+    f.body.innerHTML = `<div class="prog">السؤال ${i + 1} من ${set.questions.length} · الموضوع: ${esc(set.topics[i < 3 ? 0 : 1])}</div><div class="hl-tip">تسمع السؤال <b>مرة وحدة</b> ثم يبدأ التسجيل تلقائيًا (35 ث). OREO: رأي ← سبب ← مثال ← So overall. الجواب القصير أكبر خطأ — تكلم 25–35 ثانية. ما تعرف الموضوع؟ <span class="en2">To be honest, I don't know much about this, but I guess …</span></div><div class="row"><button class="btn" id="pq">▶️ اسمع السؤال</button></div>${ideaWrap(set.topics.join(' ') + ' ' + q.q, 'topic')}<div id="sb"></div>`;
     $('pq').onclick = async () => { if (played) return; played = true; $('pq').disabled = true; await TTS.speak(q.q, 0.95); const sb = $('sb'); sb.innerHTML = ''; speakBox(sb, 0, 35, (r) => { const rep = gradeSpeaking(r, { prompt: q.q, keywords: kwFrom(q.q + ' ' + q.model), kind: 'interactive' }); const sc = rep ? rep.score : Math.round(Math.min(1, r.dur / 35) * 100); rs.push({ q, r, rep, sc }); logAttempt('is', { q: q.q, a: r.text || '', sc, extra: rubricExtra(rep, { seconds: Math.round(r.dur), wpm: r.wpm, words: r.n }) }); i++; show(); }, 'interactive'); $('st').click(); };
   }
   function finish() {
@@ -1680,7 +1914,7 @@ DRILLS.is = function () {
 DRILLS.ss = function () {
   const it = pickNew(BANKS.speaking.sample, 'ss', x => x.prompt);
   const f = frame('speakDrill', '🎥 Speaking Sample', 0);
-  f.body.innerHTML = `<div class="sent" style="font-size:15px"><b>${esc(it.prompt)}</b></div><div class="hl-tip">30 ثانية تحضير: اختر 2–3 أفكار. ثم 3 دقائق: مقدمة تجاوب مباشرة ← نقطتان بمثال حقيقي ← خاتمة. الفيديو يشوفه مسؤول القبول — اجلس عدل وابتسم.</div>`;
+  f.body.innerHTML = `<div class="sent" style="font-size:15px"><b>${esc(it.prompt)}</b></div><div class="hl-tip">30 ثانية تحضير: اختر 2–3 أفكار. ثم 3 دقائق: مقدمة تجاوب مباشرة ← نقطتان بمثال حقيقي ← خاتمة. الفيديو يشوفه مسؤول القبول — اجلس عدل وابتسم.</div>${ideaWrap(it.prompt, 'topic')}`;
   speakBox(f.body, 30, 180, (r) => {
     const rep = gradeSpeaking(r, { prompt: it.prompt, keywords: kwFrom(it.prompt + ' ' + it.model), kind: 'sample' });
     const s = speakResult(f.body, r, 180, `<h3>أفكار للتغطية</h3><div class="arnote explain">${bidi(it.plan_ar)}</div><h3>نموذج (~200 كلمة)</h3><div class="model">${esc(it.model)}</div>`, rep);
@@ -1819,7 +2053,8 @@ DRILLS.words = function () {
   }
   render();
 };
-DRILLS.frames = function () {
+DRILLS.frames = function () { return DRILLS.kit(); };
+DRILLS.framesOld = function () {
   const box = $('skillsDrill'); const F = BANKS.writing.frames, R = BANKS.speaking.rescue;
   const groups = [...new Set(F.map(f => f.group))];
   box.innerHTML = `<h3>🧱 العبارات الآمنة (كلها أقصر من 5 كلمات)</h3><div class="hl-tip">استخدم العبارات القصيرة لتنظيم إجابة أصلية مرتبطة بالسؤال. تجنب نسخ إجابة محفوظة لا تناسب المطلوب.</div>` + groups.map(g => `<div class="card"><h3>${esc(g)}</h3>${F.filter(f => f.group === g).map(f => `<div class="li"><span class="w" style="min-width:0">${esc(f.en)}</span><span>${esc(f.ar)}</span></div>`).join('')}</div>`).join('') + `<div class="card"><h3>🛟 عبارات إنقاذ بالمحادثة</h3>${R.map(r => `<div class="li"><span class="w" style="min-width:0">${esc(r.en)}</span><span>${esc(r.ar)} — <em>${bidi(r.when_ar)}</em></span></div>`).join('')}</div>`;
@@ -1843,4 +2078,3 @@ window.addEventListener('load', () => { if (window.DetScore && DetScore.loadWord
 </script>
 </body>
 </html>
-
