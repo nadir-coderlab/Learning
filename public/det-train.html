@@ -719,7 +719,7 @@ async function loadPacks() {
   try { const r2 = await fetch('det-bank2.json?v=' + Date.now(), { cache: 'no-store' }); if (r2.ok) mergeBanks(await r2.json()); } catch (e) {}
   try { const r = await fetch('det-packs.json?v=' + Date.now(), { cache: 'no-store' }); if (r.ok) { const P = await r.json(); PACKS = Object.assign({ coach: [], banks: {} }, P || {}); mergeBanks(PACKS.banks); } } catch (e) {}
   /* عدة الحفظ ومولّد الأفكار (بذور أفكار وأمثلة وكلمات لكل موضوع) */
-  try { const rk = await fetch('det-kit.json?v=' + Date.now(), { cache: 'no-store' }); if (rk.ok) { const K = await rk.json(); if (K && Array.isArray(K.topics)) KIT = Object.assign({ topics: [], frames: [], photo: [], colloc: [] }, K); } } catch (e) {}
+  try { const rk = await fetch('det-kit.json?v=' + Date.now(), { cache: 'no-store' }); if (rk.ok) { const K = await rk.json(); if (K && Array.isArray(K.topics)) { KIT = Object.assign({ topics: [], frames: [], photo: [], colloc: [] }, K); TIDX = null; } } } catch (e) {}
   try { renderCoach(); renderMenus(); render110(); renderTech(); } catch (e) { console.error(e); }
 }
 function renderCoach() {
@@ -1058,10 +1058,33 @@ function renderSection() {
 }
 
 /* ---------- مولّد الأفكار: يكتشف موضوع السؤال ويعطيك بذور أفكار وأمثلة وكلمات ---------- */
-function topicOf(text) {
-  const t = ' ' + String(text || '').toLowerCase().replace(/[^a-z0-9' ]+/g, ' ').replace(/\s+/g, ' ') + ' ';
+let TIDX = null;
+/* فهرس احتياطي: كلمات كل موضوع من مفرداته وأسئلته وأفكاره، عشان الأسئلة اللي ما فيها كلمة مفتاحية حرفية */
+function topicIndex() {
+  if (TIDX) return TIDX;
+  const stem = (w) => w.replace(/(ies|ied)$/, 'y').replace(/(ing|ed|es|s)$/, '');
+  TIDX = (KIT.topics || []).map(tp => {
+    const m = {};
+    const add = (str, w) => words(String(str || '')).forEach(x => { const k = stem(x.toLowerCase()); if (k.length >= 4 && !STOP.has(k)) m[k] = Math.max(m[k] || 0, w); });
+    (tp.vocab || []).forEach(v => add(v.w, 2));
+    (tp.questions || []).forEach(q => add(q, 1));
+    (tp.ideas || []).forEach(i => add(i.en, 0.6));
+    return { tp, m };
+  });
+  return TIDX;
+}
+const topicOf = (text) => topicMatch(text).list;
+function topicMatch(text) {
+  const raw = String(text || '').toLowerCase();
+  const t = ' ' + raw.replace(/[^a-z0-9' ]+/g, ' ').replace(/\s+/g, ' ') + ' ';
   const scored = (KIT.topics || []).map(tp => ({ tp, sc: (tp.keys || []).reduce((a, k) => a + (t.includes(' ' + String(k).toLowerCase() + ' ') ? (k.includes(' ') ? 2 : 1) : 0), 0) })).filter(x => x.sc > 0).sort((a, b) => b.sc - a.sc);
-  return scored.slice(0, 2).map(x => x.tp);
+  if (scored.length) return { list: scored.slice(0, 2).map(x => x.tp), fuzzy: false };
+  /* ما فيه كلمة مفتاحية: طابق بكلمات الموضوع نفسها — تقريبي، فنعرضه كـ«مواضيع قريبة» */
+  const stem = (w) => w.replace(/(ies|ied)$/, 'y').replace(/(ing|ed|es|s)$/, '');
+  const qs = words(raw).map(w => stem(w.toLowerCase())).filter(w => w.length >= 4 && !STOP.has(w));
+  if (!qs.length) return { list: [], fuzzy: true };
+  const near = topicIndex().map(({ tp, m }) => ({ tp, sc: qs.reduce((a, w) => a + (m[w] || 0), 0) })).filter(x => x.sc >= 3).sort((a, b) => b.sc - a.sc);
+  return { list: near.slice(0, 2).map(x => x.tp), fuzzy: true };
 }
 const RESCUE_FRAMES = [['To be honest, I don\'t know much about this, but I guess …', 'بصراحة ما أعرف كثير عن الموضوع، بس أتوقع …'], ['I\'m not very familiar with this topic. However, I\'d guess that …', 'الموضوع مو مألوف لي، لكن أتوقع إن …'], ['That\'s a tricky question. One thing I can say is …', 'سؤال صعب. الشي الوحيد اللي أقدر أقوله …'], ['It depends on the situation, but in general …', 'يعتمد على الموقف، لكن بشكل عام …']];
 function ideaHtml(promptText, kind) {
@@ -1069,10 +1092,12 @@ function ideaHtml(promptText, kind) {
     const ph = KIT.photo || [];
     return `<div class="ideaSec"><b>🖼️ عبارات الصورة (عدّل الكلمات على صورتك)</b>${ph.length ? ph.map(x => `<div class="kitRow"><span class="en2">${esc(x.en)}</span><span class="kitAr">${esc(x.ar)}</span></div>`).join('') : '<div class="hl-tip">⏳ ما تحمّلت عدة الحفظ بعد</div>'}</div><div class="ideaSec"><b>🧭 الترتيب</b><div class="hl-tip">عام (This photo shows …) ← مين يسوي وش بصيغة -ing + صفات ← وين (foreground / background / on the left) ← تخمين (probably / looks like / might be) — بالكلام: 0–20 ث عام، 20–60 تفاصيل، 60–90 تخمين ورأي.</div></div>`;
   }
-  const tps = topicOf(promptText);
+  const mt = topicMatch(promptText), tps = mt.list;
+  const GENERIC = `<div class="ideaSec"><b>🧭 الهيكل اللي يمشي مع أي سؤال</b><div class="hl-tip">OREO: رأيك مباشرة ← السبب ← مثال من حياتك (شغلك، مدينتك، عائلتك) ← الخلاصة. أو PPF: كيف كان الشي قبل؟ كيف هو الحين؟ كيف بيصير؟</div></div>`;
   if (!tps.length) return `<div class="ideaSec"><b>💡 ما لقيت موضوعًا محددًا — استخدم الهيكل العام</b><div class="hl-tip">OREO: رأيك مباشرة ← السبب ← مثال من حياتك (شغلك، مدينتك، عائلتك) ← الخلاصة. أو PPF: كيف كان الشي قبل؟ كيف هو الحين؟ كيف بيصير؟</div></div><div class="ideaSec"><b>🛟 ما تعرف الموضوع؟</b>${RESCUE_FRAMES.map(([en, ar]) => `<div class="kitRow"><span class="en2">${esc(en)}</span><span class="kitAr">${esc(ar)}</span></div>`).join('')}</div>`;
   const side = (s) => s === 'pro' ? '✅' : s === 'con' ? '❌' : '•';
-  return tps.map((tp, i) => `<div class="ideaSec"><b>💡 ${esc(tp.ar)}${i ? ' (موضوع ثانوي)' : ''} — بذور أفكار: خذ وحدة أو ثنتين وعدّلها بكلامك</b>${(tp.ideas || []).slice(0, i ? 3 : 8).map(x => `<div class="kitRow"><span class="en2">${side(x.side)} ${esc(x.en)}</span><span class="kitAr">${esc(x.ar)}</span></div>`).join('')}</div>` + (i ? '' : `<div class="ideaSec"><b>👤 مثال شخصي تبني عليه</b>${(tp.examples || []).map(x => `<div class="kitRow"><span class="en2">${esc(x.en)}</span><span class="kitAr">${esc(x.ar)}</span></div>`).join('')}</div><div class="ideaSec"><b>⏳ ماضي · حاضر · مستقبل (عشان ما تخلص أفكارك)</b>${tp.ppf ? ['past', 'present', 'future'].map(k => `<div class="kitRow"><span class="en2">${esc(tp.ppf[k])}</span></div>`).join('') : ''}</div><div class="ideaSec"><b>🔤 كلمات الموضوع</b><div class="chips" style="direction:ltr">${(tp.vocab || []).map(v => `<span class="vchip" title="${esc(v.ex || '')}">${esc(v.w)} <small>${esc(v.ar)}</small></span>`).join('')}</div></div>`)).join('') + `<div class="ideaSec"><b>🛟 ما تعرف الموضوع؟</b>${RESCUE_FRAMES.slice(0, 2).map(([en, ar]) => `<div class="kitRow"><span class="en2">${esc(en)}</span><span class="kitAr">${esc(ar)}</span></div>`).join('')}</div>`;
+  /* المطابقة التقريبية ما تلغي الهيكل العام — لو الموضوع مو مضبوط تبقى معك طريقة تجاوب فيها */
+  return (mt.fuzzy ? GENERIC + `<div class="hl-tip" style="margin:-4px 0 6px">⚠️ ما فيه موضوع مطابق تمامًا — هذي <b>مواضيع قريبة</b>، خذ منها اللي يناسب سؤالك بس.</div>` : '') + tps.map((tp, i) => `<div class="ideaSec"><b>💡 ${esc(tp.ar)}${mt.fuzzy ? ' (قريب)' : i ? ' (موضوع ثانوي)' : ''} — بذور أفكار: خذ وحدة أو ثنتين وعدّلها بكلامك</b>${(tp.ideas || []).slice(0, i ? 3 : 8).map(x => `<div class="kitRow"><span class="en2">${side(x.side)} ${esc(x.en)}</span><span class="kitAr">${esc(x.ar)}</span></div>`).join('')}</div>` + (i ? '' : `<div class="ideaSec"><b>👤 مثال شخصي تبني عليه</b>${(tp.examples || []).map(x => `<div class="kitRow"><span class="en2">${esc(x.en)}</span><span class="kitAr">${esc(x.ar)}</span></div>`).join('')}</div><div class="ideaSec"><b>⏳ ماضي · حاضر · مستقبل (عشان ما تخلص أفكارك)</b>${tp.ppf ? ['past', 'present', 'future'].map(k => `<div class="kitRow"><span class="en2">${esc(tp.ppf[k])}</span></div>`).join('') : ''}</div><div class="ideaSec"><b>🔤 كلمات الموضوع</b><div class="chips" style="direction:ltr">${(tp.vocab || []).map(v => `<span class="vchip" title="${esc(v.ex || '')}">${esc(v.w)} <small>${esc(v.ar)}</small></span>`).join('')}</div></div>`)).join('') + `<div class="ideaSec"><b>🛟 ما تعرف الموضوع؟</b>${RESCUE_FRAMES.slice(0, 2).map(([en, ar]) => `<div class="kitRow"><span class="en2">${esc(en)}</span><span class="kitAr">${esc(ar)}</span></div>`).join('')}</div>`;
 }
 const ideaWrap = (promptText, kind) => `<div class="ideaWrap"><button type="button" class="btn sm ghost ideaBtn" data-kind="${esc(kind || 'topic')}" data-prompt="${esc(String(promptText || '').slice(0, 600))}">💡 أفكار للموضوع</button><div class="ideaBox" hidden></div></div>`;
 document.addEventListener('click', (e) => {

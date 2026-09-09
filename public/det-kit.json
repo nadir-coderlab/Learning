@@ -3,113 +3,3199 @@
  "updated": "2026-09-09",
  "_readme_ar": "عدة الحفظ ومولّد الأفكار. frames = عبارات قصيرة وهياكل (g = المجموعة). photo = عبارات وصف الصورة. colloc = collocations عامة. topics = لكل موضوع: keys للكشف عن الموضوع من نص السؤال، ideas بذور أفكار (side: pro/con/general)، examples أمثلة شخصية، vocab كلمات الموضوع، questions أسئلة بصيغة الاختبار، ppf ماضي/حاضر/مستقبل. ممنوع الأجوبة الكاملة المحفوظة.",
  "frames": [
-  { "g": "openers", "en": "Personally, I think …", "ar": "شخصيًا أعتقد إن … — جواب مباشر بأول ثانية" },
-  { "g": "openers", "en": "To be honest, …", "ar": "بصراحة … — تكسب ثانية تفكير وتبدو طبيعيًا" },
-  { "g": "openers", "en": "It depends, but in general …", "ar": "يعتمد، لكن بشكل عام … — لما السؤال له وجهان" },
-  { "g": "openers", "en": "Yes, definitely. / No, not really.", "ar": "نعم أكيد / لا مو مرة — لأسئلة نعم/لا ثم تكمل بالسبب" },
-  { "g": "reasons", "en": "The main reason is that …", "ar": "السبب الرئيسي إن …" },
-  { "g": "reasons", "en": "One reason is … Another reason is …", "ar": "سبب … وسبب ثاني … — سببان بجملتين" },
-  { "g": "reasons", "en": "This is because …", "ar": "وهذا لأن …" },
-  { "g": "reasons", "en": "That's why …", "ar": "عشان كذا …" },
-  { "g": "examples", "en": "For example, last year at my hospital …", "ar": "مثلًا السنة الماضية بالمستشفى … — مثال من شغلك" },
-  { "g": "examples", "en": "For instance, in my city, Madinah, …", "ar": "مثلًا بمدينتي المدينة … — مثال من مكانك" },
-  { "g": "examples", "en": "A good example is …", "ar": "مثال جيد هو …" },
-  { "g": "examples", "en": "I remember when I …", "ar": "أذكر لما … — يفتح قصة قصيرة" },
-  { "g": "contrast", "en": "On the other hand, …", "ar": "من الجهة الثانية …" },
-  { "g": "contrast", "en": "However, some people think that …", "ar": "لكن بعض الناس يشوفون إن … — الرأي المضاد ثم رأيك" },
-  { "g": "contrast", "en": "Of course, it also has some drawbacks. For example, …", "ar": "طبعًا له سلبيات، مثلًا … — يبيّن إنك تشوف الوجهين" },
-  { "g": "closers", "en": "So overall, I think …", "ar": "فبشكل عام أعتقد … — خاتمة الكلام (35 ثانية)" },
-  { "g": "closers", "en": "In conclusion, …", "ar": "في الختام … — خاتمة المقال" },
-  { "g": "closers", "en": "For these reasons, I believe …", "ar": "لهذه الأسباب أعتقد …" },
-  { "g": "closers", "en": "In short, …", "ar": "باختصار …" },
-  { "g": "transitions", "en": "In regard to the second question, …", "ar": "بالنسبة للسؤال الثاني … — Read Then Speak" },
-  { "g": "transitions", "en": "Turning to the third question, …", "ar": "ننتقل للسؤال الثالث …" },
-  { "g": "transitions", "en": "As for the final question, …", "ar": "أما آخر سؤال …" },
-  { "g": "transitions", "en": "Returning to the first question, I'd also like to add that …", "ar": "بالرجوع للسؤال الأول، أبغى أضيف إن … — لما تتذكر فكرة" },
-  { "g": "transitions", "en": "Another thing I'd like to add is that …", "ar": "شي ثاني أبغى أضيفه … — يكسر السكوت" },
-  { "g": "unknown", "en": "To be honest, I don't know much about this, but I guess …", "ar": "بصراحة ما أعرف كثير عن هذا، بس أتوقع … — ثم فكرة بسيطة" },
-  { "g": "unknown", "en": "I'm not very familiar with this topic. However, I'd guess that …", "ar": "الموضوع مو مألوف لي، لكن أتوقع إن …" },
-  { "g": "unknown", "en": "That's a tricky question. One thing I can say is …", "ar": "سؤال صعب. الشي اللي أقدر أقوله …" },
-  { "g": "unknown", "en": "I've never really thought about it, but maybe …", "ar": "ما فكرت فيه قبل، بس يمكن …" },
-  { "g": "time", "en": "When I was at school, …", "ar": "لما كنت بالمدرسة … — الماضي" },
-  { "g": "time", "en": "A few years ago, I used to …", "ar": "قبل سنوات كنت … — الماضي" },
-  { "g": "time", "en": "These days, …", "ar": "هالأيام … — الحاضر" },
-  { "g": "time", "en": "Nowadays, most people …", "ar": "الحين أغلب الناس … — الحاضر" },
-  { "g": "time", "en": "In the future, I'm going to …", "ar": "بالمستقبل راح … — المستقبل" },
-  { "g": "time", "en": "I hope that one day …", "ar": "أتمنى إن يوم من الأيام … — المستقبل" },
-  { "g": "complex", "en": "Even though …, …", "ar": "مع إن …، … — جملة مركّبة" },
-  { "g": "complex", "en": "Although …, …", "ar": "رغم إن …، …" },
-  { "g": "complex", "en": "…, which means that …", "ar": "…، وهذا يعني إن … — موصولة" },
-  { "g": "complex", "en": "If …, … will …", "ar": "إذا …، راح … — شرطية" },
-  { "g": "complex", "en": "While I was …, …", "ar": "بينما كنت …، … — للقصص" },
-  { "g": "complex", "en": "Despite …, …", "ar": "رغم …، … — بعدها اسم أو -ing" },
-  { "g": "recount", "en": "Last year, at my hospital, …", "ar": "السنة الماضية بالمستشفى … — الزمان والمكان" },
-  { "g": "recount", "en": "The problem was that …", "ar": "المشكلة كانت إن …" },
-  { "g": "recount", "en": "First, … Then, … After that, … Finally, …", "ar": "أول … بعدين … بعد كذا … وأخيرًا … — ترتيب الأحداث" },
-  { "g": "recount", "en": "In the end, …", "ar": "بالنهاية … — النتيجة" },
-  { "g": "recount", "en": "This experience taught me that …", "ar": "هذي التجربة علمتني إن … — الدرس" },
-  { "g": "recount", "en": "Now I always … / Now I never …", "ar": "الحين دايم … / الحين أبدًا ما … — وش تغيّر" },
-  { "g": "summary", "en": "In this conversation, I talked with my friend about …", "ar": "بهذي المحادثة تكلمت مع صديقي عن …" },
-  { "g": "summary", "en": "The problem was that …", "ar": "المشكلة كانت إن …" },
-  { "g": "summary", "en": "She suggested that … / He recommended …", "ar": "اقترحت إن … / نصحني بـ …" },
-  { "g": "summary", "en": "In the end, we decided to …", "ar": "بالنهاية قررنا …" },
-  { "g": "punct", "en": "Capital letter at the start. Full stop at the end.", "ar": "حرف كبير بأول الجملة ونقطة بالنهاية — دايمًا" },
-  { "g": "punct", "en": "If it rains, we will stay home.", "ar": "فاصلة بعد جملة الشرط لما تجي بالأول" },
-  { "g": "punct", "en": "Despite the rain, he went out.", "ar": "فاصلة بعد العبارة الافتتاحية (Despite / After / When …)" },
-  { "g": "punct", "en": "You are a teacher, aren't you?", "ar": "فاصلة قبل السؤال الذيلي وعلامة استفهام بالنهاية" },
-  { "g": "punct", "en": "There's = There is · I'd = I would · it's = it is", "ar": "الاختصار والصيغة الكاملة مقبولان — لكن لا تنسَ الفاصلة العليا" },
-  { "g": "punct", "en": "criticisms · tastes · years · students", "ar": "لا تنسَ -s الجمع — تسمع ولا تكتب = غلط" }
+  {
+   "g": "openers",
+   "en": "Personally, I think …",
+   "ar": "شخصيًا أعتقد إن … — جواب مباشر بأول ثانية"
+  },
+  {
+   "g": "openers",
+   "en": "To be honest, …",
+   "ar": "بصراحة … — تكسب ثانية تفكير وتبدو طبيعيًا"
+  },
+  {
+   "g": "openers",
+   "en": "It depends, but in general …",
+   "ar": "يعتمد، لكن بشكل عام … — لما السؤال له وجهان"
+  },
+  {
+   "g": "openers",
+   "en": "Yes, definitely. / No, not really.",
+   "ar": "نعم أكيد / لا مو مرة — لأسئلة نعم/لا ثم تكمل بالسبب"
+  },
+  {
+   "g": "reasons",
+   "en": "The main reason is that …",
+   "ar": "السبب الرئيسي إن …"
+  },
+  {
+   "g": "reasons",
+   "en": "One reason is … Another reason is …",
+   "ar": "سبب … وسبب ثاني … — سببان بجملتين"
+  },
+  {
+   "g": "reasons",
+   "en": "This is because …",
+   "ar": "وهذا لأن …"
+  },
+  {
+   "g": "reasons",
+   "en": "That's why …",
+   "ar": "عشان كذا …"
+  },
+  {
+   "g": "examples",
+   "en": "For example, last year at my hospital …",
+   "ar": "مثلًا السنة الماضية بالمستشفى … — مثال من شغلك"
+  },
+  {
+   "g": "examples",
+   "en": "For instance, in my city, Madinah, …",
+   "ar": "مثلًا بمدينتي المدينة … — مثال من مكانك"
+  },
+  {
+   "g": "examples",
+   "en": "A good example is …",
+   "ar": "مثال جيد هو …"
+  },
+  {
+   "g": "examples",
+   "en": "I remember when I …",
+   "ar": "أذكر لما … — يفتح قصة قصيرة"
+  },
+  {
+   "g": "contrast",
+   "en": "On the other hand, …",
+   "ar": "من الجهة الثانية …"
+  },
+  {
+   "g": "contrast",
+   "en": "However, some people think that …",
+   "ar": "لكن بعض الناس يشوفون إن … — الرأي المضاد ثم رأيك"
+  },
+  {
+   "g": "contrast",
+   "en": "Of course, it also has some drawbacks. For example, …",
+   "ar": "طبعًا له سلبيات، مثلًا … — يبيّن إنك تشوف الوجهين"
+  },
+  {
+   "g": "closers",
+   "en": "So overall, I think …",
+   "ar": "فبشكل عام أعتقد … — خاتمة الكلام (35 ثانية)"
+  },
+  {
+   "g": "closers",
+   "en": "In conclusion, …",
+   "ar": "في الختام … — خاتمة المقال"
+  },
+  {
+   "g": "closers",
+   "en": "For these reasons, I believe …",
+   "ar": "لهذه الأسباب أعتقد …"
+  },
+  {
+   "g": "closers",
+   "en": "In short, …",
+   "ar": "باختصار …"
+  },
+  {
+   "g": "transitions",
+   "en": "In regard to the second question, …",
+   "ar": "بالنسبة للسؤال الثاني … — Read Then Speak"
+  },
+  {
+   "g": "transitions",
+   "en": "Turning to the third question, …",
+   "ar": "ننتقل للسؤال الثالث …"
+  },
+  {
+   "g": "transitions",
+   "en": "As for the final question, …",
+   "ar": "أما آخر سؤال …"
+  },
+  {
+   "g": "transitions",
+   "en": "Returning to the first question, I'd also like to add that …",
+   "ar": "بالرجوع للسؤال الأول، أبغى أضيف إن … — لما تتذكر فكرة"
+  },
+  {
+   "g": "transitions",
+   "en": "Another thing I'd like to add is that …",
+   "ar": "شي ثاني أبغى أضيفه … — يكسر السكوت"
+  },
+  {
+   "g": "unknown",
+   "en": "To be honest, I don't know much about this, but I guess …",
+   "ar": "بصراحة ما أعرف كثير عن هذا، بس أتوقع … — ثم فكرة بسيطة"
+  },
+  {
+   "g": "unknown",
+   "en": "I'm not very familiar with this topic. However, I'd guess that …",
+   "ar": "الموضوع مو مألوف لي، لكن أتوقع إن …"
+  },
+  {
+   "g": "unknown",
+   "en": "That's a tricky question. One thing I can say is …",
+   "ar": "سؤال صعب. الشي اللي أقدر أقوله …"
+  },
+  {
+   "g": "unknown",
+   "en": "I've never really thought about it, but maybe …",
+   "ar": "ما فكرت فيه قبل، بس يمكن …"
+  },
+  {
+   "g": "time",
+   "en": "When I was at school, …",
+   "ar": "لما كنت بالمدرسة … — الماضي"
+  },
+  {
+   "g": "time",
+   "en": "A few years ago, I used to …",
+   "ar": "قبل سنوات كنت … — الماضي"
+  },
+  {
+   "g": "time",
+   "en": "These days, …",
+   "ar": "هالأيام … — الحاضر"
+  },
+  {
+   "g": "time",
+   "en": "Nowadays, most people …",
+   "ar": "الحين أغلب الناس … — الحاضر"
+  },
+  {
+   "g": "time",
+   "en": "In the future, I'm going to …",
+   "ar": "بالمستقبل راح … — المستقبل"
+  },
+  {
+   "g": "time",
+   "en": "I hope that one day …",
+   "ar": "أتمنى إن يوم من الأيام … — المستقبل"
+  },
+  {
+   "g": "complex",
+   "en": "Even though …, …",
+   "ar": "مع إن …، … — جملة مركّبة"
+  },
+  {
+   "g": "complex",
+   "en": "Although …, …",
+   "ar": "رغم إن …، …"
+  },
+  {
+   "g": "complex",
+   "en": "…, which means that …",
+   "ar": "…، وهذا يعني إن … — موصولة"
+  },
+  {
+   "g": "complex",
+   "en": "If …, … will …",
+   "ar": "إذا …، راح … — شرطية"
+  },
+  {
+   "g": "complex",
+   "en": "While I was …, …",
+   "ar": "بينما كنت …، … — للقصص"
+  },
+  {
+   "g": "complex",
+   "en": "Despite …, …",
+   "ar": "رغم …، … — بعدها اسم أو -ing"
+  },
+  {
+   "g": "recount",
+   "en": "Last year, at my hospital, …",
+   "ar": "السنة الماضية بالمستشفى … — الزمان والمكان"
+  },
+  {
+   "g": "recount",
+   "en": "The problem was that …",
+   "ar": "المشكلة كانت إن …"
+  },
+  {
+   "g": "recount",
+   "en": "First, … Then, … After that, … Finally, …",
+   "ar": "أول … بعدين … بعد كذا … وأخيرًا … — ترتيب الأحداث"
+  },
+  {
+   "g": "recount",
+   "en": "In the end, …",
+   "ar": "بالنهاية … — النتيجة"
+  },
+  {
+   "g": "recount",
+   "en": "This experience taught me that …",
+   "ar": "هذي التجربة علمتني إن … — الدرس"
+  },
+  {
+   "g": "recount",
+   "en": "Now I always … / Now I never …",
+   "ar": "الحين دايم … / الحين أبدًا ما … — وش تغيّر"
+  },
+  {
+   "g": "summary",
+   "en": "In this conversation, I talked with my friend about …",
+   "ar": "بهذي المحادثة تكلمت مع صديقي عن …"
+  },
+  {
+   "g": "summary",
+   "en": "The problem was that …",
+   "ar": "المشكلة كانت إن …"
+  },
+  {
+   "g": "summary",
+   "en": "She suggested that … / He recommended …",
+   "ar": "اقترحت إن … / نصحني بـ …"
+  },
+  {
+   "g": "summary",
+   "en": "In the end, we decided to …",
+   "ar": "بالنهاية قررنا …"
+  },
+  {
+   "g": "punct",
+   "en": "Capital letter at the start. Full stop at the end.",
+   "ar": "حرف كبير بأول الجملة ونقطة بالنهاية — دايمًا"
+  },
+  {
+   "g": "punct",
+   "en": "If it rains, we will stay home.",
+   "ar": "فاصلة بعد جملة الشرط لما تجي بالأول"
+  },
+  {
+   "g": "punct",
+   "en": "Despite the rain, he went out.",
+   "ar": "فاصلة بعد العبارة الافتتاحية (Despite / After / When …)"
+  },
+  {
+   "g": "punct",
+   "en": "You are a teacher, aren't you?",
+   "ar": "فاصلة قبل السؤال الذيلي وعلامة استفهام بالنهاية"
+  },
+  {
+   "g": "punct",
+   "en": "There's = There is · I'd = I would · it's = it is",
+   "ar": "الاختصار والصيغة الكاملة مقبولان — لكن لا تنسَ الفاصلة العليا"
+  },
+  {
+   "g": "punct",
+   "en": "criticisms · tastes · years · students",
+   "ar": "لا تنسَ -s الجمع — تسمع ولا تكتب = غلط"
+  }
  ],
  "photo": [
-  { "en": "This photo shows … / In this picture, there is …", "ar": "الجملة الأولى: وش الصورة بشكل عام" },
-  { "en": "In the foreground, … / In the background, …", "ar": "بالمقدمة … / بالخلفية …" },
-  { "en": "On the left, … / On the right, … / In the middle, …", "ar": "على اليسار / اليمين / بالنص" },
-  { "en": "A young man is pushing a cart along a rainy street.", "ar": "مين يسوي وش: فاعل + is/are + فعل -ing + مكان" },
-  { "en": "He is wearing a colorful T-shirt and black shorts.", "ar": "الملابس: is wearing + الألوان" },
-  { "en": "They are probably … / It looks like … / He might be …", "ar": "التخمين — يرفع الدرجة" },
-  { "en": "They seem to be in their 20s / 30s.", "ar": "العمر تقريبًا: in their 20s" },
-  { "en": "engaged in conversation", "ar": "منشغلين بالحديث — لصورة ناس يتكلمون" },
-  { "en": "engrossed in her work", "ar": "مستغرقة بشغلها — طالبة أو موظفة تركّز" },
-  { "en": "crowded with people / vendors", "ar": "مزدحم بالناس / الباعة" },
-  { "en": "surrounded by tall trees / mountains", "ar": "محاط بأشجار / جبال عالية" },
-  { "en": "a tree-lined street", "ar": "شارع مصفوف بالأشجار" },
-  { "en": "lit up with bright lights", "ar": "مضيء بأنوار ساطعة — مشهد ليلي" },
-  { "en": "the hustle and bustle of the city", "ar": "صخب المدينة وحركتها — لمشهد مزدحم" },
-  { "en": "flowers in full bloom", "ar": "ورود متفتحة بالكامل" },
-  { "en": "This image captures … / This shot features …", "ar": "الصورة تلتقط … / تعرض … — بدل shows" },
-  { "en": "It's unclear what that is, but if I had to guess, I'd say …", "ar": "ما أعرف وش هذا، بس لو خمّنت أقول … — لأي شي غامض" }
+  {
+   "en": "This photo shows … / In this picture, there is …",
+   "ar": "الجملة الأولى: وش الصورة بشكل عام"
+  },
+  {
+   "en": "In the foreground, … / In the background, …",
+   "ar": "بالمقدمة … / بالخلفية …"
+  },
+  {
+   "en": "On the left, … / On the right, … / In the middle, …",
+   "ar": "على اليسار / اليمين / بالنص"
+  },
+  {
+   "en": "A young man is pushing a cart along a rainy street.",
+   "ar": "مين يسوي وش: فاعل + is/are + فعل -ing + مكان"
+  },
+  {
+   "en": "He is wearing a colorful T-shirt and black shorts.",
+   "ar": "الملابس: is wearing + الألوان"
+  },
+  {
+   "en": "They are probably … / It looks like … / He might be …",
+   "ar": "التخمين — يرفع الدرجة"
+  },
+  {
+   "en": "They seem to be in their 20s / 30s.",
+   "ar": "العمر تقريبًا: in their 20s"
+  },
+  {
+   "en": "engaged in conversation",
+   "ar": "منشغلين بالحديث — لصورة ناس يتكلمون"
+  },
+  {
+   "en": "engrossed in her work",
+   "ar": "مستغرقة بشغلها — طالبة أو موظفة تركّز"
+  },
+  {
+   "en": "crowded with people / vendors",
+   "ar": "مزدحم بالناس / الباعة"
+  },
+  {
+   "en": "surrounded by tall trees / mountains",
+   "ar": "محاط بأشجار / جبال عالية"
+  },
+  {
+   "en": "a tree-lined street",
+   "ar": "شارع مصفوف بالأشجار"
+  },
+  {
+   "en": "lit up with bright lights",
+   "ar": "مضيء بأنوار ساطعة — مشهد ليلي"
+  },
+  {
+   "en": "the hustle and bustle of the city",
+   "ar": "صخب المدينة وحركتها — لمشهد مزدحم"
+  },
+  {
+   "en": "flowers in full bloom",
+   "ar": "ورود متفتحة بالكامل"
+  },
+  {
+   "en": "This image captures … / This shot features …",
+   "ar": "الصورة تلتقط … / تعرض … — بدل shows"
+  },
+  {
+   "en": "It's unclear what that is, but if I had to guess, I'd say …",
+   "ar": "ما أعرف وش هذا، بس لو خمّنت أقول … — لأي شي غامض"
+  }
  ],
  "colloc": [
-  { "en": "make a decision", "ar": "يتخذ قرارًا" },
-  { "en": "meet a deadline", "ar": "يلتزم بموعد التسليم" },
-  { "en": "take responsibility for", "ar": "يتحمل مسؤولية" },
-  { "en": "solve a problem", "ar": "يحل مشكلة" },
-  { "en": "save time / waste time", "ar": "يوفر وقت / يضيّع وقت" },
-  { "en": "gain experience", "ar": "يكتسب خبرة" },
-  { "en": "achieve a goal", "ar": "يحقق هدفًا" },
-  { "en": "play an important role", "ar": "يلعب دورًا مهمًا" },
-  { "en": "have a big impact on", "ar": "له تأثير كبير على" },
-  { "en": "pay attention to", "ar": "ينتبه لـ" },
-  { "en": "keep in touch with", "ar": "يبقى على تواصل مع" },
-  { "en": "spend time with", "ar": "يقضي وقتًا مع" },
-  { "en": "work under pressure", "ar": "يشتغل تحت ضغط" },
-  { "en": "improve my skills", "ar": "يطوّر مهاراتي" },
-  { "en": "learn from mistakes", "ar": "يتعلم من الأخطاء" },
-  { "en": "reduce stress", "ar": "يقلل التوتر" },
-  { "en": "raise awareness", "ar": "ينشر الوعي" },
-  { "en": "protect the environment", "ar": "يحمي البيئة" },
-  { "en": "public transport", "ar": "المواصلات العامة" },
-  { "en": "the cost of living", "ar": "تكلفة المعيشة" },
-  { "en": "a healthy lifestyle", "ar": "نمط حياة صحي" },
-  { "en": "face-to-face", "ar": "وجهًا لوجه" },
-  { "en": "in the long run", "ar": "على المدى البعيد" },
-  { "en": "a wide range of", "ar": "مجموعة واسعة من" },
-  { "en": "as a result", "ar": "نتيجة لذلك" },
-  { "en": "get used to", "ar": "يتعود على" },
-  { "en": "take part in", "ar": "يشارك في" },
-  { "en": "at the same time", "ar": "بنفس الوقت" },
-  { "en": "on a daily basis", "ar": "بشكل يومي" },
-  { "en": "the pros and cons", "ar": "الإيجابيات والسلبيات" }
+  {
+   "en": "make a decision",
+   "ar": "يتخذ قرارًا"
+  },
+  {
+   "en": "meet a deadline",
+   "ar": "يلتزم بموعد التسليم"
+  },
+  {
+   "en": "take responsibility for",
+   "ar": "يتحمل مسؤولية"
+  },
+  {
+   "en": "solve a problem",
+   "ar": "يحل مشكلة"
+  },
+  {
+   "en": "save time / waste time",
+   "ar": "يوفر وقت / يضيّع وقت"
+  },
+  {
+   "en": "gain experience",
+   "ar": "يكتسب خبرة"
+  },
+  {
+   "en": "achieve a goal",
+   "ar": "يحقق هدفًا"
+  },
+  {
+   "en": "play an important role",
+   "ar": "يلعب دورًا مهمًا"
+  },
+  {
+   "en": "have a big impact on",
+   "ar": "له تأثير كبير على"
+  },
+  {
+   "en": "pay attention to",
+   "ar": "ينتبه لـ"
+  },
+  {
+   "en": "keep in touch with",
+   "ar": "يبقى على تواصل مع"
+  },
+  {
+   "en": "spend time with",
+   "ar": "يقضي وقتًا مع"
+  },
+  {
+   "en": "work under pressure",
+   "ar": "يشتغل تحت ضغط"
+  },
+  {
+   "en": "improve my skills",
+   "ar": "يطوّر مهاراتي"
+  },
+  {
+   "en": "learn from mistakes",
+   "ar": "يتعلم من الأخطاء"
+  },
+  {
+   "en": "reduce stress",
+   "ar": "يقلل التوتر"
+  },
+  {
+   "en": "raise awareness",
+   "ar": "ينشر الوعي"
+  },
+  {
+   "en": "protect the environment",
+   "ar": "يحمي البيئة"
+  },
+  {
+   "en": "public transport",
+   "ar": "المواصلات العامة"
+  },
+  {
+   "en": "the cost of living",
+   "ar": "تكلفة المعيشة"
+  },
+  {
+   "en": "a healthy lifestyle",
+   "ar": "نمط حياة صحي"
+  },
+  {
+   "en": "face-to-face",
+   "ar": "وجهًا لوجه"
+  },
+  {
+   "en": "in the long run",
+   "ar": "على المدى البعيد"
+  },
+  {
+   "en": "a wide range of",
+   "ar": "مجموعة واسعة من"
+  },
+  {
+   "en": "as a result",
+   "ar": "نتيجة لذلك"
+  },
+  {
+   "en": "get used to",
+   "ar": "يتعود على"
+  },
+  {
+   "en": "take part in",
+   "ar": "يشارك في"
+  },
+  {
+   "en": "at the same time",
+   "ar": "بنفس الوقت"
+  },
+  {
+   "en": "on a daily basis",
+   "ar": "بشكل يومي"
+  },
+  {
+   "en": "the pros and cons",
+   "ar": "الإيجابيات والسلبيات"
+  }
  ],
- "topics": []
+ "topics": [
+  {
+   "id": "education",
+   "ar": "التعليم والدراسة",
+   "keys": [
+    "education",
+    "school",
+    "schools",
+    "university",
+    "universities",
+    "college",
+    "student",
+    "students",
+    "exam",
+    "exams",
+    "homework",
+    "online learning",
+    "online classes",
+    "teacher",
+    "teachers",
+    "study abroad",
+    "studying abroad",
+    "classroom",
+    "creativity",
+    "degree"
+   ],
+   "ideas": [
+    {
+     "side": "pro",
+     "en": "Online learning lets busy people study at their own pace without leaving home.",
+     "ar": "التعليم عن بُعد يخلي المشغول يدرس على راحته من البيت بدون ما يطلع."
+    },
+    {
+     "side": "con",
+     "en": "In online classes, students get distracted easily and have less contact with their teachers.",
+     "ar": "في حصص التعليم عن بُعد الطالب يتشتت بسرعة ويقل تواصله مع المعلم."
+    },
+    {
+     "side": "pro",
+     "en": "Exams push students to review everything and show what they really understand.",
+     "ar": "الاختبارات تجبر الطالب يراجع كل شي وتبيّن وش فاهم فعلاً."
+    },
+    {
+     "side": "con",
+     "en": "Exams measure memory more than real skills, so some smart students get low marks.",
+     "ar": "الاختبارات تقيس الحفظ أكثر من المهارة، عشان كذا بعض الطلاب الأذكياء يجيبون درجات ضعيفة."
+    },
+    {
+     "side": "pro",
+     "en": "Studying abroad builds confidence because you have to solve everyday problems in a new language.",
+     "ar": "الدراسة برا تبني الثقة لأنك مضطر تحل مشاكلك اليومية بلغة جديدة."
+    },
+    {
+     "side": "con",
+     "en": "Studying abroad is expensive, and many students feel lonely far from their families.",
+     "ar": "الدراسة برا غالية، وكثير من الطلاب يحسون بالوحدة بعيد عن أهلهم."
+    },
+    {
+     "side": "general",
+     "en": "A good teacher makes a bigger difference than any textbook or app.",
+     "ar": "المعلم الشاطر يفرق أكثر من أي كتاب أو تطبيق."
+    },
+    {
+     "side": "general",
+     "en": "Schools should teach creativity and teamwork, not just facts for the exam.",
+     "ar": "المدارس لازم تعلّم الإبداع والعمل الجماعي، مو بس معلومات للاختبار."
+    }
+   ],
+   "examples": [
+    {
+     "en": "For example, I took an online course for my job last year, and I studied mostly at night after my kids went to bed.",
+     "ar": "مثلاً، أخذت دورة عن بُعد لشغلي السنة الماضية، وكنت أذاكر غالباً بالليل بعد ما عيالي ينامون."
+    },
+    {
+     "en": "For instance, at my hospital in Madinah, new staff learn much faster from a senior colleague sitting with them than from a manual.",
+     "ar": "مثلاً، في المستشفى اللي أشتغل فيه بالمدينة، الموظف الجديد يتعلم أسرع بكثير لما يجلس معه زميل خبير بدل ما يقرأ الدليل."
+    },
+    {
+     "en": "For example, my children have a lot of homework every evening, so we rarely have time to play or read together.",
+     "ar": "مثلاً، عيالي عندهم واجبات كثيرة كل مساء، فقلّ ما يصير عندنا وقت نلعب أو نقرأ مع بعض."
+    },
+    {
+     "en": "For instance, a colleague of mine studied abroad for two years, and he came back much more confident in English and at work.",
+     "ar": "مثلاً، زميل لي درس برا سنتين، ورجع واثق أكثر بكثير في الإنجليزي وفي شغله."
+    }
+   ],
+   "vocab": [
+    {
+     "w": "meet a deadline",
+     "ar": "يخلّص ويسلّم في الوقت المحدد",
+     "ex": "I stayed up late to meet the deadline for my essay."
+    },
+    {
+     "w": "distracted",
+     "ar": "مشتّت، ذهنه مو في الدرس",
+     "ex": "I get distracted every time my phone is next to me while I study."
+    },
+    {
+     "w": "memorize",
+     "ar": "يحفظ صم (عن ظهر قلب)",
+     "ex": "Many students memorize facts and forget them after the exam."
+    },
+    {
+     "w": "concentrate",
+     "ar": "يركّز",
+     "ex": "I can't concentrate at home, so I study at the library."
+    },
+    {
+     "w": "review for an exam",
+     "ar": "يراجع قبل الاختبار",
+     "ex": "I always review for an exam a few days early, not the night before."
+    },
+    {
+     "w": "scholarship",
+     "ar": "ابتعاث / منحة دراسية",
+     "ex": "He got a scholarship to study in the UK for two years."
+    },
+    {
+     "w": "tuition fees",
+     "ar": "رسوم الدراسة",
+     "ex": "Tuition fees abroad are high, so many families can't afford them."
+    },
+    {
+     "w": "practical skills",
+     "ar": "مهارات عملية تنفع بالشغل",
+     "ex": "Universities should teach practical skills that people actually use at work."
+    },
+    {
+     "w": "face-to-face",
+     "ar": "حضوري، وجهاً لوجه",
+     "ex": "Face-to-face classes help shy students ask questions more easily."
+    },
+    {
+     "w": "keep up with",
+     "ar": "يلحّق على المستوى / يواكب",
+     "ex": "Some students can't keep up with the fast pace of online lessons."
+    },
+    {
+     "w": "under pressure",
+     "ar": "تحت ضغط",
+     "ex": "Teenagers feel under pressure to get top marks in every subject."
+    },
+    {
+     "w": "hands-on experience",
+     "ar": "خبرة من الممارسة الفعلية مو من الكتاب",
+     "ex": "Hospital training gives students hands-on experience, not just theory."
+    },
+    {
+     "w": "drop out",
+     "ar": "يترك الدراسة قبل ما يتخرج",
+     "ex": "Some students drop out of university because they choose the wrong major."
+    },
+    {
+     "w": "well-rounded",
+     "ar": "متوازن، شاطر في أكثر من جانب مو بس الدراسة",
+     "ex": "Sports and art help children become well-rounded people."
+    }
+   ],
+   "questions": [
+    "Do you think online learning is as effective as learning in a classroom? Why or why not?",
+    "Some people think exams are the best way to measure what students have learned. Do you agree or disagree? Give reasons and examples.",
+    "Describe a time when a teacher helped you learn something difficult. What did they do, and how did it change you?",
+    "Should schools give students less homework and more time for creative activities? Why?",
+    "Would you like to study in another country? What would be the advantages and disadvantages for you?"
+   ],
+   "ppf": {
+    "past": "When I was at university, the hardest thing for me was …",
+    "present": "These days, I'm studying English after work because …",
+    "future": "In the future, I'd like my children to learn …"
+   }
+  },
+  {
+   "id": "work",
+   "ar": "العمل والوظيفة",
+   "keys": [
+    "work",
+    "job",
+    "jobs",
+    "career",
+    "careers",
+    "boss",
+    "manager",
+    "colleagues",
+    "coworkers",
+    "teamwork",
+    "leadership",
+    "promotion",
+    "deadline",
+    "deadlines",
+    "working from home",
+    "remote work",
+    "office",
+    "salary",
+    "employee",
+    "workplace"
+   ],
+   "ideas": [
+    {
+     "side": "pro",
+     "en": "Working from home saves commuting time and lets people focus without office interruptions.",
+     "ar": "الشغل من البيت يوفر وقت المشوار ويخليك تركز بدون مقاطعات المكتب."
+    },
+    {
+     "side": "con",
+     "en": "When people work from home, they miss out on quick face-to-face help from colleagues.",
+     "ar": "اللي يشتغل من البيت يفقد المساعدة السريعة وجهاً لوجه من زملائه."
+    },
+    {
+     "side": "pro",
+     "en": "Good teamwork means tasks get finished faster because everyone shares the workload.",
+     "ar": "الشغل الجماعي يخلص المهام أسرع لأن الكل يشيل جزء من الحمل."
+    },
+    {
+     "side": "con",
+     "en": "In a large company, it's easy to feel like just a number.",
+     "ar": "في الشركة الكبيرة سهل تحس إنك مجرد رقم."
+    },
+    {
+     "side": "pro",
+     "en": "A small company gives you more responsibility, so you learn new skills quickly.",
+     "ar": "الشركة الصغيرة تعطيك مسؤولية أكبر، فتتعلم مهارات جديدة بسرعة."
+    },
+    {
+     "side": "general",
+     "en": "People stay in a job when they feel respected and can grow, not only for the money.",
+     "ar": "الناس تستمر في الوظيفة لما تحس بالاحترام وفيه فرصة تتطور، مو بس علشان الراتب."
+    },
+    {
+     "side": "general",
+     "en": "A good leader listens to the team and explains decisions clearly instead of just giving orders.",
+     "ar": "القائد الزين يسمع لفريقه ويشرح قراراته بوضوح، مو بس يعطي أوامر."
+    },
+    {
+     "side": "con",
+     "en": "Tight deadlines can push people to rush and make mistakes that cost more time later.",
+     "ar": "المواعيد الضيقة تخلي الناس تستعجل وتغلط، والغلط يضيع وقت أكثر بعدين."
+    }
+   ],
+   "examples": [
+    {
+     "en": "For example, when our hospital moved to a new records system, my team shared the work and finished before the deadline.",
+     "ar": "مثلاً لما انتقل مستشفانا لنظام سجلات جديد، فريقي تقاسم الشغل وخلصنا قبل الموعد."
+    },
+    {
+     "en": "For instance, on days when I work from home, I skip the long drive across Madinah and finish my reports faster.",
+     "ar": "مثلاً لما أشتغل من البيت يوم، أوفر مشوار السواقة في المدينة وأخلص التقارير أسرع."
+    },
+    {
+     "en": "For example, my manager asks for our opinion before changing a process, so the whole team supports the decision.",
+     "ar": "مثلاً مديري يسأل رأينا قبل ما يغير أي إجراء، فالفريق كله يدعم القرار."
+    },
+    {
+     "en": "For instance, in a hospital with hundreds of employees, some colleagues don't even know who handles patient records.",
+     "ar": "مثلاً في مستشفى فيه مئات الموظفين، بعض الزملاء ما يعرفون حتى مين مسؤول عن سجلات المرضى."
+    }
+   ],
+   "vocab": [
+    {
+     "w": "meet a deadline",
+     "ar": "تخلص الشغل في الوقت المحدد",
+     "ex": "We worked late to meet the deadline for the report."
+    },
+    {
+     "w": "colleague",
+     "ar": "زميل في الشغل",
+     "ex": "My colleagues help me when the system is down."
+    },
+    {
+     "w": "reliable",
+     "ar": "تعتمد عليه، ما يخذلك",
+     "ex": "A reliable employee always does what they promise."
+    },
+    {
+     "w": "work under pressure",
+     "ar": "تشتغل وأنت مضغوط",
+     "ex": "Hospital staff have to work under pressure every day."
+    },
+    {
+     "w": "get promoted",
+     "ar": "تاخذ ترقية",
+     "ex": "He got promoted after two years of hard work."
+    },
+    {
+     "w": "job satisfaction",
+     "ar": "الرضا عن الوظيفة",
+     "ex": "Job satisfaction matters more to me than a big office."
+    },
+    {
+     "w": "work-life balance",
+     "ar": "التوازن بين الشغل والحياة",
+     "ex": "Working from home improved my work-life balance a lot."
+    },
+    {
+     "w": "take responsibility",
+     "ar": "تتحمل المسؤولية",
+     "ex": "A good leader takes responsibility when things go wrong."
+    },
+    {
+     "w": "flexible hours",
+     "ar": "دوام مرن",
+     "ex": "Flexible hours help parents pick up their kids from school."
+    },
+    {
+     "w": "commute",
+     "ar": "مشوار الروحة والرجعة للدوام",
+     "ex": "My commute to the hospital takes about twenty minutes."
+    },
+    {
+     "w": "workload",
+     "ar": "كمية الشغل اللي عليك",
+     "ex": "The workload is heavy at the end of every month."
+    },
+    {
+     "w": "career path",
+     "ar": "مسارك الوظيفي، وين رايح في شغلك",
+     "ex": "I want a clear career path in health information management."
+    },
+    {
+     "w": "teamwork",
+     "ar": "الشغل الجماعي، روح الفريق",
+     "ex": "Teamwork is important when a hospital has an emergency."
+    },
+    {
+     "w": "manage a team",
+     "ar": "تدير فريق",
+     "ex": "Managing a team means listening more than talking."
+    }
+   ],
+   "questions": [
+    "Do you think working from home is better than working in an office? Why or why not?",
+    "Some people think a high salary is the most important thing in a job. Do you agree or disagree? Give reasons.",
+    "Describe a time when you had to work as part of a team. What happened, and what did you learn?",
+    "Would you prefer to work for a small company or a large company? Explain your choice.",
+    "What makes a good manager? Give reasons and examples."
+   ],
+   "ppf": {
+    "past": "When I started my first job, I didn't know how to…",
+    "present": "These days, my biggest challenge at the hospital is…",
+    "future": "In the future, I'd like to move into a role where…"
+   }
+  },
+  {
+   "id": "technology",
+   "ar": "التقنية والإنترنت",
+   "keys": [
+    "technology",
+    "technologies",
+    "smartphone",
+    "smartphones",
+    "mobile phone",
+    "social media",
+    "internet",
+    "online",
+    "artificial intelligence",
+    "ai",
+    "robot",
+    "robots",
+    "app",
+    "apps",
+    "screen time",
+    "privacy",
+    "online shopping",
+    "computer",
+    "computers",
+    "digital"
+   ],
+   "ideas": [
+    {
+     "side": "pro",
+     "en": "Smartphones let us contact our family, pay bills, and order things in a few seconds.",
+     "ar": "الجوال يخليك تتواصل مع أهلك وتدفع فواتيرك وتطلب أغراضك بثواني"
+    },
+    {
+     "side": "con",
+     "en": "Too much screen time makes people tired, hurts their sleep, and weakens real-life relationships.",
+     "ar": "كثرة الجلوس قدام الشاشة تتعب الواحد وتخرب نومه وتضعف علاقاته الحقيقية"
+    },
+    {
+     "side": "pro",
+     "en": "Social media gives ordinary people a voice and helps small businesses reach new customers.",
+     "ar": "مواقع التواصل تعطي الناس العاديين صوت وتساعد المشاريع الصغيرة توصل لزباين جدد"
+    },
+    {
+     "side": "con",
+     "en": "Social media spreads fake news quickly, and many people believe it without checking the source.",
+     "ar": "مواقع التواصل تنشر الأخبار الكاذبة بسرعة وناس كثير يصدقونها بدون ما يتأكدون من المصدر"
+    },
+    {
+     "side": "pro",
+     "en": "AI can do boring, repetitive tasks quickly, so people have more time for creative work.",
+     "ar": "الذكاء الاصطناعي يخلص الشغل الممل والمتكرر بسرعة، فيصير عندك وقت للشغل الإبداعي"
+    },
+    {
+     "side": "con",
+     "en": "Companies collect our personal data through apps, and we rarely know how they use it.",
+     "ar": "الشركات تجمع بياناتنا الشخصية عن طريق التطبيقات، ونادراً ما نعرف وش يسوون فيها"
+    },
+    {
+     "side": "general",
+     "en": "Technology is not good or bad by itself; it depends on how we use it.",
+     "ar": "التقنية بحد ذاتها مو زينة ولا شينة، المهم كيف نستخدمها"
+    },
+    {
+     "side": "con",
+     "en": "Robots and AI might replace many jobs, so workers will need to learn new skills.",
+     "ar": "الروبوتات والذكاء الاصطناعي ممكن يشيلون وظايف كثير، فلازم الموظفين يتعلمون مهارات جديدة"
+    }
+   ],
+   "examples": [
+    {
+     "en": "For example, at my hospital we moved from paper files to an electronic system, and finding a patient record now takes seconds.",
+     "ar": "مثلاً، بالمستشفى انتقلنا من الملفات الورقية للنظام الإلكتروني، والحين تلقى ملف المريض بثواني"
+    },
+    {
+     "en": "For instance, my kids spend hours on their tablets at home, so my wife and I set a daily screen-time limit.",
+     "ar": "مثلاً، عيالي يقضون ساعات على الأجهزة اللوحية بالبيت، فأنا وزوجتي حددنا لهم وقت يومي للشاشة"
+    },
+    {
+     "en": "For example, I renew my documents and pay bills through government apps, which saves me a long drive across Madinah.",
+     "ar": "مثلاً، أجدد أوراقي وأدفع فواتيري عن طريق التطبيقات الحكومية، وهذا يوفر علي مشوار طويل داخل المدينة المنورة"
+    },
+    {
+     "en": "For instance, a colleague of mine shared a fake health story on social media, and we had to check the real source together.",
+     "ar": "مثلاً، زميل بالشغل نشر خبر صحي كاذب من مواقع التواصل، واضطرينا نتأكد من المصدر الحقيقي مع بعض"
+    }
+   ],
+   "vocab": [
+    {
+     "w": "screen time",
+     "ar": "الوقت اللي تقضيه قدام الشاشة (جوال، تلفزيون، حاسوب)",
+     "ex": "Doctors say children should have less screen time each day."
+    },
+    {
+     "w": "stay in touch",
+     "ar": "تظل على تواصل مع أحد",
+     "ex": "Video calls help me stay in touch with my relatives."
+    },
+    {
+     "w": "reliable",
+     "ar": "موثوق، تقدر تعتمد عليه",
+     "ex": "Our hospital needs a reliable internet connection all day."
+    },
+    {
+     "w": "convenient",
+     "ar": "مريح وسهل، يوفر عليك وقت وجهد",
+     "ex": "Online shopping is convenient when you're busy at work."
+    },
+    {
+     "w": "addicted to",
+     "ar": "مدمن على شيء، ما تقدر تتركه",
+     "ex": "Many teenagers are addicted to their phones."
+    },
+    {
+     "w": "privacy",
+     "ar": "الخصوصية، إن معلوماتك الشخصية ما يشوفها أحد",
+     "ex": "I worry about my privacy when I use free apps."
+    },
+    {
+     "w": "personal data",
+     "ar": "بياناتك الشخصية زي اسمك ورقمك وموقعك",
+     "ex": "Some apps sell your personal data to other companies."
+    },
+    {
+     "w": "face-to-face",
+     "ar": "وجهاً لوجه، مقابلة حقيقية مو عبر الشاشة",
+     "ex": "I still prefer face-to-face meetings with my team."
+    },
+    {
+     "w": "replace",
+     "ar": "يحل محل شيء أو أحد",
+     "ex": "Robots may replace some workers in factories."
+    },
+    {
+     "w": "keep up with",
+     "ar": "تلاحق التطور وما تتأخر عنه",
+     "ex": "It's hard to keep up with new technology at work."
+    },
+    {
+     "w": "rely on",
+     "ar": "تعتمد على",
+     "ex": "We rely on computers for almost every task at the hospital."
+    },
+    {
+     "w": "fake news",
+     "ar": "أخبار كاذبة تنتشر بسرعة على الإنترنت",
+     "ex": "Fake news spreads fast on social media."
+    },
+    {
+     "w": "up to date",
+     "ar": "محدّث، على آخر إصدار أو آخر المعلومات",
+     "ex": "Keep your phone software up to date for safety."
+    },
+    {
+     "w": "distraction",
+     "ar": "شيء يشتت انتباهك ويلهيك عن شغلك",
+     "ex": "Notifications are a big distraction when I'm trying to work."
+    }
+   ],
+   "questions": [
+    "Do you think children should have smartphones before the age of 12? Why or why not?",
+    "Some people think social media does more harm than good. Do you agree or disagree? Give reasons and examples.",
+    "Describe a time when technology helped you solve a problem at work or at home.",
+    "Will robots and artificial intelligence take away more jobs than they create? Explain your opinion.",
+    "Is online shopping better than shopping in stores? Give two reasons for your answer."
+   ],
+   "ppf": {
+    "past": "When I started working, we still used paper files, and...",
+    "present": "These days, I use my phone for almost everything, such as...",
+    "future": "In the future, I think AI in hospitals will..."
+   }
+  },
+  {
+   "id": "health",
+   "ar": "الصحة ونمط الحياة",
+   "keys": [
+    "health",
+    "healthy",
+    "exercise",
+    "diet",
+    "sleep",
+    "stress",
+    "hospital",
+    "hospitals",
+    "doctor",
+    "doctors",
+    "habit",
+    "habits",
+    "mental health",
+    "fitness",
+    "gym",
+    "fast food",
+    "junk food",
+    "lifestyle",
+    "medicine",
+    "illness"
+   ],
+   "ideas": [
+    {
+     "side": "pro",
+     "en": "Regular exercise gives you more energy and helps you sleep better at night.",
+     "ar": "الرياضة المنتظمة تعطيك طاقة أكثر وتخليك تنام أحسن بالليل."
+    },
+    {
+     "side": "pro",
+     "en": "Cooking at home is cheaper and healthier than eating fast food every day.",
+     "ar": "الطبخ في البيت أرخص وأصح من الأكل السريع كل يوم."
+    },
+    {
+     "side": "pro",
+     "en": "Regular check-ups can catch health problems early, when they are easier to treat.",
+     "ar": "الفحص الدوري يكشف المشاكل الصحية بدري، ووقتها علاجها أسهل."
+    },
+    {
+     "side": "con",
+     "en": "Many people work long hours, so they have no time or energy to exercise.",
+     "ar": "ناس كثير يشتغلون ساعات طويلة، فما عندهم وقت ولا طاقة للرياضة."
+    },
+    {
+     "side": "con",
+     "en": "Healthy food and gym memberships can be expensive for families on a tight budget.",
+     "ar": "الأكل الصحي واشتراك النادي ممكن يكون غالي على العوائل اللي ميزانيتها محدودة."
+    },
+    {
+     "side": "con",
+     "en": "Hot weather and few safe places to walk make it hard to stay active outside.",
+     "ar": "الحر وقلة الأماكن الآمنة للمشي يصعّبون إنك تبقى نشيط برا."
+    },
+    {
+     "side": "general",
+     "en": "Too much stress and too little sleep hurt your mental health, not just your body.",
+     "ar": "التوتر الزايد وقلة النوم يضرّون صحتك النفسية، مو بس جسمك."
+    },
+    {
+     "side": "general",
+     "en": "Small daily habits, like walking or drinking more water, matter more than big changes.",
+     "ar": "العادات اليومية الصغيرة زي المشي وشرب موية أكثر أهم من التغييرات الكبيرة."
+    }
+   ],
+   "examples": [
+    {
+     "en": "For example, at our hospital in Madinah, some colleagues walk around the building during their breaks instead of sitting at their desks.",
+     "ar": "مثلاً، في مستشفانا بالمدينة، بعض الزملاء يمشون حول المبنى وقت الاستراحة بدل ما يقعدون على مكاتبهم."
+    },
+    {
+     "en": "For example, my family and I try to eat dinner at home during the week and keep fast food for the weekend.",
+     "ar": "مثلاً، أنا وعائلتي نحاول نتعشى في البيت أيام الدوام ونخلي الأكل السريع لنهاية الأسبوع."
+    },
+    {
+     "en": "For instance, in Madinah it's too hot to walk outside in the afternoon, so people exercise late at night or indoors at the gym.",
+     "ar": "مثلاً، في المدينة الجو حار مرة وما تقدر تمشي برا العصر، فالناس يتمرنون بالليل أو داخل النادي."
+    },
+    {
+     "en": "For example, working in a busy hospital can be stressful, so after work I switch off my phone and spend time with my kids.",
+     "ar": "مثلاً، الشغل في مستشفى مزحوم يكون متعب نفسياً، فبعد الدوام أقفل جوالي وأقضي وقت مع عيالي."
+    }
+   ],
+   "vocab": [
+    {
+     "w": "stay in shape",
+     "ar": "تحافظ على لياقتك",
+     "ex": "I go to the gym twice a week to stay in shape."
+    },
+    {
+     "w": "balanced diet",
+     "ar": "أكل متوازن، من كل شي بمقدار",
+     "ex": "A balanced diet includes vegetables, fruit, and some protein."
+    },
+    {
+     "w": "cut down on",
+     "ar": "تقلل من شي زي السكر أو القهوة",
+     "ex": "My doctor told me to cut down on sugar and soft drinks."
+    },
+    {
+     "w": "get enough sleep",
+     "ar": "تنام كفاية",
+     "ex": "It's hard to get enough sleep when you work night shifts."
+    },
+    {
+     "w": "deal with stress",
+     "ar": "تتعامل مع الضغط النفسي",
+     "ex": "Walking after work helps me deal with stress."
+    },
+    {
+     "w": "check-up",
+     "ar": "فحص دوري عند الدكتور",
+     "ex": "I have a check-up at the hospital every year."
+    },
+    {
+     "w": "make an appointment",
+     "ar": "تحجز موعد",
+     "ex": "You can make an appointment with the doctor through the app."
+    },
+    {
+     "w": "prevent",
+     "ar": "تمنع الشي قبل ما يصير",
+     "ex": "Washing your hands often helps prevent many illnesses."
+    },
+    {
+     "w": "junk food",
+     "ar": "الأكل اللي مو صحي زي المقرمشات والوجبات السريعة",
+     "ex": "Kids love junk food, but it's bad for their teeth."
+    },
+    {
+     "w": "well-being",
+     "ar": "الراحة والصحة العامة، جسم ونفس",
+     "ex": "Spending time with family is good for your well-being."
+    },
+    {
+     "w": "put on weight",
+     "ar": "يزيد وزنك",
+     "ex": "I put on weight when I stopped walking to work."
+    },
+    {
+     "w": "work out",
+     "ar": "تتمرن",
+     "ex": "My brother works out at home because the gym is too far away."
+    },
+    {
+     "w": "burn out",
+     "ar": "تنهار من كثر الشغل والضغط",
+     "ex": "Nurses often burn out if they work too many long shifts."
+    },
+    {
+     "w": "healthcare",
+     "ar": "الرعاية الصحية، المستشفيات والخدمات الطبية",
+     "ex": "Good healthcare should be affordable for everyone."
+    }
+   ],
+   "questions": [
+    "Do you think people today are healthier than people were fifty years ago? Why or why not?",
+    "Some people think that governments should put a high tax on junk food and sugary drinks. Do you agree or disagree? Give reasons.",
+    "Describe a time when you changed a habit to improve your health. What did you do, and how did you feel?",
+    "What is the biggest cause of stress for people in your country, and how do they deal with it?",
+    "Do you think it's better to see a doctor online or in person? Explain your choice."
+   ],
+   "ppf": {
+    "past": "When I was younger, my health habits were different, because I used to…",
+    "present": "These days, my daily routine is busy, so to stay healthy I try to…",
+    "future": "Next year, I'm going to change one habit, for example…"
+   }
+  },
+  {
+   "id": "environment",
+   "ar": "البيئة",
+   "keys": [
+    "environment",
+    "environmental",
+    "pollution",
+    "polluted",
+    "recycling",
+    "recycle",
+    "plastic",
+    "climate change",
+    "global warming",
+    "renewable energy",
+    "solar",
+    "save water",
+    "green spaces",
+    "parks",
+    "ocean",
+    "oceans",
+    "waste",
+    "rubbish",
+    "electric cars",
+    "nature"
+   ],
+   "ideas": [
+    {
+     "side": "pro",
+     "en": "Recycling at home is easy, and it reduces the waste that ends up in landfills.",
+     "ar": "إعادة التدوير في البيت سهلة، وتقلل الزبالة اللي تروح للمرادم."
+    },
+    {
+     "side": "con",
+     "en": "Many people don't recycle because there are no recycling bins near their homes.",
+     "ar": "ناس كثير ما يعيدون التدوير لأنه ما فيه حاويات تدوير قريبة من بيوتهم."
+    },
+    {
+     "side": "pro",
+     "en": "Banning plastic bags is a simple step, and it quickly reduces the litter in our streets.",
+     "ar": "منع أكياس البلاستيك خطوة بسيطة تقلل الزبالة في الشوارع بسرعة."
+    },
+    {
+     "side": "con",
+     "en": "Small actions like recycling don't help much when big factories keep polluting the air.",
+     "ar": "الأشياء الصغيرة مثل التدوير ما تنفع كثير طول ما المصانع الكبيرة تلوث الهواء."
+    },
+    {
+     "side": "general",
+     "en": "In a hot, dry country like Saudi Arabia, we can't afford to waste water at home.",
+     "ar": "في بلد حار وجاف مثل السعودية، ما نقدر نهدر الماء في البيت."
+    },
+    {
+     "side": "pro",
+     "en": "Solar energy makes sense here because we have sunshine almost every day of the year.",
+     "ar": "الطاقة الشمسية منطقية عندنا لأن الشمس طالعة تقريباً كل يوم في السنة."
+    },
+    {
+     "side": "con",
+     "en": "Electric cars are still expensive, and there aren't enough charging stations in most cities.",
+     "ar": "السيارات الكهربائية للحين غالية، وما فيه محطات شحن كافية في أغلب المدن."
+    },
+    {
+     "side": "general",
+     "en": "Green spaces like parks make cities cooler and give families a place to relax.",
+     "ar": "المساحات الخضراء مثل الحدائق تبرّد المدن وتعطي العوائل مكان يرتاحون فيه."
+    }
+   ],
+   "examples": [
+    {
+     "en": "For example, our hospital put paper recycling boxes in every office last year, and now we throw away much less paper.",
+     "ar": "مثلاً، في مستشفانا حطوا صناديق تدوير ورق في كل مكتب السنة الماضية، والحين نرمي ورق أقل بكثير."
+    },
+    {
+     "en": "For instance, during the summer in Madinah, I water our small garden at night so we waste less water.",
+     "ar": "مثلاً، في صيف المدينة أسقي حديقتنا الصغيرة بالليل عشان ما يضيع ماء كثير."
+    },
+    {
+     "en": "For example, I drive to the hospital every day, and the traffic on the main road makes the air really dirty.",
+     "ar": "مثلاً، أسوق للمستشفى كل يوم، والزحمة في الطريق الرئيسي تخلي الهواء وسخ مرة."
+    },
+    {
+     "en": "For instance, my family likes the park near our house, but we often find plastic bottles left on the grass.",
+     "ar": "مثلاً، أهلي يحبون الحديقة القريبة من البيت، بس كثير نلقى قوارير بلاستيك مرمية على العشب."
+    }
+   ],
+   "vocab": [
+    {
+     "w": "pollution",
+     "ar": "التلوث (وساخة الهواء أو الماء)",
+     "ex": "Air pollution is a big problem in large cities."
+    },
+    {
+     "w": "recycle",
+     "ar": "يعيد التدوير (يستخدم الشي من جديد بدل ما يرميه)",
+     "ex": "We recycle paper and plastic at the office."
+    },
+    {
+     "w": "waste",
+     "ar": "الزبالة / الهدر",
+     "ex": "Hospitals produce a lot of waste every day."
+    },
+    {
+     "w": "throw away",
+     "ar": "يرمي في الزبالة",
+     "ex": "People throw away plastic bottles after using them once."
+    },
+    {
+     "w": "climate change",
+     "ar": "تغير المناخ (الجو يتغير ويصير أحر)",
+     "ex": "Climate change is making our summers even hotter."
+    },
+    {
+     "w": "renewable energy",
+     "ar": "طاقة متجددة (مثل الشمس والرياح، ما تخلص)",
+     "ex": "Saudi Arabia is investing in renewable energy like solar power."
+    },
+    {
+     "w": "save water",
+     "ar": "يوفر الماء",
+     "ex": "Short showers are an easy way to save water."
+    },
+    {
+     "w": "harmful",
+     "ar": "مضر / يضر",
+     "ex": "Plastic bags are harmful to birds and sea animals."
+    },
+    {
+     "w": "protect the environment",
+     "ar": "يحمي البيئة",
+     "ex": "Everyone can do something small to protect the environment."
+    },
+    {
+     "w": "reduce",
+     "ar": "يقلل",
+     "ex": "We should reduce the plastic we use every day."
+    },
+    {
+     "w": "public transport",
+     "ar": "المواصلات العامة (باص، قطار)",
+     "ex": "Better public transport means fewer cars on the road."
+    },
+    {
+     "w": "green spaces",
+     "ar": "مساحات خضراء (حدائق وأشجار)",
+     "ex": "Madinah needs more green spaces for families to enjoy."
+    },
+    {
+     "w": "raise awareness",
+     "ar": "يوعّي الناس / ينشر الوعي",
+     "ex": "Schools can raise awareness about recycling among children."
+    },
+    {
+     "w": "run out of",
+     "ar": "يخلص عنده الشي / ينتهي",
+     "ex": "If we waste water, we might run out of it one day."
+    }
+   ],
+   "questions": [
+    "Do you think recycling should be required by law? Why or why not?",
+    "Some people say the government should fix environmental problems, not ordinary people. Do you agree? Explain why.",
+    "Describe a time when you did something to help the environment. What did you do, and how did you feel?",
+    "What is the biggest environmental problem in your city, and how could it be solved?",
+    "Would you prefer to live in a big city with more jobs or a small town with cleaner air? Explain your choice."
+   ],
+   "ppf": {
+    "past": "When I was a child, the environment in my city was …",
+    "present": "These days, at the hospital and at home, I try to …",
+    "future": "In the future, I think the environment in Madinah will …"
+   }
+  },
+  {
+   "id": "city",
+   "ar": "المدينة والمواصلات",
+   "keys": [
+    "city",
+    "cities",
+    "public transport",
+    "public transportation",
+    "traffic",
+    "traffic jam",
+    "commute",
+    "bus",
+    "metro",
+    "cars",
+    "driving",
+    "parking",
+    "housing",
+    "apartment",
+    "big city",
+    "small town",
+    "countryside",
+    "parks",
+    "noise",
+    "urban"
+   ],
+   "ideas": [
+    {
+     "side": "pro",
+     "en": "Good public transport saves people money and cuts the number of cars on the road.",
+     "ar": "المواصلات العامة الزينة توفر على الناس فلوس وتقلل عدد السيارات في الشوارع."
+    },
+    {
+     "side": "con",
+     "en": "Buses and trains often run late, so many people still prefer to drive their own cars.",
+     "ar": "الباصات والقطارات كثير تتأخر، عشان كذا الناس تفضّل تسوق سياراتها."
+    },
+    {
+     "side": "pro",
+     "en": "Big cities have more jobs, better hospitals, and more places to study or have fun.",
+     "ar": "المدن الكبيرة فيها وظائف أكثر ومستشفيات أحسن وأماكن أكثر للدراسة والترفيه."
+    },
+    {
+     "side": "con",
+     "en": "Life in a big city is expensive, noisy, and stressful, especially for families with children.",
+     "ar": "العيشة في المدينة الكبيرة غالية ومزعجة ومتعبة، خصوصاً للعوائل اللي عندها أطفال."
+    },
+    {
+     "side": "pro",
+     "en": "Banning cars from the city center makes streets safer and cleaner for people who walk.",
+     "ar": "منع دخول السيارات لوسط المدينة يخلي الشوارع أكثر أماناً وأنظف للي يمشون."
+    },
+    {
+     "side": "con",
+     "en": "In hot countries like Saudi Arabia, people can't walk far, so they depend on cars.",
+     "ar": "في البلدان الحارة مثل السعودية، الناس ما تقدر تمشي مسافات طويلة، فتعتمد على السيارة."
+    },
+    {
+     "side": "general",
+     "en": "Parks and green spaces give families a place to relax and help reduce stress.",
+     "ar": "الحدائق والمساحات الخضراء تعطي العوائل مكان يرتاحون فيه وتقلل التوتر."
+    },
+    {
+     "side": "general",
+     "en": "Traffic jams waste time and energy, so people arrive at work tired and late.",
+     "ar": "الزحمة تضيّع الوقت والطاقة، فالناس توصل الدوام تعبانة ومتأخرة."
+    }
+   ],
+   "examples": [
+    {
+     "en": "For example, my drive to the hospital in Madinah takes twenty minutes on a normal day, but almost an hour in Ramadan traffic.",
+     "ar": "مثلاً، مشواري للمستشفى في المدينة ياخذ عشرين دقيقة في اليوم العادي، لكن تقريباً ساعة في زحمة رمضان."
+    },
+    {
+     "en": "For instance, some of my colleagues share one car to get to work because parking near the hospital is always full in the morning.",
+     "ar": "مثلاً، بعض زملائي يروحون الدوام بسيارة وحدة لأن المواقف اللي جنب المستشفى دايماً مليانة الصبح."
+    },
+    {
+     "en": "For example, on weekends I take my kids to a park near our house because it's quieter than the busy streets.",
+     "ar": "مثلاً، في نهاية الأسبوع آخذ عيالي لحديقة قريبة من البيت لأنها أهدى من الشوارع المزدحمة."
+    },
+    {
+     "en": "For instance, when I visited Riyadh, I tried the metro and it was faster than driving in the city center.",
+     "ar": "مثلاً، لما زرت الرياض جربت المترو وكان أسرع من السواقة في وسط المدينة."
+    }
+   ],
+   "vocab": [
+    {
+     "w": "commute",
+     "ar": "مشوار الروحة للدوام والرجعة منه كل يوم",
+     "ex": "My daily commute takes about half an hour each way."
+    },
+    {
+     "w": "rush hour",
+     "ar": "وقت الذروة، ساعة الزحمة",
+     "ex": "Traffic is terrible during the morning rush hour."
+    },
+    {
+     "w": "traffic jam",
+     "ar": "زحمة سيارات واقفة ما تتحرك",
+     "ex": "I was stuck in a traffic jam for forty minutes."
+    },
+    {
+     "w": "public transport",
+     "ar": "المواصلات العامة: باصات وقطارات ومترو",
+     "ex": "Public transport in my city is getting better every year."
+    },
+    {
+     "w": "reliable",
+     "ar": "يعتمد عليه، ما يخذلك",
+     "ex": "The bus isn't reliable, so I usually drive to work."
+    },
+    {
+     "w": "affordable",
+     "ar": "سعره معقول، في متناول اليد",
+     "ex": "Young families need affordable housing near their jobs."
+    },
+    {
+     "w": "crowded",
+     "ar": "مزدحم، مليان ناس",
+     "ex": "The city center gets very crowded on weekends."
+    },
+    {
+     "w": "convenient",
+     "ar": "مريح وسهل وقريب",
+     "ex": "Living near the hospital is convenient for my work."
+    },
+    {
+     "w": "pollution",
+     "ar": "تلوث الهواء",
+     "ex": "Too many cars cause air pollution in big cities."
+    },
+    {
+     "w": "cost of living",
+     "ar": "غلاء المعيشة، تكاليف العيشة",
+     "ex": "The cost of living in Riyadh is higher than in Madinah."
+    },
+    {
+     "w": "neighborhood",
+     "ar": "الحي اللي تسكن فيه",
+     "ex": "We live in a quiet neighborhood with a small park."
+    },
+    {
+     "w": "green space",
+     "ar": "مساحات خضراء وحدائق",
+     "ex": "Every neighborhood should have some green space for families."
+    },
+    {
+     "w": "get around",
+     "ar": "تتنقل من مكان لمكان",
+     "ex": "Without a car, it's hard to get around the city."
+    },
+    {
+     "w": "infrastructure",
+     "ar": "البنية التحتية: طرق وجسور وخدمات",
+     "ex": "Good infrastructure makes a city easier to live in."
+    }
+   ],
+   "questions": [
+    "Do you think cities should ban cars from their city centers? Why or why not?",
+    "Some people think living in a big city is better than living in a small town. Do you agree or disagree? Give reasons.",
+    "Describe a time when you were stuck in traffic. What happened and how did you feel?",
+    "What is the best way to improve public transport in your city? Explain your answer.",
+    "Should governments spend more money on parks and green spaces or on new roads? Why?"
+   ],
+   "ppf": {
+    "past": "When I was a child, Madinah was much smaller and …",
+    "present": "These days, my commute to the hospital is …",
+    "future": "In the future, I hope my city will have …"
+   }
+  },
+  {
+   "id": "travel",
+   "ar": "السفر والسياحة",
+   "keys": [
+    "travel",
+    "travelling",
+    "traveling",
+    "tourism",
+    "tourist",
+    "tourists",
+    "trip",
+    "trips",
+    "holiday",
+    "holidays",
+    "vacation",
+    "vacations",
+    "guided tour",
+    "tour guide",
+    "sightseeing",
+    "abroad",
+    "destination",
+    "destinations",
+    "over-tourism",
+    "journey"
+   ],
+   "ideas": [
+    {
+     "side": "pro",
+     "en": "When you travel abroad, you see how other people live, and you understand them better.",
+     "ar": "السفر برا يخليك تفهم ثقافات ثانية وتصير أوسع أفق."
+    },
+    {
+     "side": "con",
+     "en": "Too many tourists can damage historic sites and make life harder for local people.",
+     "ar": "كثرة السياح تضر الأماكن التاريخية وتصعّب حياة أهل البلد."
+    },
+    {
+     "side": "pro",
+     "en": "A guided tour saves time because the guide explains the history and handles the details.",
+     "ar": "الجولة مع مرشد توفر عليك وقت، لأنه يشرح لك التاريخ ويرتب لك كل شي."
+    },
+    {
+     "side": "con",
+     "en": "Guided tours follow a fixed schedule, so you can't stay longer at places you like.",
+     "ar": "الجولات المنظمة لها جدول ثابت، ما تقدر تطول في مكان عجبك."
+    },
+    {
+     "side": "pro",
+     "en": "Planning a trip in advance usually means cheaper flights, cheaper hotels and fewer surprises.",
+     "ar": "التخطيط من بدري يعني تذاكر وفنادق أرخص ومفاجآت أقل."
+    },
+    {
+     "side": "con",
+     "en": "If you plan every hour of a trip, it feels like work and you can't relax.",
+     "ar": "إذا رتبت كل ساعة في الرحلة، بتحس إنك في شغل وما تقدر ترتاح."
+    },
+    {
+     "side": "pro",
+     "en": "Travelling around your own country is cheaper, and you discover places you never noticed before.",
+     "ar": "السفر داخل بلدك أرخص، وتكتشف أماكن ما كنت منتبه لها."
+    },
+    {
+     "side": "general",
+     "en": "Tourism creates jobs and brings money to hotels, restaurants and small local businesses.",
+     "ar": "السياحة توفر وظائف وتجيب فلوس للفنادق والمطاعم والمحلات الصغيرة."
+    }
+   ],
+   "examples": [
+    {
+     "en": "For example, last summer my family and I drove to Taif for a week, and the kids loved the cooler weather.",
+     "ar": "مثلاً، الصيف اللي فات رحنا أنا وأهلي الطائف بالسيارة أسبوع، والعيال انبسطوا من الجو البارد."
+    },
+    {
+     "en": "For instance, in Madinah we get thousands of visitors every year, and the streets near the mosque are always crowded.",
+     "ar": "مثلاً، في المدينة يجينا آلاف الزوار كل سنة، والشوارع حول الحرم دايم زحمة."
+    },
+    {
+     "en": "For example, a colleague at the hospital booked a guided tour in Istanbul and said it saved him a lot of time.",
+     "ar": "مثلاً، زميل لي في المستشفى حجز جولة مع مرشد في إسطنبول وقال إنها وفرت عليه وقت كثير."
+    },
+    {
+     "en": "For instance, I always plan my holidays around my work schedule because the hospital is busiest during Hajj season.",
+     "ar": "مثلاً، دايم أرتب إجازاتي على حسب دوامي، لأن الضغط في المستشفى يكون أكثر شي في موسم الحج."
+    }
+   ],
+   "vocab": [
+    {
+     "w": "book a trip",
+     "ar": "تحجز رحلة (تذاكر أو فندق)",
+     "ex": "We booked our trip two months before the holiday."
+    },
+    {
+     "w": "destination",
+     "ar": "الوجهة، المكان اللي رايح له",
+     "ex": "Turkey is a popular destination for Saudi families in summer."
+    },
+    {
+     "w": "guided tour",
+     "ar": "جولة مع مرشد سياحي",
+     "ex": "The guided tour of the old city took three hours."
+    },
+    {
+     "w": "sightseeing",
+     "ar": "تشوف المعالم والأماكن السياحية",
+     "ex": "We spent the first day sightseeing in the city centre."
+    },
+    {
+     "w": "affordable",
+     "ar": "بسعر معقول، مو غالي",
+     "ex": "Local trips are more affordable for a big family."
+    },
+    {
+     "w": "crowded",
+     "ar": "زحمة، مليان ناس",
+     "ex": "The beach was too crowded, so we left early."
+    },
+    {
+     "w": "in advance",
+     "ar": "مقدماً، قبلها بوقت",
+     "ex": "It's cheaper if you buy the tickets in advance."
+    },
+    {
+     "w": "day trip",
+     "ar": "رحلة يوم واحد، تروح وترجع نفس اليوم",
+     "ex": "We took a day trip to the mountains and came back the same evening."
+    },
+    {
+     "w": "the locals",
+     "ar": "أهل البلد، السكان المحليين",
+     "ex": "The locals were friendly and helped us find the market."
+    },
+    {
+     "w": "peak season",
+     "ar": "موسم الذروة، وقت الزحمة والغلا",
+     "ex": "Hotels double their prices during peak season."
+    },
+    {
+     "w": "get away from",
+     "ar": "تبتعد شوي عن الشغل أو الروتين وتاخذ لك راحة",
+     "ex": "I need to get away from work for a few days."
+    },
+    {
+     "w": "explore",
+     "ar": "تكتشف وتتجول في مكان جديد",
+     "ex": "We spent the afternoon exploring the old town on foot."
+    },
+    {
+     "w": "cultural heritage",
+     "ar": "التراث الثقافي، الأماكن والعادات القديمة",
+     "ex": "AlUla is famous for its cultural heritage, and thousands of tourists visit it every winter."
+    },
+    {
+     "w": "worth visiting",
+     "ar": "يستاهل الزيارة",
+     "ex": "The old market is definitely worth visiting at night."
+    }
+   ],
+   "questions": [
+    "Do you prefer to plan your trips carefully or to be spontaneous? Why?",
+    "Some people think guided tours are the best way to see a new country. Others prefer to explore on their own. Which do you prefer and why?",
+    "Describe a time when you visited a place that was very crowded. What happened and how did you feel?",
+    "Some people believe tourism does more harm than good to popular cities. Do you agree or disagree? Give reasons and examples.",
+    "What advice would you give a friend who is visiting your city for the first time?"
+   ],
+   "ppf": {
+    "past": "The last time I travelled with my family, we …",
+    "present": "These days, when I get time off from the hospital, I usually …",
+    "future": "If I get a long holiday next year, I'd really like to …"
+   }
+  },
+  {
+   "id": "family",
+   "ar": "الأسرة والأصدقاء",
+   "keys": [
+    "family",
+    "families",
+    "friend",
+    "friends",
+    "friendship",
+    "parents",
+    "children",
+    "kids",
+    "relatives",
+    "elderly",
+    "grandparents",
+    "stay in touch",
+    "keep in touch",
+    "trust",
+    "close friend",
+    "best friend",
+    "old people",
+    "family time",
+    "spend time with",
+    "relationship"
+   ],
+   "ideas": [
+    {
+     "side": "general",
+     "en": "Family gives you support when things go wrong, so it comes first for most people.",
+     "ar": "العائلة هي اللي تقف معك لما تتعقد الأمور، عشان كذا هي الأولوية عند أغلب الناس."
+    },
+    {
+     "side": "pro",
+     "en": "Meeting friends face to face is better because you can really see how they feel.",
+     "ar": "اللقاء وجه لوجه أحسن لأنك تشوف بعينك شعور صاحبك وتحس فيه."
+    },
+    {
+     "side": "pro",
+     "en": "Messaging apps make it easy to stay in touch with friends who live far away.",
+     "ar": "برامج المراسلة تسهّل عليك التواصل مع الأصدقاء اللي ساكنين بعيد."
+    },
+    {
+     "side": "con",
+     "en": "Talking only online can feel shallow, and people forget to visit each other in person.",
+     "ar": "التواصل عبر الإنترنت أحيانًا سطحي، والناس تنسى تزور بعض على الطبيعة."
+    },
+    {
+     "side": "pro",
+     "en": "Elderly parents should live with their children because they need daily care and company.",
+     "ar": "الوالدين الكبار في السن لازم يسكنون مع عيالهم لأنهم يحتاجون رعاية وونسة كل يوم."
+    },
+    {
+     "side": "con",
+     "en": "Caring for elderly relatives at home is hard when both husband and wife work full time.",
+     "ar": "رعاية كبار السن في البيت صعبة لما الزوج والزوجة الاثنين يشتغلون ساعات طويلة."
+    },
+    {
+     "side": "general",
+     "en": "Trust takes years to build, but you can lose it in one bad moment.",
+     "ar": "الثقة تحتاج سنين عشان تنبني، لكن ممكن تروح في لحظة وحدة."
+    },
+    {
+     "side": "general",
+     "en": "A few close friends are worth more than hundreds of online followers.",
+     "ar": "شوية أصدقاء مقرّبين أحسن بكثير من مئات المتابعين على الإنترنت."
+    }
+   ],
+   "examples": [
+    {
+     "en": "For example, some of my relatives live in Jeddah, so we have a family group chat and share photos every week.",
+     "ar": "مثلًا، بعض قرايبي ساكنين في جدة، فعندنا مجموعة محادثة عائلية نتبادل فيها الصور كل أسبوع."
+    },
+    {
+     "en": "For instance, even after a long day at work, I still try to have dinner with my children and hear about their day.",
+     "ar": "مثلًا، حتى لو كان يومي طويل في الدوام، أحاول أتعشى مع عيالي وأسمع منهم كيف كان يومهم."
+    },
+    {
+     "en": "For example, every Thursday evening I meet two old school friends at a café in Madinah, and we talk for hours.",
+     "ar": "مثلًا، كل خميس بالليل أقابل صاحبين من أيام المدرسة في مقهى بالمدينة المنورة ونسولف ساعات."
+    },
+    {
+     "en": "For instance, I visit my parents every weekend, and my mother always says a short visit is better than a phone call.",
+     "ar": "مثلًا، أزور والديّ كل نهاية أسبوع، وأمي دايم تقول زيارة قصيرة أحسن من مكالمة."
+    }
+   ],
+   "vocab": [
+    {
+     "w": "stay in touch",
+     "ar": "تظل على تواصل",
+     "ex": "We stay in touch through a family group chat."
+    },
+    {
+     "w": "close friend",
+     "ar": "صديق مقرّب، خوي",
+     "ex": "A close friend will always tell you the truth."
+    },
+    {
+     "w": "reliable",
+     "ar": "يُعتمد عليه، ما يخذلك",
+     "ex": "My brother is reliable; he always keeps his promises."
+    },
+    {
+     "w": "trust",
+     "ar": "ثقة / يثق بـ",
+     "ex": "It takes time to trust someone new."
+    },
+    {
+     "w": "get along with",
+     "ar": "يتفاهم مع، علاقته طيبة مع",
+     "ex": "I get along well with my wife's family."
+    },
+    {
+     "w": "look after",
+     "ar": "يعتني بـ، يهتم بـ",
+     "ex": "My sister and I take turns looking after our elderly father."
+    },
+    {
+     "w": "support",
+     "ar": "دعم، وقفة",
+     "ex": "My family gave me a lot of support during my exams."
+    },
+    {
+     "w": "extended family",
+     "ar": "العائلة الكبيرة (الأعمام والأخوال وعيالهم)",
+     "ex": "Our extended family meets every Friday for lunch."
+    },
+    {
+     "w": "generation",
+     "ar": "جيل",
+     "ex": "Three generations live in my grandfather's house."
+    },
+    {
+     "w": "catch up with",
+     "ar": "تسولف مع واحد وتعرف آخر أخباره",
+     "ex": "I need to catch up with an old friend this weekend."
+    },
+    {
+     "w": "make time for",
+     "ar": "يفرّغ وقت لـ",
+     "ex": "Busy parents should make time for their children."
+    },
+    {
+     "w": "quality time",
+     "ar": "وقت حلو مع الأهل بدون مشاغل ولا جوال",
+     "ex": "We spend quality time together on the weekend."
+    },
+    {
+     "w": "raise children",
+     "ar": "يربّي عيال",
+     "ex": "It's not easy to raise children in a big city."
+    },
+    {
+     "w": "lose touch",
+     "ar": "ينقطع التواصل بينكم",
+     "ex": "I lost touch with most of my university friends."
+    }
+   ],
+   "questions": [
+    "Do you think it's better to have a few close friends or many friends? Why?",
+    "Some people think elderly parents should live with their children instead of in a care home. Do you agree or disagree? Use specific reasons and examples to support your answer.",
+    "Describe a time when a friend or a family member helped you. What happened, and how did you feel afterwards?",
+    "How has technology changed the way families stay in touch? Is this change mostly positive or negative?",
+    "What makes someone a good friend? Talk about the qualities you look for and give an example."
+   ],
+   "ppf": {
+    "past": "When I was a child, my whole family used to …",
+    "present": "These days, my friends and I mostly …",
+    "future": "In the future, I hope my family and I will …"
+   }
+  },
+  {
+   "id": "money",
+   "ar": "المال والتسوق",
+   "keys": [
+    "money",
+    "spend",
+    "spending",
+    "save money",
+    "savings",
+    "shopping",
+    "online shopping",
+    "advertising",
+    "advertisements",
+    "ads",
+    "buy",
+    "buying",
+    "rent",
+    "renting",
+    "budget",
+    "plastic bags",
+    "expensive",
+    "cheap",
+    "possessions",
+    "prices"
+   ],
+   "ideas": [
+    {
+     "side": "pro",
+     "en": "Saving a little every month gives you a safety net when something unexpected happens.",
+     "ar": "توفير شوي كل شهر يعطيك شبكة أمان لو صار شي ما تتوقعه."
+    },
+    {
+     "side": "con",
+     "en": "Enjoying your money today matters too, because nobody knows what tomorrow will bring.",
+     "ar": "الاستمتاع بفلوسك اليوم مهم بعد، لأن محد يدري وش يصير بكرة."
+    },
+    {
+     "side": "pro",
+     "en": "A trip with your family gives you memories that last much longer than a new phone.",
+     "ar": "السفر مع العائلة يعطيك ذكريات تدوم أطول بكثير من جوال جديد."
+    },
+    {
+     "side": "con",
+     "en": "Advertising pushes people, especially children, to buy things they don't really need.",
+     "ar": "الإعلانات تدفع الناس، خصوصاً الأطفال، يشترون أشياء ما يحتاجونها."
+    },
+    {
+     "side": "pro",
+     "en": "Online shopping saves time and lets you compare prices before you buy.",
+     "ar": "التسوق الإلكتروني يوفر وقت ويخليك تقارن الأسعار قبل ما تشتري."
+    },
+    {
+     "side": "con",
+     "en": "It's easy to overspend online, because paying with one click doesn't feel like spending real money.",
+     "ar": "سهل تصرف زيادة في الشراء الإلكتروني، لأن الدفع بكبسة زر ما يحسسك إنها فلوس حقيقية."
+    },
+    {
+     "side": "general",
+     "en": "Renting gives you flexibility, but buying a home means you're building something for the future.",
+     "ar": "الإيجار يعطيك مرونة، لكن شراء بيت يعني إنك تبني شي للمستقبل."
+    },
+    {
+     "side": "pro",
+     "en": "A small charge for plastic bags makes people remember to bring their own, and it cuts waste.",
+     "ar": "رسوم بسيطة على الأكياس البلاستيكية تخلي الناس يتذكرون يجيبون أكياسهم وتقلل النفايات."
+    }
+   ],
+   "examples": [
+    {
+     "en": "For example, my wife and I now make a monthly budget, and we put a small amount aside first every month.",
+     "ar": "مثلاً، أنا وزوجتي صرنا نسوي ميزانية شهرية، ونحط مبلغ بسيط على جنب أول شي كل شهر."
+    },
+    {
+     "en": "For instance, last year I bought a new phone after seeing an ad, and honestly I barely used the extra features.",
+     "ar": "مثلاً، السنة الماضية اشتريت جوال جديد بعد ما شفت إعلان، وبصراحة بالكاد استخدمت المميزات الزيادة."
+    },
+    {
+     "en": "For example, I order most things for my kids online now, because after a long day at work I'm too tired to go to the mall.",
+     "ar": "مثلاً، صرت أطلب أغلب أغراض العيال من المتاجر الإلكترونية، لأن بعد يوم دوام طويل ما عندي طاقة أروح السوق."
+    },
+    {
+     "en": "For instance, a trip to the Red Sea with my family gave us better memories than anything I've bought in years.",
+     "ar": "مثلاً، رحلة للبحر الأحمر مع العائلة أعطتنا ذكريات أحلى من أي شي اشتريته من سنين."
+    }
+   ],
+   "vocab": [
+    {
+     "w": "afford",
+     "ar": "يقدر يدفع ثمنه / يقدر عليه",
+     "ex": "We can't afford a new car this year."
+    },
+    {
+     "w": "affordable",
+     "ar": "سعره معقول / في المتناول",
+     "ex": "Renting is more affordable for young families in big cities."
+    },
+    {
+     "w": "budget",
+     "ar": "ميزانية",
+     "ex": "My wife and I set a monthly budget for shopping."
+    },
+    {
+     "w": "save up for",
+     "ar": "يوفّر فلوس لشي معين",
+     "ex": "I'm saving up for a family trip next summer."
+    },
+    {
+     "w": "waste money on",
+     "ar": "يضيّع فلوسه على",
+     "ex": "People waste money on things they never use."
+    },
+    {
+     "w": "overspend",
+     "ar": "يصرف أكثر من اللازم",
+     "ex": "It's easy to overspend when you shop online late at night."
+    },
+    {
+     "w": "bargain",
+     "ar": "صفقة / سعر حلو",
+     "ex": "I got a real bargain on this jacket during the sale."
+    },
+    {
+     "w": "value for money",
+     "ar": "يستاهل فلوسه",
+     "ex": "A good phone is expensive, but it's good value for money."
+    },
+    {
+     "w": "in debt",
+     "ar": "مديون / عليه دين",
+     "ex": "Many young people end up in debt because of credit cards."
+    },
+    {
+     "w": "impulse buying",
+     "ar": "شراء على الطاير بدون تفكير",
+     "ex": "Ads on social media encourage impulse buying."
+    },
+    {
+     "w": "consumer",
+     "ar": "مستهلك",
+     "ex": "Consumers today have more choice than ever before."
+    },
+    {
+     "w": "advertisement (ad)",
+     "ar": "إعلان",
+     "ex": "That ad made the product look better than it really was."
+    },
+    {
+     "w": "second-hand",
+     "ar": "مستعمل",
+     "ex": "Buying second-hand furniture saves money and reduces waste."
+    },
+    {
+     "w": "long-term investment",
+     "ar": "استثمار طويل المدى",
+     "ex": "Buying a house is a long-term investment for the family."
+    }
+   ],
+   "questions": [
+    "Do you think it's better to spend money on experiences or on things? Why?",
+    "Some people think advertising makes us buy things we don't need. Do you agree or disagree? Give reasons.",
+    "Describe a time when you saved money for something important. What was it, and how did you feel?",
+    "Some people rent a home for many years instead of buying one. What are the advantages and disadvantages?",
+    "Some people prefer shopping online, while others prefer going to stores. Which do you prefer, and why?"
+   ],
+   "ppf": {
+    "past": "When I was younger, I used to spend my money on…",
+    "present": "These days, I try to save money by…",
+    "future": "In the future, I'm planning to put money aside for…"
+   }
+  },
+  {
+   "id": "food",
+   "ar": "الطعام والطبخ",
+   "keys": [
+    "food",
+    "foods",
+    "cooking",
+    "cook",
+    "meal",
+    "meals",
+    "restaurant",
+    "restaurants",
+    "fast food",
+    "healthy eating",
+    "diet",
+    "dish",
+    "dishes",
+    "eat out",
+    "eating out",
+    "food delivery",
+    "recipe",
+    "recipes",
+    "traditional food",
+    "home-cooked"
+   ],
+   "ideas": [
+    {
+     "side": "pro",
+     "en": "Home-cooked meals are usually healthier because you control the ingredients and the amount of oil.",
+     "ar": "الأكل البيتي غالباً أصح لأنك تتحكم في المكونات وكمية الزيت."
+    },
+    {
+     "side": "pro",
+     "en": "Eating together as a family gives everyone time to talk and stay connected.",
+     "ar": "الأكل مع العايلة يعطي الكل وقت يسولفون ويبقون قريبين من بعض."
+    },
+    {
+     "side": "pro",
+     "en": "Eating out lets you try new dishes and enjoy time with friends without cleaning up afterwards.",
+     "ar": "الأكل برا يخليك تجرب أكلات جديدة وتستانس مع الربع بدون ما تغسل صحون."
+    },
+    {
+     "side": "con",
+     "en": "Fast food is cheap and quick, but eating it too often causes weight gain and health problems.",
+     "ar": "الوجبات السريعة سريعة ورخيصة، بس لو تكثر منها تزيد وزنك وتسبب مشاكل صحية."
+    },
+    {
+     "side": "con",
+     "en": "Food delivery apps are convenient, but people spend more money and move less.",
+     "ar": "تطبيقات التوصيل مريحة، بس الناس تصرف أكثر وتتحرك أقل."
+    },
+    {
+     "side": "con",
+     "en": "Cooking at home takes time and planning, which is hard after a long day at work.",
+     "ar": "الطبخ في البيت ياخذ وقت وتخطيط، وهذا صعب بعد يوم دوام طويل."
+    },
+    {
+     "side": "general",
+     "en": "Every country has traditional dishes, and people are usually proud to serve them to guests.",
+     "ar": "كل بلد عندها أكلات تقليدية، والناس عادة يفتخرون إنهم يقدمونها للضيوف."
+    },
+    {
+     "side": "general",
+     "en": "Many people know what healthy food is, but they pick the easy option when they're tired.",
+     "ar": "كثير ناس يعرفون وش الأكل الصحي، بس يختارون الأسهل لما يكونون تعبانين."
+    }
+   ],
+   "examples": [
+    {
+     "en": "For example, my colleagues at the hospital often order lunch through a delivery app because we only get a short break.",
+     "ar": "مثلاً، زملائي في المستشفى غالباً يطلبون الغدا من تطبيق توصيل لأن وقت الاستراحة قصير."
+    },
+    {
+     "en": "For instance, every Friday my family gets together at my parents' house in Madinah, and we cook kabsa.",
+     "ar": "مثلاً، كل جمعة عايلتي تتجمع في بيت الوالدين بالمدينة ونطبخ كبسة مع بعض."
+    },
+    {
+     "en": "For example, when I finish late at the hospital, I usually grab fast food on the way home instead of cooking.",
+     "ar": "مثلاً، لما أرجع من المستشفى متأخر، غالباً آخذ وجبة سريعة وأنا في الطريق بدل ما أطبخ."
+    },
+    {
+     "en": "For instance, my family and I started cooking at home more often last year, and we all feel healthier now.",
+     "ar": "مثلاً، من السنة الماضية أنا وعايلتي صرنا نطبخ في البيت أكثر، وحسينا إننا أصح."
+    }
+   ],
+   "vocab": [
+    {
+     "w": "home-cooked",
+     "ar": "أكل بيتي، مطبوخ في البيت",
+     "ex": "My mother still sends us a home-cooked meal every Friday."
+    },
+    {
+     "w": "eat out",
+     "ar": "تاكل برا في مطعم",
+     "ex": "We eat out about once a week."
+    },
+    {
+     "w": "ingredients",
+     "ar": "مكونات الأكلة",
+     "ex": "I check the ingredients before I buy anything."
+    },
+    {
+     "w": "balanced diet",
+     "ar": "نظام أكل متوازن فيه كل شي بمقدار",
+     "ex": "A balanced diet includes vegetables, fruit, and protein."
+    },
+    {
+     "w": "convenient",
+     "ar": "مريح وسهل، يوفر عليك جهد",
+     "ex": "Delivery apps are convenient when you're busy at work."
+    },
+    {
+     "w": "portion",
+     "ar": "حصة، كمية الأكل في الصحن",
+     "ex": "Restaurant portions are often bigger than we need."
+    },
+    {
+     "w": "affordable",
+     "ar": "سعره معقول، مو غالي",
+     "ex": "Cooking at home is more affordable than eating out."
+    },
+    {
+     "w": "recipe",
+     "ar": "وصفة الطبخة وطريقتها",
+     "ex": "My mother taught me her recipe for kabsa."
+    },
+    {
+     "w": "processed food",
+     "ar": "أكل مصنّع ومعلّب فيه إضافات",
+     "ex": "Processed food usually has too much salt and sugar."
+    },
+    {
+     "w": "cut down on",
+     "ar": "تقلل من شي",
+     "ex": "I'm trying to cut down on sugar and soft drinks."
+    },
+    {
+     "w": "takeout",
+     "ar": "أكل سفري، تطلبه وتاخذه معك",
+     "ex": "We ordered takeout because nobody wanted to cook."
+    },
+    {
+     "w": "nutritious",
+     "ar": "مغذي ومفيد للجسم",
+     "ex": "Dates are nutritious and give you quick energy."
+    },
+    {
+     "w": "skip a meal",
+     "ar": "تفوّت وجبة، ما تاكلها",
+     "ex": "I sometimes skip a meal when I'm late for work."
+    },
+    {
+     "w": "traditional dish",
+     "ar": "أكلة شعبية تقليدية",
+     "ex": "Kabsa is the most famous traditional dish in Saudi Arabia."
+    }
+   ],
+   "questions": [
+    "Do you think people should cook at home more often instead of eating out? Why or why not?",
+    "Some people think fast food should be banned near schools. Do you agree or disagree? Use specific reasons and examples.",
+    "Describe a time when you shared a meal with your family or friends. What did you eat and why was it special?",
+    "Food delivery apps have changed the way people eat. Is this a positive or negative change? Explain.",
+    "Talk about a traditional dish from your country. How is it made, and when do people eat it?"
+   ],
+   "ppf": {
+    "past": "When I was younger, we always ate at home because…",
+    "present": "These days, I eat out more often than I used to because…",
+    "future": "In the future, I want to cook at home more, so I'm going to…"
+   }
+  },
+  {
+   "id": "sport",
+   "ar": "الرياضة",
+   "keys": [
+    "sport",
+    "sports",
+    "exercise",
+    "exercising",
+    "gym",
+    "football",
+    "soccer",
+    "team sports",
+    "athlete",
+    "athletes",
+    "fitness",
+    "workout",
+    "work out",
+    "physical activity",
+    "competition",
+    "compete",
+    "play sports",
+    "watch sports",
+    "match",
+    "training"
+   ],
+   "ideas": [
+    {
+     "side": "pro",
+     "en": "Regular exercise reduces stress and helps people sleep better after a long day at work.",
+     "ar": "الرياضة المنتظمة تخفف التوتر وتخليك تنام أحسن بعد يوم شغل طويل."
+    },
+    {
+     "side": "pro",
+     "en": "Team sports teach young people how to work together and how to lose without giving up.",
+     "ar": "الرياضة الجماعية تعلّم الشباب التعاون وتقبّل الخسارة بدون ما يستسلمون."
+    },
+    {
+     "side": "con",
+     "en": "Gym memberships are expensive, and many people stop going after the first few weeks.",
+     "ar": "اشتراكات النادي غالية، وكثير من الناس يوقفون بعد أول كم أسبوع."
+    },
+    {
+     "side": "con",
+     "en": "Watching sports on TV for hours is relaxing, but it doesn't improve your health at all.",
+     "ar": "مشاهدة الرياضة بالتلفزيون ساعات شي مريح، بس ما تفيد صحتك أبداً."
+    },
+    {
+     "side": "con",
+     "en": "Too much competition at school can put pressure on children who are not naturally athletic.",
+     "ar": "المنافسة الزايدة بالمدرسة تضغط على الأطفال اللي ما هم رياضيين بطبعهم."
+    },
+    {
+     "side": "general",
+     "en": "Most adults say they have no time for sports, but a daily thirty-minute walk is enough.",
+     "ar": "أغلب الكبار يقولون ما عندهم وقت للرياضة، بس مشية نص ساعة يومياً تكفي."
+    },
+    {
+     "side": "pro",
+     "en": "Playing sports with colleagues builds friendships, and that makes working together much easier.",
+     "ar": "اللعب مع زملاء الشغل يبني صداقات تسهّل الشغل مع بعض."
+    },
+    {
+     "side": "general",
+     "en": "In hot countries, people often exercise in the evening or indoors because of the heat.",
+     "ar": "في البلدان الحارة، الناس غالباً يتمرنون بالليل أو داخل المباني بسبب الحر."
+    }
+   ],
+   "examples": [
+    {
+     "en": "For example, some of my colleagues at the hospital play football every Thursday evening, and it's the best part of our week.",
+     "ar": "مثلاً، بعض زملائي بالمستشفى يلعبون كورة كل خميس بالليل، وهذا أحلى شي بأسبوعنا."
+    },
+    {
+     "en": "For instance, in Madinah it's too hot to run in the afternoon, so I walk with my family after sunset.",
+     "ar": "مثلاً، بالمدينة الجو حار مرة بالعصر وما أقدر أجري، فأمشي مع أهلي بعد المغرب."
+    },
+    {
+     "en": "For example, I joined a gym near my office last year, but after two months I only went on weekends.",
+     "ar": "مثلاً، اشتركت بنادي قريب من الدوام السنة الماضية، لكن بعد شهرين صرت أروح بس بنهاية الأسبوع."
+    },
+    {
+     "en": "For instance, when I sit at a desk all day, a short walk around the hospital helps me focus again.",
+     "ar": "مثلاً، لما أجلس على المكتب طول اليوم، مشية قصيرة حول المستشفى ترجّع لي تركيزي."
+    }
+   ],
+   "vocab": [
+    {
+     "w": "work out",
+     "ar": "يتمرن / يسوي رياضة",
+     "ex": "I try to work out three times a week."
+    },
+    {
+     "w": "stay in shape",
+     "ar": "يحافظ على لياقته",
+     "ex": "Walking every evening helps me stay in shape."
+    },
+    {
+     "w": "get fit",
+     "ar": "يصير لايق / يقوّي جسمه",
+     "ex": "He joined a gym because he wanted to get fit."
+    },
+    {
+     "w": "team spirit",
+     "ar": "روح الفريق / التعاون",
+     "ex": "Football teaches children team spirit and patience."
+    },
+    {
+     "w": "competitive",
+     "ar": "تنافسي / يحب المنافسة",
+     "ex": "My brother is very competitive when we play cards."
+    },
+    {
+     "w": "take part in",
+     "ar": "يشارك في",
+     "ex": "A lot of the staff take part in the hospital's annual race."
+    },
+    {
+     "w": "warm up",
+     "ar": "يسخّن قبل الرياضة",
+     "ex": "Always warm up for five minutes before you run."
+    },
+    {
+     "w": "physical activity",
+     "ar": "نشاط بدني / حركة",
+     "ex": "Doctors recommend thirty minutes of physical activity a day."
+    },
+    {
+     "w": "injury",
+     "ar": "إصابة",
+     "ex": "He missed the whole season because of a knee injury."
+    },
+    {
+     "w": "inactive lifestyle",
+     "ar": "نمط حياة قليل الحركة / كثرة الجلوس",
+     "ex": "An inactive lifestyle is common among people who work in offices."
+    },
+    {
+     "w": "beat",
+     "ar": "يغلب / يفوز على",
+     "ex": "Our team beat the other department two goals to one."
+    },
+    {
+     "w": "support a team",
+     "ar": "يشجّع فريق",
+     "ex": "I've supported the same team since I was a child."
+    },
+    {
+     "w": "keep up with",
+     "ar": "يلحّق على / يواكب",
+     "ex": "I couldn't keep up with the younger players."
+    },
+    {
+     "w": "give up",
+     "ar": "يستسلم / يترك",
+     "ex": "Don't give up when the first few weeks feel hard."
+    }
+   ],
+   "questions": [
+    "Do you think children should be required to play sports at school? Why or why not?",
+    "Some people think watching sports is a waste of time. Do you agree or disagree? Give reasons.",
+    "Describe a time when you took part in a sports event or a competition. What happened and how did you feel?",
+    "Is it better to exercise alone or with other people? Explain your opinion.",
+    "Many people pay for gym memberships but rarely go. Why do you think this happens, and what could help?"
+   ],
+   "ppf": {
+    "past": "When I was younger, I used to play football with my friends, and…",
+    "present": "These days, my exercise routine has changed, so I usually…",
+    "future": "In the future, I'm going to exercise more regularly, for example…"
+   }
+  },
+  {
+   "id": "media",
+   "ar": "الترفيه والإعلام",
+   "keys": [
+    "music",
+    "film",
+    "films",
+    "movie",
+    "movies",
+    "tv",
+    "television",
+    "series",
+    "comedy",
+    "funny",
+    "jokes",
+    "video games",
+    "gaming",
+    "news",
+    "books",
+    "reading",
+    "celebrity",
+    "celebrities",
+    "famous people",
+    "entertainment"
+   ],
+   "ideas": [
+    {
+     "side": "pro",
+     "en": "Watching films and series in English is a fun way to improve your listening skills.",
+     "ar": "مشاهدة الأفلام والمسلسلات بالإنجليزي طريقة ممتعة تقوّي الاستماع عندك."
+    },
+    {
+     "side": "con",
+     "en": "Too much screen time at night ruins your sleep and makes the next workday harder.",
+     "ar": "السهر على الشاشات يخرب نومك ويصعّب عليك يوم الدوام اللي بعده."
+    },
+    {
+     "side": "general",
+     "en": "Humor helps people relax, and a good laugh with colleagues makes a stressful day easier.",
+     "ar": "الضحك يريّح الناس، وضحكة مع الزملاء تخفف ضغط اليوم."
+    },
+    {
+     "side": "con",
+     "en": "News on social media spreads fast, but nobody checks it, so a lot of it is false.",
+     "ar": "أخبار مواقع التواصل تنتشر بسرعة، بس كثير منها ما أحد يتأكد من صحته وممكن يكون كذب."
+    },
+    {
+     "side": "pro",
+     "en": "Video games can teach teamwork and quick thinking, as long as you don't play too much.",
+     "ar": "الألعاب الإلكترونية تعلّم العمل الجماعي وسرعة التفكير، بشرط تحدد الوقت."
+    },
+    {
+     "side": "con",
+     "en": "Celebrities have a big influence on young people, but they are not always good role models.",
+     "ar": "المشاهير لهم تأثير كبير على الشباب، بس مو دايم قدوة حسنة."
+    },
+    {
+     "side": "general",
+     "en": "Reading a book takes more effort than watching a video, but you remember it longer.",
+     "ar": "قراءة الكتاب تحتاج جهد أكثر من مشاهدة الفيديو، بس تتذكرها مدة أطول."
+    },
+    {
+     "side": "pro",
+     "en": "Watching something light for an hour helps you forget work stress after a long shift.",
+     "ar": "مشاهدة شي خفيف ساعة تساعدك تنسى ضغط الشغل بعد دوام طويل."
+    }
+   ],
+   "examples": [
+    {
+     "en": "For example, on my drive to the hospital in Madinah, I listen to English podcasts and news to practice my listening.",
+     "ar": "مثلًا، وأنا أسوق للمستشفى في المدينة أسمع بودكاست وأخبار بالإنجليزي عشان أتمرن على الاستماع."
+    },
+    {
+     "en": "For instance, my kids love video games, so we agreed on one hour a day after they finish their homework.",
+     "ar": "مثلًا، عيالي يحبون الألعاب الإلكترونية، فاتفقنا على ساعة وحدة باليوم بعد ما يخلصون واجباتهم."
+    },
+    {
+     "en": "For example, my colleagues and I share funny clips during our break, and it really helps after a busy morning.",
+     "ar": "مثلًا، أنا وزملائي نتبادل مقاطع مضحكة في وقت الاستراحة، وتفيد كثير بعد صباح مزدحم بالشغل."
+    },
+    {
+     "en": "For instance, at the hospital we often see false health news on social media, so I always check official sources.",
+     "ar": "مثلًا، في المستشفى نشوف كثير من الأخبار الصحية في مواقع التواصل وتطلع مو صحيحة، فأتأكد من المصادر الرسمية."
+    }
+   ],
+   "vocab": [
+    {
+     "w": "entertainment",
+     "ar": "ترفيه وتسلية",
+     "ex": "Films and music are my favorite kinds of entertainment."
+    },
+    {
+     "w": "binge-watch",
+     "ar": "تشوف حلقات كثيرة ورا بعض بجلسة وحدة",
+     "ex": "We binge-watched the whole series in one weekend."
+    },
+    {
+     "w": "sense of humor",
+     "ar": "خفة دم، روح المرح",
+     "ex": "My manager has a great sense of humor."
+    },
+    {
+     "w": "reliable source",
+     "ar": "مصدر موثوق تقدر تعتمد عليه",
+     "ex": "I only trust news from a reliable source."
+    },
+    {
+     "w": "fake news",
+     "ar": "أخبار كاذبة أو مفبركة",
+     "ex": "Fake news spreads quickly on social media."
+    },
+    {
+     "w": "addictive",
+     "ar": "يعلّق ويسبب إدمان",
+     "ex": "Some video games are very addictive, especially for teenagers."
+    },
+    {
+     "w": "role model",
+     "ar": "قدوة يقتدي بها الناس",
+     "ex": "Not every famous person is a good role model."
+    },
+    {
+     "w": "keep up with",
+     "ar": "تتابع آخر الأخبار أول بأول",
+     "ex": "I keep up with the news on my phone every morning."
+    },
+    {
+     "w": "switch off",
+     "ar": "تفصل عن الشغل وترتاح",
+     "ex": "A funny show helps me switch off after work."
+    },
+    {
+     "w": "influence",
+     "ar": "تأثير على الناس",
+     "ex": "My older brother had a big influence on the music I listen to."
+    },
+    {
+     "w": "worth watching",
+     "ar": "يستاهل المشاهدة",
+     "ex": "That documentary is really worth watching."
+    },
+    {
+     "w": "screen time",
+     "ar": "الوقت اللي تقضيه قدام الشاشة (جوال، تلفزيون)",
+     "ex": "Doctors say children need less screen time."
+    },
+    {
+     "w": "plot",
+     "ar": "قصة الفيلم أو المسلسل",
+     "ex": "The film had a simple plot but great acting."
+    },
+    {
+     "w": "privacy",
+     "ar": "خصوصية",
+     "ex": "Famous people deserve some privacy in their daily lives."
+    }
+   ],
+   "questions": [
+    "Do you think video games are good or bad for children? Why?",
+    "Some people think celebrities have too much influence on young people. Do you agree or disagree? Give reasons.",
+    "Describe a time when a film or a book changed the way you think about something.",
+    "Is it better to get your news from social media or from traditional sources like TV? Why?",
+    "Talk about a type of music or a TV show you enjoy and explain why you like it."
+   ],
+   "ppf": {
+    "past": "When I was younger, my friends and I used to spend hours...",
+    "present": "These days, after work I usually relax by...",
+    "future": "In the future, I'd like to spend more of my free time..."
+   }
+  },
+  {
+   "id": "culture",
+   "ar": "الثقافة والتقاليد",
+   "keys": [
+    "culture",
+    "cultural",
+    "tradition",
+    "traditions",
+    "traditional",
+    "festival",
+    "festivals",
+    "celebration",
+    "celebrate",
+    "holiday",
+    "eid",
+    "language",
+    "languages",
+    "foreign language",
+    "learn english",
+    "art",
+    "museum",
+    "identity",
+    "customs",
+    "heritage"
+   ],
+   "ideas": [
+    {
+     "side": "pro",
+     "en": "Traditions connect young people to their grandparents and give families a shared identity.",
+     "ar": "التقاليد تربط الشباب بأجدادهم وتعطي العايلة هوية مشتركة"
+    },
+    {
+     "side": "pro",
+     "en": "Learning a foreign language opens doors to better jobs and helps you meet new people.",
+     "ar": "تعلّم لغة أجنبية يفتح لك أبواب وظايف أحسن ويساعدك تقابل ناس جدد"
+    },
+    {
+     "side": "pro",
+     "en": "Festivals bring the whole community together and help local businesses earn more money.",
+     "ar": "المهرجانات تجمع أهل البلد كلهم وتخلي المحلات المحلية تكسب أكثر"
+    },
+    {
+     "side": "con",
+     "en": "Some old traditions no longer fit modern life and can put pressure on young people.",
+     "ar": "بعض العادات القديمة ما عادت تناسب حياتنا اليوم وممكن تضغط على الشباب"
+    },
+    {
+     "side": "con",
+     "en": "Big celebrations can cost families too much money and create stress for everyone.",
+     "ar": "الاحتفالات الكبيرة ممكن تكلّف العايلة فلوس زيادة وتسبب توتر للكل"
+    },
+    {
+     "side": "con",
+     "en": "When people use English everywhere, they may slowly lose their own language and culture.",
+     "ar": "لما الناس تستخدم الإنجليزي في كل شي، ممكن يفقدون لغتهم وثقافتهم شوي شوي"
+    },
+    {
+     "side": "general",
+     "en": "Culture keeps changing because every new generation adds its own ideas and habits.",
+     "ar": "الثقافة تتغير على طول لأن كل جيل جديد يضيف أفكاره وعاداته"
+    },
+    {
+     "side": "general",
+     "en": "Art and music help people express feelings that are hard to put into words.",
+     "ar": "الفن والموسيقى تساعد الناس يعبّرون عن مشاعر صعب يقولونها بالكلام"
+    }
+   ],
+   "examples": [
+    {
+     "en": "For example, every Eid my family gathers at my parents' house in Madinah, and the children wear new clothes.",
+     "ar": "مثلاً، كل عيد عايلتي تتجمع في بيت الوالدين بالمدينة، والأطفال يلبسون ثياب جديدة"
+    },
+    {
+     "en": "For instance, in Madinah I meet visitors from all over the world, and each group has its own food and clothes.",
+     "ar": "مثلاً، في المدينة أقابل زوار من كل العالم، وكل مجموعة لها أكلها ولبسها الخاص"
+    },
+    {
+     "en": "For example, at the hospital I practice English with colleagues from other countries, and they teach me words in their languages.",
+     "ar": "مثلاً، أتدرب على الإنجليزي مع زملائي الأجانب في المستشفى، وهم يعلموني كلمات من لغاتهم"
+    },
+    {
+     "en": "For instance, on Saudi National Day my children painted flags at school, and the whole city was full of green lights.",
+     "ar": "مثلاً، في اليوم الوطني عيالي رسموا أعلام بالمدرسة، والمدينة كلها كانت مليانة أنوار خضراء"
+    }
+   ],
+   "vocab": [
+    {
+     "w": "tradition",
+     "ar": "عادة أو تقليد متوارث",
+     "ex": "Eating together after prayer is an important tradition in my family."
+    },
+    {
+     "w": "celebrate",
+     "ar": "يحتفل",
+     "ex": "We celebrate Eid with a big lunch at my parents' house."
+    },
+    {
+     "w": "festival",
+     "ar": "مهرجان",
+     "ex": "The city holds a food festival every winter near the old market."
+    },
+    {
+     "w": "heritage",
+     "ar": "تراث (اللي ورثناه من أجدادنا)",
+     "ex": "Old houses in Madinah are part of our heritage."
+    },
+    {
+     "w": "mother tongue",
+     "ar": "اللغة الأم",
+     "ex": "Arabic is my mother tongue, but I use English at work."
+    },
+    {
+     "w": "fluent",
+     "ar": "طليق في اللغة",
+     "ex": "I want to become fluent in English before my next trip."
+    },
+    {
+     "w": "identity",
+     "ar": "الهوية (مين أنت ووين تنتمي)",
+     "ex": "Our language is a big part of our national identity."
+    },
+    {
+     "w": "custom",
+     "ar": "عادة اجتماعية",
+     "ex": "It's a custom here to offer coffee and dates to guests."
+    },
+    {
+     "w": "pass down",
+     "ar": "يورّث / ينقل للجيل الجاي",
+     "ex": "My grandfather passed down many stories about old Madinah."
+    },
+    {
+     "w": "take part in",
+     "ar": "يشارك في",
+     "ex": "Thousands of people take part in the National Day parade."
+    },
+    {
+     "w": "generation",
+     "ar": "جيل",
+     "ex": "The younger generation prefers English songs to traditional music."
+    },
+    {
+     "w": "diverse",
+     "ar": "متنوع (من خلفيات مختلفة)",
+     "ex": "Our hospital has a diverse team from more than ten countries."
+    },
+    {
+     "w": "keep alive",
+     "ar": "يحافظ على استمرار شي",
+     "ex": "Cooking family recipes is one way to keep traditions alive."
+    },
+    {
+     "w": "open-minded",
+     "ar": "متقبّل للأفكار والثقافات الثانية",
+     "ex": "Travel makes people more open-minded about other cultures."
+    }
+   ],
+   "questions": [
+    "Do you think it's important for children to learn about their country's traditions? Why or why not?",
+    "Some people think everyone should learn a foreign language at school. Do you agree or disagree? Give reasons.",
+    "Describe a celebration or festival you enjoyed. What happened, and why was it special to you?",
+    "Do you think global culture is making all countries too similar? Explain your answer.",
+    "If a visitor came to your city, which local tradition would you show them, and why?"
+   ],
+   "ppf": {
+    "past": "When I was a child, Eid in Madinah felt different because…",
+    "present": "These days at the hospital, I meet people from…",
+    "future": "In the future, I hope my children will keep…"
+   }
+  },
+  {
+   "id": "society",
+   "ar": "المجتمع والقوانين",
+   "keys": [
+    "law",
+    "laws",
+    "rules",
+    "government",
+    "community",
+    "volunteer",
+    "volunteering",
+    "public places",
+    "public spaces",
+    "equality",
+    "safety",
+    "society",
+    "citizens",
+    "crime",
+    "police",
+    "neighbourhood",
+    "neighborhood",
+    "rights",
+    "punishment",
+    "taxes"
+   ],
+   "ideas": [
+    {
+     "side": "pro",
+     "en": "Strict laws make people feel safe, so families go out more, even late at night.",
+     "ar": "القوانين الصارمة تخلي الناس يحسون بالأمان، فالعوائل تطلع أكثر حتى بالليل."
+    },
+    {
+     "side": "con",
+     "en": "Too many rules can slow down daily life and stop people from using common sense.",
+     "ar": "كثرة الأنظمة ممكن تبطّئ الحياة اليومية وتخلي الناس ما يستخدمون عقلهم."
+    },
+    {
+     "side": "pro",
+     "en": "Volunteering builds real skills and helps young people feel useful in their community.",
+     "ar": "التطوع يعلّم مهارات حقيقية ويخلي الشباب يحسون إنهم مفيدين لمجتمعهم."
+    },
+    {
+     "side": "con",
+     "en": "Forcing people to volunteer rarely works, because good help comes from real motivation.",
+     "ar": "إجبار الناس على التطوع نادر ما ينفع، لأن المساعدة الصادقة تجي من دافع حقيقي."
+    },
+    {
+     "side": "general",
+     "en": "Most people follow the rules when they understand the reason behind them.",
+     "ar": "أغلب الناس يلتزمون بالأنظمة لما يفهمون السبب اللي وراها."
+    },
+    {
+     "side": "general",
+     "en": "Good public spaces, like parks and walking paths, bring neighbours together and reduce stress.",
+     "ar": "الأماكن العامة الزينة مثل الحدائق والممشات تجمع الجيران وتقلل التوتر."
+    },
+    {
+     "side": "pro",
+     "en": "Equal chances for everyone mean the best person gets the job, not the person with connections.",
+     "ar": "تكافؤ الفرص معناه الأفضل ياخذ الوظيفة، مو اللي عنده واسطة."
+    },
+    {
+     "side": "con",
+     "en": "Sudden government decisions can hurt small businesses that have no time to prepare.",
+     "ar": "القرارات الحكومية السريعة ممكن تضر المشاريع الصغيرة اللي ما عندها وقت تستعد."
+    }
+   ],
+   "examples": [
+    {
+     "en": "For example, when the hospital added clear signs and a one-way system in the car park, visitors stopped arguing about spaces.",
+     "ar": "مثلاً، لما المستشفى حط لوحات واضحة وخلّى السير داخل الموقف باتجاه واحد، الزوار بطّلوا يتهاوشون على المواقف."
+    },
+    {
+     "en": "For instance, last Ramadan my colleagues and I volunteered to hand out water near the Prophet's Mosque, and it felt great.",
+     "ar": "مثلاً، رمضان الماضي تطوعت أنا وزملائي نوزع ماء قريب من المسجد النبوي، وكان شعور رائع."
+    },
+    {
+     "en": "For example, since they put speed cameras on the main road in Madinah, I have seen far fewer accidents on my way to work.",
+     "ar": "مثلاً، من يوم ما حطوا كاميرات السرعة بالطريق الرئيسي بالمدينة المنورة، صرت أشوف حوادث أقل بكثير في طريقي للدوام."
+    },
+    {
+     "en": "For instance, my family loves the new walking path near our home, because my kids can play safely while we chat with our neighbours.",
+     "ar": "مثلاً، أهلي يحبون الممشى الجديد جنب بيتنا، لأن عيالي يلعبون بأمان واحنا نسولف مع الجيران."
+    }
+   ],
+   "vocab": [
+    {
+     "w": "follow the rules",
+     "ar": "يلتزم بالنظام",
+     "ex": "Most visitors follow the rules when the signs are clear."
+    },
+    {
+     "w": "obey the law",
+     "ar": "يلتزم بالقانون",
+     "ex": "Drivers are more likely to obey the law when they see cameras."
+    },
+    {
+     "w": "volunteer",
+     "ar": "يتطوع / متطوع",
+     "ex": "I volunteer for a health campaign twice a year."
+    },
+    {
+     "w": "community",
+     "ar": "المجتمع المحلي، الحي وأهله",
+     "ex": "Our community became closer after the new park opened."
+    },
+    {
+     "w": "public space",
+     "ar": "مكان عام (حديقة، ممشى، ساحة)",
+     "ex": "A clean public space makes people want to stay longer."
+    },
+    {
+     "w": "equal opportunities",
+     "ar": "تكافؤ الفرص، نفس الفرصة للكل",
+     "ex": "Equal opportunities mean everyone can apply for the same job."
+    },
+    {
+     "w": "fair",
+     "ar": "عادل / منصف",
+     "ex": "The new parking rule is fair because it applies to everyone."
+    },
+    {
+     "w": "make a difference",
+     "ar": "يسوي فرق حقيقي",
+     "ex": "Even one hour of volunteering can make a difference."
+    },
+    {
+     "w": "take responsibility",
+     "ar": "يتحمل المسؤولية",
+     "ex": "Citizens should take responsibility for keeping their streets clean."
+    },
+    {
+     "w": "get a fine",
+     "ar": "ياخذ مخالفة (غرامة)",
+     "ex": "You get a fine if you park in the ambulance bay."
+    },
+    {
+     "w": "feel safe",
+     "ar": "يحس بالأمان",
+     "ex": "I feel safe walking in my neighbourhood at night."
+    },
+    {
+     "w": "strict",
+     "ar": "صارم / شديد",
+     "ex": "Strict rules about smoking protect patients and staff."
+    },
+    {
+     "w": "benefit",
+     "ar": "يستفيد / فائدة",
+     "ex": "Everyone benefits when the government builds more parks."
+    },
+    {
+     "w": "the authorities",
+     "ar": "الجهات المسؤولة (البلدية، المرور، الحكومة)",
+     "ex": "The authorities closed the road after the accident."
+    }
+   ],
+   "questions": [
+    "Do you think people should be required to do volunteer work in their community? Why or why not?",
+    "Some people think strict laws are the best way to keep a city safe. Others believe education works better. Which view do you agree with, and why?",
+    "Describe a time when you helped someone in your community. What did you do, and how did you feel afterwards?",
+    "What is one rule or law in your country that you would change? Explain your reasons.",
+    "Should governments spend more money on parks and public spaces, or on roads and transport? Give reasons for your answer."
+   ],
+   "ppf": {
+    "past": "When I was younger, people in my neighbourhood used to …",
+    "present": "These days, the rule that affects my daily life the most is …",
+    "future": "In the future, I'd like to volunteer more, maybe by …"
+   }
+  },
+  {
+   "id": "future",
+   "ar": "العلم والمستقبل",
+   "keys": [
+    "future",
+    "in the future",
+    "technology",
+    "robot",
+    "robots",
+    "space",
+    "space travel",
+    "invention",
+    "inventions",
+    "predict",
+    "prediction",
+    "predictions",
+    "years from now",
+    "artificial intelligence",
+    "ai",
+    "science",
+    "scientists",
+    "self-driving",
+    "flying cars",
+    "medicine"
+   ],
+   "ideas": [
+    {
+     "side": "pro",
+     "en": "New medical technology will help doctors find diseases earlier and save more lives.",
+     "ar": "التقنية الطبية الجديدة بتساعد الدكاترة يكتشفون المرض بدري وينقذون ناس أكثر."
+    },
+    {
+     "side": "con",
+     "en": "Robots can serve food quickly, but many people will lose their jobs in restaurants.",
+     "ar": "الروبوت يقدّم الأكل بسرعة، بس ناس كثير بيفقدون شغلهم في المطاعم."
+    },
+    {
+     "side": "pro",
+     "en": "Working from home will become normal, so people can spend more time with their families.",
+     "ar": "الشغل من البيت بيصير شي عادي، وبكذا يقدر الواحد يقضي وقت أكثر مع أهله."
+    },
+    {
+     "side": "con",
+     "en": "Space travel costs billions, and that money could build hospitals and schools instead.",
+     "ar": "رحلات الفضاء تكلف مليارات، وهالفلوس ممكن تبني مستشفيات ومدارس بدالها."
+    },
+    {
+     "side": "general",
+     "en": "Nobody can predict exactly what will happen, but we can prepare by learning new skills.",
+     "ar": "محد يقدر يتوقع المستقبل بالضبط، بس نقدر نستعد بتعلم مهارات جديدة."
+    },
+    {
+     "side": "pro",
+     "en": "Smart cities with electric buses and green energy will make the air cleaner for everyone.",
+     "ar": "المدن الذكية بالباصات الكهربائية والطاقة النظيفة بتخلي الهواء أنظف للكل."
+    },
+    {
+     "side": "con",
+     "en": "If we depend on machines for everything, we may forget how to do simple things ourselves.",
+     "ar": "لو اعتمدنا على الآلات في كل شي، ممكن ننسى نسوي الأشياء البسيطة بأنفسنا."
+    },
+    {
+     "side": "general",
+     "en": "Inventions like the phone and the internet changed daily life faster than people expected.",
+     "ar": "اختراعات زي الجوال والإنترنت غيّرت حياتنا اليومية أسرع مما توقع الناس."
+    }
+   ],
+   "examples": [
+    {
+     "en": "For example, at my hospital in Madinah, we moved from paper files to an electronic system, and finding a patient record now takes seconds.",
+     "ar": "مثلاً، في مستشفانا بالمدينة انتقلنا من الملفات الورقية لنظام إلكتروني، وصار ملف المريض يطلع بثواني."
+    },
+    {
+     "en": "For instance, my children ask me if cars will fly one day, and honestly I think they will see things I can't imagine.",
+     "ar": "مثلاً، عيالي يسألوني هل السيارات بتطير يوم من الأيام، وبصراحة أتوقع بيشوفون أشياء ما أقدر أتخيلها."
+    },
+    {
+     "en": "For example, last year I ate at a restaurant in Madinah where a robot brought the food, and my kids loved it.",
+     "ar": "مثلاً، السنة الماضية أكلت في مطعم بالمدينة فيه روبوت يجيب الأكل، وعيالي انبسطوا مرة."
+    },
+    {
+     "en": "For instance, some of my colleagues now join hospital meetings online from home, which saves them an hour of driving every day.",
+     "ar": "مثلاً، بعض زملائي صاروا يحضرون اجتماعات المستشفى عن بُعد من البيت، وهذا يوفر عليهم ساعة سواقة كل يوم."
+    }
+   ],
+   "vocab": [
+    {
+     "w": "predict",
+     "ar": "يتوقع / يتنبأ",
+     "ex": "Experts predict that most cars will be electric in twenty years."
+    },
+    {
+     "w": "artificial intelligence (AI)",
+     "ar": "الذكاء الاصطناعي",
+     "ex": "Artificial intelligence can read scans faster than a doctor."
+    },
+    {
+     "w": "replace",
+     "ar": "يحل محل / يبدّل شي بشي",
+     "ex": "Robots may replace waiters in some restaurants soon."
+    },
+    {
+     "w": "invention",
+     "ar": "اختراع",
+     "ex": "The smartphone is the most useful invention in my lifetime."
+    },
+    {
+     "w": "self-driving car",
+     "ar": "سيارة تسوق نفسها بدون سائق",
+     "ex": "A self-driving car could make my commute much easier."
+    },
+    {
+     "w": "affordable",
+     "ar": "سعره معقول / في متناول الناس",
+     "ex": "I hope space travel becomes affordable for ordinary people."
+    },
+    {
+     "w": "reliable",
+     "ar": "موثوق / تقدر تعتمد عليه",
+     "ex": "The new hospital system is fast but not always reliable."
+    },
+    {
+     "w": "keep up with",
+     "ar": "يواكب / يلحق على الجديد",
+     "ex": "It's hard to keep up with new technology at work."
+    },
+    {
+     "w": "develop",
+     "ar": "يطوّر / يشتغل على شي جديد ويحسّنه",
+     "ex": "Scientists are developing new medicines for serious diseases."
+    },
+    {
+     "w": "in the long run",
+     "ar": "على المدى البعيد",
+     "ex": "In the long run, robots will save companies money."
+    },
+    {
+     "w": "cure",
+     "ar": "علاج يشفي تماماً",
+     "ex": "I believe doctors will find a cure for many diseases."
+    },
+    {
+     "w": "explore",
+     "ar": "يستكشف",
+     "ex": "Humans will explore Mars in the next twenty years."
+    },
+    {
+     "w": "drawback",
+     "ar": "عيب / سلبية",
+     "ex": "One drawback of robots is that they can't understand how people feel."
+    },
+    {
+     "w": "out of date",
+     "ar": "قديم / انتهى وقته",
+     "ex": "My laptop is already out of date after three years."
+    }
+   ],
+   "questions": [
+    "Do you think robots will replace human workers in restaurants in the future? Why or why not?",
+    "Some people think governments should spend money on space exploration. Others think the money should go to hospitals and schools. Which view do you agree with? Give reasons.",
+    "Describe a time when a new technology changed the way you work or live. What happened and how did you feel?",
+    "What do you think cities will look like in fifty years? Explain your ideas.",
+    "Some people believe that working from home will be the normal way of working in the future. Do you agree or disagree? Give reasons and examples."
+   ],
+   "ppf": {
+    "past": "When I started working, we used paper files for everything, and...",
+    "present": "These days, new technology at my hospital helps us...",
+    "future": "In twenty years, I think my children will..."
+   }
+  },
+  {
+   "id": "growth",
+   "ar": "التطور الشخصي",
+   "keys": [
+    "goal",
+    "goals",
+    "habit",
+    "habits",
+    "success",
+    "successful",
+    "hard work",
+    "talent",
+    "decision",
+    "difficult decision",
+    "mistake",
+    "mistakes",
+    "learn from",
+    "hobby",
+    "hobbies",
+    "time management",
+    "manage time",
+    "achieve",
+    "motivation",
+    "improve yourself"
+   ],
+   "ideas": [
+    {
+     "side": "pro",
+     "en": "Hard work matters more than talent because practice builds skills that talent alone can't give you.",
+     "ar": "الاجتهاد أهم من الموهبة، لأنه يطوّر مهارات ما تقدر الموهبة وحدها تطوّرها"
+    },
+    {
+     "side": "con",
+     "en": "Talent still matters because some people learn a skill faster and enjoy it more.",
+     "ar": "الموهبة لها دور بعد، لأن فيه ناس يتعلمون المهارة أسرع ويستمتعون فيها أكثر"
+    },
+    {
+     "side": "general",
+     "en": "Small daily habits are easier to keep than big changes, so progress lasts longer.",
+     "ar": "العادات الصغيرة اليومية أسهل تستمر عليها من التغييرات الكبيرة، فالتقدم يدوم أطول"
+    },
+    {
+     "side": "general",
+     "en": "Mistakes are useful because they show us exactly what we need to improve.",
+     "ar": "الأخطاء مفيدة لأنها توريك بالضبط وش تحتاج تحسّن"
+    },
+    {
+     "side": "pro",
+     "en": "Setting clear goals keeps you focused, especially when work and family take most of your time.",
+     "ar": "الأهداف الواضحة تخليك مركّز، خصوصاً لما الشغل والأهل ياخذون أغلب وقتك"
+    },
+    {
+     "side": "con",
+     "en": "Chasing too many goals at once causes stress and often leads to giving up.",
+     "ar": "كثرة الأهداف في نفس الوقت تسبب ضغط، وغالباً تخليك تترك كل شي"
+    },
+    {
+     "side": "general",
+     "en": "A hobby helps you relax after work, so you go back the next day with more energy.",
+     "ar": "الهواية تريّحك بعد الدوام، فترجع لشغلك وعندك طاقة أكثر"
+    },
+    {
+     "side": "general",
+     "en": "Good time management means planning your important tasks first instead of replying to every message immediately.",
+     "ar": "إدارة الوقت الصح: تخطط للمهم أول، مو ترد على كل رسالة تجيك"
+    }
+   ],
+   "examples": [
+    {
+     "en": "For example, I started studying English for thirty minutes every morning before work at the hospital, and my listening improved quickly.",
+     "ar": "مثلاً: بديت أذاكر إنجليزي نص ساعة كل يوم الصبح قبل الدوام بالمستشفى، ومهارة الاستماع عندي تحسّنت بسرعة"
+    },
+    {
+     "en": "For instance, when I made a mistake in a report at work, my manager helped me fix it, and now I double-check everything.",
+     "ar": "مثلاً: لما غلطت في تقرير بالشغل، مديري ساعدني أصلحه، وصرت أراجع كل شي مرتين"
+    },
+    {
+     "en": "For example, moving to the health information department was a difficult decision, but the new job taught me many skills.",
+     "ar": "مثلاً: قراري إني أنتقل لقسم المعلومات الصحية كان صعب، بس الوظيفة الجديدة علّمتني مهارات كثيرة"
+    },
+    {
+     "en": "For instance, on my drive home in Madinah, I listen to English podcasts, so my commute is not wasted time.",
+     "ar": "مثلاً: وأنا راجع البيت بالمدينة المنورة أسمع تسجيلات صوتية بالإنجليزي، فوقت المشوار ما يضيع"
+    }
+   ],
+   "vocab": [
+    {
+     "w": "set a goal",
+     "ar": "تحط لك هدف",
+     "ex": "Every January I set a goal to read more books."
+    },
+    {
+     "w": "achieve",
+     "ar": "تحقق الشي وتوصل للي تبيه",
+     "ex": "It took me two years to achieve my goal of speaking English at work."
+    },
+    {
+     "w": "give up",
+     "ar": "تستسلم وتترك الشي",
+     "ex": "Many people give up when they don't see quick results."
+    },
+    {
+     "w": "stick to",
+     "ar": "تلتزم بالشي وما تتركه",
+     "ex": "The hardest part is sticking to a new habit."
+    },
+    {
+     "w": "make a decision",
+     "ar": "تاخذ قرار",
+     "ex": "I needed a week to make a decision about the new job."
+    },
+    {
+     "w": "weigh the pros and cons",
+     "ar": "توزن الإيجابيات والسلبيات قبل ما تقرر",
+     "ex": "Before I changed departments, I weighed the pros and cons carefully."
+    },
+    {
+     "w": "learn from your mistakes",
+     "ar": "تستفيد من غلطاتك",
+     "ex": "Good managers learn from their mistakes instead of hiding them."
+    },
+    {
+     "w": "hard-working",
+     "ar": "كدّاد ومجتهد",
+     "ex": "My colleagues are hard-working, so our department finishes reports on time."
+    },
+    {
+     "w": "natural talent",
+     "ar": "موهبة طبيعية جاية من نفسها، مو بالتعلم",
+     "ex": "Some doctors have a natural talent for talking to patients."
+    },
+    {
+     "w": "prioritize",
+     "ar": "تقدّم الأهم على المهم",
+     "ex": "I prioritize urgent tasks before I open my email."
+    },
+    {
+     "w": "meet a deadline",
+     "ar": "تخلّص الشغل في الوقت المحدد",
+     "ex": "We worked late to meet the deadline for the monthly report."
+    },
+    {
+     "w": "waste time",
+     "ar": "تضيّع وقتك على الفاضي",
+     "ex": "I used to waste time on my phone every evening."
+    },
+    {
+     "w": "step by step",
+     "ar": "شوي شوي، خطوة خطوة",
+     "ex": "I improved my writing step by step over six months."
+    },
+    {
+     "w": "comfort zone",
+     "ar": "منطقة الراحة، اللي أنت متعود عليه",
+     "ex": "Speaking English with visitors pushed me out of my comfort zone."
+    }
+   ],
+   "questions": [
+    "Do you think hard work is more important than talent? Why or why not?",
+    "Some people think it is better to have one big goal than many small ones. Do you agree or disagree? Give reasons and examples.",
+    "Describe a time when you had to make a difficult decision. What did you decide, and how did you feel afterwards?",
+    "Describe a hobby you enjoy and explain why it is important to you.",
+    "Talk about a mistake you learned from. You should say what happened, what you learned, and what you do differently now."
+   ],
+   "ppf": {
+    "past": "When I started working at the hospital, my biggest goal was...",
+    "present": "These days, I try to build one small habit, such as...",
+    "future": "In the future, I'm going to manage my time better by..."
+   }
+  }
+ ]
 }
