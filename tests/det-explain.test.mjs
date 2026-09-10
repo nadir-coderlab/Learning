@@ -20,9 +20,13 @@ const arabic = s => typeof s === 'string' && (s.match(/[؀-ۿ]/g) || []).length 
 test('det-explain.json covers the banks with real Arabic', { skip: !exists('det-explain.json') && 'det-explain.json not generated yet' }, () => {
   const E = JSON.parse(read('det-explain.json'));
   const cov = (have, want) => [...want.keys()].filter(k => have[k]).length / want.size;
-  assert(cov(E.rc, rc) >= 0.95, `rc coverage ${cov(E.rc, rc)}`);
-  assert(cov(E.ir, ir) >= 0.95, `ir coverage ${cov(E.ir, ir)}`);
-  assert(cov(E.fib, fib) >= 0.95, `fib coverage ${cov(E.fib, fib)}`);
+  // A partial file (flagged by the merge script while the generation workflow is still running) is allowed to be incomplete, never invalid.
+  if (!E.partial) {
+    assert(cov(E.rc, rc) >= 0.95, `rc coverage ${cov(E.rc, rc)}`);
+    assert(cov(E.ir, ir) >= 0.95, `ir coverage ${cov(E.ir, ir)}`);
+    assert(cov(E.fib, fib) >= 0.95, `fib coverage ${cov(E.fib, fib)}`);
+  }
+  assert(Object.keys(E.rc).length + Object.keys(E.ir).length + Object.keys(E.fib).length > 0, 'empty file');
   for (const [t, x] of Object.entries(E.rc)) { assert(rc.has(t), 'unknown rc title ' + t); assert(arabic(x.ar) && x.ar.split(/\s+/).length >= rc.get(t).text.split(/\s+/).length * 0.5, 'rc translation too short: ' + t); }
   for (const [s, ar] of Object.entries(E.fib)) { assert(fib.has(s), 'unknown fib sentence ' + s.slice(0, 40)); assert(arabic(ar), 'fib translation: ' + s.slice(0, 40)); }
 });
@@ -43,5 +47,5 @@ test('every Interactive Reading option has a reason that matches the real option
     }
     assert.equal(x.why.highlight.length, s.highlight.length, t + ': highlight count');
   }
-  assert(withWhy >= ir.size * 0.9, `only ${withWhy}/${ir.size} sets have per-option reasons`);
+  if (!E.partial) assert(withWhy >= ir.size * 0.9, `only ${withWhy}/${ir.size} sets have per-option reasons`);
 });
