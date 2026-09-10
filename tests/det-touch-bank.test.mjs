@@ -23,11 +23,14 @@ test('200 original practice items with intact first and last reading sentences',
     assert(p.text.split(/\s+/).length >= 80, p.title);
     const gaps = [...p.text.matchAll(/\{([^}]+)\}/g)].map(x => x[1]);
     assert(gaps.length >= 8, p.title);
+    assert.equal(new Set(gaps).size, gaps.length, p.title + ': duplicate gap word loses its gaps_ar entry');
     for (const gap of gaps) assert(p.gaps_ar[gap]?.length, `${p.title}: ${gap}`);
   }
   for (const x of banks.fib.items) {
     assert(x.sentence.includes(x.answer)); assert(x.answer.startsWith(x.stem));
     assert(x.stem.length < x.answer.length); assert(x.hint_ar.length > 1);
+    assert(x.clue_ar.includes('____') && !x.clue_ar.includes(x.answer), x.answer + ': clue must show the sentence with the gap, never the answer');
+    assert(!x.clue_ar.startsWith('المعنى: '), x.answer + ': clue must not repeat the gloss that hint_ar already shows');
   }
 });
 test('integration merges the bank synchronously and preserves contextual variants', () => {
@@ -78,7 +81,10 @@ test('touch start/end selection supports reverse ranges, one word, reset and key
   assert.equal(f.mounted.value(), 'small green library');
   assert.equal(words[2].attributes['aria-pressed'], 'true');
   words[5].listeners.click(); assert.equal(f.mounted.value(), 'early.');
-  f.mounted.clear(); assert.equal(f.mounted.value(), '');
-  words[0].listeners.click(); words[5].listeners.click();
+  assert.equal(words[0].attributes.tabindex, '0'); assert.equal(words[1].attributes.tabindex, '-1');
+  // Clearing leaves tap mode (the plain passage comes back), so the learner can drag-select or tap again.
+  f.mounted.clear(); assert.equal(f.mounted.value(), ''); assert.equal(f.mounted.tapping(), false);
+  f.mounted.tapMode(); const again = f.passage.querySelectorAll().slice(-6);
+  again[0].listeners.click(); again[5].listeners.click();
   assert.equal(f.mounted.value(), 'The small green library opens early.');
 });
