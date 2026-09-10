@@ -1,8 +1,9 @@
 {
  "v": 2,
- "updated": "2026-09-08",
+ "updated": "2026-09-10",
  "_readme_ar": "حزمة المدرّب: أنا (كلود) أحدّث هذا الملف بناءً على سجل محاولاتك (det-logs). profile = نتائجك الرسمية وأهداف كل مهارة (تظهر في بطاقة «طريقك إلى 110»). coach = ملاحظات تظهر في تبويب «اليوم». banks = أسئلة إضافية تُضاف لبنوك المدرّب بنفس شكل عناصر كل بنك (fib.items, readselect.real/fake, listentype.items, readcomplete.passages, ireading.sets, writing.photo/interactive/sample/summary, speaking.rts/interactive/sample/photo, grammar_vocab.vocab).",
  "profile": {
+  "test_date": "2026-09-12",
   "targets": {
    "overall": 110,
    "reading": 100,
@@ -90,6 +91,18 @@
     "kit",
     "is",
     "ws"
+   ]
+  },
+  {
+   "date": "2026-09-10",
+   "title_ar": "آخر 48 ساعة: الترتيب قبل الكم — النمط ← القصة ← الهيكل",
+   "body_ar": "لاحظت الشي الصح: الأسئلة تتكرر بصيغ مختلفة (مهارة تعلمتها، مهارة تنصح فيها، شخص أثّر فيك، مشكلة حليتها…). عشان كذا صار عندك: ① «أنماط الأسئلة» — 10 أنماط، كل نمط له ترتيب ثابت (3 خطوات لـ35 ثانية، و6 خطوات لـ5 دقائق) والمدرّب يكشف النمط تلقائيًا ويطلّع لك شريطًا أصفر تحت كل سؤال كتابة أو كلام، والمدرّب الحي يمشي على خطوات النمط نفسها. ② «قصصي الجاهزة» — 6 قصص من حياتك (مهارة تعلمتها، شخص، مكان، مشكلة بالشغل، إنجاز، تغيير قبل/بعد) تكتبها مرة الليلة وتظهر لك مع كل سؤال يناسبها؛ بالاختبار تعدّل الزمان والأسماء بس. ③ ماراثون: 6 صور كتابة ورا بعض، 4 صور كلام، 3 مقالات بأنماط مختلفة، وخيار «أسئلة مترابطة» يعطيك أسئلة نفس الموضوع ورا بعض. ④ خطة الـ48 ساعة فوق بالرئيسية تتغير حسب الوقت. القاعدة الوحيدة لكل سؤال: اعرف النمط (ثانيتين) ← استدعِ قصتك ← ابدأ بالخطوة الأولى فورًا. ونام 7 ساعات.",
+   "focus": [
+    "patterns",
+    "stories",
+    "ideas",
+    "ws",
+    "is"
    ]
   }
  ],
@@ -241,6 +254,50 @@
       }
      ]
     }
+   ],
+   "sample": [
+    {
+     "prompt": "Talk about something new that you learned in the last year. How did you learn it, what was difficult about it, and how do you use it now?",
+     "level": "B1-B2",
+     "plan_ar": "نمط «مهارة تعلمتها» بثلاث دقائق: 0–25ث وش ومتى وليش ← 25–75ث كيف تعلمتها بالتفصيل (خطوات) ← 75–120ث الصعوبة وكيف تجاوزتها ← 120–160ث كيف تستخدمها الحين + مثال ← 160–180ث الدرس. لا تسكت: لو خلصت الأفكار ارجع للماضي/المستقبل.",
+     "model": "Something new that I learned in the last year is how to use a digital records system at the hospital where I work as an administrator. I started learning it about eight months ago because my department stopped using paper files, and I did not want to depend on the IT team every time a patient's file was missing. I learned it in three steps. First, I watched the short training videos that the company provided. Then, I practised every morning for twenty minutes with a colleague who already knew the system. Finally, I wrote my own checklist with the exact steps for booking, cancelling and moving appointments. The most difficult part was the speed. At first, a simple booking took me five minutes, and I made mistakes with patient numbers, which was stressful when people were waiting. I dealt with that by slowing down for one week and following my checklist word by word until it became automatic. These days, I use the system every single day, and I can finish a booking in under a minute. I even train new employees now. Overall, this experience taught me that daily practice, even a short one, beats a long course."
+    },
+    {
+     "prompt": "What is one skill that you would advise young people to learn? Explain why it is important, how they can learn it, and how it will help them.",
+     "level": "B1-B2",
+     "plan_ar": "نمط «نصيحة» بثلاث دقائق: التوصية مباشرة ← ليش (سببان) ← مثال من شغلك ← كيف يتعلمونها (خطوات عملية) ← كيف تفيدهم بالمستقبل ← الخيار الثاني مو سيئ لكن ← خاتمة.",
+     "model": "If I had to advise young people to learn one skill, it would be time management, because almost everything else depends on it. The main reason is that most young people are not lazy; they simply do not know how to organise their day, so they finish tasks late and feel stressed. Another reason is that employers notice this skill immediately. For example, in my hospital, we hired two new administrators with similar qualifications, and within a month everyone could see the difference: the one who planned her week never missed a deadline, and she was promoted first. The best way to learn it is very simple. They can start by writing three tasks every morning, the most important one first, and checking them in the evening. After a few weeks, they can use a calendar app and plan the whole week. This will help them in the future because when they are able to control their time, they can study, work and still have time for family and rest. Of course, some people say that talent matters more, but I believe talent without organisation is wasted. Overall, time management is the skill I would recommend, and the good news is that anyone can learn it."
+    },
+    {
+     "prompt": "Some people like to learn new things from books and courses, while others prefer to learn by doing. Which way do you prefer, and why?",
+     "level": "B1-B2",
+     "plan_ar": "نمط «تفضيل»: اختيارك بأول جملة ← السبب الأول + مثال ← السبب الثاني ← الخيار الثاني مو سيئ لكن ← ماضي/حاضر ← خاتمة.",
+     "model": "Personally, I prefer to learn by doing, although I still use books and courses as a starting point. The main reason is that I remember things much better when I practise them with my hands. For example, when I learned the new records system at my hospital, I watched the training videos, but I really understood it only after I made real bookings and fixed my own mistakes. Another reason is that learning by doing shows you the real problems. A course explains the perfect situation, but at work the printer stops, the patient is angry and the system is slow, and you only learn to deal with that by doing it. Of course, books and courses have their benefits. They give you the theory and the correct words, and they are safer when a mistake is expensive, such as in medicine. However, for most skills, I think practice is faster. When I was a student, I used to read everything twice and still forget it. These days, I read once, then try immediately, and the knowledge stays with me. Overall, that is why I prefer learning by doing, with a book nearby when I need it."
+    }
+   ],
+   "rts": [
+    {
+     "prompt": "Talk about a skill you learned recently.",
+     "level": "B1-B2",
+     "bullets": [
+      "What is the skill, and when did you learn it?",
+      "How did you learn it?",
+      "What was difficult about learning it?"
+     ],
+     "outline_ar": "نمط «مهارة تعلمتها» على ثلاث نقاط: النقطة 1 (25ث): سمّ المهارة والوقت والسبب. النقطة 2 (25ث): الطريقة by + -ing ومع مين. النقطة 3 (25ث): الصعوبة وكيف تجاوزتها، واختم بوش تقدر تسويه الحين. اربطها: In regard to the second question … / As for the final question …",
+     "model": "Today I'd like to talk about a skill I learned recently, which is using a new appointment system at the hospital where I work. I learned it about six months ago because my department moved from paper files to digital records, and I wanted to help my team instead of waiting for the IT staff. In regard to the second question, I learned it mainly by watching short training videos in the evening and then practising every morning with a colleague who already knew the system. I also wrote a simple checklist with the exact steps and kept it next to my computer. As for the final question, the most difficult part was the speed. At first, a simple booking took me five minutes, and I made mistakes with patient numbers when people were waiting. I dealt with it by slowing down for a week and following my checklist until it became automatic. Now I can finish a booking in less than a minute, and I even train new employees. Overall, this skill taught me that short daily practice works better than one long course."
+    },
+    {
+     "prompt": "Talk about advice you would give to new employees.",
+     "level": "B1-B2",
+     "bullets": [
+      "What skill should they learn first?",
+      "What is the best way to learn it?",
+      "How will it help them in their career?"
+     ],
+     "outline_ar": "نمط «نصيحة» على ثلاث نقاط: النقطة 1: مهارة وحدة وليش. النقطة 2: خطوات عملية للتعلم (start by … then …). النقطة 3: الفائدة مستقبلًا + مثال من شغلك. اختم بجملة Overall.",
+     "model": "Today I'd like to talk about the advice I would give to new employees. The first skill they should learn is clear communication, especially writing short and polite messages, because most problems at work start when people do not explain things clearly. In regard to the second question, the best way to learn it is by practising every day. They can start by writing one short email to a manager or a colleague and asking for feedback, and then they can read messages from experienced staff to see how they organise their ideas. As for the final question, this skill will help them a lot in their career. For example, in my hospital, managers give more responsibility to employees who can describe a problem in three clear sentences, and those employees are usually promoted first. Even though technical skills are important, communication is what people notice every day. Overall, I would tell every new employee to learn to communicate clearly from the first week."
+    }
    ]
   },
   "writing": {
@@ -249,6 +306,30 @@
      "prompt": "Describe a time when you had to solve a problem at work or school quickly. What was the problem, what did you do, and what did you learn from the experience?",
      "plan_ar": "نوع «احكِ موقفًا» (Recount): جملة تحدد الزمان والمكان ← المشكلة بجملتين ← وش سويت بالترتيب (First, Then, Finally) ← النتيجة ← الدرس بجملة تبدأ بـ This experience taught me… . كله بالماضي البسيط، و120+ كلمة.",
      "model_90": "Last year, the information system at my hospital suddenly stopped working during a busy morning. Doctors could not see test results, and patients were waiting in the corridor. First, I told my team to switch to the paper forms that we keep for emergencies. Then I called the IT department and explained exactly which services were down. While they were fixing the problem, I checked the most urgent patients myself and wrote their results by hand. Finally, after about two hours, the system came back, and we entered all the paper records carefully. Nobody was harmed, and the manager thanked the team. This experience taught me that a simple backup plan and clear communication are more important than panic. Now we practice the paper procedure every few months."
+    },
+    {
+     "prompt": "Describe a skill you have learned recently. How did you learn it? What difficulties did you face, and how did you deal with them?",
+     "level": "B1-B2",
+     "plan_ar": "نمط «مهارة تعلمتها» (جاءك بالاختبار الحقيقي): وش ومتى ← ليش ← كيف (by + فعل-ing) ← الصعوبة ← كيف تجاوزتها ووش تقدر تسويه الحين ← الدرس. كله بالماضي، 120+ كلمة، وجملة مركّبة وحدة على الأقل. قصتك «مهارة تعلمتها» تجاوب عليه كله — عدّل الزمان والأسماء بس.",
+     "model_90": "Recently, I learned how to use a new appointment system at the hospital where I work. I decided to learn it because my department was moving from paper files to digital records, and I wanted to help my team instead of waiting for the IT staff. I learned it by watching short training videos in the evening and then practising every morning with a colleague who already knew the system. The hardest part was remembering the correct order of the steps, and at first I made several mistakes with patient numbers. I dealt with this by writing a simple checklist and keeping it next to my computer. After two weeks, I could complete a booking in less than a minute without help. Overall, learning this skill taught me that small daily practice is more useful than one long training session."
+    },
+    {
+     "prompt": "What skill would you recommend that students learn before they start their first job? What is the best way to learn it, and how will it help them in the future?",
+     "level": "B1-B2",
+     "plan_ar": "نمط «نصيحة» (جاءك بالاختبار الحقيقي): التوصية مباشرة بأول جملة ← ليش + مثال من شغلك ← أفضل طريقة للتعلم (خطوة عملية) ← كيف تفيدهم مستقبلًا ← خاتمة. لا تذكر ثلاث مهارات — وحدة وتشرحها زين.",
+     "model_90": "If I had to recommend one skill, it would be clear communication, especially writing short professional emails and messages. The main reason is that most problems at work happen because people do not explain things clearly. For example, in my hospital, a new employee once sent an unclear message about a meeting time, and half of the team came an hour late. The best way to learn this skill is to practise every day: students can start by writing one short email to a teacher or a friend and asking for feedback, and they can also read real work emails to see how experienced people organise their ideas. This will help them in the future because managers trust employees who can explain a problem in a few clear sentences, which often leads to more responsibility and better positions. Overall, I believe communication is worth learning early because every job depends on it."
+    },
+    {
+     "prompt": "How has the way people in your country communicate with each other changed over the last twenty years? Do you think these changes are positive?",
+     "level": "B1-B2",
+     "plan_ar": "نمط «التغيير» (PPF): الجواب مباشرة ← كيف كان قبل (used to) ← كيف الحين (these days) ← ليش تغير ← مثال من عائلتك ← سلبية وحدة بجملة مركّبة ← وش بيصير ← خاتمة.",
+     "model_90": "In my opinion, the way people in Saudi Arabia communicate has changed completely, and most of these changes are positive. In the past, families used to visit each other every week, and important news travelled slowly through phone calls or letters. These days, almost everyone uses smartphones and messaging apps, so my relatives in different cities share photos and news within seconds. This changed mainly because mobile internet became cheap and fast, and because young people learned to use technology quickly. For example, my mother, who never used a computer, now makes video calls to my children every evening. However, some people spend more time on their phones than with the people sitting next to them, which is a real problem. In the next ten years, I expect that video calls will become even more common. Overall, I think the changes are positive as long as we still meet face to face."
+    },
+    {
+     "prompt": "Describe a goal that you worked hard to achieve. What was the goal, what difficulties did you face, and how did you feel when you achieved it?",
+     "level": "B1-B2",
+     "plan_ar": "نمط «احكِ موقفًا» بقصة «إنجاز»: متى ووش الهدف ← الصعوبة ← أول محاولة فشلت ← First / Then / Finally ← النتيجة والشعور ← الدرس. كله بالماضي.",
+     "model_90": "Two years ago, I set myself the goal of finishing a professional certificate in healthcare management while working full time at the hospital. The main difficulty was time: I have three children, and after work I was usually too tired to study. At first, I tried to study late at night, but I could not concentrate and I failed the first practice test. Then I changed my plan. I woke up one hour earlier every day and studied before my family got up, and I used my lunch break to review flashcards on my phone. Even though it was hard for the first month, it slowly became a habit. Finally, after six months, I passed the exam with a high score. When I saw the result, I felt proud and relieved, and my manager gave me more responsibility. This experience taught me that a small daily routine is stronger than motivation."
     }
    ]
   }

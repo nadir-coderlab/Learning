@@ -117,9 +117,9 @@
       'معنى الصورة يتأثر بسياقها. جودة العمل لا تعتمد بالضرورة على غلاء الكاميرا.',
       'تكوين بصري|سرد|تعليق تحت الصورة|يفكر|اهتمام|خدمة|معنى|قصص'],
     ['The Borrowed Tent', 'A2-B1',
-      'My friends and I borrowed a tent for a weekend camping trip. We checked the {pegs} and examined the {waterproof} cover before leaving. One pole was bent, so we asked the owner whether it could still be used. He showed us how to connect the pieces {correctly}. At the campsite, we chose flat ground away from the {road}. We put up the tent while there was still enough {light}. During the night, rain fell, but everything inside stayed {dry}. Before returning it, we cleaned the floor and let the cover {dry}. We also counted all the parts {again}. Taking care of borrowed equipment made it easier to ask for help another time.',
+      'My friends and I borrowed a tent for a weekend camping trip. We checked the {pegs} and examined the {waterproof} cover before leaving. One pole was bent, so we asked the owner whether it could still be used. He showed us how to connect the pieces {correctly}. At the campsite, we chose flat ground away from the {road}. We put up the tent while there was still enough {light}. During the night, rain fell, but everything inside stayed {dry}. Before returning it, we cleaned the floor and let the cover {air} out. We also counted all the parts {again}. Taking care of borrowed equipment made it easier to ask for help another time.',
       'فحص الخيمة قبل الرحلة والعناية بها قبل الإرجاع حفظا المعدات المستعارة. ترك الغطاء يجف مهم.',
-      'أوتاد|مقاوم للماء|بطريقة صحيحة|طريق|ضوء|جاف|يجف|مرة أخرى'],
+      'أوتاد|مقاوم للماء|بطريقة صحيحة|طريق|ضوء|جاف|يتهوّى (air out = يجف بالهواء)|مرة أخرى'],
     ['The Digital Notice', 'B1-B2',
       'A council replaced many printed notices with updates on its website. The change improved {accessibility} for residents who used {smartphones} every day. Yet some older residents rarely went online and began missing important information. Community workers suggested keeping printed notices in selected public {places}. They also offered short sessions to help people find the council\'s {website}. Officials realised that using a newer method did not automatically reach {everyone}. Maintaining more than one channel required extra {effort}, but improved coverage. Residents could choose the method that suited their {needs}. The project became more {inclusive}. Its success was measured by whether people received information rather than how much paper it saved.',
       'التحول الرقمي قد يستبعد بعض السكان. الجمع بين قنوات متعددة حسّن وصول المعلومات.',
@@ -194,7 +194,9 @@
     // Two contextual vocabulary items and two dictation sentences per passage.
     gaps.slice(0, 2).forEach((answer, i) => {
       const sentence = sentences.find(s => new RegExp('\\b' + answer + '\\b').test(s));
-      banks.fib.items.push({ sentence, answer, stem: answer.slice(0, Math.max(1, Math.floor(answer.length / 2))), hint_ar: ar[i], clue_ar: 'المعنى: ' + ar[i] + '. سياق القطعة: ' + gist_ar, level });
+      // The clue points at the shown sentence (its topic), not at the whole passage; the gloss is already in hint_ar.
+      const topic = sentence.replace(new RegExp('\\b' + answer + '\\b'), '____');
+      banks.fib.items.push({ sentence, answer, stem: answer.slice(0, Math.max(1, Math.floor(answer.length / 2))), hint_ar: ar[i], clue_ar: 'من الجملة نفسها: «' + topic + '» — الكلمة الناقصة ' + (i === 0 ? 'من أول القطعة' : 'من وسط القطعة') + ' عن: ' + gist_ar.split(/[.。]/)[0].trim() + '.', level });
     });
     [sentences[0], sentences[sentences.length - 1]].forEach(text => banks.listentype.items.push({ text, level, trap_ar: dictationNote(text) }));
   });
