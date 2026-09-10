@@ -21,7 +21,9 @@
     passage.style.userSelect = 'text';
     passage.style.webkitUserSelect = 'text';
     active = () => { doc.removeEventListener('selectionchange', capture); passage.removeEventListener('pointerup', capture); };
+    const original = passage.innerHTML;
     function tapMode() {
+      if (tapping) return;
       tapping = true; saved = ''; first = last = null;
       passage.textContent = ''; preview.textContent = 'اضغط أول كلمة ثم آخر كلمة من الإجابة.';
       const words = full.match(/\S+\s*/g) || [];
@@ -29,6 +31,16 @@
         const button = doc.createElement('button');
         button.type = 'button'; button.textContent = word.trimEnd();
         button.className = 'hl-word'; button.setAttribute('aria-pressed', 'false');
+        // Roving tabindex: one tab stop for the passage, arrows move between words.
+        button.setAttribute('tabindex', index === 0 ? '0' : '-1');
+        button.addEventListener('keydown', (e) => {
+          const delta = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
+          if (!delta) return;
+          const all = Array.from(passage.querySelectorAll('button'));
+          const next = all[Math.max(0, Math.min(all.length - 1, index + delta))];
+          if (!next || next === button) return;
+          e.preventDefault(); button.setAttribute('tabindex', '-1'); next.setAttribute('tabindex', '0'); next.focus && next.focus();
+        });
         button.addEventListener('click', () => {
           if (first === null || last !== null) { first = index; last = null; }
           else last = index;
@@ -49,10 +61,13 @@
     return {
       capture, tapMode,
       value() { capture(); return saved; },
+      tapping() { return tapping; },
       clear() {
         saved = ''; first = last = null; preview.textContent = 'لم تحدد إجابة بعد.';
-        if (!tapping) doc.getSelection()?.removeAllRanges();
-        passage.querySelectorAll('button').forEach(b => { b.setAttribute('aria-pressed', 'false'); b.classList.remove('hl-selected'); });
+        if (tapping) { // Leave tap mode: restore the plain passage so drag-selection works again.
+          tapping = false; passage.innerHTML = original;
+        }
+        doc.getSelection()?.removeAllRanges();
       },
       destroy: dispose
     };

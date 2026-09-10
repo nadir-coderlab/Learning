@@ -278,6 +278,23 @@ body.exam:not(.exam-coach) .drill .ideaWrap{display:none!important}
 .hl-word.hl-selected{background:#bbf7d0;color:#14532d}
 .hl-word:focus-visible{outline:2px solid #0369a1}
 .hl-preview{padding:10px;border:1px solid #94a3b8;border-radius:8px;min-height:44px;font-size:16px;direction:ltr;unicode-bidi:plaintext;white-space:pre-wrap}
+/* ===== v6: أنماط الأسئلة · قصصي الجاهزة · آخر 48 ساعة ===== */
+.patStrip{background:#fffbeb;border:1px solid #f0c26b;border-radius:12px;padding:6px 10px;margin:6px 0;font-size:13.5px;line-height:1.7}
+.patStrip .patHead{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.patStrip .patHead b{color:var(--amber)}
+.patStrip .patHead .patTog{margin-inline-start:auto}
+.patChips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.patChips span{font-size:12px;font-weight:800;border-radius:999px;padding:1px 9px;background:#fff;border:1px solid #f0c26b;color:#92400e}
+.patSlots{margin:6px 0 0;padding:0;list-style:none}
+.patSlots li{margin:2px 0;padding:4px 0;border-bottom:1px dashed #f0c26b}
+.patSlots .patK{font-weight:900}.patSlots .patT{font-size:12px;color:var(--muted);font-weight:700;margin-inline-start:6px}
+.patSlots .en2{display:block;font-size:14px}
+.patAr{font-size:12.5px;color:var(--muted);font-weight:700}
+.patStory{margin-top:6px;font-size:13px;background:#fff;border-radius:8px;padding:4px 8px}
+.patStory .en2{font-size:13px}
+body.exam:not(.exam-coach) .drill .patStrip{display:none!important}
+.storyBox .ta{min-height:100px}
+#h48Card{border:2px solid var(--amber)}
 </style>
 <script src="det-scoring.js" defer></script>
 <script type="module" src="det-sync.js"></script>
@@ -294,6 +311,7 @@ body.exam:not(.exam-coach) .drill .ideaWrap{display:none!important}
 
 <!-- ======================= اليوم ======================= -->
 <section class="view on" id="v-home">
+  <div class="card" id="h48Card" style="display:none"></div>
   <div class="card" id="card110"></div>
   <div class="card" id="path120"></div>
 
@@ -432,7 +450,7 @@ const SK = 'detTrainer.v1';
 let S = store.get(SK, { best: {}, done: {}, vocab: {}, lessons: {}, plan: {} });
 fixState();
 function fixState() {
-  ['hist', 'miss', 'mastered', 'ab', 'best', 'done', 'vocab', 'lessons', 'plan'].forEach(k => { if (!S[k] || typeof S[k] !== 'object' || Array.isArray(S[k])) S[k] = {}; }); ['log', 'mocks'].forEach(k => { if (!Array.isArray(S[k])) S[k] = []; });
+  ['hist', 'miss', 'mastered', 'ab', 'best', 'done', 'vocab', 'lessons', 'plan', 'stories', 'patSeen'].forEach(k => { if (!S[k] || typeof S[k] !== 'object' || Array.isArray(S[k])) S[k] = {}; }); ['log', 'mocks'].forEach(k => { if (!Array.isArray(S[k])) S[k] = []; });
   if (!S.seen || typeof S.seen !== 'object' || Array.isArray(S.seen)) S.seen = {}; if (!Number.isFinite(S.sq)) S.sq = 0;
   if (!S.sec || typeof S.sec !== 'object' || Array.isArray(S.sec)) S.sec = {}; if (!Array.isArray(S.official)) S.official = []; S.official = S.official.filter(o => o && typeof o === 'object' && Number.isFinite(o.overall)); if (S.coach == null) S.coach = true;
   /* تنظيف القيم التالفة (استرجاع قديم أو تعديل يدوي) */
@@ -655,7 +673,7 @@ function renderSync() {
 }
 
 /* ---------- المحرك التكيفي: مستواك التقديري لكل نوع سؤال (0.5 = A1 … 4.5 = C1+) ---------- */
-const LVL = { 'A1': 0.5, 'A2': 1, 'A2-B1': 1.5, 'B1': 2, 'B1+': 2.5, 'B1-B2': 2.5, 'B2': 3, 'B2+': 3.5, 'C1': 4, 'C1+': 4.5 };
+const LVL = { 'A1': 0.5, 'A2': 1, 'A2-B1': 1.5, 'B1': 2, 'B1+': 2.5, 'B1-B2': 2.5, 'B2': 3, 'B2+': 3.5, 'B2-C1': 3.5, 'C1': 4, 'C1+': 4.5 };
 const FAKE_LVL = { invented: 1.2, swap: 2.2, affix: 3, blend: 3 };
 const lvlNum = (l) => typeof l === 'number' ? l : (LVL[l] != null ? LVL[l] : 2);
 const lvlName = (x) => x < 1.25 ? 'A2' : x < 1.75 ? 'A2+' : x < 2.25 ? 'B1' : x < 2.75 ? 'B1+' : x < 3.25 ? 'B2' : x < 3.75 ? 'B2+' : 'C1';
@@ -666,9 +684,10 @@ function skillLevel(k) { const v = SKILLS[k].d.filter(d => S.ab[d] != null).map(
 function adaptPick(pool, lvlFn, kind, n, o) {
   o = o || {}; const ab = ability(kind); pool = (pool || []).filter(Boolean); if (!pool.length) return [];
   const keyFn = o.keyFn || ((x) => x.w || x.answer || x.text || x.title || x.prompt || x.scenario || JSON.stringify(x));
+  const seenFn = o.seenFn || keyFn; /* مفتاح «شفته» قد يختلف عن مفتاح الأخطاء (الفراغات: نفس الكلمة بجملتين مختلفتين = سؤالان) */
   /* الدورة: كم اختيار لازم يمر قبل ما يرجع نفس العنصر */
   const cycle = Math.max(2, Math.ceil(pool.length / Math.max(1, n)));
-  const fresh = (x) => { const at = seenAt(kind, keyFn(x)); if (!at) return 1; return Math.max(0.06, Math.min(1, ((S.sq || 0) - at) / cycle)); }; /* 1 = صار جاهز يتكرر */
+  const fresh = (x) => { const at = seenAt(kind, seenFn(x)); if (!at) return 1; return Math.max(0.06, Math.min(1, ((S.sq || 0) - at) / cycle)); }; /* 1 = صار جاهز يتكرر */
   const top = o.kinds ? related(kind, pool, keyFn, o.kinds, o.max || 0, fresh) : [];
   /* نفس السؤال اللي غلطت فيه ما يتكرر هنا (مكانه «مراجعتي») — نجيب مشابهه بدله */
   const dup = (x) => (o.kinds && o.kinds.some(k => S.miss[missId(k, keyFn(x))])) ? 0.25 : 1;
@@ -678,9 +697,9 @@ function adaptPick(pool, lvlFn, kind, n, o) {
   const cand = pool.filter(x => top.indexOf(x) < 0);
   const ok = cand.filter(x => fresh(x) >= 1);
   const rest = ok.map(x => ({ x, w: wOf(x) })).sort((a, b) => b.w - a.w).slice(0, need).map(r => r.x);
-  if (rest.length < need) cand.filter(x => ok.indexOf(x) < 0).sort((a, b) => seenAt(kind, keyFn(a)) - seenAt(kind, keyFn(b))).slice(0, need - rest.length).forEach(x => rest.push(x));
+  if (rest.length < need) cand.filter(x => ok.indexOf(x) < 0).sort((a, b) => seenAt(kind, seenFn(a)) - seenAt(kind, seenFn(b))).slice(0, need - rest.length).forEach(x => rest.push(x));
   const out = shuffle(top.concat(rest));
-  markSeen(kind, out.map(keyFn));
+  markSeen(kind, out.map(seenFn));
   return out;
 }
 /* عنصر واحد جديد عليك (قطعة/سيناريو/سؤال كتابة أو محادثة) */
@@ -713,13 +732,14 @@ function mergeBanks(banks) {
   }));
   WORD_AR = null; VTHEME = null;
 }
+/* بنك اللمس يندمج هنا (قبل التوجيه بالرابط وأول تمرين) — مو داخل التحميل غير المتزامن */
+if (window.DetPracticeBank) mergeBanks(window.DetPracticeBank.banks);
 async function loadPacks() {
-  if (window.DetPracticeBank) mergeBanks(window.DetPracticeBank.banks);
   /* البنك الثاني (أسئلة إضافية عشان ما يتكرر عليك شي) ثم حزمة المدرّب */
   try { const r2 = await fetch('det-bank2.json?v=' + Date.now(), { cache: 'no-store' }); if (r2.ok) mergeBanks(await r2.json()); } catch (e) {}
   try { const r = await fetch('det-packs.json?v=' + Date.now(), { cache: 'no-store' }); if (r.ok) { const P = await r.json(); PACKS = Object.assign({ coach: [], banks: {} }, P || {}); mergeBanks(PACKS.banks); } } catch (e) {}
   /* عدة الحفظ ومولّد الأفكار (بذور أفكار وأمثلة وكلمات لكل موضوع) */
-  try { const rk = await fetch('det-kit.json?v=' + Date.now(), { cache: 'no-store' }); if (rk.ok) { const K = await rk.json(); if (K && Array.isArray(K.topics)) KIT = Object.assign({ topics: [], frames: [], photo: [], colloc: [] }, K); } } catch (e) {}
+  try { const rk = await fetch('det-kit.json?v=' + Date.now(), { cache: 'no-store' }); if (rk.ok) { const K = await rk.json(); if (K && Array.isArray(K.topics)) { KIT = Object.assign({ topics: [], frames: [], photo: [], colloc: [] }, K); TIDX = null; } } } catch (e) {}
   try { renderCoach(); renderMenus(); render110(); renderTech(); } catch (e) { console.error(e); }
 }
 function renderCoach() {
@@ -865,7 +885,7 @@ const COACH_CHIPS = {
   summary: ['In this conversation, I talked with', 'The problem was that', 'In the end, we decided to'],
 };
 const RECOUNT_RE = /\b(describe|tell (me |us )?about|think about|write about|remember)\b[^.?]*\b(a time|an experience|a situation|a moment|an occasion|a day|something you)\b/i;
-const writeKindOf = (drill, prompt) => drill === 'wp' ? 'photo' : drill === 'sum' ? 'summary' : drill === 'iw2' ? 'interactive2' : RECOUNT_RE.test(prompt || '') ? 'recount' : 'sample';
+const writeKindOf = (drill, prompt) => { if (drill === 'wp') return 'photo'; if (drill === 'sum') return 'summary'; if (drill === 'iw2') return 'interactive2'; const p = patternOf(prompt); /* v6: نمط السؤال يقود خطوات المدرّب */ if (p) return 'pat:' + p.id; return RECOUNT_RE.test(prompt || '') ? 'recount' : 'sample'; };
 function insertAtCaret(ta, ph) { const s = ta.selectionStart == null ? ta.value.length : ta.selectionStart, e = ta.selectionEnd == null ? s : ta.selectionEnd; const before = ta.value.slice(0, s), after = ta.value.slice(e); const ins = (before && !/\s$/.test(before) ? ' ' : '') + ph + ' '; ta.value = before + ins + after; const pos = (before + ins).length; ta.focus(); try { ta.setSelectionRange(pos, pos); } catch (x) {} ta.dispatchEvent(new Event('input')); }
 function liveCoach(ta, o) {
   const holder = ta.parentNode; const fr = ta.closest('.drill');
@@ -923,11 +943,12 @@ const SPEAK_CHECK = {
   interactive: [['رأي', CX.opinion], ['سبب', CX.reason], ['مثال', CX.example], ['خلاصة', CX.concl]],
   sample: [['رأي', CX.opinion], ['سبب', CX.reason], ['مثال', CX.example], ['فكرة 2', CX.second], ['ماضي/مستقبل', /\b(when i was|years ago|in the past|used to|these days|nowadays|in the future|i (will|am going to|plan to|hope to))\b/i], ['خاتمة', CX.concl]],
 };
-function speakCoach(body, kind, secs) {
+function speakCoach(body, kind, secs, pat) {
   if (!coachOn()) return null;
-  const phases = SPEAK_PHASES[kind] || SPEAK_PHASES.interactive; const checks = SPEAK_CHECK[kind] || SPEAK_CHECK.interactive; const tc = techOf(kind === 'photo' ? 'sp' : kind === 'interactive' ? 'is' : kind === 'sample' ? 'ss' : 'rts');
+  const ps = pat ? patSlots(pat, secs <= 45 ? 'is' : 'ss') : null; /* v6: نمط السؤال يحدد المراحل والفحوصات */
+  const phases = ps ? ps.map(s => [s.w, s.k, s.en]) : (SPEAK_PHASES[kind] || SPEAK_PHASES.interactive); const checks = ps ? ps.map(s => [s.k, s.re]) : (SPEAK_CHECK[kind] || SPEAK_CHECK.interactive); const tc = techOf(kind === 'photo' ? 'sp' : kind === 'interactive' ? 'is' : kind === 'sample' ? 'ss' : 'rts');
   const scale = secs / phases.reduce((a, x) => a + x[0], 0);
-  const p = el('div', 'lc'); p.innerHTML = `<div class="lch"><span>🧑‍🏫 المدرّب الحي</span><div class="tools"><span class="pace"></span>${tc ? '<button type="button" class="techBtn">📚 الطريقة</button>' : ''}</div></div><div class="phases">${phases.map(x => `<span>${x[1]}</span>`).join('')}</div><div class="next"></div><div class="steps">${checks.map(c => `<span>${c[0]}</span>`).join('')}</div><div class="techIn" style="display:none"></div>`;
+  const p = el('div', 'lc'); p.innerHTML = `<div class="lch"><span>🧑‍🏫 المدرّب الحي${pat ? ' · 🧭 ' + esc(pat.ar) : ''}</span><div class="tools"><span class="pace"></span>${tc ? '<button type="button" class="techBtn">📚 الطريقة</button>' : ''}</div></div><div class="phases">${phases.map(x => `<span>${x[1]}</span>`).join('')}</div><div class="next"></div><div class="steps">${checks.map(c => `<span>${c[0]}</span>`).join('')}</div><div class="techIn" style="display:none"></div>`;
   body.appendChild(p);
   const pace = p.querySelector('.pace'), ph = [...p.querySelectorAll('.phases span')], nx = p.querySelector('.next'), chips = [...p.querySelectorAll('.steps span')], techIn = p.querySelector('.techIn');
   const tb = p.querySelector('.techBtn'); if (tb) tb.onclick = () => { const on = techIn.style.display === 'none'; techIn.style.display = on ? '' : 'none'; if (on && !techIn.innerHTML) techIn.innerHTML = techHtml(tc, true); };
@@ -1003,15 +1024,18 @@ function prepHtml(sec) {
 }
 
 /* ---------- محاكاة قسم تتكرر ---------- */
-function secSeq(sec, drill) {
-  if (drill && DRILL_META[drill]) { const [v, k] = DRILL_META[drill][1].split('/'); return [[v, k], [v, k], [v, k]]; }
+function secSeq(sec, drill, n) {
+  if (drill && DRILL_META[drill]) { const [v, k] = DRILL_META[drill][1].split('/'); return Array.from({ length: Math.max(1, Math.min(12, n || 3)) }, () => [v, k]); }
   return (SEC_SEQ[sec] || SEC_SEQ.writing).slice();
 }
-function startSectionMock(sec, mode, drill) {
+/* n = عدد التكرارات لتمرين واحد (ماراثون) · topic = قفل الموضوع عشان تجيك أسئلة مترابطة */
+function startSectionMock(sec, mode, drill, n, topic) {
   if (MOCK.full) return toast('خلّص المحاكاة الجارية أول');
-  const seq = secSeq(sec, drill); const label = drill && DRILL_META[drill] ? DRILL_META[drill][0] : 'قسم ' + SEC_AR[sec];
-  MOCK.on = true; MOCK.section = sec; MOCK.secDrill = drill || null; MOCK.mode = mode; MOCK.results = []; MOCK.t0 = Date.now(); MOCK.round = ((S.sec[sec] || []).length) + 1;
-  S.secPick = { sec, drill: drill || null, mode }; save();
+  const prev = S.secPick || {}; n = n || prev.n || 3; topic = topic === undefined ? (prev.topic || null) : topic;
+  const seq = secSeq(sec, drill, n); const tp = topic && (KIT.topics || []).find(t => t.id === topic);
+  const label = (drill && DRILL_META[drill] ? DRILL_META[drill][0] + ' ×' + seq.length : 'قسم ' + SEC_AR[sec]) + (tp ? ' · 🔗 ' + tp.ar : '');
+  MOCK.on = true; MOCK.section = sec; MOCK.secDrill = drill || null; MOCK.mode = mode; MOCK.results = []; MOCK.t0 = Date.now(); MOCK.round = ((S.sec[sec] || []).length) + 1; MOCK.topicLock = tp ? topic : null; MOCK.patDone = [];
+  S.secPick = { sec, drill: drill || null, mode, n, topic: tp ? topic : null }; save();
   if (mode === 'practice') { MOCK.full = false; MOCK.coach = false; MOCK.queue = seq.slice(1); toast(`${label}: ${seq.length} تمارين متتالية — المراجعة بعد كل تمرين، وبالنهاية ملخص الجولة`); nav(seq[0][0], seq[0][1]); return; }
   MOCK.full = true; MOCK.coach = mode === 'coach'; MOCK.locked = false; MOCK.queue = seq.slice(1); MOCK.cur = seq[0][1];
   document.body.classList.add('exam'); document.body.classList.toggle('exam-coach', MOCK.coach);
@@ -1020,7 +1044,7 @@ function startSectionMock(sec, mode, drill) {
 }
 function finishSection(body) {
   const sec = MOCK.section, drill = MOCK.secDrill, mode = MOCK.mode, res = MOCK.results.slice();
-  MOCK.on = false; MOCK.section = null; MOCK.secDrill = null; MOCK.queue = [];
+  MOCK.on = false; MOCK.section = null; MOCK.secDrill = null; MOCK.queue = []; MOCK.topicLock = null; MOCK.patDone = [];
   if (!res.length) { toast('انتهت الجولة بدون نتيجة'); return; }
   const by = {}; res.forEach(r => { (by[r.key] = by[r.key] || []).push(r.sc); });
   const avg = Math.round(res.reduce((a, r) => a + r.sc, 0) / res.length);
@@ -1046,22 +1070,50 @@ function renderSection() {
   const pick = $('secPick'), out = $('secResult'); if (!pick) return;
   const cur = S.secPick || { sec: 'writing', drill: null, mode: 'practice' };
   const drills = Object.keys(DRILL_META).filter(k => Object.values(SKILLS).some(s => s.d.includes(k)));
+  const PROMPT_DRILLS = ['ws', 'iw', 'rts', 'is', 'ss']; /* التمارين اللي لها سؤال نصي — تقبل قفل الموضوع */
   pick.innerHTML = `<div class="secChips">${Object.keys(SEC_AR).map(k => `<button type="button" class="secChip${cur.sec === k && !cur.drill ? ' on' : ''}" data-sec="${k}">${{ reading: '📖', listening: '🎧', writing: '✍️', speaking: '🗣️' }[k]} ${SEC_AR[k]}</button>`).join('')}</div>
-  <div class="row" style="margin:6px 0"><label class="hl-tip">أو تمرين واحد يتكرر: <select id="secDrillSel" class="in" style="width:auto;display:inline-block">${['<option value="">— القسم كامل —</option>'].concat(drills.map(k => `<option value="${k}"${cur.drill === k ? ' selected' : ''}>${DRILL_META[k][0]}</option>`)).join('')}</select></label></div>
+  <div class="row" style="margin:6px 0"><label class="hl-tip">أو تمرين واحد يتكرر: <select id="secDrillSel" class="in" style="width:auto;display:inline-block">${['<option value="">— القسم كامل —</option>'].concat(drills.map(k => `<option value="${k}"${cur.drill === k ? ' selected' : ''}>${DRILL_META[k][0]}</option>`)).join('')}</select></label>${cur.drill ? `<label class="hl-tip">عدد المرات: <select id="secN" class="in" style="width:auto;display:inline-block">${[3, 4, 5, 6, 8, 10].map(n => `<option value="${n}"${(cur.n || 3) === n ? ' selected' : ''}>×${n}</option>`).join('')}</select></label>` : ''}${PROMPT_DRILLS.indexOf(cur.drill) >= 0 && (KIT.topics || []).length ? `<label class="hl-tip">🔗 أسئلة مترابطة (نفس الموضوع): <select id="secTopic" class="in" style="width:auto;display:inline-block"><option value="">— متنوع —</option>${KIT.topics.map(t => `<option value="${t.id}"${cur.topic === t.id ? ' selected' : ''}>${esc(t.ar)}</option>`).join('')}</select></label>` : ''}</div>
+  <div class="row" style="margin:4px 0;align-items:center"><b style="font-size:13px">🏃 ماراثون سريع:</b><button type="button" class="btn sm ghost" data-mar="wp:6">🖼️ 6 صور كتابة</button><button type="button" class="btn sm ghost" data-mar="sp:4">🗣️ 4 صور كلام</button><button type="button" class="btn sm ghost" data-mar="ws:3">📜 3 مقالات بأنماط مختلفة</button><button type="button" class="btn sm ghost" data-mar="ss:2">🎥 عيّنتا كلام</button><button type="button" class="btn sm ghost" data-mar="is:2">🤖 12 سؤال محادثة</button></div>
   <div id="secPrep">${prepHtml(cur.sec)}</div>
   <div class="row" style="margin-top:8px"><button class="btn" data-mode="practice">🏋️ تدريب — مراجعة بعد كل تمرين</button><button class="btn" style="background:#7c2d12" data-mode="coach">🧑‍🏫 مدرّبة — النتائج بالنهاية</button><button class="btn" style="background:#111827" data-mode="strict">🧪 صارمة</button></div>
   <div class="hl-tip" style="margin-top:4px">كل جولة أسئلة مختلفة (المدرّب يتذكر اللي شفته). بالتدريب والمدرّبة يظهر المدرّب الحي وزر «💡 أفكار». كرّر القسم حتى تستقر نسبك فوق 80% ثم انتقل للأصعب.</div>`;
   pick.querySelectorAll('.secChip').forEach(b => b.onclick = () => { S.secPick = Object.assign({}, cur, { sec: b.dataset.sec, drill: null }); save(); renderSection(); });
   $('secDrillSel').onchange = (e) => { const d = e.target.value || null; const sec = d ? (Object.keys(SKILLS).find(k => SKILLS[k].d.includes(d)) || cur.sec) : cur.sec; S.secPick = Object.assign({}, cur, { sec, drill: d }); save(); renderSection(); };
-  pick.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => startSectionMock(cur.sec, b.dataset.mode, cur.drill));
+  const nSel = $('secN'); if (nSel) nSel.onchange = (e) => { S.secPick = Object.assign({}, S.secPick || cur, { n: +e.target.value || 3 }); save(); };
+  const tSel = $('secTopic'); if (tSel) tSel.onchange = (e) => { S.secPick = Object.assign({}, S.secPick || cur, { topic: e.target.value || null }); save(); };
+  pick.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { const sp = S.secPick || cur; startSectionMock(cur.sec, b.dataset.mode, cur.drill, sp.n, sp.topic || null); });
+  pick.querySelectorAll('[data-mar]').forEach(b => b.onclick = () => { const [d, n] = b.dataset.mar.split(':'); const sec = Object.keys(SKILLS).find(k => SKILLS[k].d.includes(d)); if (sec) startSectionMock(sec, 'practice', d, +n, (S.secPick || {}).topic || null); });
   if (out) { out.innerHTML = secSummaryHtml(cur.sec); wireSecButtons(out); }
 }
 
 /* ---------- مولّد الأفكار: يكتشف موضوع السؤال ويعطيك بذور أفكار وأمثلة وكلمات ---------- */
-function topicOf(text) {
-  const t = ' ' + String(text || '').toLowerCase().replace(/[^a-z0-9' ]+/g, ' ').replace(/\s+/g, ' ') + ' ';
+let TIDX = null;
+/* فهرس احتياطي: كلمات كل موضوع من مفرداته وأسئلته وأفكاره، عشان الأسئلة اللي ما فيها كلمة مفتاحية حرفية */
+function topicIndex() {
+  if (TIDX) return TIDX;
+  const stem = (w) => w.replace(/(ies|ied)$/, 'y').replace(/(ing|ed|es|s)$/, '');
+  TIDX = (KIT.topics || []).map(tp => {
+    const m = {};
+    const add = (str, w) => words(String(str || '')).forEach(x => { const k = stem(x.toLowerCase()); if (k.length >= 4 && !STOP.has(k)) m[k] = Math.max(m[k] || 0, w); });
+    (tp.vocab || []).forEach(v => add(v.w, 2));
+    (tp.questions || []).forEach(q => add(q, 1));
+    (tp.ideas || []).forEach(i => add(i.en, 0.6));
+    return { tp, m };
+  });
+  return TIDX;
+}
+const topicOf = (text) => topicMatch(text).list;
+function topicMatch(text) {
+  const raw = String(text || '').toLowerCase();
+  const t = ' ' + raw.replace(/[^a-z0-9' ]+/g, ' ').replace(/\s+/g, ' ') + ' ';
   const scored = (KIT.topics || []).map(tp => ({ tp, sc: (tp.keys || []).reduce((a, k) => a + (t.includes(' ' + String(k).toLowerCase() + ' ') ? (k.includes(' ') ? 2 : 1) : 0), 0) })).filter(x => x.sc > 0).sort((a, b) => b.sc - a.sc);
-  return scored.slice(0, 2).map(x => x.tp);
+  if (scored.length) return { list: scored.slice(0, 2).map(x => x.tp), fuzzy: false };
+  /* ما فيه كلمة مفتاحية: طابق بكلمات الموضوع نفسها — تقريبي، فنعرضه كـ«مواضيع قريبة» */
+  const stem = (w) => w.replace(/(ies|ied)$/, 'y').replace(/(ing|ed|es|s)$/, '');
+  const qs = words(raw).map(w => stem(w.toLowerCase())).filter(w => w.length >= 4 && !STOP.has(w));
+  if (!qs.length) return { list: [], fuzzy: true };
+  const near = topicIndex().map(({ tp, m }) => ({ tp, sc: qs.reduce((a, w) => a + (m[w] || 0), 0) })).filter(x => x.sc >= 3).sort((a, b) => b.sc - a.sc);
+  return { list: near.slice(0, 2).map(x => x.tp), fuzzy: true };
 }
 const RESCUE_FRAMES = [['To be honest, I don\'t know much about this, but I guess …', 'بصراحة ما أعرف كثير عن الموضوع، بس أتوقع …'], ['I\'m not very familiar with this topic. However, I\'d guess that …', 'الموضوع مو مألوف لي، لكن أتوقع إن …'], ['That\'s a tricky question. One thing I can say is …', 'سؤال صعب. الشي الوحيد اللي أقدر أقوله …'], ['It depends on the situation, but in general …', 'يعتمد على الموقف، لكن بشكل عام …']];
 function ideaHtml(promptText, kind) {
@@ -1069,10 +1121,12 @@ function ideaHtml(promptText, kind) {
     const ph = KIT.photo || [];
     return `<div class="ideaSec"><b>🖼️ عبارات الصورة (عدّل الكلمات على صورتك)</b>${ph.length ? ph.map(x => `<div class="kitRow"><span class="en2">${esc(x.en)}</span><span class="kitAr">${esc(x.ar)}</span></div>`).join('') : '<div class="hl-tip">⏳ ما تحمّلت عدة الحفظ بعد</div>'}</div><div class="ideaSec"><b>🧭 الترتيب</b><div class="hl-tip">عام (This photo shows …) ← مين يسوي وش بصيغة -ing + صفات ← وين (foreground / background / on the left) ← تخمين (probably / looks like / might be) — بالكلام: 0–20 ث عام، 20–60 تفاصيل، 60–90 تخمين ورأي.</div></div>`;
   }
-  const tps = topicOf(promptText);
+  const mt = topicMatch(promptText), tps = mt.list;
+  const GENERIC = `<div class="ideaSec"><b>🧭 الهيكل اللي يمشي مع أي سؤال</b><div class="hl-tip">OREO: رأيك مباشرة ← السبب ← مثال من حياتك (شغلك، مدينتك، عائلتك) ← الخلاصة. أو PPF: كيف كان الشي قبل؟ كيف هو الحين؟ كيف بيصير؟</div></div>`;
   if (!tps.length) return `<div class="ideaSec"><b>💡 ما لقيت موضوعًا محددًا — استخدم الهيكل العام</b><div class="hl-tip">OREO: رأيك مباشرة ← السبب ← مثال من حياتك (شغلك، مدينتك، عائلتك) ← الخلاصة. أو PPF: كيف كان الشي قبل؟ كيف هو الحين؟ كيف بيصير؟</div></div><div class="ideaSec"><b>🛟 ما تعرف الموضوع؟</b>${RESCUE_FRAMES.map(([en, ar]) => `<div class="kitRow"><span class="en2">${esc(en)}</span><span class="kitAr">${esc(ar)}</span></div>`).join('')}</div>`;
   const side = (s) => s === 'pro' ? '✅' : s === 'con' ? '❌' : '•';
-  return tps.map((tp, i) => `<div class="ideaSec"><b>💡 ${esc(tp.ar)}${i ? ' (موضوع ثانوي)' : ''} — بذور أفكار: خذ وحدة أو ثنتين وعدّلها بكلامك</b>${(tp.ideas || []).slice(0, i ? 3 : 8).map(x => `<div class="kitRow"><span class="en2">${side(x.side)} ${esc(x.en)}</span><span class="kitAr">${esc(x.ar)}</span></div>`).join('')}</div>` + (i ? '' : `<div class="ideaSec"><b>👤 مثال شخصي تبني عليه</b>${(tp.examples || []).map(x => `<div class="kitRow"><span class="en2">${esc(x.en)}</span><span class="kitAr">${esc(x.ar)}</span></div>`).join('')}</div><div class="ideaSec"><b>⏳ ماضي · حاضر · مستقبل (عشان ما تخلص أفكارك)</b>${tp.ppf ? ['past', 'present', 'future'].map(k => `<div class="kitRow"><span class="en2">${esc(tp.ppf[k])}</span></div>`).join('') : ''}</div><div class="ideaSec"><b>🔤 كلمات الموضوع</b><div class="chips" style="direction:ltr">${(tp.vocab || []).map(v => `<span class="vchip" title="${esc(v.ex || '')}">${esc(v.w)} <small>${esc(v.ar)}</small></span>`).join('')}</div></div>`)).join('') + `<div class="ideaSec"><b>🛟 ما تعرف الموضوع؟</b>${RESCUE_FRAMES.slice(0, 2).map(([en, ar]) => `<div class="kitRow"><span class="en2">${esc(en)}</span><span class="kitAr">${esc(ar)}</span></div>`).join('')}</div>`;
+  /* المطابقة التقريبية ما تلغي الهيكل العام — لو الموضوع مو مضبوط تبقى معك طريقة تجاوب فيها */
+  return (mt.fuzzy ? GENERIC + `<div class="hl-tip" style="margin:-4px 0 6px">⚠️ ما فيه موضوع مطابق تمامًا — هذي <b>مواضيع قريبة</b>، خذ منها اللي يناسب سؤالك بس.</div>` : '') + tps.map((tp, i) => `<div class="ideaSec"><b>💡 ${esc(tp.ar)}${mt.fuzzy ? ' (قريب)' : i ? ' (موضوع ثانوي)' : ''} — بذور أفكار: خذ وحدة أو ثنتين وعدّلها بكلامك</b>${(tp.ideas || []).slice(0, i ? 3 : 8).map(x => `<div class="kitRow"><span class="en2">${side(x.side)} ${esc(x.en)}</span><span class="kitAr">${esc(x.ar)}</span></div>`).join('')}</div>` + (i ? '' : `<div class="ideaSec"><b>👤 مثال شخصي تبني عليه</b>${(tp.examples || []).map(x => `<div class="kitRow"><span class="en2">${esc(x.en)}</span><span class="kitAr">${esc(x.ar)}</span></div>`).join('')}</div><div class="ideaSec"><b>⏳ ماضي · حاضر · مستقبل (عشان ما تخلص أفكارك)</b>${tp.ppf ? ['past', 'present', 'future'].map(k => `<div class="kitRow"><span class="en2">${esc(tp.ppf[k])}</span></div>`).join('') : ''}</div><div class="ideaSec"><b>🔤 كلمات الموضوع</b><div class="chips" style="direction:ltr">${(tp.vocab || []).map(v => `<span class="vchip" title="${esc(v.ex || '')}">${esc(v.w)} <small>${esc(v.ar)}</small></span>`).join('')}</div></div>`)).join('') + `<div class="ideaSec"><b>🛟 ما تعرف الموضوع؟</b>${RESCUE_FRAMES.slice(0, 2).map(([en, ar]) => `<div class="kitRow"><span class="en2">${esc(en)}</span><span class="kitAr">${esc(ar)}</span></div>`).join('')}</div>`;
 }
 const ideaWrap = (promptText, kind) => `<div class="ideaWrap"><button type="button" class="btn sm ghost ideaBtn" data-kind="${esc(kind || 'topic')}" data-prompt="${esc(String(promptText || '').slice(0, 600))}">💡 أفكار للموضوع</button><div class="ideaBox" hidden></div></div>`;
 document.addEventListener('click', (e) => {
@@ -1081,6 +1135,220 @@ document.addEventListener('click', (e) => {
   if (box.hidden) { box.innerHTML = ideaHtml(b.dataset.prompt, b.dataset.kind); box.hidden = false; b.textContent = '💡 إخفاء الأفكار'; logAttempt('ideas-open', { q: (b.dataset.prompt || b.dataset.kind).slice(0, 120), a: topicOf(b.dataset.prompt).map(t => t.id).join(',') || b.dataset.kind, ok: true }); }
   else { box.hidden = true; b.textContent = '💡 أفكار للموضوع'; }
 });
+
+/* =========================================================
+   v6 — الترتيب: أنماط الأسئلة (تعرف النمط من أول جملة ← هيكل بالوقت ← يقود المدرّب الحي) · قصصي الجاهزة · ماراثون وأسئلة مترابطة · آخر 48 ساعة
+   ========================================================= */
+/* ==v6-patterns== */
+const PAT_ORDER = ['learned', 'experience', 'advise', 'compare', 'preference', 'change', 'about', 'why', 'agree', 'describe'];
+const PATTERNS = [
+  { id: 'learned', ic: '🎓', ar: 'مهارة أو شي تعلمته', cue: 'skill you learned · how did you learn it · difficulties', story: 'learned',
+    how: 'يسألك عن شي تعلمته قريب وكيف تعلمته ووش الصعوبات. جوابه قصة قصيرة بالماضي: وش ومتى ← كيف ← الصعوبة ← كيف تجاوزتها والحين ← الدرس. قصة «مهارة تعلمتها» تجاوب عليه كله.',
+    det: [[/\b(you (have |recently )?(learn(ed|t)|acquired|picked up|mastered)|you taught yourself)\b/i, 3], [/\bhow (did|do) you (learn|start|practi[cs]e|pick)\b/i, 3], [/\b(a |new |one )?skill(s)?\b/i, 1], [/\blearn(ed|t|ing)?\b/i, 1], [/\b(difficult(y|ies)?|challenges?|hard (was|part)|struggle)\b/i, 1]],
+    slots: [
+      { k: 'وش تعلمت ومتى', en: 'Recently, I learned how to … / A few months ago, I started learning …', ar: 'سمّ المهارة وحدد الوقت بأول جملة — لا مقدمات', chip: 'Recently, I learned how to', re: /\b(learn(ed|t|ing)?|started|picked up|took up|taught myself|began)\b/i, w: 2, core: true },
+      { k: 'ليش', en: 'I decided to learn it because …', ar: 'سبب واحد واضح: شغلك، عائلتك، هدفك', chip: 'I decided to learn it because', re: CX.reason, w: 1.5 },
+      { k: 'كيف تعلمته', en: 'I learned it by watching videos / with the help of a colleague / by practising every day', ar: 'الطريقة: by + فعل-ing، أو مع مين', chip: 'I learned it by', re: /\b(by (watching|practi[cs]ing|reading|taking|using|asking|joining|doing|following)|through|with the help of|online (course|videos?|lessons?)|youtube|step by step|every (day|week|morning|night)|practi[cs]ed)\b/i, w: 2, core: true },
+      { k: 'الصعوبة', en: 'The hardest part was … / At first, I found it difficult to …', ar: 'صعوبة وحدة محددة، مو «كان صعب»', chip: 'The hardest part was', re: /\b(difficult|hard(est)?|challeng|struggl|at first|problem|mistakes?|frustrat|confus|gave up|not easy)\b/i, w: 2, core: true },
+      { k: 'كيف تجاوزتها والنتيجة', en: 'I overcame this by … / Now I can … without help', ar: 'وش سويت بالضبط + وش تقدر تسويه الحين', chip: 'I overcame this by', re: /\b(overc[ao]me|solved|kept (going|practi[cs]ing|trying)|now i (can|am able|feel|use|do)|managed to|got better|improved|eventually|finally|no longer)\b/i, w: 2 },
+      { k: 'الدرس والخاتمة', en: 'Overall, learning this taught me that …', ar: 'جملة وحدة تقفل الجواب', chip: 'Overall, learning this taught me that', re: /\b(taught me|i learned that|i learnt that|i realized|i realised|lesson|overall|in conclusion|to sum up|in short)\b/i, w: 1.5 },
+    ] },
+  { id: 'experience', ic: '📖', ar: 'احكِ موقفًا أو تجربة', cue: 'a time when · an experience · a problem you solved · memorable', story: 'problem',
+    how: 'يبغى قصة: زمان ومكان ← المشكلة أو الحدث ← First / Then / Finally ← النتيجة ← الدرس. كله بالماضي. قصص «مشكلة حليتها» و«إنجاز» تجاوب عليه.',
+    det: [[/\b(a time when|a time (that )?you|an? (experience|occasion|moment|situation|day) (when|that|you|in which)|the last time|a memorable|a mistake|a problem you (solved|had|faced|dealt)|something you did|an? (event|trip|journey) (that|you))\b/i, 4], [/\b(what happened|how did you feel|what did you (do|learn)|what was the result|did you)\b/i, 2], [RECOUNT_RE, 3]],
+    slots: [
+      { k: 'الزمان والمكان', en: 'Last year, at the hospital where I work, …', ar: 'متى ووين بأول جملة', chip: 'Last year,', re: /\b(last (year|month|week|summer|winter)|a few (years|months|weeks|days) ago|when i was|years? ago|in 20\d\d|one day|once,? |two years ago|recently)\b/i, w: 1.5, core: true },
+      { k: 'المشكلة أو الحدث', en: 'The problem was that … / Suddenly, …', ar: 'وش صار بالضبط', chip: 'The problem was that', re: /\b(problem|suddenly|unfortunately|stopped working|broke|failed|forgot|lost|late|couldn'?t|could not|didn'?t|did not|was not|wasn'?t|difficult|challenge|mistake|happened|decided to)\b/i, w: 2, core: true },
+      { k: 'الترتيب', en: 'First, … Then, … After that, … Finally, …', ar: 'ثلاث خطوات بالترتيب', chip: 'First,', re: /\b(first(ly)?,|then,?|after that|next,|finally|eventually|afterwards|later,)\b/i, w: 2 },
+      { k: 'النتيجة', en: 'In the end, … / As a result, …', ar: 'وش كانت النتيجة', chip: 'In the end,', re: /\b(in the end|as a result|luckily|fortunately|it worked|succeeded|solved|managed to|was able to|thanked|result)\b/i, w: 1.5, core: true },
+      { k: 'جملة مركّبة', en: 'While they were fixing it, I … / Although …, …', ar: 'وحدة على الأقل — بند بالتصحيح', chip: 'Although', re: CX.complex, w: 1 },
+      { k: 'الدرس والخاتمة', en: 'This experience taught me that …', ar: 'الدرس بجملة', chip: 'This experience taught me that', re: /\b(taught me|i learned|i learnt|i realized|i realised|lesson|now i (always|never|know|try)|overall)\b/i, w: 1.5 },
+    ] },
+  { id: 'advise', ic: '💡', ar: 'نصيحة أو توصية', cue: 'recommend · advise · what should students · best way', story: 'learned',
+    how: 'يبغى توصية (مهارة، عادة، مكان، طريقة) وليش وكيف يبدؤون وكيف تفيدهم. الجواب: التوصية مباشرة ← ليش + مثال ← أفضل طريقة ← الفائدة مستقبلًا ← خاتمة. مثالك: قصة «مهارة تعلمتها».',
+    det: [[/\b(recommend|advise|advice|suggest(ion)?s?|tips?)\b/i, 4], [/\b(best way|good way|how (can|should) (someone|people|students|a person|they|young people))\b/i, 2], [/\bshould (students|people|young people|everyone|children|parents|a person|someone)\b/i, 1], [/\bwhat (should|would you tell|advice|tips)\b/i, 3], [/\b(encourage|what would you tell)\b/i, 2]],
+    slots: [
+      { k: 'التوصية مباشرة', en: 'If I had to recommend one skill, it would be … / I would advise students to …', ar: 'الجواب بأول جملة، وحدة بس', chip: 'I would recommend', re: /\b(i (would|'d) (recommend|advise|suggest|tell|say)|my advice|should (learn|try|start|focus|choose|spend)|the best (skill|way|thing|option)|it would be)\b/i, w: 2, core: true },
+      { k: 'ليش', en: 'The main reason is that … / This matters because …', ar: 'سبب واحد قوي', chip: 'The main reason is that', re: CX.reason, w: 1.5, core: true },
+      { k: 'مثال منك', en: 'For example, when I learned …, it helped me …', ar: 'من شغلك أو تجربتك', chip: 'For example,', re: CX.example, w: 1.5 },
+      { k: 'أفضل طريقة', en: 'The best way to learn it is … / They can start by …', ar: 'خطوة عملية: كيف يبدؤون', chip: 'The best way to learn it is', re: /\b(best way|can (start|begin|learn|practi[cs]e|try|join)|start by|by (practi[cs]ing|watching|joining|taking|using|reading|doing)|step by step|every (day|week)|online|little by little)\b/i, w: 2, core: true },
+      { k: 'كيف تفيدهم', en: 'This will help them … / In the future, they will be able to …', ar: 'الفائدة بالمستقبل: شغل، دراسة، حياة', chip: 'This will help them', re: /\b(will (help|make|allow|give|open|improve)|helps? (them|you|people)|in the future|be able to|opportunit|career|benefit|useful)\b/i, w: 1.5 },
+      { k: 'خاتمة', en: 'Overall, I believe … is worth learning because …', ar: 'قفل بجملة', chip: 'Overall,', re: CX.concl, w: 1 },
+    ] },
+  { id: 'compare', ic: '⚖️', ar: 'مقارنة: مزايا وعيوب', cue: 'advantages · disadvantages · better · X or Y', story: 'change',
+    how: 'خيارين أو شي له مزايا وعيوب. الجواب: موقفك ← ميزة + مثال ← الجهة الثانية (عيب أو ميزة الخيار الآخر) ← مثال ← الترجيح. لا تعطي قائمة — كل ميزة بسبب.',
+    det: [[/\badvantages?\b/i, 2], [/\b(disadvantages?|drawbacks?|downsides?)\b/i, 2], [/\b(pros and cons|benefits? and (drawbacks|problems|risks|costs)|positive and negative|strengths? and weakness|good and bad)\b/i, 3], [/\b(better to|is it better|which is better|which (one )?(is|would be) (better|more)|more \w+ than|as \w+ as|compared? (to|with)|rather than|instead of|differences? between|similar)\b/i, 2], [/\bor\b[^.?!]*\?/i, 1], [/\b(both|each option|the two)\b/i, 1]],
+    slots: [
+      { k: 'موقفك', en: 'In my opinion, … is better / Personally, I think both have benefits, but …', ar: 'الجواب مباشرة بأول جملة', chip: 'In my opinion,', re: /\b(i (think|believe|prefer|would say|feel)|in my (opinion|view)|personally|is better|better option|for me)\b/i, w: 1.5, core: true },
+      { k: 'الميزة الأولى', en: 'The main advantage is that … / One benefit is …', ar: 'ميزة وحدة + ليش', chip: 'The main advantage is that', re: /\b(advantage|benefit|positive|good thing|plus|helps?|allows?|makes it (easier|possible)|cheaper|faster|more (convenient|flexible|comfortable))\b/i, w: 2, core: true },
+      { k: 'مثال', en: 'For example, in my city / at my hospital …', ar: 'من حياتك', chip: 'For example,', re: CX.example, w: 1.5 },
+      { k: 'الجهة الثانية', en: 'On the other hand, … / However, the disadvantage is …', ar: 'العيب أو ميزة الخيار الآخر', chip: 'On the other hand,', re: /\b(disadvantage|drawback|downside|negative|problem|however|on the other hand|but|although|even though|whereas)\b/i, w: 2, core: true },
+      { k: 'جملة مركّبة', en: 'Even though …, … / …, which …', ar: 'وحدة على الأقل', chip: 'Even though', re: CX.complex, w: 1 },
+      { k: 'الترجيح والخاتمة', en: 'On balance, I think … outweighs … / Overall, …', ar: 'الحكم النهائي بجملة', chip: 'On balance,', re: /\b(on balance|overall|in the end|outweigh|in conclusion|to sum up|all in all|still think|in short)\b/i, w: 1.5 },
+    ] },
+  { id: 'preference', ic: '❤️', ar: 'تفضيل أو اختيار', cue: 'prefer · would you rather · favourite · which do you', story: 'place',
+    how: 'يبغى اختيارك وليش. الجواب: اختيارك مباشرة ← سبب + مثال ← سبب ثاني ← الخيار الثاني مو سيئ لكن … ← خاتمة. لا تتردد بين الخيارين — اختر بثانية.',
+    det: [[/\b(prefer|preference|would you rather|favou?rite)\b/i, 3], [/\bwhich (do you|would you|one|type|kind)\b/i, 1], [/\b(do you like|do you enjoy|would you (choose|like|pick))\b/i, 2], [/\bor\b[^.?!]*\?/i, 1]],
+    slots: [
+      { k: 'اختيارك', en: 'I prefer … / My favourite … is … / Personally, I would choose …', ar: 'الاختيار بأول 3 ثواني', chip: 'I prefer', re: /\b(i (prefer|would rather|would choose|like|love|enjoy|usually choose)|my favou?rite|personally|for me|i('d| would) (go|pick))\b/i, w: 1.5, core: true },
+      { k: 'السبب الأول', en: 'The main reason is that …', ar: 'ليش — سبب واضح', chip: 'The main reason is that', re: CX.reason, w: 2, core: true },
+      { k: 'مثال', en: 'For example, last weekend I …', ar: 'مثال حقيقي من حياتك', chip: 'For example,', re: CX.example, w: 1.5, core: true },
+      { k: 'السبب الثاني', en: 'Another reason is that … / In addition, …', ar: 'سبب ثاني مختلف', chip: 'Another reason is that', re: CX.second, w: 1.5 },
+      { k: 'الخيار الثاني', en: 'Of course, the other option has its benefits, but …', ar: 'تنازل بسيط ثم ترجع لاختيارك', chip: 'Of course, the other option has its benefits, but', re: /\b(of course|the other (option|one|choice)|some people|although|even though|but|however|still|while)\b/i, w: 1 },
+      { k: 'خاتمة', en: 'Overall, that is why I prefer …', ar: 'قفل بجملة', chip: 'Overall,', re: CX.concl, w: 1 },
+    ] },
+  { id: 'change', ic: '🔄', ar: 'التغيير والمستقبل (قبل ← الحين ← بعدين)', cue: 'has changed · in the future · next 20 years · if you could', story: 'change',
+    how: 'يسأل كيف تغير شي أو كيف بيصير أو «لو تقدر». الجواب PPF: جوابك مباشرة ← كيف كان قبل ← كيف الحين ← وش بيصير وليش ← مثال ← خاتمة. ما تخلص أفكارك أبدًا لأن كل زمن فكرة.',
+    det: [[/\b(in the (near )?future|looking ahead|(next|coming) (ten|twenty|fifty|\d+) years|in (ten|twenty|fifty|\d+) years|by 20\d\d|predict|will (change|be different|look like|become))\b/i, 3], [/\b(has|have) (\w+ )?(changed|become|developed|improved|grown)\b/i, 3], [/\b(compared with|compared to|than (in )?the past|than before|used to|years ago|in the past|today than)\b/i, 2], [/\b(if you could|if you (had|were|won)|what would you (do|change)|imagine)\b/i, 3], [/\b(change|changes|changed)\b/i, 1]],
+    slots: [
+      { k: 'الجواب مباشرة', en: 'I think in the future … / If I could …, I would … / Yes, it has changed a lot.', ar: 'التوقع أو الجواب بأول جملة', chip: 'I think in the future', re: /\b(i (think|believe|expect|predict|would)|in the future|will (probably|definitely|likely)|would (probably|definitely|choose|like)|has changed|yes,|no,)\b/i, w: 1.5, core: true },
+      { k: 'قبل (الماضي)', en: 'In the past, … / Ten years ago, people used to …', ar: 'كيف كان الشي قبل', chip: 'In the past,', re: /\b(in the past|used to|years ago|when i was|before|previously|back then|traditionally)\b/i, w: 1.5 },
+      { k: 'الحين (الحاضر)', en: 'These days, … / Nowadays, most people …', ar: 'كيف هو الحين', chip: 'These days,', re: /\b(these days|nowadays|today|now|currently|at the moment|already)\b/i, w: 1.5, core: true },
+      { k: 'بعدين وليش', en: 'In the next ten years, I expect … because …', ar: 'التوقع + السبب', chip: 'In the next ten years, I expect', re: /\b(will (be|become|have|make|change|replace|allow|help)|going to|might|may|could|likely|expect|in (ten|twenty|\d+) years)\b/i, w: 2, core: true },
+      { k: 'مثال', en: 'For example, in my hospital we already …', ar: 'مثال حقيقي', chip: 'For example,', re: CX.example, w: 1.5 },
+      { k: 'خاتمة', en: 'Overall, I think this change is positive because …', ar: 'قفل بجملة', chip: 'Overall,', re: CX.concl, w: 1 },
+    ] },
+  { id: 'about', ic: '🙋', ar: 'عنك: عادة أو روتين', cue: 'how often · what kind of · do you usually · tell me about where you live', story: 'place',
+    how: 'أسئلة بداية Interactive Speaking: عنك وعاداتك. سهلة لكن خطرها الجواب القصير. الجواب: العادة مباشرة ← متى ووين ومع مين ← ليش ← آخر مرة ← خلاصة. كمّل 30 ثانية.',
+    det: [[/\b(how often|how many (times|hours)|what kind of|what type of|what sort of)\b/i, 2], [/\bdo you (usually|often|normally|generally|like|enjoy|use|listen|watch|read|play|go|spend|eat|cook|exercise|travel|work|study|live)\b/i, 2], [/\b(your (typical|daily|usual|favou?rite|hometown|area|neighbou?rhood|weekend|routine|free time|job|family|city)|where you live|about yourself)\b/i, 2], [/\b(tell me about (the|your|where)|let'?s (begin|start|talk|move|switch)|now let'?s|to start with)\b/i, 2]],
+    slots: [
+      { k: 'الجواب مباشرة', en: 'I usually … / Most of the time, I …', ar: 'العادة بأول جملة', chip: 'I usually', re: /\b(i (usually|normally|often|always|sometimes|rarely|never|tend to|mostly|generally|typically)|most of the time|every (day|week|weekend|morning|evening)|once or twice|i (live|work|listen|watch|read|use|go|like|love|enjoy))\b/i, w: 2, core: true },
+      { k: 'متى ووين ومع مين', en: 'In the evening, after work, with my kids …', ar: 'تفاصيل الوقت والمكان والناس', chip: 'In the evening, after work,', re: /\b(in the (morning|evening|afternoon)|after work|before work|on (weekends|fridays|saturdays|thursdays|the weekend)|at home|at (work|the hospital|the office)|with my (family|kids|children|wife|friends|colleagues|brother|sister|father|mother)|near|in my (city|area|neighbou?rhood))\b/i, w: 2, core: true },
+      { k: 'ليش', en: 'I do this because … / The reason is …', ar: 'سبب واحد', chip: 'I do this because', re: CX.reason, w: 1.5, core: true },
+      { k: 'آخر مرة أو مثال', en: 'For example, last Friday I …', ar: 'مثال حقيقي قريب', chip: 'For example, last Friday', re: /\b(for (example|instance)|last (week|weekend|time|friday|month|night)|yesterday|recently|the last time|this week)\b/i, w: 1.5 },
+      { k: 'خاتمة', en: 'So overall, … / That is why …', ar: 'قفل بجملة', chip: 'So overall,', re: /\b(so overall|overall|that'?s why|in general|so,? |all in all)\b/i, w: 1 },
+    ] },
+  { id: 'why', ic: '🔍', ar: 'اشرح: ليش أو كيف أو الأسباب', cue: 'why do · what are the reasons · how can · what makes · benefits · effects', story: 'problem',
+    how: 'يبغى أسبابًا أو طرقًا أو آثارًا. الجواب: الجواب المباشر (فيه سببين رئيسيين) ← السبب الأول + مثال ← السبب الثاني ← النتيجة أو الحل ← خاتمة. رقّم أسبابك: First … Second …',
+    det: [[/\bwhy (do|does|did|is|are|have|has|might|would|should)\b/i, 3], [/\bwhat (are|is) (the )?(main |biggest |most )?(reasons?|causes?|effects?|benefits?|advantages?|role|impact|importance|problems?|challenges?|qualities|ways?)\b/i, 3], [/\b(what makes|in what ways|how important|explain (why|how)|what (can|should) be done|what factors)\b/i, 3], [/\bhow (do|does|can|could|has|have|is|are|should|might) (people|we|students|it|they|technology|the|this|your|a|an|companies|schools|governments|parents|cities|someone)\b/i, 2]],
+    slots: [
+      { k: 'الجواب المباشر', en: 'There are two main reasons why … / I think the main reason is …', ar: 'قل إن عندك سببين — وهذا يعطيك الترتيب', chip: 'There are two main reasons why', re: /\b(main reason|there are (two|several|many|a few) (reasons|ways|factors|benefits)|the biggest|i think|in my (opinion|view)|mainly|because|the first)\b/i, w: 1.5, core: true },
+      { k: 'السبب الأول', en: 'First, … / One reason is that …', ar: 'سبب واضح + ليش', chip: 'First,', re: /\b(first(ly)?|one (reason|way|factor|benefit|cause)|the (first|main) (reason|way|factor)|to begin with|for one thing)\b/i, w: 2, core: true },
+      { k: 'مثال', en: 'For example, in my hospital …', ar: 'مثال من حياتك', chip: 'For example,', re: CX.example, w: 1.5, core: true },
+      { k: 'السبب الثاني', en: 'Second, … / Another reason is that …', ar: 'سبب ثاني مختلف', chip: 'Second,', re: CX.second, w: 2 },
+      { k: 'النتيجة أو الحل', en: 'As a result, … / One solution is …', ar: 'الأثر أو الحل بجملة', chip: 'As a result,', re: /\b(as a result|this is why|that'?s why|therefore|so that|leads? to|solution|to solve|consequently|this means)\b/i, w: 1.5 },
+      { k: 'خاتمة', en: 'Overall, … / In conclusion, …', ar: 'قفل بجملة', chip: 'Overall,', re: CX.concl, w: 1 },
+    ] },
+  { id: 'agree', ic: '🗣️', ar: 'رأي: مع أو ضد', cue: 'do you agree · some people think · what is your opinion · should', story: 'success',
+    how: 'أكثر نمط يتكرر. OREO: رأيك مباشرة ← السبب ← مثال ← السبب الثاني أو الرأي المقابل ← جملة مركّبة ← خاتمة. اختر جهة وحدة وامشِ فيها — التردد يضيع الوقت.',
+    det: [[/\b(do you agree|agree or disagree|to what extent)\b/i, 4], [/\b(what is your (opinion|view)|what do you think|in your opinion|do you think)\b/i, 2], [/\b(some people (think|believe|say|argue|feel)|others (think|believe|say|argue|feel)|many people (think|believe|say))\b/i, 2], [/\bshould\b/i, 2], [/\b(is it (important|necessary|good|fair|right)|is this (a good|positive|negative))\b/i, 2]],
+    slots: [
+      { k: 'رأيك مباشرة', en: 'I strongly agree that … / In my opinion, … / I think …', ar: 'الجواب بأول جملة', chip: 'In my opinion,', re: CX.opinion, w: 1.5, core: true },
+      { k: 'السبب الأول', en: 'The main reason is that … / because …', ar: 'ليش', chip: 'The main reason is that', re: CX.reason, w: 2, core: true },
+      { k: 'مثال منك', en: 'For example, last year at my hospital …', ar: 'مثال من شغلك أو مدينتك أو عائلتك', chip: 'For example,', re: CX.example, w: 2, core: true },
+      { k: 'فكرة ثانية أو الرأي المقابل', en: 'Another reason is … / Some people may say …, but …', ar: 'سبب ثاني أو رد على الرأي الثاني', chip: 'Another reason is that', re: CX.second, w: 1.5 },
+      { k: 'جملة مركّبة', en: 'Even though …, … / Although …, … / …, which …', ar: 'وحدة على الأقل', chip: 'Even though', re: CX.complex, w: 1 },
+      { k: 'خاتمة', en: 'Overall, … / In conclusion, …', ar: 'قفل بجملة', chip: 'Overall,', re: CX.concl, w: 1 },
+    ] },
+  { id: 'describe', ic: '🖼️', ar: 'وصف شخص أو مكان أو شي', cue: 'describe a person / place / something you own · who is · what is it like', story: null,
+    how: 'يبغى وصفًا مو قصة. الجواب: التعريف ← صفتان أو ثلاث بأمثلة ← موقف معه ← ليش مهم لك ← جملة مركّبة ← خاتمة. قصص «شخص أثّر فيك» و«مكان تحبه» جاهزة.',
+    det: [[/\b(describe|tell (me|us) about|talk about|write about) (a|an|your|the|someone|somewhere|something|one)\b/i, 3], [/\b(a person|someone|a place|somewhere|something you (own|use|like|have)|an? (object|item|book|film|movie|app|website|city|town|building|restaurant|shop|teacher|friend|relative))\b/i, 2], [/\b(what is (it|he|she|this person) like|who is (this|that|the) person|what does (it|he|she) look like|why (is|are) (it|he|she|they) (important|special))\b/i, 2], [/\b(admire|respect|influenc|role model|your favou?rite (place|person|thing|book|app))\b/i, 2]],
+    slots: [
+      { k: 'التعريف', en: 'The person I want to talk about is my … / The place I would like to describe is …', ar: 'مين أو وش، وعلاقتك فيه', chip: 'The person I want to talk about is', re: /\b(i('d| would) like to (talk|describe|tell)|the (person|place|thing|object|city|book|app|item|one) i|is called|is my (friend|father|mother|brother|sister|colleague|boss|teacher|hometown|uncle|cousin|manager)|is located|is a|it is|he is|she is)\b/i, w: 1.5, core: true },
+      { k: 'صفتان أو ثلاث', en: 'He is very patient and hardworking / It is a quiet, green park with …', ar: 'صفات + تفاصيل محسوسة', chip: 'He is very', re: /\b(very|really|extremely|quite|kind|patient|friendly|hardworking|honest|beautiful|quiet|busy|modern|old|small|large|famous|popular|comfortable|clean|crowded|peaceful|generous|smart|funny|strict|helpful|calm|green|wide|traditional)\b/i, w: 2, core: true },
+      { k: 'موقف أو مثال', en: 'I remember when … / For example, once …', ar: 'قصة قصيرة معه', chip: 'I remember when', re: /\b(i remember|once|for (example|instance)|last (year|time|month)|when i|one day)\b/i, w: 2, core: true },
+      { k: 'ليش مهم لك', en: 'What makes it special is … / The reason I admire him is …', ar: 'الأثر عليك', chip: 'What makes it special is', re: /\b(special|important to me|means a lot|the reason i|i (love|like|admire|respect|enjoy)|because|taught me|helped me)\b/i, w: 1.5 },
+      { k: 'جملة مركّبة', en: 'Although he is busy, he always … / …, which …', ar: 'وحدة على الأقل', chip: 'Although', re: CX.complex, w: 1 },
+      { k: 'خاتمة', en: 'Overall, … / That is why …', ar: 'قفل بجملة', chip: 'Overall,', re: CX.concl, w: 1 },
+    ] },
+];
+function patternOf(text) {
+  const t = String(text || ''); if (!t.trim()) return null;
+  let best = null, bs = 0;
+  PAT_ORDER.forEach(id => { const p = PATTERNS.find(x => x.id === id); const sc = p.det.reduce((a, [re, w]) => a + (re.test(t) ? w : 0), 0); if (sc > bs) { bs = sc; best = p; } });
+  return best;
+}
+/* ==/v6-patterns== */
+const PAT_FMT = { is: [35, 'ث'], ideas: [35, 'ث'], sp: [90, 'ث'], rts: [90, 'ث'], ss: [180, 'ث'], ws: [130, 'كلمة'], iw: [110, 'كلمة'] };
+const PAT_NUM = '①②③④⑤⑥⑦';
+const patSlots = (p, fmt) => (fmt === 'is' || fmt === 'ideas') ? p.slots.filter(s => s.core) : p.slots;
+/* الأنماط تدخل المدرّب الحي: خطوات الكتابة وشرائح الإدراج ومراحل الكلام */
+PATTERNS.forEach(p => {
+  COACH_KINDS['pat:' + p.id] = { steps: p.slots.map(s => ({ k: s.k, hint: esc(s.ar) + ': <span class="en2">' + esc(s.en) + '</span>', re: s.re })) };
+  COACH_CHIPS['pat:' + p.id] = p.slots.map(s => s.chip);
+});
+const STORY_DEFS = [
+  { k: 'learned', ic: '🎓', ar: 'مهارة تعلمتها قريب', use: ['learned', 'advise', 'about'], guide: ['وش المهارة ومتى بدأت (Recently / A few months ago)', 'كيف تعلمتها (فيديوهات، زميل، تطبيق، تدريب يومي)', 'أصعب شي فيها وكيف تجاوزته', 'وش تقدر تسويه الحين بسببها'], starter: 'Recently, I learned how to use a new system at the hospital where I work. I learned it by watching short videos and practising every day with a colleague. The hardest part was remembering all the steps, but I kept practising, and now I can use it without help. This experience taught me that small daily practice is better than long sessions.' },
+  { k: 'person', ic: '👤', ar: 'شخص أثّر فيك', use: ['describe', 'agree'], guide: ['مين هو وعلاقتك فيه', 'صفتان أو ثلاث بمثال', 'موقف تتذكره معه', 'وش تعلمت منه'], starter: 'The person who has influenced me most is my father. He is very patient and hardworking. For example, when I failed an exam at university, he did not shout; he sat with me and made a study plan. What I learned from him is that calm planning solves most problems, which is something I still use at work today.' },
+  { k: 'place', ic: '📍', ar: 'مكان تحبه', use: ['describe', 'preference', 'about'], guide: ['وين هو ووش يميزه', 'وش تسوي فيه ومع مين', 'ليش مهم لك', 'قبل والحين بجملة'], starter: 'My favourite place in Madinah is a quiet park near my home. It is a green, peaceful place with tall trees and a small lake. I usually go there with my children on Friday afternoons. I like it because it helps me relax after a busy week. Even though it is sometimes crowded, I always feel calm there.' },
+  { k: 'problem', ic: '🛠️', ar: 'مشكلة حليتها بالشغل', use: ['experience', 'why', 'agree'], guide: ['متى ووين', 'وش المشكلة بالضبط', 'First / Then / Finally', 'النتيجة والدرس'], starter: 'Last year, at the hospital where I work, our appointment system stopped working on a busy morning. The problem was that many patients were waiting and nobody knew the order. First, I asked the staff to write names on paper. Then, I called the IT team. Finally, we used a simple list until the system returned. In the end, every patient was seen, and this experience taught me that a simple backup plan saves a lot of stress.' },
+  { k: 'success', ic: '🏆', ar: 'هدف حققته أو إنجاز', use: ['experience', 'advise', 'agree'], guide: ['وش الهدف ومتى', 'وش الصعوبة', 'وش سويت بالضبط', 'النتيجة ووش تغير'], starter: 'One of my proudest achievements was improving my English while working full time. At first, it was difficult because I had very little free time. I decided to study for thirty minutes every night after my children went to sleep, and I practised speaking every morning in the car. After a few months, I could write reports in English at work. As a result, my manager gave me more responsibility.' },
+  { k: 'change', ic: '🔄', ar: 'تغيير شفته (قبل ← الحين ← بعدين)', use: ['change', 'compare', 'why', 'about'], guide: ['كيف كان الشي قبل 10 سنوات', 'كيف هو الحين', 'ليش تغير', 'وش تتوقع بعد 10 سنوات'], starter: 'Ten years ago, patients in my city had to come to the hospital just to book an appointment. These days, most people book online or through an app in a few minutes. This changed mainly because smartphones became cheap and the government supported digital services. In the future, I think doctors will see many patients online, which will save time for families like mine.' },
+];
+function storyFor(p, prompt) {
+  if (!p) return null; const t = String(prompt || '').toLowerCase(); let k = p.story;
+  if (p.id === 'describe') k = /\b(person|someone|who|friend|teacher|family|admire|influence|relative|colleague|leader|role model)\b/.test(t) ? 'person' : /\b(place|city|town|where|visit|country|building|restaurant|park|area|neighbou?rhood|home)\b/.test(t) ? 'place' : null;
+  if (p.id === 'experience') k = /\b(proud|achiev|success|goal|accomplish|happy|enjoy|memorable|trip|celebrat)\b/.test(t) ? 'success' : 'problem';
+  return k ? STORY_DEFS.find(s => s.k === k) || null : null;
+}
+function storyHtml(st) {
+  if (!st) return '<div class="patStory">📖 ما فيه قصة جاهزة لهذا السؤال — خذ مثالًا من شغلك أو مدينتك أو عائلتك، أو من زر «💡 أفكار».</div>';
+  const txt = String(S.stories[st.k] || '').trim();
+  return `<div class="patStory">📖 قصتك المناسبة: <b>${st.ic} ${esc(st.ar)}</b> — ${txt ? `<span class="en2">${esc(txt.slice(0, 170))}${txt.length > 170 ? '…' : ''}</span> <small class="hl-tip">عدّل الزمان والأسماء على السؤال، لا تلصقها كما هي</small>` : '<b style="color:#b91c1c">ما كتبتها بعد</b>'} <a href="#skills/stories">${txt ? '✏️ عدّل' : '✍️ اكتبها الحين (دقيقتين)'}</a></div>`;
+}
+function patternHtml(p, fmt, prompt) {
+  const F = PAT_FMT[fmt] || PAT_FMT.ws; const slots = patSlots(p, fmt); const sum = slots.reduce((a, s) => a + s.w, 0);
+  return `<ol class="patSlots">${slots.map((s, i) => `<li><span class="patK">${PAT_NUM[i] || i + 1} ${esc(s.k)}</span><span class="patT">~${Math.round(F[0] * s.w / sum)} ${F[1]}</span><span class="en2">${esc(s.en)}</span><div class="patAr">${esc(s.ar)}</div></li>`).join('')}</ol>` + (fmt === 'rts' ? '<div class="hl-tip">في Read Then Speak: النقاط الثلاث بالسؤال هي ترتيبك (~25 ثانية لكل وحدة) — استخدم خطوات النمط عشان تعبّي كل نقطة بسرعة.</div>' : '') + (prompt != null ? storyHtml(storyFor(p, prompt)) : '');
+}
+/* شريط النمط تحت السؤال: اسم النمط + خطواته (يفتح كامل أول 3 مرات لكل نمط ثم يبقى مطويًا عشان تتعود تستدعيه من راسك) */
+function patStrip(prompt, fmt) {
+  const p = patternOf(prompt); if (!p) return '';
+  const slots = patSlots(p, fmt); const seen = (S.patSeen[p.id] = (S.patSeen[p.id] || 0) + 1); save();
+  const open = seen <= 3 || MOCK.coach;
+  return `<div class="patStrip" data-fmt="${esc(fmt)}" data-prompt="${esc(String(prompt || '').slice(0, 600))}" data-pat="${p.id}"><div class="patHead"><span>🧭 النمط: <b>${p.ic} ${esc(p.ar)}</b></span><small class="hl-tip">${esc(p.cue)}</small><button type="button" class="btn sm ghost patTog">${open ? '📋 إخفاء الهيكل' : '📋 الهيكل كامل'}</button></div><div class="patChips">${slots.map((s, i) => `<span>${PAT_NUM[i]} ${esc(s.k)}</span>`).join('')}</div><div class="patFull"${open ? '' : ' hidden'}>${open ? patternHtml(p, fmt, prompt) : ''}</div></div>`;
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('.patTog'); if (!b) return; const w = b.closest('.patStrip'); const full = w.querySelector('.patFull'); const p = PATTERNS.find(x => x.id === w.dataset.pat); if (!p) return;
+  if (full.hidden) { full.innerHTML = patternHtml(p, w.dataset.fmt, w.dataset.prompt); full.hidden = false; b.textContent = '📋 إخفاء الهيكل'; logAttempt('pattern-open', { q: (w.dataset.prompt || '').slice(0, 120), a: p.id, ok: true }); }
+  else { full.hidden = true; b.textContent = '📋 الهيكل كامل'; }
+});
+/* اختيار سؤال بالموضوع المقفول (أسئلة مترابطة) وبأنماط مختلفة داخل الماراثون */
+function pickPrompt(list, kind, keyFn, textFn) {
+  textFn = textFn || keyFn; let pool = list;
+  if (MOCK.topicLock) { const f = list.filter(x => (topicOf(textFn(x))[0] || {}).id === MOCK.topicLock); if (f.length >= 2) pool = f; }
+  const vary = MOCK.section && kind !== 'is' && kind !== 'rts'; /* مجموعة الأسئلة والنقاط الثلاث ما لها نمط واحد */
+  if (vary && MOCK.patDone && MOCK.patDone.length) { const f = pool.filter(x => { const p = patternOf(textFn(x)); return !p || MOCK.patDone.indexOf(p.id) < 0; }); if (f.length >= 2) pool = f; }
+  const it = pickNew(pool, kind, keyFn);
+  if (vary && it) { const p = patternOf(textFn(it)); if (p) (MOCK.patDone = MOCK.patDone || []).push(p.id); }
+  return it;
+}
+/* التظليل: لو ما تحمّل ملف اللمس نرجع للتحديد العادي بدل ما يتعطل Interactive Reading */
+const HL_FALLBACK = { mount(passage, preview) { let saved = ''; const cap = () => { const s = document.getSelection(); const v = s && !s.isCollapsed && passage.contains(s.anchorNode) ? String(s).trim() : ''; if (v) { saved = v; preview.textContent = v; } }; document.addEventListener('selectionchange', cap); return { capture: cap, tapMode() { toast('تحديد اللمس غير متاح الحين — حدد النص بالسحب'); }, value() { cap(); return saved; }, clear() { saved = ''; preview.textContent = 'لم تحدد إجابة بعد.'; const s = document.getSelection(); s && s.removeAllRanges(); }, destroy() { document.removeEventListener('selectionchange', cap); } }; }, dispose() {} };
+const HL = () => window.DetHighlight || HL_FALLBACK;
+
+/* ---------- قصصي الجاهزة: 6 قصص من حياتك تكتبها مرة وتعدّلها على كل سؤال ---------- */
+function drillStories() {
+  const box = $('skillsDrill');
+  const patName = (id) => (PATTERNS.find(p => p.id === id) || {}).ar;
+  box.innerHTML = `<div class="card"><h3>📖 قصصي الجاهزة — 6 قصص من حياتك تكتبها مرة وتستخدمها بكل الأنماط</h3><div class="hl-tip">أغلب الأسئلة تبغى <b>مثالًا من حياتك</b>، والمثال هو اللي يوقّفك بالاختبار مو القواعد. اكتب كل قصة 40–70 كلمة بالماضي مع جملة مركّبة وحدة (Although … / …, which …). القالب تحت كل قصة مثال بس — <b>غيّره لقصتك أنت</b> بأسماء وأماكن حقيقية، لأن المحفوظ الجاهز ينكشف وينزّل الدرجة. بالاختبار: تعرف النمط ← تجيب القصة المناسبة ← تعدّل الزمان والأسماء على السؤال.</div><div class="row"><a class="btn sm ghost" href="#skills/patterns">🧭 أنماط الأسئلة</a><a class="btn sm ghost" href="#skills/ideas">⚡ تدرّب: النمط + 3 أفكار</a></div></div>` + STORY_DEFS.map(st => { const v = S.stories[st.k] || ''; return `<div class="card storyBox" data-k="${st.k}"><h3>${st.ic} ${esc(st.ar)} <small class="hl-tip">تنفع لأنماط: ${st.use.map(patName).filter(Boolean).join(' · ')}</small></h3><ul class="hl-tip" style="margin:0 16px 6px 0">${st.guide.map(g => `<li>${esc(g)}</li>`).join('')}</ul><details class="tech"><summary>قالب مثال (غيّره لقصتك)</summary><div class="model" style="font-size:13px">${esc(st.starter)}</div><div class="row"><button type="button" class="btn sm ghost stStart">✍️ انسخ القالب للمربع وعدّله</button></div></details><textarea class="ta stTa" placeholder="Write your own story in English — 40–70 words, past tense, one complex sentence.">${esc(v)}</textarea><div class="wc"><b>${wcount(v)}</b> words</div></div>`; }).join('');
+  box.querySelectorAll('.storyBox').forEach(b => {
+    const k = b.dataset.k, ta = b.querySelector('.stTa'), wc = b.querySelector('.wc'); let h = null;
+    ta.addEventListener('input', () => { wc.innerHTML = `<b>${wcount(ta.value)}</b> words`; clearTimeout(h); h = setTimeout(() => { S.stories[k] = ta.value; save(); logAttempt('story', { q: k, a: ta.value, extra: { words: wcount(ta.value) } }); }, 900); });
+    b.querySelector('.stStart').onclick = () => { if (ta.value.trim() && !confirm('تستبدل قصتك الحالية بالقالب؟')) return; ta.value = STORY_DEFS.find(s => s.k === k).starter; ta.dispatchEvent(new Event('input')); ta.focus(); };
+  });
+}
+/* ---------- صفحة الأنماط: الترتيب لكل نمط بالـ35 ثانية وبالـ5 دقائق + أسئلة من البنك بنفس النمط ---------- */
+function drillPatterns() {
+  const box = $('skillsDrill'); const pool = allPrompts();
+  const written = STORY_DEFS.filter(s => String(S.stories[s.k] || '').trim()).length;
+  box.innerHTML = `<div class="card"><h3>🧭 أنماط الأسئلة العشرة — نفس الأسئلة تتكرر بصيغ مختلفة</h3><div class="hl-tip">أول شي تسويه لما يطلع السؤال: تعرف نمطه (ثانيتين) — وبعدها الهيكل جاهز ومعك قصة تناسبه، فما تدوّر أفكارًا. تحت كل نمط: كيف تعرفه، الترتيب لـ35 ثانية ولـ5 دقائق، وأسئلة من البنك بنفس النمط عشان تشوف كيف تتكرر. الشريط الأصفر نفسه يطلع لك تحت كل سؤال بالتمارين، والمدرّب الحي يمشي على خطوات النمط.</div><div class="row"><a class="btn sm" href="#skills/ideas">⚡ تدرّب: اعرف النمط وهات 3 أفكار</a><a class="btn sm ghost" href="#skills/stories">📖 قصصي الجاهزة (${written}/6 مكتوبة)</a></div></div>` + PATTERNS.map(p => { const ex = pool.filter(x => (patternOf(x.q) || {}).id === p.id).slice(0, 3); return `<details class="tech"><summary>${p.ic} ${esc(p.ar)} <small class="hl-tip">${esc(p.cue)}</small></summary><div class="why">${esc(p.how)}</div><b>🗣️ 35 ثانية — 3 خطوات بس</b>${patternHtml(p, 'is', null)}<b style="display:block;margin-top:8px">✍️ 5 دقائق (130 كلمة) / 🎥 3 دقائق — الهيكل كامل</b>${patternHtml(p, 'ws', '')}${ex.length ? `<b style="display:block;margin-top:8px">أسئلة من البنك بنفس النمط</b>${ex.map(x => `<div class="ph">${esc(x.q)}</div>`).join('')}` : ''}</details>`; }).join('');
+}
+
+/* ---------- آخر 48 ساعة: عدّاد + مرحلة اليوم بالرئيسية ---------- */
+const H48_PHASES = [['h48a', '2026-09-11T05:00'], ['h48b', '2026-09-11T13:00'], ['h48c', '2026-09-11T18:00'], ['h48d', '2026-09-12T04:00'], ['h48e', '2026-09-12T23:59']];
+const testDate = () => (PACKS.profile && PACKS.profile.test_date) || '2026-09-12';
+function renderH48() {
+  const box = $('h48Card'); if (!box) return;
+  const now = Date.now(); const test = new Date(testDate() + 'T08:00:00').getTime(); const hrs = Math.round((test - now) / 3600e3);
+  const blocks = PLAN.filter(d => H48_PHASES.some(([id]) => id === d.id));
+  if (hrs < -14 || !blocks.length) { box.style.display = 'none'; return; } box.style.display = '';
+  const curId = (H48_PHASES.find(([, until]) => now < new Date(until).getTime()) || H48_PHASES[H48_PHASES.length - 1])[0];
+  const cur = blocks.find(d => d.id === curId) || blocks[blocks.length - 1];
+  const all = blocks.flatMap(d => d.tasks); const done = blocks.reduce((a, d) => a + d.tasks.filter(t => taskDone(d, t)).length, 0);
+  box.innerHTML = `<h3>⏱️ الاختبار السبت <bdi dir="ltr">${esc(testDate())}</bdi> — ${hrs > 0 ? `باقي <b style="color:var(--amber)">~${hrs} ساعة</b>` : '<b>اليوم</b>'}</h3><div class="lead" style="margin:0 0 6px">ما فيه وقت لكل شي، فالترتيب أهم من الكم: <b>النمط ← القصة ← الهيكل</b> بكل سؤال كتابة أو كلام. المرحلة الحالية: <b>${cur.name}</b> — ${esc(cur.goal)}</div><div class="bar"><i style="width:${Math.round(100 * done / all.length)}%"></i></div><div class="prog">${done} من ${all.length} مهمة بآخر 48 ساعة</div><div id="h48Tasks"></div><div class="row"><a class="btn sm ghost" href="#skills/patterns">🧭 الأنماط</a><a class="btn sm ghost" href="#skills/stories">📖 قصصي</a><button class="btn sm ghost" type="button" id="h48All">📅 الخطة كاملة</button></div>`;
+  const list = $('h48Tasks'); cur.tasks.forEach(t => list.appendChild(taskRow(cur, t)));
+  $('h48All').onclick = () => { const p = $('plan'); p && p.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+}
 
 /* ---------- تمرين الأفكار السريعة: 3 أفكار بـ30 ثانية ---------- */
 function allPrompts() {
@@ -1095,14 +1363,15 @@ function drillIdeas() {
   const pool = allPrompts(); if (!pool.length) { $('skillsDrill').innerHTML = '<div class="note r">ما فيه أسئلة بعد.</div>'; return; }
   const it = adaptPick(pool, () => 2, 'ideas', 1, { keyFn: x => x.q })[0]; const t0 = Date.now();
   const f = frame('skillsDrill', '⚡ تمرين الأفكار السريعة', 30, () => done());
-  f.body.innerHTML = `<div class="sent" style="font-size:15px"><b>${esc(it.q)}</b></div><div class="hl-tip">30 ثانية: اكتب <b>3 أفكار</b> (سطر لكل فكرة — كلمتين أو جملة قصيرة، عربي أو إنجليزي). هذا تدريب على «الفكرة تجي بسرعة» — نفس اللي يصير لك بالاختبار بعد السؤال مباشرة. الأفكار الجاهزة تظهر بعد الوقت.</div><textarea class="ta" id="ideaTa" placeholder="1. …&#10;2. …&#10;3. …" style="min-height:110px"></textarea><div class="row"><button class="btn" id="ideaDone">خلصت</button></div>`;
+  f.body.innerHTML = `<div class="sent" style="font-size:15px"><b>${esc(it.q)}</b></div><div class="row" style="margin:4px 0"><label class="hl-tip">🧭 وش نمط السؤال؟ <select id="ideaPat" class="in" style="width:auto;display:inline-block"><option value="">— اختر بثانيتين —</option>${PATTERNS.map(p => `<option value="${p.id}">${p.ic} ${esc(p.ar)}</option>`).join('')}</select></label></div><div class="hl-tip">30 ثانية: اعرف النمط ثم اكتب <b>3 أفكار</b> (سطر لكل فكرة — كلمتين أو جملة قصيرة، عربي أو إنجليزي). هذا تدريب على «الفكرة تجي بسرعة» — نفس اللي يصير لك بالاختبار بعد السؤال مباشرة. الأفكار الجاهزة تظهر بعد الوقت.</div><textarea class="ta" id="ideaTa" placeholder="1. …&#10;2. …&#10;3. …" style="min-height:110px"></textarea><div class="row"><button class="btn" id="ideaDone">خلصت</button></div>`;
   f.timer.start(); const ta = $('ideaTa'); ta.focus(); $('ideaDone').onclick = done; let fin = false;
   function done() {
     if (fin) return; fin = true; f.timer.stop();
     const lines = ta.value.split(/\n+/).map(x => x.replace(/^\s*[\d\-•.)]+\s*/, '').trim()).filter(x => x.length >= 3);
     const sc = Math.min(100, Math.round(100 * Math.min(3, lines.length) / 3)); setBest('ideas', sc);
-    logAttempt('ideas', { q: it.q, a: lines.join(' | '), sc, ms: Date.now() - t0, extra: { n: lines.length, topic: (topicOf(it.q)[0] || {}).id || null } });
-    result(f.body, sc, `${lines.length} فكرة بـ${Math.min(30, Math.round((Date.now() - t0) / 1000))} ثانية${lines.length >= 3 ? ' ✓' : ' — الهدف 3'}`, `<h3>أفكارك</h3><div class="model">${esc(lines.join('\n')) || '(فاضي)'}</div><h3>أفكار جاهزة للمقارنة</h3>${ideaHtml(it.q, 'topic')}<div class="hl-tip" style="margin-top:6px">الفكرة ما تحتاج تكون ذكية — تحتاج تكون واضحة وتقدر تعطي عليها سبب ومثال. لو ما جتك فكرة: خذ «رأي ← سبب ← مثال من شغلك» أو «قبل ← الحين ← بعدين».</div>`);
+    const guess = ($('ideaPat') || {}).value || ''; const real = patternOf(it.q); const patOk = !!real && guess === real.id;
+    logAttempt('ideas', { q: it.q, a: lines.join(' | '), sc, ms: Date.now() - t0, extra: { n: lines.length, topic: (topicOf(it.q)[0] || {}).id || null, pat: real ? real.id : null, guess: guess || null, patOk } });
+    result(f.body, sc, `${lines.length} فكرة بـ${Math.min(30, Math.round((Date.now() - t0) / 1000))} ثانية${lines.length >= 3 ? ' ✓' : ' — الهدف 3'}${real ? (patOk ? ' · النمط ✓' : guess ? ' · النمط ✗' : '') : ''}`, (real ? `<h3>🧭 النمط: ${real.ic} ${esc(real.ar)} ${guess ? (patOk ? '<span style="color:var(--teal)">✓ عرفته</span>' : `<span style="color:#b91c1c">✗ اخترت «${esc((PATTERNS.find(p => p.id === guess) || {}).ar || guess)}»</span>`) : '<small class="hl-tip">(ما اخترت النمط — المرة الجاية اختره قبل الأفكار)</small>'}</h3>${patternHtml(real, 'is', it.q)}` : '') + `<h3>أفكارك</h3><div class="model">${esc(lines.join('\n')) || '(فاضي)'}</div><h3>أفكار جاهزة للمقارنة</h3>${ideaHtml(it.q, 'topic')}<div class="hl-tip" style="margin-top:6px">الفكرة ما تحتاج تكون ذكية — تحتاج تكون واضحة وتقدر تعطي عليها سبب ومثال. لو ما جتك فكرة: خذ «رأي ← سبب ← مثال من شغلك» أو «قبل ← الحين ← بعدين».</div>`);
     again(f.body, DRILLS.ideas, '🔄 سؤال جديد');
   }
 };
@@ -1164,7 +1433,7 @@ const WAIT_HTML = '<div class="stim" style="padding:18px;text-align:center;font-
 function startFullMock(coach) {
   if (MOCK.full) return; coach = coach === true;
   if (!confirm(coach ? 'محاكاة كاملة مدرّبة: 14 تمرين متتالي بترتيب الاختبار (~50 دقيقة). الأجوبة والنماذج مخفية للنهاية، لكن المدرّب الحي يوجهك أثناء الكتابة والكلام والفقرة المثقوبة. جهّز المايك والسبيكر. جاهز؟' : 'محاكاة كاملة صارمة: 14 تمرين متتالي بدون أي تلميح ولا توجيه ولا نتائج حتى النهاية (~50 دقيقة) — مثل الاختبار تمامًا. جهّز المايك والسبيكر. جاهز؟')) return;
-  MOCK.on = true; MOCK.full = true; MOCK.coach = coach; MOCK.locked = false; MOCK.section = null; MOCK.secDrill = null; MOCK.results = []; MOCK.t0 = Date.now(); MOCK.queue = FULL_SEQ.slice(1); MOCK.cur = 'rs';
+  MOCK.on = true; MOCK.full = true; MOCK.coach = coach; MOCK.locked = false; MOCK.section = null; MOCK.secDrill = null; MOCK.topicLock = null; MOCK.patDone = []; MOCK.results = []; MOCK.t0 = Date.now(); MOCK.queue = FULL_SEQ.slice(1); MOCK.cur = 'rs';
   document.body.classList.add('exam'); document.body.classList.toggle('exam-coach', coach); $('examTitle').textContent = coach ? '🧑‍🏫 محاكاة مدرّبة — المدرّب يوجهك، والنتائج بالنهاية' : '🧪 محاكاة صارمة — بدون تلميحات'; $('examLeft').textContent = FULL_SEQ.length + ' تمارين'; nav('read', 'rs');
 }
 function mockRecord(key, score) {
@@ -1255,14 +1524,14 @@ const Rec = {
 /* التنقل */
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => { if (MOCK.full) { if (!confirm('أنت في المحاكاة الكاملة. تطلع منها؟ (النتيجة تنحسب على اللي خلصته)')) return; finishFullMock(true); return; } showView(b.dataset.v); }));
 function showView(v) {
-  window.DetHighlight.dispose();
+  if (window.DetHighlight) window.DetHighlight.dispose();
   document.querySelectorAll('.view').forEach(x => x.classList.toggle('on', x.id === 'v-' + v));
   document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x.dataset.v === v));
   window.scrollTo({ top: 0 });
   if (activeTimer) { activeTimer.stop(); activeTimer = null; }
   if (v === 'home') renderHome();
 }
-function go(view, drill) { showView(view); if (drill) { const fn = DRILLS[drill]; fn && fn(); if (view === 'skills') setTimeout(() => $('skillsDrill').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); } }
+function go(view, drill) { if (view === 'run') { /* #run/ws3 = ماراثون: تمرين × عدد (من روابط الخطة) */ const m = /^([a-z]+?)(\d+)$/.exec(drill || ''); const sec = m && Object.keys(SKILLS).find(k => SKILLS[k].d.includes(m[1])); if (sec) startSectionMock(sec, 'practice', m[1], +m[2]); return; } showView(view); if (drill) { const fn = DRILLS[drill]; fn && fn(); if (view === 'skills') setTimeout(() => $('skillsDrill').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); } }
 window.addEventListener('hashchange', () => routeHash());
 function routeHash() { const h = location.hash.replace('#', ''); if (!h) return; const [v, d] = h.split('/'); go(v, d); }
 
@@ -1270,6 +1539,41 @@ function routeHash() { const h = location.hash.replace('#', ''); if (!h) return;
    الخطة (36 ساعة)
    ========================================================= */
 const PLAN = [
+  /* ⏱️ آخر 48 ساعة قبل اختبار السبت — الترتيب قبل الكم (المرحلة الحالية تظهر بالرئيسية حسب الوقت) */
+  { id: 'h48a', name: '🌙 الخميس الليلة — الترتيب أول', goal: '90 دقيقة عن النمط والقصص، وبعدها نوم', tasks: [
+    { id: 'h48a1', t: '📖 اكتب قصصك الست الجاهزة بالإنجليزي (40–70 كلمة لكل وحدة، بالماضي، وجملة مركّبة بكل قصة)', m: '30 د', go: 'skills/stories' },
+    { id: 'h48a2', t: '🧭 اقرأ أنماط الأسئلة العشرة مرة وحدة — احفظ ترتيب الخطوات مو الجمل', m: '15 د', go: 'skills/patterns' },
+    { id: 'h48a3', t: '⚡ الأفكار السريعة ×6: اختر النمط بثانيتين ثم 3 أفكار بـ30 ثانية', m: '10 د', go: 'skills/ideas' },
+    { id: 'h48a4', t: '🤖 Interactive Speaking مجموعة مع المدرّب الحي — النمط يطلع لك مع كل سؤال، تكلم 30 ثانية كاملة', m: '10 د', go: 'speak/is' },
+    { id: 'h48a5', t: '📜 Writing Sample وحدة بالمدرّب الحي — اتبع خطوات النمط، 130 كلمة', m: '10 د', go: 'write/ws' },
+    { id: 'h48a6', t: '💤 نوم 7 ساعات', m: 'إلزامي' },
+  ]},
+  { id: 'h48b', name: '☀️ الجمعة الصباح — القراءة (أضعف مهارة) ثم ماراثون الكتابة', goal: 'قراءة بالطريقة + مقالات بأنماط مختلفة + صور ورا بعض', tasks: [
+    { id: 'h48b1', t: '🧩 Read and Complete ×3 بالطريقة: أول وآخر جملة ← السهل ← القرائن ← خمّن الفاضي', m: '12 د', go: 'read/rc' },
+    { id: 'h48b2', t: '📄 Interactive Reading قطعتان — ظلّل العبارة المجيبة فقط', m: '15 د', go: 'read/ir' },
+    { id: 'h48b3', t: '🏃 ماراثون 3 مقالات بأنماط مختلفة — قبل ما تكتب: النمط ← القصة ← ابدأ', m: '20 د', go: 'run/ws3' },
+    { id: 'h48b4', t: '🖼️ ماراثون 6 صور كتابة: 3 جمل (عام ← -ing + مكان ← تخمين) بلا توقف', m: '8 د', go: 'run/wp6' },
+    { id: 'h48b5', t: '🔁 مراجعتي: كل المستحق', m: '8 د', go: 'skills/review' },
+  ]},
+  { id: 'h48c', name: '🕑 الجمعة العصر — بروفة كاملة', goal: 'محاكاة مدرّبة كاملة، وعامل كل سؤال: النمط ← القصة ← الهيكل', tasks: [
+    { id: 'h48c1', t: '🧑‍🏫 محاكاة كاملة مدرّبة (14 تمرين بترتيب الاختبار) — زر «كاملة مدرّبة» بالرئيسية', m: '50 د', go: 'home' },
+    { id: 'h48c2', t: 'راجع نتائج المحاكاة وأعد أضعف تمرينين فيها', m: '15 د', go: 'home' },
+    { id: 'h48c3', t: '⌨️ Listen and Type 9 جمل (يجي 9 مرات بالاختبار) — حرف كبير + نقطة + فاصلة', m: '10 د', go: 'listen/lt' },
+  ]},
+  { id: 'h48d', name: '🌆 الجمعة المساء — الكلام والعدة ثم نوم مبكر', goal: 'صور كلام ورا بعض + عيّنة كلام + بروفة الغرفة', tasks: [
+    { id: 'h48d1', t: '🗣️ ماراثون 4 صور كلام — 90 ثانية كاملة بكل صورة، 110+ كلمة/دقيقة', m: '8 د', go: 'run/sp4' },
+    { id: 'h48d2', t: '🎥 Speaking Sample وحدة بالنمط — 3 دقائق كاملة', m: '5 د', go: 'speak/ss' },
+    { id: 'h48d3', t: '📝 Interactive Writing وحدة — الجزء الثاني بـ As I mentioned + معلومة جديدة', m: '10 د', go: 'write/iw' },
+    { id: 'h48d4', t: '🃏 اختبار العدة (12 بطاقة) + احكِ قصصك الست بصوت عالٍ مرة', m: '10 د', go: 'skills/kit' },
+    { id: 'h48d5', t: '📹 بروفة الغرفة والجوال والكاميرا الثانية (قوانين المراقبة)', m: '20 د', link: 'det.html#proctor' },
+    { id: 'h48d6', t: '💤 نوم 7 ساعات — ممنوع السهر، الاختبار بكرة', m: 'إلزامي' },
+  ]},
+  { id: 'h48e', name: '🎯 السبت — يوم الاختبار', goal: 'إحماء خفيف فقط — لا تتعلم شيئًا جديدًا اليوم', tasks: [
+    { id: 'h48e1', t: 'إحماء 15 دقيقة فقط: Listen and Type 4 جمل + احكِ قصصك الست بصوت عالٍ', m: '15 د', go: 'listen/lt' },
+    { id: 'h48e2', t: '🧭 نظرة أخيرة على أنماط الأسئلة — الترتيب بس، لا تحفظ جملًا', m: '5 د', go: 'skills/patterns' },
+    { id: 'h48e3', t: 'طبّق قائمة «قبل الاختبار بساعة» تحت: الجهاز، الجوال، المكتب، الهوية', m: 'إلزامي' },
+    { id: 'h48e4', t: 'داخل الاختبار: النمط ← القصة ← الهيكل · لا فراغ · لا سكوت · 130 كلمة · آخر 30 ثانية للإملاء', m: '🎯' },
+  ]},
   { id: 'r', daily: true, name: '🔁 روتين 110 اليومي (~75 دقيقة) — يتصفّر كل يوم', goal: 'القراءة والكتابة أولًا (أكبر فجوتين عندك)، ثم الإملاء، ثم المحادثة — بالمدرّب الحي', tasks: [
     { id: 'r1', t: 'Read and Complete ×2 بالحجم الحقيقي (12–16 فراغ): العنوان وأول وآخر جملة ← عبّي السهل ← القرائن ← خمّن كل فراغ فاضي', m: '8 د', go: 'read/rc' },
     { id: 'r2', t: 'Fill in the Blanks جولة — كلمة محتوى، جاوب غريزيًا بـ20 ثانية', m: '4 د', go: 'read/fib' },
@@ -1414,17 +1718,18 @@ function renderPlan() {
     const c = el('div', 'card');
     const done = day.tasks.filter(t => taskDone(day, t)).length;
     c.innerHTML = `<h3>${day.name}</h3><div class="lead" style="margin:0 0 4px">${day.goal}</div><div class="bar"><i style="width:${Math.round(100 * done / day.tasks.length)}%"></i></div>`;
-    day.tasks.forEach(t => {
-      const dn = taskDone(day, t); const row = el('label', 'task' + (dn ? ' done' : ''));
-      const link = t.go ? `<a href="#${t.go}">افتح التمرين ←</a>` : t.link ? `<a href="${t.link}" ${t.link.startsWith('http') ? 'target="_blank" rel="noopener"' : ''}>افتح ←</a>` : '';
-      row.innerHTML = `<input type="checkbox" ${dn ? 'checked' : ''}><span><span class="ttl">${t.t}</span><span class="meta">${t.m} ${link}</span></span>`;
-      const cb = row.querySelector('input');
-      cb.addEventListener('change', () => { S.plan[t.id] = cb.checked ? (day.daily ? todayKey() : true) : false; save(); renderPlan(); renderHome(); });
-      row.querySelector('a')?.addEventListener('click', (e) => e.stopPropagation());
-      c.appendChild(row);
-    });
+    day.tasks.forEach(t => c.appendChild(taskRow(day, t)));
     box.appendChild(c);
   });
+}
+function taskRow(day, t) {
+  const dn = taskDone(day, t); const row = el('label', 'task' + (dn ? ' done' : ''));
+  const link = t.go ? `<a href="#${t.go}">افتح التمرين ←</a>` : t.link ? `<a href="${t.link}" ${t.link.startsWith('http') ? 'target="_blank" rel="noopener"' : ''}>افتح ←</a>` : '';
+  row.innerHTML = `<input type="checkbox" ${dn ? 'checked' : ''}><span><span class="ttl">${t.t}</span><span class="meta">${t.m} ${link}</span></span>`;
+  const cb = row.querySelector('input');
+  cb.addEventListener('change', () => { S.plan[t.id] = cb.checked ? (day.daily ? todayKey() : true) : false; save(); renderPlan(); renderHome(); });
+  row.querySelector('a')?.addEventListener('click', (e) => e.stopPropagation());
+  return row;
 }
 function renderHome() {
   const all = PLAN.flatMap(d => d.tasks); const done = PLAN.reduce((a, d) => a + d.tasks.filter(t => taskDone(d, t)).length, 0);
@@ -1441,7 +1746,7 @@ function renderHome() {
   const rec = a.rec.map(d => `<a class="btn sm${d.avg == null ? ' ghost' : ''}" href="#${DRILL_META[d.k][1]}">${DRILL_META[d.k][0]}${d.avg == null ? ' · لسا ما جربته' : ' · ' + d.avg + '%'}</a>`).join('');
   const miss = a.topMiss.map(m => `<span class="pill" style="direction:ltr">${esc(m.w)} ×${m.n}</span>`).join(' ');
   const due = dueMiss().length, act = activeMiss().length;
-  renderSync(); renderMock(); try { render110(); renderSection(); } catch (e) { console.error(e); }
+  renderSync(); renderMock(); try { render110(); renderSection(); renderH48(); } catch (e) { console.error(e); }
   if (window.DetPath120) DetPath120.mount({ state: () => S, save, toast });
   $('weakCard').innerHTML = `<h3>🎯 نقاط ضعفك — يتحدّث تلقائيًا من درجاتك</h3>${bars}<h3 style="margin-top:12px">ركّز اليوم على</h3><div class="row rec">${rec || '<span class="hl-tip">جرّب أي تمرين وبيظهر لك التوجيه هنا</span>'}</div>${act ? `<h3 style="margin-top:12px">🔁 مراجعتي: ${due} مستحقة الآن من ${act}</h3><div class="row rec"><a class="btn sm" href="#skills/review">راجع الآن</a></div>${miss ? '<div class="hl-tip" style="margin-top:6px">أكثر ما تغلط فيه: ' + miss + '</div>' : ''}` : '<div class="hl-tip" style="margin-top:8px">🔁 كل غلطة بأي تمرين تنحفظ تلقائيًا في «مراجعتي»، وتقدر تضيف أي كلمة بزر «راجعها» من نتائج التمارين.</div>'}`;
 }
@@ -1484,7 +1789,9 @@ function renderMenus() {
     { ic: '🔁', t: 'مراجعتي', s: 'كل اللي غلطت فيه + اللي علّمت عليه — بتكرار متباعد', key: 'review', hash: 'skills/review' },
     { ic: '📚', t: 'كل الكلمات بصفحة وحدة', s: 'مفردات + كلمات التمارين + كلمات الصور — بحث وفلتر «أراجعها»', key: 'words', hash: 'skills/words' },
     { ic: '📦', t: 'عدة الحفظ', s: 'الهياكل والعبارات والكلمات اللي فعلًا ينفع تحفظها — مع اختبار وتكرار متباعد', key: 'kit', hash: 'skills/kit' },
-    { ic: '⚡', t: 'الأفكار السريعة', s: '30 ثانية لثلاث أفكار على سؤال حقيقي، ثم بذور الأفكار للمقارنة', key: 'ideas', hash: 'skills/ideas' },
+    { ic: '🧭', t: 'أنماط الأسئلة', s: '10 أنماط تتكرر — الترتيب لكل نمط بـ35 ثانية و5 دقائق، وأسئلة البنك بنفس النمط', key: 'patterns', hash: 'skills/patterns' },
+    { ic: '📖', t: 'قصصي الجاهزة', s: '6 قصص من حياتك تكتبها مرة وتظهر لك مع كل سؤال يناسبها', key: 'stories', hash: 'skills/stories' },
+    { ic: '⚡', t: 'الأفكار السريعة', s: 'اعرف النمط بثانيتين ثم 3 أفكار بـ30 ثانية على سؤال حقيقي', key: 'ideas', hash: 'skills/ideas' },
     { ic: '⌨️', t: 'سرعة الطباعة', s: '60 ثانية — الهدف 35+ كلمة/دقيقة صحيحة', key: 'typing', hash: 'skills/typing' },
   ]);
 }
@@ -1523,6 +1830,7 @@ function startMock() {
    ========================================================= */
 const DRILLS = {};
 DRILLS.ideas = drillIdeas; DRILLS.kit = drillKit; DRILLS.typing = drillTyping; /* v5 (معرّفة فوق) */
+DRILLS.stories = drillStories; DRILLS.patterns = drillPatterns; /* v6 */
 
 DRILLS.rs = function () {
   const real = adaptPick(BANKS.readselect.real, x => x.level, 'rs', 10, { kinds: ['rs', 'vocab', 'fib'], keyFn: x => x.w, max: 4 }).map(x => ({ ...x, real: true }));
@@ -1556,7 +1864,7 @@ DRILLS.rs = function () {
 };
 
 DRILLS.fib = function () {
-  const items = adaptPick(BANKS.fib.items, x => x.level, 'fib', MOCK.full ? 8 : 10, { kinds: ['fib', 'rs', 'vocab'], keyFn: x => x.answer, max: 3 }); let i = 0, right = 0; const log = [];
+  const items = adaptPick(BANKS.fib.items, x => x.level, 'fib', MOCK.full ? 8 : 10, { kinds: ['fib', 'rs', 'vocab'], keyFn: x => x.answer, seenFn: x => x.sentence ? x.sentence + '|' + x.answer : x.answer, max: 3 }); let i = 0, right = 0; const log = [];
   const f = frame('readDrill', '✏️ Fill in the Blanks', 0);
   function show() {
     if (i >= items.length) return finish();
@@ -1623,21 +1931,24 @@ DRILLS.ir = function () {
   function hl(k) {
     const q = s.highlight[k];
     f.body.innerHTML = `<div class="prog">${3 + k}/6 · Highlight the Answer — تحديد الإجابة</div><div class="sent" style="margin-bottom:8px"><b>${esc(q.q)}</b></div><div class="row"><button class="btn ghost sm" id="hl-tap">تحديد باللمس: أول كلمة ثم آخر كلمة</button><button class="btn ghost sm" id="hl-clear">مسح التحديد</button></div><div class="passage" id="ptx">${esc(full)}</div><div class="hl-tip">حدد العبارة التي تجيب السؤال فقط. يظهر النص المحفوظ أدناه قبل التصحيح. النسبة تقييم تدريبي وليست درجة دولينجو الرسمية.</div><div class="hl-preview" id="hl-preview" role="status" aria-live="polite">لم تحدد إجابة بعد.</div><div class="row"><button class="btn" id="nx">تحقق</button></div>`;
-    const selection = window.DetHighlight.mount($('ptx'), $('hl-preview'), full);
+    const selection = HL().mount($('ptx'), $('hl-preview'), full);
     $('hl-tap').onclick = () => { selection.tapMode(); $('hl-tap').disabled = true; };
-    $('hl-clear').onclick = () => selection.clear();
+    $('hl-clear').onclick = () => { selection.clear(); $('hl-tap').disabled = false; /* المسح يرجّع النص العادي، فزر اللمس يرجع يشتغل */ };
     $('nx').addEventListener('pointerdown', selection.capture);
+    let warned = false;
     $('nx').onclick = () => {
       const sel = selection.value();
-      if (!sel) { toast('حدد الإجابة أولًا أو استخدم زر التحديد باللمس.'); return; }
+      /* التحديد الفاضي ما يُحتسب غلطًا بالخطأ — لكن الضغط مرة ثانية يعديك (لا تعلق بالمحاكاة الموقوتة) */
+      if (!sel && !warned) { warned = true; toast('حدد الإجابة أولًا أو استخدم «تحديد باللمس» — واضغط «تحقق» مرة ثانية للتخطي.'); return; }
       selection.destroy();
       const a = new Set(norm(q.answer).split(' ')), b = new Set(norm(sel).split(' ').filter(Boolean));
       let inter = 0; a.forEach(w => { if (b.has(w)) inter++; });
       const sc = b.size > a.size * 4 ? 0 : inter / Math.max(a.size, b.size);
       scores.hl[k] = sc; (scores.hlSel = scores.hlSel || [])[k] = sel;
       $('hl-tap').disabled = true; $('hl-clear').disabled = true;
+      if (!sel) $('hl-preview').textContent = 'تخطيت هذا السؤال بدون تحديد.';
       $('ptx').innerHTML = esc(full).replace(esc(q.answer), '<mark>' + esc(q.answer) + '</mark>');
-      f.body.querySelector('.hl-tip').innerHTML = `<b>تقييم التدريب ${Math.round(sc * 100)}%</b> — الإجابة الصحيحة مظللة بالأخضر. حددت: <span class="en">${esc(sel)}</span>`;
+      f.body.querySelector('.hl-tip').innerHTML = `<b>تقييم التدريب ${Math.round(sc * 100)}%</b> — الإجابة الصحيحة مظللة بالأخضر. ${sel ? 'حددت: <span class="en">' + esc(sel) + '</span>' : 'ما حددت شي.'}`;
       $('nx').textContent = 'التالي'; $('nx').onclick = next;
     };
   }
@@ -1648,7 +1959,7 @@ DRILLS.ir = function () {
   function next() { step++; if (step < steps.length) steps[step](); else finish(); }
   let fin = false;
   function finish() {
-    if (fin) return; fin = true; f.timer.stop(); window.DetHighlight.dispose();
+    if (fin) return; fin = true; f.timer.stop(); if (window.DetHighlight) window.DetHighlight.dispose();
     const total = (scores.gaps * gaps.length + scores.missing + scores.hl[0] + scores.hl[1] + scores.idea + scores.title) / (gaps.length + 5);
     const sc = Math.round(100 * total); learn('ir', s.level, sc >= 70); logAttempt('ir', { q: s.title, a: JSON.stringify(scores), sc, ms: Date.now() - t0, lvl: s.level, extra: scores }); setBest('ir', sc);
     const rv = [];
@@ -1688,8 +1999,8 @@ DRILLS.lt = function () {
   }
   function finish() {
     const sc = Math.round(100 * sum / items.length); setBest('lt', sc);
-    log.forEach(l => { if (l.r.score < 0.8) addMiss('lt', l.it.text, l.it.trap_ar, 'إملاء'); });
-    const rows = log.map(l => `<div class="card" style="padding:10px 12px"><div class="diff">${l.r.html}</div><div class="hl-tip" style="margin-top:4px">درجتك ${Math.round(l.r.score * 100)}% · ${l.r.punct ? '' : '⚠️ ' + (l.r.notes || []).join(' · ') + ' · '}${bidi(l.it.trap_ar)} ${flagBtn('lt', l.it.text, l.it.trap_ar, 'إملاء')}</div></div>`).join('');
+    log.forEach(l => { if (l.r.score < 0.8) addMiss('lt', l.it.text, l.it.trap_ar || '', 'إملاء'); });
+    const rows = log.map(l => `<div class="card" style="padding:10px 12px"><div class="diff">${l.r.html}</div><div class="hl-tip" style="margin-top:4px">درجتك ${Math.round(l.r.score * 100)}% · ${l.r.punct ? '' : '⚠️ ' + (l.r.notes || []).join(' · ') + ' · '}${bidi(l.it.trap_ar || '')} ${flagBtn('lt', l.it.text, l.it.trap_ar || '', 'إملاء')}</div></div>`).join('');
     result(f.body, sc, 'متوسط تطابق الكلمات', `<div class="hl-tip">🟩 صح · 🟨 كلمة كتبتها غلط · 🟥 كلمة فاتتك (تنقّص أكثر من الغلط — اكتب أي تخمين دائمًا)</div>${rows}`);
     again(f.body, DRILLS.lt, '🔄 6 جمل جديدة');
   }
@@ -1797,9 +2108,9 @@ DRILLS.wp = function () {
   f.timer.start();
 };
 DRILLS.iw = function () {
-  const it = pickNew(BANKS.writing.interactive, 'iw', x => x.prompt);
+  const it = pickPrompt(BANKS.writing.interactive, 'iw', x => x.prompt);
   const f = frame('writeDrill', '📝 Interactive Writing — الجزء 1', 300);
-  f.body.innerHTML = `<div class="sent" style="font-size:15px">${esc(it.prompt)}</div><div class="hl-tip">موقفك مباشرة ← سببان كل واحد بمثال شخصي ← جملة مركّبة وحدة على الأقل ← Overall. الهدف 110+ كلمة (عدد تدريبي مرن). آخر دقيقة مراجعة إملاء.</div>${ideaWrap(it.prompt, 'topic')}`;
+  f.body.innerHTML = `<div class="sent" style="font-size:15px">${esc(it.prompt)}</div><div class="hl-tip">موقفك مباشرة ← سببان كل واحد بمثال شخصي ← جملة مركّبة وحدة على الأقل ← Overall. الهدف 110+ كلمة (عدد تدريبي مرن). آخر دقيقة مراجعة إملاء.</div>${patStrip(it.prompt, 'iw')}${ideaWrap(it.prompt, 'topic')}`;
   writingBox(f.body, 110, null, (t1, n1, s1) => {
     const rep1 = gradeWriting(t1, { prompt: it.prompt, keywords: kwFrom(it.prompt + ' ' + it.model1_90), min: 110, kind: 'interactive' });
     const f2 = frame('writeDrill', '📝 Interactive Writing — الجزء 2 (سؤال المتابعة)', 180);
@@ -1816,10 +2127,10 @@ DRILLS.iw = function () {
   f.timer.start();
 };
 DRILLS.ws = function () {
-  const it = pickNew(BANKS.writing.sample, 'ws', x => x.prompt);
+  const it = pickPrompt(BANKS.writing.sample, 'ws', x => x.prompt);
   const f = frame('writeDrill', '📜 Writing Sample', 300);
   const wk = writeKindOf('ws', it.prompt);
-  f.body.innerHTML = `<div class="sent" style="font-size:15px">${esc(it.prompt)}</div><div class="hl-tip">${wk === 'recount' ? 'سؤال «احكِ موقفًا»: زمان ومكان ← المشكلة ← First / Then / Finally ← النتيجة ← الدرس. كله بالماضي.' : 'جواب مباشر ← فكرتان كل وحدة بمثال ← جملة مركّبة ← Overall.'} جاوب <b>كل</b> الأسئلة الفرعية. 120+ كلمة. آخر 45 ثانية مراجعة. هذي العيّنة تروح للجامعة.</div>${ideaWrap(it.prompt, 'topic')}`;
+  f.body.innerHTML = `<div class="sent" style="font-size:15px">${esc(it.prompt)}</div><div class="hl-tip">${wk === 'recount' ? 'سؤال «احكِ موقفًا»: زمان ومكان ← المشكلة ← First / Then / Finally ← النتيجة ← الدرس. كله بالماضي.' : wk.startsWith('pat:') ? 'قبل ما تكتب: النمط (تحت) ← قصتك المناسبة ← ابدأ بأول خطوة فورًا.' : 'جواب مباشر ← فكرتان كل وحدة بمثال ← جملة مركّبة ← Overall.'} جاوب <b>كل</b> الأسئلة الفرعية. 120+ كلمة. آخر 45 ثانية مراجعة. هذي العيّنة تروح للجامعة.</div>${patStrip(it.prompt, 'ws')}${ideaWrap(it.prompt, 'topic')}`;
   writingBox(f.body, 120, null, (txt, n, sig) => {
     const rep = gradeWriting(txt, { prompt: it.prompt, keywords: kwFrom(it.prompt + ' ' + it.model_90), min: 120, kind: 'sample' });
     const s = rep ? rep.score : writeScore(n, 120, sig, 5);
@@ -1847,7 +2158,7 @@ DRILLS.sum = function () {
 /* =========================================================
    المحادثة
    ========================================================= */
-function speakBox(body, prepSec, speakSec, onDone, kind) {
+function speakBox(body, prepSec, speakSec, onDone, kind, pat) {
   const drill = body.closest('.drill'); const tmEl = drill.querySelector('#tm'), tbEl = drill.querySelector('#tb');
   body.insertAdjacentHTML('beforeend', `<div class="row" id="ctl"><button class="btn" id="st">🎙️ ابدأ التسجيل</button></div><div class="rec" id="rc" style="display:none"><span class="dot"></span><b>يسجّل…</b><button class="btn sm danger" id="sp">إيقاف وإرسال</button></div><div id="scBox"></div><div class="transcript" id="tr" style="display:none"></div>`);
   let phase = 'prep';
@@ -1857,7 +2168,7 @@ function speakBox(body, prepSec, speakSec, onDone, kind) {
   async function startRec() {
     if (started) return; started = true; phase = 'speak'; prep && prep.stop(); $('ctl').style.display = 'none'; $('rc').style.display = 'flex'; $('tr').style.display = 'block'; $('tr').textContent = '(النص يظهر هنا إذا متصفحك يدعم التحويل — كروم)';
     /* المدرّب الحي أثناء الكلام: مراحل الجواب بالوقت + هيكل OREO من النص المحوّل */
-    const coach = kind ? speakCoach($('scBox'), kind, speakSec) : null;
+    const coach = kind ? speakCoach($('scBox'), kind, speakSec, pat) : null;
     await Rec.start((t) => { $('tr').textContent = t; coach && coach.text(t); });
     const tm = useTimer(new Timer(speakSec, tmEl, tbEl, stop)); tm.start();
     $('sp').onclick = stop; let fin = false;
@@ -1884,9 +2195,9 @@ DRILLS.sp = function () {
   }, 'photo');
 };
 DRILLS.rts = function () {
-  const it = pickNew(BANKS.speaking.rts, 'rts', x => x.prompt);
+  const it = pickPrompt(BANKS.speaking.rts, 'rts', x => x.prompt, x => x.prompt + ' ' + (x.bullets || []).join(' '));
   const f = frame('speakDrill', '📖 Read Then Speak', 0);
-  f.body.innerHTML = `<div class="sent" style="font-size:15px"><b>${esc(it.prompt)}</b><ul style="margin:6px 0 0 18px">${it.bullets.map(b => `<li>${esc(b)}</li>`).join('')}</ul></div><div class="hl-tip">20 ثانية تحضير: فكرة لكل نقطة (ماضي ← حاضر ← مستقبل ينقذك). ثم جاوب النقاط بالترتيب (~25 ثانية لكل وحدة) واربطها: <span class="en2">In regard to the second question, … · As for the final question, … · Returning to the first question, I'd also like to add that …</span></div>${ideaWrap(it.prompt + ' ' + it.bullets.join(' '), 'topic')}`;
+  f.body.innerHTML = `<div class="sent" style="font-size:15px"><b>${esc(it.prompt)}</b><ul style="margin:6px 0 0 18px">${it.bullets.map(b => `<li>${esc(b)}</li>`).join('')}</ul></div><div class="hl-tip">20 ثانية تحضير: فكرة لكل نقطة (ماضي ← حاضر ← مستقبل ينقذك). ثم جاوب النقاط بالترتيب (~25 ثانية لكل وحدة) واربطها: <span class="en2">In regard to the second question, … · As for the final question, … · Returning to the first question, I'd also like to add that …</span></div>${patStrip(it.prompt + ' ' + it.bullets.join(' '), 'rts')}${ideaWrap(it.prompt + ' ' + it.bullets.join(' '), 'topic')}`;
   speakBox(f.body, 20, 90, (r) => {
     const rep = gradeSpeaking(r, { prompt: it.prompt, keywords: kwFrom(it.prompt + ' ' + it.bullets.join(' ') + ' ' + it.model), kind: 'rts' });
     const s = speakResult(f.body, r, 90, `<h3>مخطط الإجابة</h3><div class="arnote explain">${bidi(it.outline_ar)}</div><h3>نموذج (~140 كلمة)</h3><div class="model">${esc(it.model)}</div>`, rep);
@@ -1896,13 +2207,13 @@ DRILLS.rts = function () {
 };
 DRILLS.is = function () {
   if (!TTS.ok()) { $('speakDrill').innerHTML = '<div class="note r">متصفحك ما يدعم النطق الآلي.</div>'; return; }
-  const set = pickNew(BANKS.speaking.interactive, 'is', x => x.topics.join('+')); let i = 0; const rs = [];
+  const set = pickPrompt(BANKS.speaking.interactive, 'is', x => x.topics.join('+'), x => x.topics.join(' ') + ' ' + (x.questions || []).map(q => q.q).join(' ')); let i = 0; const rs = [];
   const f = frame('speakDrill', '🤖 Interactive Speaking', 0);
   function show() {
     if (i >= set.questions.length) return finish();
     const q = set.questions[i]; let played = false;
     f.body.innerHTML = `<div class="prog">السؤال ${i + 1} من ${set.questions.length} · الموضوع: ${esc(set.topics[i < 3 ? 0 : 1])}</div><div class="hl-tip">تسمع السؤال <b>مرة وحدة</b> ثم يبدأ التسجيل تلقائيًا (35 ث). OREO: رأي ← سبب ← مثال ← So overall. الجواب القصير أكبر خطأ — تكلم 25–35 ثانية. ما تعرف الموضوع؟ <span class="en2">To be honest, I don't know much about this, but I guess …</span></div><div class="row"><button class="btn" id="pq">▶️ اسمع السؤال</button></div>${ideaWrap(set.topics.join(' ') + ' ' + q.q, 'topic')}<div id="sb"></div>`;
-    $('pq').onclick = async () => { if (played) return; played = true; $('pq').disabled = true; await TTS.speak(q.q, 0.95); const sb = $('sb'); sb.innerHTML = ''; speakBox(sb, 0, 35, (r) => { const rep = gradeSpeaking(r, { prompt: q.q, keywords: kwFrom(q.q + ' ' + q.model), kind: 'interactive' }); const sc = rep ? rep.score : Math.round(Math.min(1, r.dur / 35) * 100); rs.push({ q, r, rep, sc }); logAttempt('is', { q: q.q, a: r.text || '', sc, extra: rubricExtra(rep, { seconds: Math.round(r.dur), wpm: r.wpm, words: r.n }) }); i++; show(); }, 'interactive'); $('st').click(); };
+    $('pq').onclick = async () => { if (played) return; played = true; $('pq').disabled = true; await TTS.speak(q.q, 0.95); const sb = $('sb'); sb.innerHTML = patStrip(q.q, 'is'); speakBox(sb, 0, 35, (r) => { const rep = gradeSpeaking(r, { prompt: q.q, keywords: kwFrom(q.q + ' ' + q.model), kind: 'interactive' }); const sc = rep ? rep.score : Math.round(Math.min(1, r.dur / 35) * 100); rs.push({ q, r, rep, sc }); logAttempt('is', { q: q.q, a: r.text || '', sc, extra: rubricExtra(rep, { seconds: Math.round(r.dur), wpm: r.wpm, words: r.n }) }); i++; show(); }, 'interactive', patternOf(q.q)); $('st').click(); };
   }
   function finish() {
     const avg = Math.round(rs.reduce((a, x) => a + x.sc, 0) / rs.length); setBest('is', avg);
@@ -1912,15 +2223,15 @@ DRILLS.is = function () {
   show();
 };
 DRILLS.ss = function () {
-  const it = pickNew(BANKS.speaking.sample, 'ss', x => x.prompt);
+  const it = pickPrompt(BANKS.speaking.sample, 'ss', x => x.prompt);
   const f = frame('speakDrill', '🎥 Speaking Sample', 0);
-  f.body.innerHTML = `<div class="sent" style="font-size:15px"><b>${esc(it.prompt)}</b></div><div class="hl-tip">30 ثانية تحضير: اختر 2–3 أفكار. ثم 3 دقائق: مقدمة تجاوب مباشرة ← نقطتان بمثال حقيقي ← خاتمة. الفيديو يشوفه مسؤول القبول — اجلس عدل وابتسم.</div>${ideaWrap(it.prompt, 'topic')}`;
+  f.body.innerHTML = `<div class="sent" style="font-size:15px"><b>${esc(it.prompt)}</b></div><div class="hl-tip">30 ثانية تحضير: اعرف النمط ← اختر قصتك ← 2–3 أفكار. ثم 3 دقائق: مقدمة تجاوب مباشرة ← نقطتان بمثال حقيقي ← خاتمة. الفيديو يشوفه مسؤول القبول — اجلس عدل وابتسم.</div>${patStrip(it.prompt, 'ss')}${ideaWrap(it.prompt, 'topic')}`;
   speakBox(f.body, 30, 180, (r) => {
     const rep = gradeSpeaking(r, { prompt: it.prompt, keywords: kwFrom(it.prompt + ' ' + it.model), kind: 'sample' });
     const s = speakResult(f.body, r, 180, `<h3>أفكار للتغطية</h3><div class="arnote explain">${bidi(it.plan_ar)}</div><h3>نموذج (~200 كلمة)</h3><div class="model">${esc(it.model)}</div>`, rep);
     setBest('ss', s); logAttempt('ss', { q: it.prompt, a: r.text || '', sc: s, extra: rubricExtra(rep, { seconds: Math.round(r.dur), wpm: r.wpm, words: r.n }) });
     again(f.body, DRILLS.ss, '🔄 موضوع جديد');
-  }, 'sample');
+  }, 'sample', patternOf(it.prompt));
 };
 
 /* =========================================================
