@@ -295,6 +295,16 @@ body.exam:not(.exam-coach) .drill .ideaWrap{display:none!important}
 body.exam:not(.exam-coach) .drill .patStrip{display:none!important}
 .storyBox .ta{min-height:100px}
 #h48Card{border:2px solid var(--amber)}
+/* مربعات الحروف: مربع لكل حرف ناقص مثل الاختبار */
+.gap .lbx{display:inline-flex;gap:2px;align-items:baseline;margin-inline-start:1px;direction:ltr}
+.gap .lb{font-family:inherit;font-size:inherit;font-weight:800;width:1.15em;min-width:20px;padding:0 1px;text-align:center;border:none;border-bottom:2px solid var(--teal2);background:#fff;color:var(--ink);outline:none;caret-color:var(--teal);direction:ltr;letter-spacing:0;border-radius:3px 3px 0 0}
+.gap .lb:focus{border-bottom-color:var(--teal);background:#f0fdfa}
+.gap .lb.ok{border-bottom-color:#22c55e;background:var(--ok-soft);color:#166534}
+.gap .lb.bad{border-bottom-color:#ef4444;background:var(--red-soft);color:#b91c1c}
+.gap.empty .lb{background:#fff7ed;border-bottom-color:#f59e0b}
+.gap .cnt{font-family:"Baloo 2",sans-serif;font-size:10px;color:var(--muted);font-weight:800;vertical-align:super;margin-inline-start:1px;user-select:none}
+.passage .gap{display:inline-flex;align-items:baseline;margin:0 2px}.passage .stem{font-weight:800;color:var(--teal)}
+.rv-why .rv-yes,.rv-why .rv-no{display:block;margin-top:3px;font-weight:700}.rv-why .rv-yes{color:#166534}.rv-why .rv-no{color:#991b1b}
 </style>
 <script src="det-scoring.js" defer></script>
 <script type="module" src="det-sync.js"></script>
@@ -732,6 +742,14 @@ function mergeBanks(banks) {
   }));
   WORD_AR = null; VTHEME = null;
 }
+/* الترجمات الكاملة ومبررات كل خيار (det-explain.json) — تُطبَّق على البنوك بالعنوان أو الجملة بعد دمجها كلها */
+let EXPLAIN = null;
+function applyExplain() {
+  const E = EXPLAIN; if (!E) return;
+  (BANKS.readcomplete.passages || []).forEach(p => { const x = E.rc && E.rc[p.title]; if (x && x.ar) p.ar = x.ar; });
+  (BANKS.ireading.sets || []).forEach(s => { const x = E.ir && E.ir[s.title]; if (x) { if (x.ar) s.ar = x.ar; if (x.why) s.why = x.why; } });
+  (BANKS.fib.items || []).forEach(x => { const a = E.fib && E.fib[x.sentence]; if (a) x.ar = a; });
+}
 /* بنك اللمس يندمج هنا (قبل التوجيه بالرابط وأول تمرين) — مو داخل التحميل غير المتزامن */
 if (window.DetPracticeBank) mergeBanks(window.DetPracticeBank.banks);
 async function loadPacks() {
@@ -740,6 +758,8 @@ async function loadPacks() {
   try { const r = await fetch('det-packs.json?v=' + Date.now(), { cache: 'no-store' }); if (r.ok) { const P = await r.json(); PACKS = Object.assign({ coach: [], banks: {} }, P || {}); mergeBanks(PACKS.banks); } } catch (e) {}
   /* عدة الحفظ ومولّد الأفكار (بذور أفكار وأمثلة وكلمات لكل موضوع) */
   try { const rk = await fetch('det-kit.json?v=' + Date.now(), { cache: 'no-store' }); if (rk.ok) { const K = await rk.json(); if (K && Array.isArray(K.topics)) { KIT = Object.assign({ topics: [], frames: [], photo: [], colloc: [] }, K); TIDX = null; } } } catch (e) {}
+  /* الترجمات والمبررات آخر شي، بعد ما تندمج كل البنوك */
+  try { const re = await fetch('det-explain.json?v=' + Date.now(), { cache: 'no-store' }); if (re.ok) { const E = await re.json(); if (E && typeof E === 'object') { EXPLAIN = E; applyExplain(); } } } catch (e) {}
   try { renderCoach(); renderMenus(); render110(); renderTech(); } catch (e) { console.error(e); }
 }
 function renderCoach() {
@@ -1863,25 +1883,52 @@ DRILLS.rs = function () {
   show();
 };
 
+/* ---------- مربعات الحروف: مربع لكل حرف ناقص مثل الاختبار (Fill in the Blanks / Read and Complete) ----------
+   المؤشر ينتقل وحده للمربع الجاي، Backspace يرجع، اللصق يوزّع الحروف، والقيمة الكاملة في input مخفي بنفس المعرّف عشان التحقق والمدرّب الحي. */
+function letterGap(id, stem, miss) {
+  return `<span class="gap" data-gap="${esc(id)}"><span class="stem">${esc(stem)}</span><span class="lbx">${Array.from({ length: miss }, (_, i) => `<input class="lb" data-i="${i}" maxlength="1" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="text" aria-label="حرف ${i + 1} من ${miss}">`).join('')}</span><input type="hidden" id="${esc(id)}" value=""><sup class="cnt" title="${miss} حروف ناقصة">${miss}</sup></span>`;
+}
+function wireLetterGaps(root, onEnter) {
+  root.querySelectorAll('.gap[data-gap]').forEach(g => {
+    const boxes = [...g.querySelectorAll('.lb')], hid = g.querySelector('input[type=hidden]');
+    const sync = () => { hid.value = boxes.map(b => b.value).join(''); hid.dispatchEvent(new Event('input')); };
+    const clean = (s) => String(s || '').replace(/[^A-Za-z'\-]/g, '');
+    boxes.forEach((b, i) => {
+      b.addEventListener('input', () => { const v = clean(b.value).slice(-1); b.value = v; sync(); if (v && boxes[i + 1]) boxes[i + 1].focus(); });
+      b.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !b.value && boxes[i - 1]) { e.preventDefault(); boxes[i - 1].value = ''; boxes[i - 1].focus(); sync(); }
+        else if (e.key === 'ArrowLeft' && boxes[i - 1]) { e.preventDefault(); boxes[i - 1].focus(); }
+        else if (e.key === 'ArrowRight' && boxes[i + 1]) { e.preventDefault(); boxes[i + 1].focus(); }
+        else if (e.key === ' ') { e.preventDefault(); if (boxes[i + 1]) boxes[i + 1].focus(); }
+        else if (e.key === 'Enter') { e.preventDefault(); if (onEnter) onEnter(); else { /* بالفقرة: Enter يوديك لأول مربع فاضي بعدك */ const all = [...root.querySelectorAll('.lb')]; const nx = all.slice(all.indexOf(b) + 1).find(x => !x.value && !x.disabled); nx && nx.focus(); } }
+      });
+      b.addEventListener('paste', (e) => { const t = clean((e.clipboardData || window.clipboardData).getData('text')); if (!t) return; e.preventDefault(); for (let k = 0; k < t.length && boxes[i + k]; k++) boxes[i + k].value = t[k]; sync(); (boxes[Math.min(boxes.length - 1, i + t.length)] || b).focus(); });
+      b.addEventListener('focus', () => { try { b.select(); } catch (x) {} });
+    });
+  });
+}
+/* بعد التحقق: لوّن المربعات، واكتب الحروف الصح مكان الغلط (الأحمر = الصح اللي فاتك) */
+function gapReveal(id, ok, letters) { const g = document.querySelector(`.gap[data-gap="${id}"]`); if (!g) return; g.querySelectorAll('.lb').forEach((b, i) => { b.disabled = true; b.classList.add(ok ? 'ok' : 'bad'); if (!ok) b.value = letters[i] || ''; }); }
+const gapFocus = (id) => { const b = document.querySelector(`.gap[data-gap="${id}"] .lb`); b && b.focus(); };
+
 DRILLS.fib = function () {
   const items = adaptPick(BANKS.fib.items, x => x.level, 'fib', MOCK.full ? 8 : 10, { kinds: ['fib', 'rs', 'vocab'], keyFn: x => x.answer, seenFn: x => x.sentence ? x.sentence + '|' + x.answer : x.answer, max: 3 }); let i = 0, right = 0; const log = [];
   const f = frame('readDrill', '✏️ Fill in the Blanks', 0);
   function show() {
     if (i >= items.length) return finish();
     const it = items[i]; const miss = it.answer.length - it.stem.length;
-    const html = esc(it.sentence).replace(esc(it.answer), `<span class="gap"><span class="stem">${esc(it.stem)}</span><input id="g" maxlength="${miss}" size="${miss}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${'_'.repeat(miss)}"></span>`);
-    f.body.innerHTML = `<div class="prog">الجملة ${i + 1} من ${items.length} · <span class="timer" id="t2" style="font-size:16px"></span></div><div class="tbar"><i id="b2"></i></div><div class="sent">${html}</div><div class="hl-tip" style="margin-top:6px">عدد الفراغات = عدد الحروف الناقصة (${miss}). اضغط Enter للتحقق.</div><div class="row"><button class="btn sm" id="chk">تحقق</button></div>`;
-    const inp = f.body.querySelector('#g'); inp.focus(); const t0 = Date.now();
+    const html = esc(it.sentence).replace(esc(it.answer), letterGap('g', it.stem, miss));
+    f.body.innerHTML = `<div class="prog">الجملة ${i + 1} من ${items.length} · <span class="timer" id="t2" style="font-size:16px"></span></div><div class="tbar"><i id="b2"></i></div><div class="sent">${html}</div><div class="hl-tip" style="margin-top:6px">مثل الاختبار: مربع لكل حرف ناقص (${miss} ${miss === 1 ? 'حرف' : 'حروف'}) — اكتب والمؤشر ينتقل وحده. Enter للتحقق.</div><div class="row"><button class="btn sm" id="chk">تحقق</button></div>`;
+    const inp = f.body.querySelector('#g'); wireLetterGaps(f.body, () => answer(inp.value)); gapFocus('g'); const t0 = Date.now();
     const tm = useTimer(new Timer(20, f.body.querySelector('#t2'), f.body.querySelector('#b2'), () => answer(inp.value)));
-    tm.start();
-    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') answer(inp.value); });
+    tm.start(); let answered = false;
     f.body.querySelector('#chk').addEventListener('click', () => answer(inp.value));
-    function answer(v) { tm.stop(); const guess = (it.stem + (v || '')).toLowerCase(); const ok = guess === it.answer.toLowerCase(); if (ok) right++; learn('fib', it.level, ok); logAttempt('fib', { q: it.sentence, a: guess, ok, ms: Date.now() - t0, lvl: it.level }); log.push({ it, guess, ok }); i++; show(); }
+    function answer(v) { if (answered) return; answered = true; tm.stop(); const guess = (it.stem + (v || '')).toLowerCase(); const ok = guess === it.answer.toLowerCase(); if (ok) right++; learn('fib', it.level, ok); logAttempt('fib', { q: it.sentence, a: guess, ok, ms: Date.now() - t0, lvl: it.level }); log.push({ it, guess, ok }); i++; show(); }
   }
   function finish() {
     const sc = Math.round(100 * right / items.length); setBest('fib', sc);
     log.forEach(l => { if (!l.ok) addMiss('fib', l.it.answer, l.it.hint_ar, l.it.clue_ar); });
-    const rows = log.map(l => `<div class="li ${l.ok ? 'ok' : 'bad'}"><span class="w">${esc(l.it.answer)}</span><span>${l.ok ? '✓' : 'كتبت: <b class="en">' + esc(l.guess) + '</b> · '}${bidi(l.it.hint_ar)} — <em>${bidi(l.it.clue_ar)}</em> ${flagBtn('fib', l.it.answer, l.it.hint_ar, l.it.clue_ar)}</span></div>`).join('');
+    const rows = log.map(l => `<div class="li ${l.ok ? 'ok' : 'bad'}"><span class="w">${esc(l.it.answer)}</span><span>${l.ok ? '✓' : 'كتبت: <b class="en">' + esc(l.guess) + '</b> · '}${bidi(l.it.hint_ar)} — <em>${bidi(l.it.clue_ar)}</em> ${flagBtn('fib', l.it.answer, l.it.hint_ar, l.it.clue_ar)}${l.it.ar ? '<div class="arnote" style="margin:3px 0 0;font-size:13px">📖 ' + bidi(l.it.ar) + '</div>' : ''}</span></div>`).join('');
     result(f.body, sc, `${right} من ${items.length}`, `<h3>🧑‍🏫 مراجعة فورية</h3><div class="rv-tip">لكل غلطة: وش كتبت، الكلمة الصح ومعناها، والقرينة اللي كانت بالجملة.</div><div class="list">${rows}</div>`); again(f.body, DRILLS.fib);
   }
   show();
@@ -1893,18 +1940,19 @@ DRILLS.rc = function () {
   const gaps = []; let n = 0;
   /* بحجم الاختبار الحقيقي: 12–16 فراغًا — الزيادة كلمات نحوية مثل الاختبار (تختلف كل مرة) */
   const text = augmentGaps(p.text, 12 + Math.floor(Math.random() * 5));
-  const html = esc(text).replace(/\{([^}]+)\}/g, (m, w) => { const stem = w.slice(0, Math.floor(w.length / 2)); const miss = w.length - stem.length; gaps.push({ w, stem, miss, id: 'rc' + (n++) }); return `<span class="gap"><span class="stem">${esc(stem)}</span><input id="${'rc' + (n - 1)}" maxlength="${miss}" size="${miss}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${'_'.repeat(miss)}"></span>`; });
-  f.body.innerHTML = `<div class="prog">${gaps.length} كلمة ناقصة (مثل الاختبار: 12–16) · المستوى ${esc(p.level)}</div><div class="passage"><b>${esc(p.title)}</b><br>${html}</div><div class="hl-tip" style="margin-top:6px">اقرأ العنوان وأول وآخر جملة أولًا، عبّي السهل، ودوّر الكلمة مكتوبة بمكان ثاني. لا تترك فراغًا — ما فيه خصم على الغلط.</div><div class="row"><button class="btn" id="chk">تحقق</button></div>`;
+  const html = esc(text).replace(/\{([^}]+)\}/g, (m, w) => { const stem = w.slice(0, Math.floor(w.length / 2)); const miss = w.length - stem.length; gaps.push({ w, stem, miss, id: 'rc' + (n++) }); return letterGap('rc' + (n - 1), stem, miss); });
+  f.body.innerHTML = `<div class="prog">${gaps.length} كلمة ناقصة (مثل الاختبار: 12–16) · المستوى ${esc(p.level)}</div><div class="passage"><b>${esc(p.title)}</b><br>${html}</div><div class="hl-tip" style="margin-top:6px">مثل الاختبار: مربع لكل حرف ناقص (الرقم الصغير = عدد الحروف). اقرأ العنوان وأول وآخر جملة أولًا، عبّي السهل، ودوّر الكلمة مكتوبة بمكان ثاني. لا تترك فراغًا — ما فيه خصم على الغلط.</div><div class="row"><button class="btn" id="chk">تحقق</button></div>`;
+  wireLetterGaps(f.body, null);
   f.timer.start();
   const coach = rcCoach(f.body, gaps, f.timer);
   f.body.querySelector('#chk').addEventListener('click', check);
   let done = false;
   function check() {
     if (done) return; done = true; f.timer.stop(); coach && coach.stop(); let right = 0;
-    const rowsRc = [], typed = []; gaps.forEach(g => { const inp = $(g.id); typed.push(g.stem + inp.value); const ok = (g.stem + inp.value).toLowerCase() === g.w.toLowerCase(); if (ok) right++; inp.classList.add(ok ? 'ok' : 'bad'); inp.disabled = true; const was = g.stem + inp.value; const isFn = !!FUNC_AR[g.w.toLowerCase()]; if (!ok) { addMiss('rc', g.w, wordAr(g.w) || (isFn ? FUNC_AR[g.w.toLowerCase()].split(' — ')[0] : ''), 'من فقرة: ' + p.title); inp.value = g.w.slice(g.stem.length); } rowsRc.push(ok ? `<div class="li ok"><span class="w">${esc(g.w)}</span><span>✓ ${flagBtn('rc', g.w, wordAr(g.w), 'من فقرة: ' + p.title)}</span></div>` : rvItem(true, `<span class="en2">${esc(g.w)}</span> — كتبت <span class="en2">${esc(was)}</span> ${flagBtn('rc', g.w, wordAr(g.w), 'من فقرة: ' + p.title)}`, sentenceWith(text, g.w), bidi(gapWhy(p, g.w)))); });
+    const rowsRc = [], typed = []; gaps.forEach(g => { const inp = $(g.id); typed.push(g.stem + inp.value); const ok = (g.stem + inp.value).toLowerCase() === g.w.toLowerCase(); if (ok) right++; const was = g.stem + inp.value; gapReveal(g.id, ok, g.w.slice(g.stem.length)); inp.disabled = true; const isFn = !!FUNC_AR[g.w.toLowerCase()]; if (!ok) { addMiss('rc', g.w, wordAr(g.w) || (isFn ? FUNC_AR[g.w.toLowerCase()].split(' — ')[0] : ''), 'من فقرة: ' + p.title); inp.value = g.w.slice(g.stem.length); } rowsRc.push(ok ? `<div class="li ok"><span class="w">${esc(g.w)}</span><span>✓ ${flagBtn('rc', g.w, wordAr(g.w), 'من فقرة: ' + p.title)}</span></div>` : rvItem(true, `<span class="en2">${esc(g.w)}</span> — كتبت <span class="en2">${esc(was)}</span> ${flagBtn('rc', g.w, wordAr(g.w), 'من فقرة: ' + p.title)}`, sentenceWith(text, g.w), bidi(gapWhy(p, g.w)))); });
     const sc = Math.round(100 * right / gaps.length); if (MOCK.full) { learn('rc', p.level, sc >= 70); logAttempt('rc', { q: p.title, a: typed.join(' '), sc, ms: Date.now() - t0, lvl: p.level, extra: { right, gaps: gaps.length } }); setBest('rc', sc); return; } learn('rc', p.level, sc >= 70); logAttempt('rc', { q: p.title, a: typed.join(' '), sc, ms: Date.now() - t0, lvl: p.level, extra: { right, gaps: gaps.length, missed: gaps.filter((g, k) => typed[k].toLowerCase() !== g.w.toLowerCase()).map(g => g.w) } }); setBest('rc', sc);
     const fnMiss = gaps.filter((g, k) => typed[k].toLowerCase() !== g.w.toLowerCase() && FUNC_AR[g.w.toLowerCase()]).length;
-    const r = el('div'); r.innerHTML = `<div class="res"><div class="score">${sc}%</div><div style="text-align:center;font-weight:800">${right} من ${gaps.length} — الحروف الحمراء هي الصح اللي فاتك</div></div><div class="arnote">${bidi(p.gist_ar)}</div>${fnMiss ? `<div class="note a" style="margin:8px 0"><b>${fnMiss} من أخطائك كلمات نحوية</b>هذي أرخص نقاط بالاختبار — the / and / it / that / is تنعبّي من القواعد بلا تفكير. راجع شرحها تحت وردّدها.</div>` : ''}${right < gaps.length ? '<h3>🧑‍🏫 مراجعة فورية — الكلمات اللي فاتتك</h3><div class="rv-tip">اقرأ الجملة، افهم ليش هذي الكلمة بالذات، وردّدها مرة. كلها انضافت لـ«مراجعتي».</div>' : '<h3>👏 كلها صح</h3>'}<div class="list">${rowsRc.join('')}</div>`;
+    const r = el('div'); r.innerHTML = `<div class="res"><div class="score">${sc}%</div><div style="text-align:center;font-weight:800">${right} من ${gaps.length} — الحروف الحمراء هي الصح اللي فاتك</div></div>${p.ar ? `<details class="tech" open><summary>📖 الترجمة الكاملة بالعربي</summary><div class="arnote" style="margin-top:4px">${bidi(p.ar)}</div></details>` : ''}<div class="arnote">${bidi(p.gist_ar)}</div>${fnMiss ?`<div class="note a" style="margin:8px 0"><b>${fnMiss} من أخطائك كلمات نحوية</b>هذي أرخص نقاط بالاختبار — the / and / it / that / is تنعبّي من القواعد بلا تفكير. راجع شرحها تحت وردّدها.</div>` : ''}${right < gaps.length ? '<h3>🧑‍🏫 مراجعة فورية — الكلمات اللي فاتتك</h3><div class="rv-tip">اقرأ الجملة، افهم ليش هذي الكلمة بالذات، وردّدها مرة. كلها انضافت لـ«مراجعتي».</div>' : '<h3>👏 كلها صح</h3>'}<div class="list">${rowsRc.join('')}</div>`;
     f.body.querySelector('.row').replaceWith(r); again(f.body, DRILLS.rc, '🔄 فقرة جديدة');
   }
 };
@@ -1962,13 +2010,17 @@ DRILLS.ir = function () {
     if (fin) return; fin = true; f.timer.stop(); if (window.DetHighlight) window.DetHighlight.dispose();
     const total = (scores.gaps * gaps.length + scores.missing + scores.hl[0] + scores.hl[1] + scores.idea + scores.title) / (gaps.length + 5);
     const sc = Math.round(100 * total); learn('ir', s.level, sc >= 70); logAttempt('ir', { q: s.title, a: JSON.stringify(scores), sc, ms: Date.now() - t0, lvl: s.level, extra: scores }); setBest('ir', sc);
-    const rv = [];
-    gaps.forEach((g, k) => { const ok = g.chosen === g.correct; rv.push(rvItem(!ok, `الفراغ ${k + 1}: ${ok ? '✓' : 'اخترت'} <span class="en2">${esc(g.chosen || '—')}</span>${ok ? '' : ' · الصح <span class="en2">' + esc(g.correct) + '</span>'}`, ok ? '' : sentenceWith(fullP1, g.correct), ok ? '' : bidi(wordAr(g.correct) ? 'المعنى: ' + wordAr(g.correct) + '. الكلمة لازم تناسب القواعد (الزمن/المفرد والجمع) والمعنى مع اللي قبلها وبعدها.' : 'الكلمة لازم تناسب القواعد (الزمن/المفرد والجمع) والمعنى مع اللي قبلها وبعدها — جرّب كل خيار بالجملة كاملة.'))); });
-    rv.push(rvItem(!scores.missing, `الجملة الناقصة: ${scores.missing ? '✓' : 'اخترت'}${scores.missing ? '' : ' <span class="en2">' + esc(s.missing_options[scores.missingChosen] || '—') + '</span>'}`, scores.missing ? '' : `<div class="ltr" style="font-family:'Baloo 2';font-size:14px">الصح: <b style="color:var(--teal)">${esc(s.missing_options[s.missing_correct])}</b></div>`, scores.missing ? '' : 'الجملة الصح تربط اللي قبلها باللي بعدها — دوّر على كلمة أو فكرة مكررة من الجملتين حولها، والخيارات الغلط تجيب معلومة جديدة ما لها علاقة.'));
-    s.highlight.forEach((q, k) => { const ok = scores.hl[k] >= 0.6; rv.push(rvItem(!ok, `تظليل ${k + 1}: ${Math.round(scores.hl[k] * 100)}% — <span class="en2">${esc(q.q)}</span>`, `<div class="ltr" style="font-family:'Baloo 2';font-size:14px">${(scores.hlSel && scores.hlSel[k]) ? 'ظللت: <i>' + esc(scores.hlSel[k]) + '</i><br>' : 'ما ظللت شي<br>'}الصح: <b style="color:var(--teal)">${esc(q.answer)}</b></div>`, ok ? '' : 'ظلّل العبارة اللي تجاوب السؤال مباشرة — لا أقل ولا أكثر. ابدأ من كلمة السؤال المفتاحية ودوّر عليها أو على مرادفها بالقطعة.')); });
-    rv.push(rvItem(!scores.idea, `الفكرة الرئيسية: ${scores.idea ? '✓' : 'اخترت'}${scores.idea ? '' : ' <span class="en2">' + esc(s.idea_options[scores.ideaChosen] || '—') + '</span>'}`, scores.idea ? '' : `<div class="ltr" style="font-family:'Baloo 2';font-size:14px">الصح: <b style="color:var(--teal)">${esc(s.idea_options[s.idea_correct])}</b></div>`, scores.idea ? '' : 'الفكرة الرئيسية تغطي القطعة كلها. الخيارات الغلط عادةً تفصيل صغير من فقرة وحدة، أو معلومة مو موجودة، أو رأي عام ما قالته القطعة.'));
-    rv.push(rvItem(!scores.title, `العنوان: ${scores.title ? '✓' : 'اخترت'}${scores.title ? '' : ' <span class="en2">' + esc(s.title_options[scores.titleChosen] || '—') + '</span>'}`, scores.title ? '' : `<div class="ltr" style="font-family:'Baloo 2';font-size:14px">الصح: <b style="color:var(--teal)">${esc(s.title_options[s.title_correct])}</b></div>`, scores.title ? '' : 'العنوان الصح يذكر الموضوع الأساسي وينطبق على القطعة من أولها لآخرها، مو على جزء منها.'));
-    result(f.body, sc, `الفراغات ${Math.round(scores.gaps * 100)}% · الجملة ${scores.missing ? '✓' : '✗'} · تظليل ${Math.round(scores.hl[0] * 100)}%/${Math.round(scores.hl[1] * 100)}% · الفكرة ${scores.idea ? '✓' : '✗'} · العنوان ${scores.title ? '✓' : '✗'}`, `<h3>🧑‍🏫 مراجعة فورية</h3><div class="rv-tip">كل سؤال: وش اخترت، وش الصح، وليش — راجعها الحين وهي طازجة.</div>${rv.join('')}<h3>الشرح العام</h3><div class="arnote explain">${bidi(s.explain_ar)}</div>`);
+    /* مبررات كل خيار (det-explain.json → s.why): ليش الصح صح وليش كل خيار ثاني غلط — تظهر حتى لو جاوبت صح */
+    const rv = []; const W = s.why || {}; const opt = (o) => `<span class="en2">${esc(o)}</span>`;
+    const wrongs = (q) => (q && q.wrong || []).map(x => `<div class="rv-no">✗ ${opt(x.option)} — ${bidi(x.why_ar)}</div>`).join('');
+    const whyOf = (q, correct, fallback) => q && q.why_ar ? `<div class="rv-yes">✓ ${opt(correct)} — ${bidi(q.why_ar)}</div>${wrongs(q)}` : (fallback ? bidi(fallback) : '');
+    const correctBox = (t) => `<div class="ltr" style="font-family:'Baloo 2';font-size:14px">الصح: <b style="color:var(--teal)">${esc(t)}</b></div>`;
+    gaps.forEach((g, k) => { const ok = g.chosen === g.correct; const q = W.gaps && W.gaps[k]; rv.push(rvItem(!ok, `الفراغ ${k + 1}: ${ok ? '✓' : 'اخترت'} ${opt(g.chosen || '—')}${ok ? '' : ' · الصح ' + opt(g.correct)}`, (q || !ok) ? sentenceWith(fullP1, g.correct) : '', whyOf(q, g.correct, ok ? '' : (wordAr(g.correct) ? 'المعنى: ' + wordAr(g.correct) + '. الكلمة لازم تناسب القواعد (الزمن/المفرد والجمع) والمعنى مع اللي قبلها وبعدها.' : 'الكلمة لازم تناسب القواعد (الزمن/المفرد والجمع) والمعنى مع اللي قبلها وبعدها — جرّب كل خيار بالجملة كاملة.')))); });
+    rv.push(rvItem(!scores.missing, `الجملة الناقصة: ${scores.missing ? '✓' : 'اخترت'}${scores.missing ? '' : ' ' + opt(s.missing_options[scores.missingChosen] || '—')}`, scores.missing && !W.missing ? '' : correctBox(s.missing_options[s.missing_correct]), whyOf(W.missing, s.missing_options[s.missing_correct], scores.missing ? '' : 'الجملة الصح تربط اللي قبلها باللي بعدها — دوّر على كلمة أو فكرة مكررة من الجملتين حولها، والخيارات الغلط تجيب معلومة جديدة ما لها علاقة.')));
+    s.highlight.forEach((q, k) => { const ok = scores.hl[k] >= 0.6; const hw = W.highlight && W.highlight[k]; rv.push(rvItem(!ok, `تظليل ${k + 1}: ${Math.round(scores.hl[k] * 100)}% — ${opt(q.q)}`, `<div class="ltr" style="font-family:'Baloo 2';font-size:14px">${(scores.hlSel && scores.hlSel[k]) ? 'ظللت: <i>' + esc(scores.hlSel[k]) + '</i><br>' : 'ما ظللت شي<br>'}الصح: <b style="color:var(--teal)">${esc(q.answer)}</b></div>`, hw && hw.why_ar ? bidi(hw.why_ar) : (ok ? '' : 'ظلّل العبارة اللي تجاوب السؤال مباشرة — لا أقل ولا أكثر. ابدأ من كلمة السؤال المفتاحية ودوّر عليها أو على مرادفها بالقطعة.'))); });
+    rv.push(rvItem(!scores.idea, `الفكرة الرئيسية: ${scores.idea ? '✓' : 'اخترت'}${scores.idea ? '' : ' ' + opt(s.idea_options[scores.ideaChosen] || '—')}`, scores.idea && !W.idea ? '' : correctBox(s.idea_options[s.idea_correct]), whyOf(W.idea, s.idea_options[s.idea_correct], scores.idea ? '' : 'الفكرة الرئيسية تغطي القطعة كلها. الخيارات الغلط عادةً تفصيل صغير من فقرة وحدة، أو معلومة مو موجودة، أو رأي عام ما قالته القطعة.')));
+    rv.push(rvItem(!scores.title, `العنوان: ${scores.title ? '✓' : 'اخترت'}${scores.title ? '' : ' ' + opt(s.title_options[scores.titleChosen] || '—')}`, scores.title && !W.title ? '' : correctBox(s.title_options[s.title_correct]), whyOf(W.title, s.title_options[s.title_correct], scores.title ? '' : 'العنوان الصح يذكر الموضوع الأساسي وينطبق على القطعة من أولها لآخرها، مو على جزء منها.')));
+    result(f.body, sc, `الفراغات ${Math.round(scores.gaps * 100)}% · الجملة ${scores.missing ? '✓' : '✗'} · تظليل ${Math.round(scores.hl[0] * 100)}%/${Math.round(scores.hl[1] * 100)}% · الفكرة ${scores.idea ? '✓' : '✗'} · العنوان ${scores.title ? '✓' : '✗'}`, `<h3>🧑‍🏫 مراجعة فورية</h3><div class="rv-tip">كل سؤال: وش اخترت، وش الصح، وليش الصح صح وليش الباقي غلط — راجعها الحين وهي طازجة.</div>${rv.join('')}${s.ar ? `<h3>📖 الترجمة الكاملة بالعربي</h3><div class="arnote">${bidi(s.ar)}</div>` : ''}<h3>الشرح العام</h3><div class="arnote explain">${bidi(s.explain_ar)}</div>`);
     again(f.body, DRILLS.ir, '🔄 قطعة جديدة');
   }
   steps[0]();
