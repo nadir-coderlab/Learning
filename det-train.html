@@ -305,6 +305,12 @@ body.exam:not(.exam-coach) .drill .patStrip{display:none!important}
 .gap .cnt{font-family:"Baloo 2",sans-serif;font-size:10px;color:var(--muted);font-weight:800;vertical-align:super;margin-inline-start:1px;user-select:none}
 .passage .gap{display:inline-flex;align-items:baseline;margin:0 2px}.passage .stem{font-weight:800;color:var(--teal)}
 .rv-why .rv-yes,.rv-why .rv-no{display:block;margin-top:3px;font-weight:700}.rv-why .rv-yes{color:#166534}.rv-why .rv-no{color:#991b1b}
+/* v8: قطعي المرنة */
+.flexLine{margin-top:6px;padding:4px 8px;background:#fff;border:1px dashed #f0c26b;border-radius:8px;font-size:13px;line-height:1.7}
+.flexLine .en2{font-size:13.5px}
+.flexCard .model mark{background:#fef08a;padding:0 2px;border-radius:3px}
+.flexTr{padding:6px 0;border-bottom:1px dashed var(--line)}
+#fxPick .btn.on{background:var(--teal);color:#fff;border-color:var(--teal)}
 </style>
 <script src="det-scoring.js" defer></script>
 <script type="module" src="det-sync.js"></script>
@@ -460,7 +466,7 @@ const SK = 'detTrainer.v1';
 let S = store.get(SK, { best: {}, done: {}, vocab: {}, lessons: {}, plan: {} });
 fixState();
 function fixState() {
-  ['hist', 'miss', 'mastered', 'ab', 'best', 'done', 'vocab', 'lessons', 'plan', 'stories', 'patSeen'].forEach(k => { if (!S[k] || typeof S[k] !== 'object' || Array.isArray(S[k])) S[k] = {}; }); ['log', 'mocks'].forEach(k => { if (!Array.isArray(S[k])) S[k] = []; });
+  ['hist', 'miss', 'mastered', 'ab', 'best', 'done', 'vocab', 'lessons', 'plan', 'stories', 'patSeen', 'flex'].forEach(k => { if (!S[k] || typeof S[k] !== 'object' || Array.isArray(S[k])) S[k] = {}; }); ['log', 'mocks'].forEach(k => { if (!Array.isArray(S[k])) S[k] = []; });
   if (!S.seen || typeof S.seen !== 'object' || Array.isArray(S.seen)) S.seen = {}; if (!Number.isFinite(S.sq)) S.sq = 0;
   if (!S.sec || typeof S.sec !== 'object' || Array.isArray(S.sec)) S.sec = {}; if (!Array.isArray(S.official)) S.official = []; S.official = S.official.filter(o => o && typeof o === 'object' && Number.isFinite(o.overall)); if (S.coach == null) S.coach = true;
   /* تنظيف القيم التالفة (استرجاع قديم أو تعديل يدوي) */
@@ -575,7 +581,7 @@ function related(kind, pool, keyFn, missKinds, max, fresh) {
   return shuffle(scored.slice(0, Math.max(max * 3, 6)).map(r => r.x)).slice(0, max);
 }
 const SKILLS = { reading: { ar: 'القراءة', d: ['rs', 'fib', 'rc', 'ir', 'evidence'] }, listening: { ar: 'الاستماع', d: ['lt', 'il'] }, writing: { ar: 'الكتابة', d: ['wp', 'iw', 'ws', 'sum', 'rewrite'] }, speaking: { ar: 'المحادثة', d: ['sp', 'rts', 'is', 'ss'] } };
-const DRILL_META = { evidence: ['الاستنتاج والدليل', 'read/evidence'], rewrite: ['إعادة صياغة إجاباتي', 'write/rewrite'], ideas: ['⚡ الأفكار السريعة', 'skills/ideas'], kit: ['📦 عدة الحفظ', 'skills/kit'], typing: ['⌨️ سرعة الطباعة', 'skills/typing'], rs: ['🔤 Read and Select', 'read/rs'], fib: ['✏️ Fill in the Blanks', 'read/fib'], rc: ['🧩 Read and Complete', 'read/rc'], ir: ['📄 Interactive Reading', 'read/ir'], lt: ['⌨️ Listen and Type', 'listen/lt'], il: ['💬 Interactive Listening', 'listen/il'], wp: ['🖼️ Write About the Photo', 'write/wp'], iw: ['📝 Interactive Writing', 'write/iw'], ws: ['📜 Writing Sample', 'write/ws'], sum: ['🗒️ Summarize', 'write/sum'], sp: ['🖼️ Speak About the Photo', 'speak/sp'], rts: ['📖 Read Then Speak', 'speak/rts'], is: ['🤖 Interactive Speaking', 'speak/is'], ss: ['🎥 Speaking Sample', 'speak/ss'] };
+const DRILL_META = { flex: ['📦 قطعي المرنة (تبديل سريع)', 'skills/flex'], evidence: ['الاستنتاج والدليل', 'read/evidence'], rewrite: ['إعادة صياغة إجاباتي', 'write/rewrite'], ideas: ['⚡ الأفكار السريعة', 'skills/ideas'], kit: ['📦 عدة الحفظ', 'skills/kit'], typing: ['⌨️ سرعة الطباعة', 'skills/typing'], rs: ['🔤 Read and Select', 'read/rs'], fib: ['✏️ Fill in the Blanks', 'read/fib'], rc: ['🧩 Read and Complete', 'read/rc'], ir: ['📄 Interactive Reading', 'read/ir'], lt: ['⌨️ Listen and Type', 'listen/lt'], il: ['💬 Interactive Listening', 'listen/il'], wp: ['🖼️ Write About the Photo', 'write/wp'], iw: ['📝 Interactive Writing', 'write/iw'], ws: ['📜 Writing Sample', 'write/ws'], sum: ['🗒️ Summarize', 'write/sum'], sp: ['🖼️ Speak About the Photo', 'speak/sp'], rts: ['📖 Read Then Speak', 'speak/rts'], is: ['🤖 Interactive Speaking', 'speak/is'], ss: ['🎥 Speaking Sample', 'speak/ss'] };
 function recent(key, n = 3) { const h = S.hist[key] || []; if (!h.length) return null; const last = h.slice(-n); return Math.round(last.reduce((a, x) => a + x.s, 0) / last.length); }
 function analyze() {
   const skills = Object.entries(SKILLS).map(([k, v]) => { const vals = v.d.map(d => recent(d)).filter(x => x != null); return { k, ar: v.ar, avg: vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : null, tried: vals.length, total: v.d.length }; });
@@ -760,6 +766,8 @@ async function loadPacks() {
   try { const rk = await fetch('det-kit.json?v=' + Date.now(), { cache: 'no-store' }); if (rk.ok) { const K = await rk.json(); if (K && Array.isArray(K.topics)) { KIT = Object.assign({ topics: [], frames: [], photo: [], colloc: [] }, K); TIDX = null; } } } catch (e) {}
   /* الترجمات والمبررات آخر شي، بعد ما تندمج كل البنوك */
   try { const re = await fetch('det-explain.json?v=' + Date.now(), { cache: 'no-store' }); if (re.ok) { const E = await re.json(); if (E && typeof E === 'object') { EXPLAIN = E; applyExplain(); } } } catch (e) {}
+  /* قطعي المرنة (القطع المحفوظة ومداخلها وتحويلاتها) */
+  try { const rf = await fetch('det-flex.json?v=' + Date.now(), { cache: 'no-store' }); if (rf.ok) { const X = await rf.json(); if (X && Array.isArray(X.stories)) FLEX = X; } } catch (e) {}
   try { renderCoach(); renderMenus(); render110(); renderTech(); } catch (e) { console.error(e); }
 }
 function renderCoach() {
@@ -1312,10 +1320,11 @@ function patternHtml(p, fmt, prompt) {
 }
 /* شريط النمط تحت السؤال: اسم النمط + خطواته (يفتح كامل أول 3 مرات لكل نمط ثم يبقى مطويًا عشان تتعود تستدعيه من راسك) */
 function patStrip(prompt, fmt) {
-  const p = patternOf(prompt); if (!p) return '';
+  const p = patternOf(prompt); const fl = flexLine(prompt); /* v8: أقرب قطعة محفوظة ومدخلها */
+  if (!p) return fl ? `<div class="patStrip">${fl}</div>` : '';
   const slots = patSlots(p, fmt); const seen = (S.patSeen[p.id] = (S.patSeen[p.id] || 0) + 1); save();
   const open = seen <= 3 || MOCK.coach;
-  return `<div class="patStrip" data-fmt="${esc(fmt)}" data-prompt="${esc(String(prompt || '').slice(0, 600))}" data-pat="${p.id}"><div class="patHead"><span>🧭 النمط: <b>${p.ic} ${esc(p.ar)}</b></span><small class="hl-tip">${esc(p.cue)}</small><button type="button" class="btn sm ghost patTog">${open ? '📋 إخفاء الهيكل' : '📋 الهيكل كامل'}</button></div><div class="patChips">${slots.map((s, i) => `<span>${PAT_NUM[i]} ${esc(s.k)}</span>`).join('')}</div><div class="patFull"${open ? '' : ' hidden'}>${open ? patternHtml(p, fmt, prompt) : ''}</div></div>`;
+  return `<div class="patStrip" data-fmt="${esc(fmt)}" data-prompt="${esc(String(prompt || '').slice(0, 600))}" data-pat="${p.id}"><div class="patHead"><span>🧭 النمط: <b>${p.ic} ${esc(p.ar)}</b></span><small class="hl-tip">${esc(p.cue)}</small><button type="button" class="btn sm ghost patTog">${open ? '📋 إخفاء الهيكل' : '📋 الهيكل كامل'}</button></div><div class="patChips">${slots.map((s, i) => `<span>${PAT_NUM[i]} ${esc(s.k)}</span>`).join('')}</div>${fl}<div class="patFull"${open ? '' : ' hidden'}>${open ? patternHtml(p, fmt, prompt) : ''}</div></div>`;
 }
 document.addEventListener('click', (e) => {
   const b = e.target.closest('.patTog'); if (!b) return; const w = b.closest('.patStrip'); const full = w.querySelector('.patFull'); const p = PATTERNS.find(x => x.id === w.dataset.pat); if (!p) return;
@@ -1370,6 +1379,148 @@ function renderH48() {
   $('h48All').onclick = () => { const p = $('plan'); p && p.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 }
 
+/* =========================================================
+   v8 — قطعي المرنة: 7 قطع محفوظة (من دليل المتدرب) تتبدل حسب السؤال — أقرب قطعة ومدخلها تحت كل سؤال، حفظ تدريجي، تبديل سريع، قراءة بصوت، مفاتيح التحويل
+   ========================================================= */
+let FLEX = null; /* det-flex.json */
+const flexStory = (id) => (FLEX && (FLEX.stories || []).find(s => s.id === +id)) || null;
+const flexWords = (s) => words(String(s || '')).map(w => w.toLowerCase().replace(/[^a-z0-9']/g, '')).filter(Boolean);
+/* أقرب قطعة للسؤال: تحويل جاهز بنفس نص السؤال ← كلمات الإشارة + النمط */
+function flexFor(prompt) {
+  if (!FLEX) return null; const raw = String(prompt || '').trim(); const t = raw.toLowerCase(); if (!t) return null;
+  const T = FLEX.transforms || [];
+  const exact = T.find(x => x.q.toLowerCase().trim() === t) || T.find(x => { const a = x.q.toLowerCase().slice(0, 70), b = t.slice(0, 70); return a.length > 25 && (t.includes(a) || x.q.toLowerCase().includes(b)); });
+  if (exact) { const st = flexStory(exact.story); if (st) return { story: st, tr: exact, opener: { en: exact.opener_en, when_ar: '' }, how: 'exact' }; }
+  const p = patternOf(raw); let best = null, bs = 0;
+  (FLEX.stories || []).forEach(st => { let sc = 0; (st.cues || []).forEach(c => { if (t.includes(String(c).toLowerCase())) sc += c.includes(' ') ? 2 : 1; }); if (p && (st.patterns || []).indexOf(p.id) >= 0) sc += 1.5; if (sc > bs) { bs = sc; best = st; } });
+  if (!best) return null;
+  const qw = new Set(flexWords(raw).filter(w => w.length > 3 && !STOP.has(w)));
+  const op = (best.openers || []).map(o => ({ o, sc: flexWords(o.en).filter(w => qw.has(w)).length })).sort((a, b) => b.sc - a.sc)[0];
+  return { story: best, tr: null, opener: op ? op.o : (best.openers || [])[0], how: 'cues' };
+}
+/* سطر «قطعتك الأقرب» تحت السؤال */
+function flexLine(prompt) {
+  const f = flexFor(prompt); if (!f) return '';
+  const op = f.opener ? f.opener.en : '';
+  return `<div class="flexLine">📦 قطعتك الأقرب: <b>${f.story.id}. ${esc(f.story.name_ar)}</b>${op ? ` — المدخل: <span class="en2">${esc(op)}</span>` : ''}${f.tr && f.tr.change_ar ? ` <small class="hl-tip">${esc(f.tr.change_ar)}</small>` : ` <small class="hl-tip">غيّر 20% بس: أول جملة والسبب ومثال والخاتمة — الجسم يبقى.</small>`} <a href="#skills/flex">📦 قطعي</a></div>`;
+}
+const FLEX_LVL = [[0, 'اقرأها كاملة مرتين (30 ثانية)'], [0.3, 'اختفت 30% من الكلمات — اكتب الناقص (أول حرف معطى)'], [0.6, 'اختفت 60% — اكتب الناقص'], [1, 'اكتبها كاملة من الذاكرة']];
+function flexPage() {
+  const box = $('skillsDrill'); if (!FLEX) { box.innerHTML = '<div class="note r">⏳ ما تحمّلت قطعي المرنة بعد — أعد تحميل الصفحة.</div>'; return; }
+  const prog = S.flex || {};
+  const lvlOf = (id) => (prog[id] && prog[id].lvl) || 0;
+  box.innerHTML = `<div class="card"><h3>📦 قطعي المرنة — 7 قطع محفوظة تتبدل حسب السؤال</h3><div class="hl-tip">${esc(FLEX.rule_ar || '')}</div>${(FLEX.groups_ar || []).map(g => `<div class="note a" style="margin:6px 0"><b>💡 اختصار</b>${esc(g)}</div>`).join('')}<div class="row" style="margin-top:6px"><button type="button" class="btn" id="flexSwapBtn">🔀 تبديل سريع ×10</button><a class="btn sm ghost" href="#skills/kit">🃏 مفاتيح التحويل (بطاقات)</a><a class="btn sm ghost" href="#skills/ideas">⚡ النمط + الأفكار</a></div><details class="tech" style="margin-top:8px"><summary>📜 قواعد التحويل (من دليلك)</summary><ol>${(FLEX.rules_ar || []).map(r => `<li>${esc(r)}</li>`).join('')}</ol><b>مفاتيح المدخل</b>${(FLEX.keys || []).map(k => `<div class="kitRow"><span class="en2">${esc(k.en)}</span><span class="kitAr">${esc(k.when_ar)}</span></div>`).join('')}<b style="display:block;margin-top:6px">الخواتم</b>${(FLEX.closers || []).map(k => `<div class="kitRow"><span class="en2">${esc(k.en)}</span><span class="kitAr">${esc(k.when_ar)}</span></div>`).join('')}</details></div>` +
+    (FLEX.stories || []).map(st => { const trs = (FLEX.transforms || []).filter(x => x.story === st.id); const lv = lvlOf(st.id); return `<div class="card flexCard" data-id="${st.id}"><h3>${st.id}. ${esc(st.name_ar)} <small class="hl-tip">${esc(st.one_line_ar)}</small></h3><div class="hl-tip">📌 تنفع لـ: ${esc(st.use_ar)} · <b>${esc(st.represents_ar)}</b></div><div class="model" style="font-size:14px">${flexMarkCore(st)}</div><div class="hl-tip">المظلل = قلب القطعة (اللي لازم يبقى). مستواك بالحفظ: <b>${lv}/3</b>${prog[st.id] && prog[st.id].best != null ? ` · أفضل كتابة من الذاكرة ${prog[st.id].best}%` : ''}</div><div class="row"><button type="button" class="btn sm" data-memo="${st.id}">🧠 احفظها تدريجيًا</button><button type="button" class="btn sm ghost" data-read="${st.id}">🎙️ اقرأها بصوت</button><button type="button" class="btn sm ghost" data-recall="${st.id}">✍️ اكتبها من الذاكرة</button></div><details class="tech"><summary>🧱 الهيكل + المداخل والخواتم</summary><ol>${(st.skeleton || []).map(s => `<li class="en2" style="direction:ltr;text-align:left">${esc(s)}</li>`).join('')}</ol><b>المداخل حسب السؤال</b>${(st.openers || []).map(o => `<div class="kitRow"><span class="kitAr" style="flex:0 0 150px">${esc(o.when_ar)}</span><span class="en2">${esc(o.en)}</span></div>`).join('')}<b style="display:block;margin-top:6px">الخواتم</b>${(st.closers || []).map(o => `<div class="kitRow"><span class="kitAr" style="flex:0 0 150px">${esc(o.when_ar)}</span><span class="en2">${esc(o.en)}</span></div>`).join('')}</details>${trs.length ? `<details class="tech"><summary>🔀 تحويلات جاهزة (${trs.length} سؤال)</summary>${trs.slice(0, 40).map(x => `<div class="flexTr"><div class="en2" style="font-weight:800">${esc(x.q)}</div><div class="hl-tip">${esc(x.change_ar || '')}${x.cut ? ' · <b>خذ قلب القصة فقط</b>' : ''}</div><div class="en2">↳ ${esc(x.opener_en)}</div>${x.answer_en ? `<details><summary class="hl-tip">الجواب كامل</summary><div class="model" style="font-size:13px">${esc(x.answer_en)}</div></details>` : ''}</div>`).join('')}${trs.length > 40 ? `<div class="hl-tip">و${trs.length - 40} تحويلًا آخر يظهر لك تحت السؤال نفسه بالتمارين.</div>` : ''}</details>` : ''}</div>`; }).join('');
+  $('flexSwapBtn').onclick = () => flexSwap();
+  box.querySelectorAll('[data-memo]').forEach(b => b.onclick = () => flexMemo(+b.dataset.memo, Math.min(3, lvlOf(+b.dataset.memo) + 1)));
+  box.querySelectorAll('[data-read]').forEach(b => b.onclick = () => flexRead(+b.dataset.read));
+  box.querySelectorAll('[data-recall]').forEach(b => b.onclick = () => flexMemo(+b.dataset.recall, 3));
+}
+function flexMarkCore(st) {
+  let html = esc(st.text);
+  (st.core || []).forEach(c => { const e = esc(c); if (html.includes(e)) html = html.replace(e, '<mark>' + e + '</mark>'); });
+  return html;
+}
+/* ---------- الحفظ التدريجي: 0 اقرأ ← 30% مخفي ← 60% مخفي ← كاملة من الذاكرة ---------- */
+function flexMemo(id, lvl) {
+  const st = flexStory(id); if (!st) return; lvl = Math.max(0, Math.min(3, lvl | 0));
+  const rate = FLEX_LVL[lvl][0]; const t0 = Date.now();
+  const f = frame('skillsDrill', `🧠 ${st.id}. ${esc(st.name_ar)} — ${FLEX_LVL[lvl][1]}`, lvl === 0 ? 30 : 0, lvl === 0 ? () => next() : null);
+  const toks = String(st.text).split(/(\s+)/);
+  if (lvl === 3) {
+    f.body.innerHTML = `<div class="hl-tip">اكتب القطعة كاملة من الذاكرة (${flexWords(st.text).length} كلمة). ما فيه مؤقت — الدقة أهم من السرعة. بعدين تشوف الفرق كلمة كلمة.</div><textarea class="ta" id="flexTa" spellcheck="false" autocorrect="off" placeholder="Type the passage from memory…" style="min-height:160px"></textarea><div class="wc" id="flexWc"><b>0</b> words</div><div class="row"><button class="btn" id="flexChk">تحقق</button><button class="btn sm ghost" id="flexPeek">👁️ نظرة 5 ثوانٍ</button></div>`;
+    const ta = $('flexTa'); ta.focus(); ta.addEventListener('input', () => { $('flexWc').innerHTML = `<b>${wcount(ta.value)}</b> words`; });
+    $('flexPeek').onclick = () => { const d = el('div', 'model', esc(st.text)); d.style.fontSize = '13px'; ta.before(d); setTimeout(() => d.remove(), 5000); logAttempt('flex-peek', { q: st.name_ar, a: String(id) }); };
+    $('flexChk').onclick = () => {
+      const want = flexWords(st.text), got = flexWords(ta.value);
+      const { matched, mark } = wordDiff(want, got); const sc = Math.round(100 * matched / want.length);
+      flexProgress(id, lvl, sc); logAttempt('flex-memo', { q: st.name_ar, a: ta.value, sc, ms: Date.now() - t0, lvl: String(lvl), extra: { story: id, level: lvl, matched, total: want.length } });
+      result(f.body, sc, `${matched} من ${want.length} كلمة بمكانها${sc >= 90 ? ' ✓ محفوظة' : sc >= 70 ? ' — قريب، كررها' : ' — ارجع لمستوى 60%'}`, `<h3>الأصل — الأحمر فاتك</h3><div class="model" style="font-size:14px">${mark}</div><h3>كتابتك</h3><div class="model" style="font-size:13px">${esc(ta.value) || '(فاضي)'}</div>`);
+      const r = el('div', 'row'); r.innerHTML = `<button class="btn" id="flexAgain">🔄 مرة ثانية</button><button class="btn sm ghost" id="flexDown">⬇️ مستوى 60%</button><a class="btn sm ghost" href="#skills/flex">📦 كل القطع</a>`; f.body.appendChild(r); $('flexAgain').onclick = () => flexMemo(id, 3); $('flexDown').onclick = () => flexMemo(id, 2);
+    };
+    return;
+  }
+  /* المستويات 0–2: القطعة مع فراغات بمربعات حروف (أول حرف معطى) */
+  let wi = 0; const gaps = [];
+  const html = toks.map((tk) => { if (!tk.trim()) return tk; const core = tk.replace(/^[^A-Za-z]+/, '').replace(/[^A-Za-z]+$/, ''); wi++; if (rate === 0 || core.length < 4 || wi % (rate >= 0.6 ? 5 : 10) >= (rate >= 0.6 ? 3 : 3)) return esc(tk); const pre = tk.slice(0, tk.indexOf(core)), post = tk.slice(tk.indexOf(core) + core.length); const gid = 'fx' + gaps.length; gaps.push({ id: gid, w: core }); return esc(pre) + letterGap(gid, core[0], core.length - 1) + esc(post); }).join('');
+  f.body.innerHTML = `<div class="hl-tip">${lvl === 0 ? 'اقرأها بصوت واطي مرتين وركّز على المظلل (قلب القطعة) والكلمات الرابطة. المؤقت 30 ثانية ثم ننتقل للمستوى التالي.' : `${gaps.length} كلمة مخفية — أول حرف معطى ومربع لكل حرف. Enter ينقلك لأول فراغ فاضي.`}</div><div class="sent" style="font-size:16px;line-height:2">${lvl === 0 ? flexMarkCore(st) : html}</div><div class="row">${lvl === 0 ? '<button class="btn" id="flexNext">التالي ← 30% مخفي</button>' : '<button class="btn" id="flexChk">تحقق</button>'}</div>`;
+  if (lvl === 0) { f.timer && f.timer.start(); $('flexNext').onclick = () => next(); return; }
+  wireLetterGaps(f.body, null); gapFocus('fx0');
+  let done = false;
+  $('flexChk').onclick = () => {
+    if (done) return; done = true; let right = 0; const missed = [];
+    gaps.forEach(g => { const v = ($(g.id).value || ''); const ok = (g.w[0] + v).toLowerCase() === g.w.toLowerCase(); if (ok) right++; else missed.push(g.w); gapReveal(g.id, ok, g.w.slice(1)); });
+    const sc = Math.round(100 * right / Math.max(1, gaps.length)); flexProgress(id, lvl, sc);
+    logAttempt('flex-memo', { q: st.name_ar, a: missed.join(' '), sc, ms: Date.now() - t0, lvl: String(lvl), extra: { story: id, level: lvl, missed } });
+    const r = el('div'); r.innerHTML = `<div class="res"><div class="score">${sc}%</div><div style="text-align:center;font-weight:800">${right} من ${gaps.length}${sc >= 80 ? ' ✓' : ' — كررها قبل ما تصعد'}</div></div>${missed.length ? `<div class="hl-tip">فاتك: <span class="en2">${missed.map(esc).join(' · ')}</span> — انضافت لـ«مراجعتي».</div>` : ''}<div class="row"><button class="btn" id="flexUp">${sc >= 80 ? (lvl < 2 ? '⬆️ المستوى التالي (60%)' : '✍️ اكتبها كاملة من الذاكرة') : '🔄 نفس المستوى'}</button><a class="btn sm ghost" href="#skills/flex">📦 كل القطع</a></div>`;
+    f.body.querySelector('.row').replaceWith(r);
+    missed.forEach(w => addMiss('kit', w, 'من قطعة ' + st.id + ' — ' + st.name_ar, 'قطعي المرنة: ' + sentenceWith(st.text, w).replace(/<[^>]+>/g, '')));
+    $('flexUp').onclick = () => flexMemo(id, sc >= 80 ? lvl + 1 : lvl);
+  };
+  function next() { flexMemo(id, lvl + 1); }
+}
+function flexProgress(id, lvl, sc) {
+  S.flex = S.flex || {}; const p = S.flex[id] = S.flex[id] || { lvl: 0, best: null };
+  if (sc >= 80) p.lvl = Math.max(p.lvl, Math.min(3, lvl)); if (lvl === 3) p.best = Math.max(p.best || 0, sc); save();
+}
+/* فرق كلمة بكلمة (LCS) — الأحمر بالأصل = كلمة ما كتبتها أو غيّرت مكانها */
+function wordDiff(want, got) {
+  const n = want.length, m = got.length; const L = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = want[i] === got[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  const hit = new Array(n).fill(false); let i = 0, j = 0;
+  while (i < n && j < m) { if (want[i] === got[j]) { hit[i] = true; i++; j++; } else if (L[i + 1][j] >= L[i][j + 1]) i++; else j++; }
+  return { matched: hit.filter(Boolean).length, mark: want.map((w, k) => hit[k] ? esc(w) : `<b style="color:#b91c1c;background:var(--red-soft);border-radius:4px;padding:0 3px">${esc(w)}</b>`).join(' ') };
+}
+/* ---------- اقرأها بصوت: طلاقة القطعة المحفوظة (كلمة/دقيقة + تغطية) ---------- */
+function flexRead(id) {
+  const st = flexStory(id); if (!st) return; const target = 45;
+  const f = frame('skillsDrill', `🎙️ ${st.id}. ${esc(st.name_ar)} — اقرأها بصوت`, 0);
+  f.body.innerHTML = `<div class="hl-tip">اقرأ القطعة بصوت عالٍ بسرعة الاختبار (110+ كلمة/دقيقة، يعني ~${Math.round(flexWords(st.text).length / 110 * 60)} ثانية). بعد التسجيل: كم كلمة من القطعة طلعت بالنص المحوّل.</div><div class="model" style="font-size:15px;line-height:1.9">${flexMarkCore(st)}</div>`;
+  speakBox(f.body, 0, 60, (r) => {
+    const want = flexWords(st.text), got = new Set(flexWords(r.text)); const cov = Math.round(100 * want.filter(w => got.has(w)).length / want.length);
+    const sc = r.text ? Math.round(cov * 0.7 + Math.min(1, r.wpm / 110) * 30) : Math.round(Math.min(1, r.dur / target) * 100);
+    logAttempt('flex-read', { q: st.name_ar, a: r.text || '', sc, ms: Math.round(r.dur * 1000), extra: { story: id, wpm: r.wpm, coverage: cov } });
+    result(f.body, sc, r.text ? `تغطية ${cov}% · ${r.wpm} كلمة/دقيقة${r.wpm >= 110 ? ' ✓' : ' — الهدف 110+'}` : `تكلمت ${Math.round(r.dur)} ثانية`, (r.url ? `<audio controls src="${r.url}"></audio>` : '') + (r.text ? `<div class="transcript">${esc(r.text)}</div>` : '<div class="hl-tip">ما وصلني نص (التحويل في كروم) — التقييم على الوقت.</div>'));
+    const rr = el('div', 'row'); rr.innerHTML = `<button class="btn" id="flexReadAgain">🔄 مرة ثانية</button><a class="btn sm ghost" href="#skills/flex">📦 كل القطع</a>`; f.body.appendChild(rr); $('flexReadAgain').onclick = () => flexRead(id);
+  }, null);
+}
+/* ---------- التبديل السريع: سؤال ← اختر القطعة (5 ث) ← اكتب المدخل (25 ث) ← النموذج ---------- */
+function flexSwap() {
+  if (!FLEX) return; const T = FLEX.transforms || []; const rounds = 10; let i = 0; const log = []; const t00 = Date.now();
+  const pool = shuffle(T.map(x => ({ q: x.q, tr: x }))).slice(0, 7).concat(shuffle(allPrompts().filter(p => !T.some(x => x.q.toLowerCase() === p.q.toLowerCase()))).slice(0, 3).map(p => ({ q: p.q, tr: null })));
+  const f = frame('skillsDrill', '🔀 التبديل السريع', 0);
+  function show() {
+    if (i >= pool.length) return finish();
+    const it = pool[i]; const expect = it.tr ? flexStory(it.tr.story) : (flexFor(it.q) || {}).story; const t0 = Date.now(); let chosen = null;
+    f.body.innerHTML = `<div class="prog">${i + 1} / ${pool.length} · <span class="timer" id="t2" style="font-size:16px"></span></div><div class="tbar"><i id="b2"></i></div><div class="sent" style="font-size:15px"><b>${esc(it.q)}</b></div><div class="hl-tip">أي قطعة تستخدم؟ (5 ثوانٍ)</div><div class="row" id="fxPick">${(FLEX.stories || []).map(s => `<button type="button" class="btn sm ghost" data-s="${s.id}">${s.id}. ${esc(s.name_ar)}</button>`).join('')}</div><div id="fxStep2" hidden><div class="hl-tip">الحين اكتب <b>أول جملة</b> (المدخل) تجاوب السؤال مباشرة بكلماته — ثم تكمل بجسم القطعة كما حفظته (25 ثانية).</div><textarea class="ta" id="fxTa" spellcheck="false" placeholder="One … / I think … / In the past …" style="min-height:70px"></textarea><div class="row"><button class="btn sm" id="fxDone">تحقق</button></div></div>`;
+    const tm = useTimer(new Timer(5, f.body.querySelector('#t2'), f.body.querySelector('#b2'), () => step2())); tm.start();
+    f.body.querySelectorAll('#fxPick [data-s]').forEach(b => b.onclick = () => { chosen = +b.dataset.s; f.body.querySelectorAll('#fxPick [data-s]').forEach(x => x.classList.toggle('on', x === b)); tm.stop(); step2(); });
+    let s2 = false, tm2 = null;
+    function step2() { if (s2) return; s2 = true; tm.stop(); $('fxStep2').hidden = false; $('fxTa').focus(); tm2 = useTimer(new Timer(25, f.body.querySelector('#t2'), f.body.querySelector('#b2'), () => grade())); tm2.start(); $('fxDone').onclick = grade; }
+    let fin = false;
+    function grade() {
+      if (fin) return; fin = true; tm2 && tm2.stop(); const txt = ($('fxTa').value || '').trim();
+      const okStory = !!expect && chosen === expect.id; const kws = kwFrom(it.q, 10); const first = (txt.split(/[.!?]/)[0] || '');
+      const fw = flexWords(first); const hasKw = kws.some(k => first.toLowerCase().includes(k) || fw.some(w => w.length >= 5 && k.length >= 5 && w.slice(0, 5) === k.slice(0, 5))); const long = wcount(first) >= 6; const keyStart = /^(one |i think|i believe|in my opinion|in the past|ten years ago|recently,|my |a personal|education|learning|technology|there are)/i.test(first.trim());
+      const modelOp = it.tr ? flexWords(it.tr.opener_en) : []; const sim = modelOp.length ? fw.filter(w => modelOp.includes(w)).length / modelOp.length : 0;
+      /* المدخل مقبول لو فيه كلمة من السؤال (أو جذرها)، أو يبدأ بمفتاح تحويل، أو يشبه المدخل النموذجي — والطول 6 كلمات فأكثر */
+      const okOpen = long && (hasKw || keyStart || sim >= 0.5); const sc = (okStory ? 50 : 0) + (okOpen ? 40 : hasKw || long ? 20 : 0) + (keyStart && hasKw ? 10 : keyStart || hasKw ? 5 : 0);
+      log.push({ q: it.q, chosen, expect: expect ? expect.id : null, txt, sc, okStory, okOpen });
+      logAttempt('flex-swap', { q: it.q, a: (chosen || '—') + ' | ' + txt, sc, ms: Date.now() - t0, extra: { expect: expect ? expect.id : null, okStory, okOpen, keyStart } });
+      const model = it.tr || null; const op = model ? model.opener_en : ((flexFor(it.q) || {}).opener || {}).en || '';
+      f.body.querySelector('#fxStep2').innerHTML = `<div class="res" style="margin-top:6px"><div class="score">${sc}%</div><div style="text-align:center;font-weight:800">${okStory ? '✓ القطعة صح' : expect ? `✗ الأقرب: ${expect.id}. ${esc(expect.name_ar)}` : '— ما فيه قطعة تناسب'}${okOpen ? ' · ✓ المدخل يجاوب السؤال' : !long ? ' · ✗ المدخل قصير (6 كلمات فأكثر)' : ' · ✗ المدخل ما فيه كلمات السؤال ولا مفتاح تحويل'}</div></div>${op ? `<div class="rv-item ok"><div>المدخل النموذجي: <span class="en2">${esc(op)}</span></div>${model && model.change_ar ? `<div class="rv-why">${esc(model.change_ar)}${model.cut ? ' · خذ قلب القصة فقط' : ''}</div>` : ''}${model && model.closer_en ? `<div class="hl-tip">الخاتمة: <span class="en2">${esc(model.closer_en)}</span></div>` : ''}${model && model.answer_en ? `<details><summary class="hl-tip">الجواب كامل بعد التحويل</summary><div class="model" style="font-size:13px">${esc(model.answer_en)}</div></details>` : ''}</div>` : ''}<div class="hl-tip">كتبت: <span class="en2">${esc(txt) || '(فاضي)'}</span></div><div class="row"><button class="btn" id="fxNext">➡️ التالي</button></div>`;
+      $('fxNext').onclick = () => { i++; show(); };
+    }
+  }
+  function finish() {
+    const avg = Math.round(log.reduce((a, x) => a + x.sc, 0) / Math.max(1, log.length)); setBest('flex', avg);
+    logAttempt('flex-swap-set', { q: 'swap×' + log.length, a: log.map(x => (x.okStory ? '✓' : '✗') + (x.okOpen ? '✓' : '✗')).join(' '), sc: avg, ms: Date.now() - t00 });
+    result(f.body, avg, `القطعة صح ${log.filter(x => x.okStory).length}/${log.length} · المدخل يجاوب ${log.filter(x => x.okOpen).length}/${log.length}`, `<div class="hl-tip">${avg >= 80 ? 'ممتاز — التبديل صار تلقائي. بالاختبار: النوع ← رقم القطعة ← غيّر أول جملة.' : 'كرر الجولة: الهدف تعرف رقم القطعة قبل ما يخلص الـ5 ثوانٍ، وأول جملتك فيها كلمات السؤال.'}</div>`);
+    again(f.body, flexSwap, '🔄 جولة جديدة');
+  }
+  show();
+}
+
 /* ---------- تمرين الأفكار السريعة: 3 أفكار بـ30 ثانية ---------- */
 function allPrompts() {
   const out = [];
@@ -1397,7 +1548,7 @@ function drillIdeas() {
 };
 
 /* ---------- عدة الحفظ: العبارات والكلمات اللي ينفع تحفظها (قصيرة، مو أجوبة كاملة) ---------- */
-const KIT_GROUPS = [['openers', '🗣️ ابدأ الجواب مباشرة'], ['reasons', '🧩 السبب'], ['examples', '👤 المثال'], ['contrast', '⚖️ الرأي الثاني'], ['closers', '🏁 الخاتمة'], ['transitions', '🔀 الانتقال بين الأسئلة/النقاط'], ['unknown', '🛟 ما تعرف الموضوع'], ['time', '⏳ ماضي · حاضر · مستقبل'], ['complex', '🔗 جملة مركّبة (بند بالتصحيح)'], ['recount', '📖 قالب «احكِ موقفًا»'], ['summary', '🗒️ ملخص المحادثة'], ['photo', '🖼️ وصف الصورة'], ['colloc', '🧲 collocations عامة'], ['punct', '⌨️ ترقيم الإملاء'], ['func', '🧩 كلمات Read and Complete النحوية']];
+const KIT_GROUPS = [['flex', '📦 مفاتيح التحويل ومداخل قطعي المرنة'], ['openers', '🗣️ ابدأ الجواب مباشرة'], ['reasons', '🧩 السبب'], ['examples', '👤 المثال'], ['contrast', '⚖️ الرأي الثاني'], ['closers', '🏁 الخاتمة'], ['transitions', '🔀 الانتقال بين الأسئلة/النقاط'], ['unknown', '🛟 ما تعرف الموضوع'], ['time', '⏳ ماضي · حاضر · مستقبل'], ['complex', '🔗 جملة مركّبة (بند بالتصحيح)'], ['recount', '📖 قالب «احكِ موقفًا»'], ['summary', '🗒️ ملخص المحادثة'], ['photo', '🖼️ وصف الصورة'], ['colloc', '🧲 collocations عامة'], ['punct', '⌨️ ترقيم الإملاء'], ['func', '🧩 كلمات Read and Complete النحوية']];
 function kitItems() {
   const out = [];
   const F = BANKS.writing.frames || []; F.forEach(f => out.push({ g: f.group === 'connectors' ? 'reasons' : f.group === 'guesses' ? 'photo' : f.group, en: f.en, ar: f.ar }));
@@ -1406,6 +1557,7 @@ function kitItems() {
   (KIT.photo || []).forEach(x => out.push({ g: 'photo', en: x.en, ar: x.ar }));
   (KIT.colloc || []).forEach(x => out.push({ g: 'colloc', en: x.en, ar: x.ar }));
   Object.entries(FUNC_AR).slice(0, 30).forEach(([w, ar]) => out.push({ g: 'func', en: w, ar }));
+  if (FLEX) { (FLEX.keys || []).forEach(k => out.push({ g: 'flex', en: k.en, ar: 'مدخل — ' + k.when_ar })); (FLEX.closers || []).forEach(k => out.push({ g: 'flex', en: k.en, ar: 'خاتمة — ' + k.when_ar })); (FLEX.stories || []).forEach(st => (st.openers || []).forEach(o => out.push({ g: 'flex', en: o.en, ar: st.id + '. ' + st.name_ar + ' — ' + o.when_ar }))); }
   const seen = new Set(); return out.filter(x => x.en && !seen.has(x.g + '|' + x.en.toLowerCase()) && seen.add(x.g + '|' + x.en.toLowerCase()));
 }
 function drillKit() {
@@ -1569,6 +1721,7 @@ const PLAN = [
     { id: 'h48a6', t: '💤 نوم 7 ساعات', m: 'إلزامي' },
   ]},
   { id: 'h48b', name: '☀️ الجمعة الصباح — القراءة (أضعف مهارة) ثم ماراثون الكتابة', goal: 'قراءة بالطريقة + مقالات بأنماط مختلفة + صور ورا بعض', tasks: [
+    { id: 'h48b0', t: '📦 قطعي المرنة: اقرأ القطع السبع ومداخلها، ثم حفظ تدريجي للقطعتين 4 و7 (أقوى قطعتين)', m: '20 د', go: 'skills/flex' },
     { id: 'h48b1', t: '🧩 Read and Complete ×3 بالطريقة: أول وآخر جملة ← السهل ← القرائن ← خمّن الفاضي', m: '12 د', go: 'read/rc' },
     { id: 'h48b2', t: '📄 Interactive Reading قطعتان — ظلّل العبارة المجيبة فقط', m: '15 د', go: 'read/ir' },
     { id: 'h48b3', t: '🏃 ماراثون 3 مقالات بأنماط مختلفة — قبل ما تكتب: النمط ← القصة ← ابدأ', m: '20 د', go: 'run/ws3' },
@@ -1581,6 +1734,7 @@ const PLAN = [
     { id: 'h48c3', t: '⌨️ Listen and Type 9 جمل (يجي 9 مرات بالاختبار) — حرف كبير + نقطة + فاصلة', m: '10 د', go: 'listen/lt' },
   ]},
   { id: 'h48d', name: '🌆 الجمعة المساء — الكلام والعدة ثم نوم مبكر', goal: 'صور كلام ورا بعض + عيّنة كلام + بروفة الغرفة', tasks: [
+    { id: 'h48d0', t: '🔀 التبديل السريع ×10: النوع ← رقم القطعة ← أول جملة بكلمات السؤال (ثم اقرأ القطع السبع بصوت)', m: '12 د', go: 'skills/flex' },
     { id: 'h48d1', t: '🗣️ ماراثون 4 صور كلام — 90 ثانية كاملة بكل صورة، 110+ كلمة/دقيقة', m: '8 د', go: 'run/sp4' },
     { id: 'h48d2', t: '🎥 Speaking Sample وحدة بالنمط — 3 دقائق كاملة', m: '5 د', go: 'speak/ss' },
     { id: 'h48d3', t: '📝 Interactive Writing وحدة — الجزء الثاني بـ As I mentioned + معلومة جديدة', m: '10 د', go: 'write/iw' },
@@ -1589,7 +1743,7 @@ const PLAN = [
     { id: 'h48d6', t: '💤 نوم 7 ساعات — ممنوع السهر، الاختبار بكرة', m: 'إلزامي' },
   ]},
   { id: 'h48e', name: '🎯 السبت — يوم الاختبار', goal: 'إحماء خفيف فقط — لا تتعلم شيئًا جديدًا اليوم', tasks: [
-    { id: 'h48e1', t: 'إحماء 15 دقيقة فقط: Listen and Type 4 جمل + احكِ قصصك الست بصوت عالٍ', m: '15 د', go: 'listen/lt' },
+    { id: 'h48e1', t: 'إحماء 15 دقيقة فقط: Listen and Type 4 جمل + اقرأ قطعك السبع بصوت عالٍ مرة (المداخل بس، لا تحفظ جديد)', m: '15 د', go: 'skills/flex' },
     { id: 'h48e2', t: '🧭 نظرة أخيرة على أنماط الأسئلة — الترتيب بس، لا تحفظ جملًا', m: '5 د', go: 'skills/patterns' },
     { id: 'h48e3', t: 'طبّق قائمة «قبل الاختبار بساعة» تحت: الجهاز، الجوال، المكتب، الهوية', m: 'إلزامي' },
     { id: 'h48e4', t: 'داخل الاختبار: النمط ← القصة ← الهيكل · لا فراغ · لا سكوت · 130 كلمة · آخر 30 ثانية للإملاء', m: '🎯' },
@@ -1810,6 +1964,7 @@ function renderMenus() {
     { ic: '📚', t: 'كل الكلمات بصفحة وحدة', s: 'مفردات + كلمات التمارين + كلمات الصور — بحث وفلتر «أراجعها»', key: 'words', hash: 'skills/words' },
     { ic: '📦', t: 'عدة الحفظ', s: 'الهياكل والعبارات والكلمات اللي فعلًا ينفع تحفظها — مع اختبار وتكرار متباعد', key: 'kit', hash: 'skills/kit' },
     { ic: '🧭', t: 'أنماط الأسئلة', s: '10 أنماط تتكرر — الترتيب لكل نمط بـ35 ثانية و5 دقائق، وأسئلة البنك بنفس النمط', key: 'patterns', hash: 'skills/patterns' },
+    { ic: '📦', t: 'قطعي المرنة', s: '7 قطع محفوظة تتبدل حسب السؤال — حفظ تدريجي، تبديل سريع، قراءة بصوت، ومفاتيح التحويل', key: 'flex', hash: 'skills/flex' },
     { ic: '📖', t: 'قصصي الجاهزة', s: '6 قصص من حياتك تكتبها مرة وتظهر لك مع كل سؤال يناسبها', key: 'stories', hash: 'skills/stories' },
     { ic: '⚡', t: 'الأفكار السريعة', s: 'اعرف النمط بثانيتين ثم 3 أفكار بـ30 ثانية على سؤال حقيقي', key: 'ideas', hash: 'skills/ideas' },
     { ic: '⌨️', t: 'سرعة الطباعة', s: '60 ثانية — الهدف 35+ كلمة/دقيقة صحيحة', key: 'typing', hash: 'skills/typing' },
@@ -1851,6 +2006,7 @@ function startMock() {
 const DRILLS = {};
 DRILLS.ideas = drillIdeas; DRILLS.kit = drillKit; DRILLS.typing = drillTyping; /* v5 (معرّفة فوق) */
 DRILLS.stories = drillStories; DRILLS.patterns = drillPatterns; /* v6 */
+DRILLS.flex = flexPage; /* v8 */
 
 DRILLS.rs = function () {
   const real = adaptPick(BANKS.readselect.real, x => x.level, 'rs', 10, { kinds: ['rs', 'vocab', 'fib'], keyFn: x => x.w, max: 4 }).map(x => ({ ...x, real: true }));
