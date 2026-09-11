@@ -311,6 +311,15 @@ body.exam:not(.exam-coach) .drill .patStrip{display:none!important}
 .flexCard .model mark{background:#fef08a;padding:0 2px;border-radius:3px}
 .flexTr{padding:6px 0;border-bottom:1px dashed var(--line)}
 #fxPick .btn.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+/* v9: «ابدأ من هنا» + طي باقي الرئيسية */
+.card.start{border:2px solid var(--teal);background:linear-gradient(180deg,#f0fdfa,#fff)}
+.startGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:6px}
+.startBtn{display:flex;flex-direction:column;gap:2px;text-decoration:none;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-family:inherit;text-align:right;cursor:pointer;box-shadow:var(--shadow)}
+.startBtn b{font-size:15px}.startBtn small{color:var(--muted);font-weight:700;font-size:12px;line-height:1.5}
+.startBtn:hover{border-color:var(--teal)}
+details.homeMore{margin:12px 0}details.homeMore>summary{cursor:pointer;font-weight:900;font-size:15px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);list-style:none}
+details.homeMore>summary::before{content:'▸ ';color:var(--teal)}details.homeMore[open]>summary::before{content:'▾ '}
+details.homeMore>summary::-webkit-details-marker{display:none}
 </style>
 <script src="det-scoring.js" defer></script>
 <script type="module" src="det-sync.js"></script>
@@ -327,7 +336,30 @@ body.exam:not(.exam-coach) .drill .patStrip{display:none!important}
 
 <!-- ======================= اليوم ======================= -->
 <section class="view on" id="v-home">
+  <div class="card start" id="startCard">
+    <h3>🚀 ابدأ من هنا — كل اللي تحتاجه اليوم بهالأزرار</h3>
+    <div class="startGrid">
+      <a class="startBtn" href="#skills/flex"><b>📦 قطعي المرنة</b><small>القصص الأربع + الفرعان: حفظ تدريجي ← تبديل سريع</small></a>
+      <a class="startBtn" href="#skills/patterns"><b>🧭 أنماط الأسئلة</b><small>كلمة وحدة تحدد النوع ← الترتيب</small></a>
+      <a class="startBtn" href="#read/rc"><b>🧩 Read and Complete</b><small>أضعف مهارة — بالطريقة + الترجمة بعد التحقق</small></a>
+      <button type="button" class="startBtn" id="startMockBtn"><b>🧑‍🏫 محاكاة كاملة مدرّبة</b><small>14 تمرين بترتيب الاختبار (~50 د)</small></button>
+      <a class="startBtn" href="#listen/lt"><b>⌨️ Listen and Type</b><small>9 جمل — أسهل رافعة للدرجة</small></a>
+      <a class="startBtn" href="#skills/review"><b>🔁 مراجعتي</b><small>كل اللي غلطت فيه، بالتكرار المتباعد</small></a>
+    </div>
+    <div class="hl-tip" style="margin-top:8px">🧭 <b>وين الأشياء:</b> الشريط تحت الشاشة = <b>اليوم · قراءة · استماع · كتابة · محادثة · مهارات</b>. تبويب «مهارات» فيه: قطعي المرنة، أنماط الأسئلة، قصصي الجاهزة، عدة الحفظ، مراجعتي. وباقي الرئيسية (التقدم، التكنيكات، ملفي، المزامنة، الخطة الكاملة) مطوي تحت «المزيد» عشان ما يشتت.</div>
+  </div>
   <div class="card" id="h48Card" style="display:none"></div>
+  <div class="card" id="coachCard" style="display:none">
+    <h3>🧑‍🏫 ملاحظات المدرّب</h3>
+    <div id="coachBox"></div>
+  </div>
+  <div class="card">
+    <h3>🎯 محاكاة قسم — تتكرر لين تتقنه</h3>
+    <div class="lead" style="margin:0 0 6px">اختر قسمًا (أو تمرينًا واحدًا) ويعطيك جولة كاملة منه بأسئلة جديدة كل مرة، ومعها وش تحفظ ووش تتدرب ووش تسوي يوم الاختبار. بعد كل جولة تشوف نسبتك مقارنة بالجولة السابقة وزر «كرر». داخل التمرين زر <b>💡 أفكار للموضوع</b> يعطيك بذور أفكار وأمثلة وكلمات الموضوع.</div>
+    <div id="secPick"></div>
+    <div id="secResult"></div>
+  </div>
+  <details class="homeMore"><summary>📊 تقدمك وطريقك إلى 110 (النتيجة الرسمية، نقاط الضعف، مسار 120)</summary>
   <div class="card" id="card110"></div>
   <div class="card" id="path120"></div>
 
@@ -339,6 +371,8 @@ body.exam:not(.exam-coach) .drill .patStrip{display:none!important}
   </div>
 
   <div class="card" id="weakCard"></div>
+  </details>
+  <details class="homeMore"><summary>📚 المزيد: تكنيكات 110 · المحاكاة الكاملة والمصغّرة · ملفي والمزامنة · كيف تستخدم المدرّب · الخطة كاملة</summary>
   <div class="card" id="techCard">
     <h3>📚 تكنيكات 110 — من مدرّسي الاختبار ومتفوقين بـ140–160</h3>
     <div class="lead" style="margin:0 0 6px">درستها من محاضرات ومحاكيات 2025–2026 وحطيتها هنا بالعامية. كل تكنيك له زر «تدرّب الآن»، ونفس الخطوات تظهر لك <b>أثناء</b> التمرين في «المدرّب الحي» (الصندوق الأصفر فوق مربع الكتابة أو التسجيل).</div>
@@ -353,16 +387,6 @@ body.exam:not(.exam-coach) .drill .patStrip{display:none!important}
   <div class="card" id="syncCard">
     <h3>☁️ حسابي والمزامنة</h3>
     <div id="syncBox"></div>
-  </div>
-  <div class="card" id="coachCard" style="display:none">
-    <h3>🧑‍🏫 ملاحظات المدرّب</h3>
-    <div id="coachBox"></div>
-  </div>
-  <div class="card">
-    <h3>🎯 محاكاة قسم — تتكرر لين تتقنه</h3>
-    <div class="lead" style="margin:0 0 6px">اختر قسمًا (أو تمرينًا واحدًا) ويعطيك جولة كاملة منه بأسئلة جديدة كل مرة، ومعها وش تحفظ ووش تتدرب ووش تسوي يوم الاختبار. بعد كل جولة تشوف نسبتك مقارنة بالجولة السابقة وزر «كرر». داخل التمرين زر <b>💡 أفكار للموضوع</b> يعطيك بذور أفكار وأمثلة وكلمات الموضوع.</div>
-    <div id="secPick"></div>
-    <div id="secResult"></div>
   </div>
   <div class="card">
     <h3>🎲 المحاكاة</h3>
@@ -384,6 +408,7 @@ body.exam:not(.exam-coach) .drill .patStrip{display:none!important}
   <div id="plan"></div>
 
   <div class="note g"><b>ليش 110 مو 95؟ ومتى تحجز؟</b>الاختبار تكيفي ودرجتك تتذبذب ±10–15 حسب اليوم والأسئلة. لو مستواك الحقيقي 110 فأسوأ يوم يعطيك 95–100. قرار الإعادة يعتمد على نتائج التجريبي الرسمي (نطاق يشمل 110 مرتين) وعلى استقرار أدائك في أسئلة جديدة بالمحاكاة الصارمة — نسب التمارين مؤشر تدريبي، مو درجة DET، ولا يوجد عدد أيام أو كلمات يضمن درجة.</div>
+</details>
 </section>
 
 <!-- ======================= قراءة ======================= -->
@@ -1962,13 +1987,13 @@ function renderMenus() {
     { ic: '🎥', t: 'Speaking Sample', s: '30 ث + 3 دقائق — يشوفه مسؤول القبول', key: 'ss', hash: 'speak/ss' },
   ]);
   menu('skillsMenu', [
+    { ic: '📦', t: 'قطعي المرنة — ابدأ هنا', s: 'القصص الأربع + الفرعان + القالب: حفظ تدريجي، تبديل سريع، قراءة بصوت، ومفاتيح التحويل', key: 'flex', hash: 'skills/flex' },
     { ic: '🎓', t: 'الدروس العشرة', s: 'قواعد B1→B2 بالعربي مع تمارين', key: 'lessons', hash: 'skills/lessons' },
     { ic: '🃏', t: 'بطاقات المفردات', s: `${(BANKS.grammar_vocab?.vocab || []).length} كلمة بالمعنى والمثال`, key: 'vocab', hash: 'skills/vocab' },
     { ic: '🔁', t: 'مراجعتي', s: 'كل اللي غلطت فيه + اللي علّمت عليه — بتكرار متباعد', key: 'review', hash: 'skills/review' },
     { ic: '📚', t: 'كل الكلمات بصفحة وحدة', s: 'مفردات + كلمات التمارين + كلمات الصور — بحث وفلتر «أراجعها»', key: 'words', hash: 'skills/words' },
     { ic: '📦', t: 'عدة الحفظ', s: 'الهياكل والعبارات والكلمات اللي فعلًا ينفع تحفظها — مع اختبار وتكرار متباعد', key: 'kit', hash: 'skills/kit' },
     { ic: '🧭', t: 'أنماط الأسئلة', s: '10 أنماط تتكرر — الترتيب لكل نمط بـ35 ثانية و5 دقائق، وأسئلة البنك بنفس النمط', key: 'patterns', hash: 'skills/patterns' },
-    { ic: '📦', t: 'قطعي المرنة', s: '7 قطع محفوظة تتبدل حسب السؤال — حفظ تدريجي، تبديل سريع، قراءة بصوت، ومفاتيح التحويل', key: 'flex', hash: 'skills/flex' },
     { ic: '📖', t: 'قصصي الجاهزة', s: '6 قصص من حياتك تكتبها مرة وتظهر لك مع كل سؤال يناسبها', key: 'stories', hash: 'skills/stories' },
     { ic: '⚡', t: 'الأفكار السريعة', s: 'اعرف النمط بثانيتين ثم 3 أفكار بـ30 ثانية على سؤال حقيقي', key: 'ideas', hash: 'skills/ideas' },
     { ic: '⌨️', t: 'سرعة الطباعة', s: '60 ثانية — الهدف 35+ كلمة/دقيقة صحيحة', key: 'typing', hash: 'skills/typing' },
@@ -2589,6 +2614,7 @@ if (window.installPath120Drills) installPath120Drills({ state: () => S, drills: 
 $('mockBtn').addEventListener('click', startMock);
 $('fullMockBtn').addEventListener('click', () => startFullMock(false));
 $('fullMockCoachBtn').addEventListener('click', () => startFullMock(true));
+const smb = $('startMockBtn'); if (smb) smb.addEventListener('click', () => startFullMock(true));
 try { renderTech(); } catch (e) { console.error(e); }
 $('examStop').addEventListener('click', () => { if (confirm('تنهي المحاكاة الحين؟ النتيجة تنحسب على اللي خلصته.')) finishFullMock(true); });
 $('expBtn').onclick = () => { const json = JSON.stringify(S); $('expBox').innerHTML = `<textarea class="ta" id="expTa" style="min-height:110px;font-size:12px" readonly></textarea><div class="row"><button class="btn sm" id="cpBtn">📋 نسخ</button><a class="btn sm ghost" id="dlBtn" download="det-trainer-data.json" style="text-decoration:none">⬇️ تنزيل ملف</a></div>`; $('expTa').value = json; $('dlBtn').href = 'data:application/json;charset=utf-8,' + encodeURIComponent(json); $('cpBtn').onclick = async () => { try { await navigator.clipboard.writeText(json); toast('انسخت ✓'); } catch (e) { $('expTa').select(); toast('حدد النص وانسخه'); } }; };
