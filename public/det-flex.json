@@ -1,0 +1,236 @@
+{
+ "v": 1,
+ "updated": "2026-09-11",
+ "_readme_ar": "قطعي المرنة: 7 قطع يحفظها المتدرب (من دليله) بصيغة هيكل + مداخل وخواتم تتبدل حسب السؤال. transforms = تحويلات جاهزة لأسئلة البنك (المدخل، الخاتمة، وش يتغير، الجواب المعدّل). القاعدة: غيّر 20% فقط (أول جملة، السبب، مثال، آخر جملة) والجسم يبقى.",
+ "rule_ar": "السؤال يتغير ← تحدد نوعه بثانيتين ← تختار أقرب قطعة ← تغيّر المدخل وبعض التفاصيل (20% فقط) ← تستخدم جسم القطعة المحفوظ ← تغيّر الخاتمة إذا احتجت. لا تجبر القطعة على السؤال؛ لو ما تناسبه اختر قطعة ثانية.",
+ "groups_ar": [
+  "5 هياكل تكفي: القطعتان 1 و6 قصة وحدة (الإنجليزي) بمدخلين — احفظ جسمًا واحدًا وأضف جملة الـ85 لما يكون السؤال عن فشل أو هدف شخصي. القطعتان 4 و5 نفس الهيكل (مشكلة ← خطوات ← فريق ← نتيجة ← درس) بقلبين مختلفين — احفظ الهيكل مرة والقلبين جملتين لكل واحد.",
+  "الوحدة اللي تحفظها فعلًا: الهيكل + جملتان أو ثلاث «قلب» لكل قطعة + مفاتيح التحويل (13 مدخل و5 خواتم). الباقي تركيب."
+ ],
+ "stories": [
+  {
+   "id": 1, "key": "english", "name_ar": "تعلم الإنجليزي", "one_line_ar": "تعلم + صعوبة + ممارسة + تحسن", "group": "A",
+   "represents_ar": "بدأت شيئًا ← واجهت صعوبة ← تدربت ← تحسنت ← عندي هدف للمستقبل",
+   "use_ar": "مهارة أو تعلم أو عادة أو تحدي أو ثقة أو نصيحة عن التعلم",
+   "text": "Recently, I started improving my English because I need it for my studies and work. At first, speaking was difficult for me because I was afraid of making mistakes. I started practicing every day and learning useful words and simple sentence structures. Although it was difficult at first, I became more confident. Now, I can speak more easily, and I hope to improve even more in the future.",
+   "skeleton": ["Recently, I started [skill/activity] because [reason].", "At first, [difficulty] was difficult for me because [reason].", "I started [practice/action] every day.", "Although it was difficult at first, I became more [result].", "Now, I can [current ability], and I hope to [future goal]."],
+   "core": ["At first, speaking was difficult for me because I was afraid of making mistakes.", "I started practicing every day and learning useful words and simple sentence structures.", "Although it was difficult at first, I became more confident."],
+   "patterns": ["learned", "advise", "about", "experience"],
+   "cues": ["skill", "learn", "habit", "challenge", "confident", "practice", "language", "study", "improve", "goal you are working"],
+   "openers": [
+    {"when_ar": "مهارة تعلمتها", "en": "Recently, I started improving my English because I need it for my studies and work."},
+    {"when_ar": "تحدي واجهته", "en": "One challenge I faced was improving my English speaking."},
+    {"when_ar": "هدف تشتغل عليه", "en": "One of my current goals is to improve my English."},
+    {"when_ar": "عادة مفيدة", "en": "One useful habit I have is practicing English every day."},
+    {"when_ar": "نصيحة لمن يتعلم مهارة", "en": "I think the best advice is to practice every day."},
+    {"when_ar": "شي زاد ثقتك", "en": "Learning English has made me more confident."}
+   ],
+   "closers": [
+    {"when_ar": "مستقبل", "en": "Now, I can speak more easily, and I hope to improve even more in the future."},
+    {"when_ar": "درس", "en": "This experience taught me that regular practice can make a big difference."},
+    {"when_ar": "عادة", "en": "Now, I can speak more easily, and I want to continue this habit in the future."}
+   ]
+  },
+  {
+   "id": 2, "key": "father", "name_ar": "الشخص المؤثر", "one_line_ar": "شخص + صفات + نصيحة + أثر", "group": "B",
+   "represents_ar": "شخص ← صفاته ← موقف أو نصيحة ← أثره عليك ← وش تعلمت",
+   "use_ar": "شخص أو قدوة أو نصيحة أو صفات أو شخص ساعدك",
+   "text": "One person who influenced me is my father. He is calm, hardworking, and always willing to help others. When I was younger, he taught me to take responsibility and work hard. I still remember his advice when I face difficult situations. Although we do not always agree, I respect his opinion. He taught me that patience and hard work can help people succeed.",
+   "skeleton": ["One person who [influenced/helped/inspired] me is [person].", "He/She is [quality 1] and [quality 2].", "He/She taught me [lesson].", "I remember [specific advice/situation].", "This person taught me that [lesson]."],
+   "core": ["He is calm, hardworking, and always willing to help others.", "When I was younger, he taught me to take responsibility and work hard.", "Although we do not always agree, I respect his opinion."],
+   "patterns": ["describe", "advise"],
+   "cues": ["person", "someone", "role model", "teacher", "friend", "advice", "respect", "admire", "influence", "family member", "leader", "manager"],
+   "openers": [
+    {"when_ar": "شخص أثّر فيك", "en": "One person who influenced me is my father."},
+    {"when_ar": "شخص تحترمه", "en": "One person I really respect is my father."},
+    {"when_ar": "قدوة", "en": "My father is one of my biggest role models."},
+    {"when_ar": "نصيحة مهمة وصلتك", "en": "One important piece of advice I received was to work hard and never give up easily. My father gave me this advice when I was younger."},
+    {"when_ar": "شخص ساعدك بوقت صعب", "en": "My father helped me during a difficult time in my life. He stayed calm and gave me useful advice."}
+   ],
+   "closers": [
+    {"when_ar": "درس", "en": "He taught me that patience and hard work can help people succeed."},
+    {"when_ar": "قدوة", "en": "For this reason, I try to follow his example in my own life."},
+    {"when_ar": "ساعدك", "en": "His support helped me deal with the situation better."}
+   ]
+  },
+  {
+   "id": 3, "key": "madinah", "name_ar": "المدينة المنورة", "one_line_ar": "مكان + نشاط + سبب الحب + مستقبل", "group": "C",
+   "represents_ar": "مكان ← صفته ← وش تسوي فيه ← ليش مهم ← كيف تتوقع مستقبله",
+   "use_ar": "مكان أو مدينة أو سياحة أو وقت فراغ أو العائلة أو تغير المدينة",
+   "text": "My favorite place is Madinah, where I live with my family. It is a peaceful city with many interesting places. I enjoy spending time with my family, especially on weekends. Sometimes we go out for dinner, visit a park, or simply relax together. I have lived here for many years, which makes the city very special to me. In the future, I think Madinah will become even more modern and attractive.",
+   "skeleton": ["My favorite place is [place].", "It is [description].", "I usually [activity] there with [people].", "It is special to me because [reason].", "In the future, I think [future change]."],
+   "core": ["It is a peaceful city with many interesting places.", "Sometimes we go out for dinner, visit a park, or simply relax together.", "I have lived here for many years, which makes the city very special to me."],
+   "patterns": ["describe", "about", "preference", "change"],
+   "cues": ["place", "city", "town", "country", "visit", "tourist", "free time", "weekend", "family", "where you live", "neighbourhood", "neighborhood", "travel", "holiday"],
+   "openers": [
+    {"when_ar": "مكان تحبه", "en": "My favorite place is Madinah, where I live with my family."},
+    {"when_ar": "مدينة تنصح السياح بزيارتها", "en": "I would recommend Madinah to tourists because it is a peaceful and interesting city."},
+    {"when_ar": "مكان تروح له بوقت الفراغ", "en": "One place I enjoy visiting in my free time is a park in Madinah."},
+    {"when_ar": "شي تسويه مع العائلة", "en": "I enjoy spending time with my family on weekends."},
+    {"when_ar": "كيف تغيرت مدينتك", "en": "Madinah has changed a lot over the years. It has become more modern, and there are more services and interesting places."}
+   ],
+   "closers": [
+    {"when_ar": "مستقبل", "en": "In the future, I think Madinah will become even more modern and attractive."},
+    {"when_ar": "سياح", "en": "I think visitors can have a memorable experience there."},
+    {"when_ar": "عائلة", "en": "These simple activities are special to me because they help us spend quality time together."}
+   ]
+  },
+  {
+   "id": 4, "key": "system", "name_ar": "تعطل النظام", "one_line_ar": "مشكلة + خطوات + فريق + درس", "group": "D",
+   "represents_ar": "مشكلة مفاجئة ← First / Then ← فريق ← نتيجة ← درس",
+   "use_ar": "مشكلة أو ضغط أو فريق أو قيادة أو تقنية أو موقف مفاجئ أو درس تعلمته — وأقوى قطعة عندك",
+   "text": "One day at work, our computer system suddenly went down. It was a serious problem because we use the system for most of our work. First, I informed my team and asked them to use the backup plan. Then, we continued our work manually until the system came back. Although the situation was stressful, we managed it successfully. This experience taught me the importance of teamwork and being prepared.",
+   "skeleton": ["One day at [place], [problem] happened.", "It was serious because [reason].", "First, I [action 1].", "Then, we [action 2].", "Although the situation was [adjective], we [result].", "This experience taught me [lesson]."],
+   "core": ["First, I informed my team and asked them to use the backup plan.", "Then, we continued our work manually until the system came back.", "Although the situation was stressful, we managed it successfully."],
+   "patterns": ["experience", "why", "agree", "compare"],
+   "cues": ["problem", "unexpected", "team", "teamwork", "lead", "leader", "stress", "pressure", "technology", "difficult situation", "lesson", "prepared", "emergency", "mistake"],
+   "openers": [
+    {"when_ar": "مشكلة حليتها", "en": "One day at work, our computer system suddenly went down."},
+    {"when_ar": "موقف مفاجئ", "en": "One unexpected event happened at work when our computer system suddenly went down."},
+    {"when_ar": "عمل جماعي", "en": "One good example of teamwork happened when our computer system went down at work."},
+    {"when_ar": "قيادة", "en": "One time I had to lead my team was when our computer system suddenly went down."},
+    {"when_ar": "سلبيات التقنية (رأي ثم مثال)", "en": "One disadvantage of technology is that work can stop when a system fails. For example, our computer system once went down at work, and we had to continue manually."},
+    {"when_ar": "درس تعلمته", "en": "One experience that taught me an important lesson happened at work."},
+    {"when_ar": "ليش الفريق مهم (رأي ثم قلب القصة)", "en": "I think teamwork is important because it helps people solve problems faster. For example, when our computer system went down at work, my team worked together and used the backup plan."}
+   ],
+   "closers": [
+    {"when_ar": "درس", "en": "This experience taught me the importance of teamwork and being prepared."},
+    {"when_ar": "فريق", "en": "This experience showed me how important teamwork is during difficult situations."},
+    {"when_ar": "قيادة", "en": "This experience taught me to stay calm and make clear decisions."},
+    {"when_ar": "تقنية", "en": "This is why organizations need a good backup plan."}
+   ]
+  },
+  {
+   "id": 5, "key": "service", "name_ar": "تحسين خدمة", "one_line_ar": "هدف + مشكلة + تغيير + نتيجة", "group": "D",
+   "represents_ar": "هدف ← مشكلة ← تحليل ← تغيير ← تحسن ← درس",
+   "use_ar": "إنجاز أو هدف في العمل أو تحسين أو مشروع فريق أو التخطيط أو تغيير حسّن شيئًا",
+   "text": "One of my important goals at work was to improve a service for patients. The main problem was that patients had to wait for a long time. My team and I studied the problem and changed the way we worked. At first, it was difficult, but everyone worked together. In the end, we reduced the waiting time a lot. This experience taught me that good planning and teamwork can make a big difference.",
+   "skeleton": ["One of my important goals was to [goal].", "The main problem was [problem].", "My team and I [actions].", "At first, it was difficult, but [team/action].", "In the end, we [result].", "This experience taught me [lesson]."],
+   "core": ["The main problem was that patients had to wait for a long time.", "My team and I studied the problem and changed the way we worked.", "In the end, we reduced the waiting time a lot."],
+   "patterns": ["experience", "why", "change", "advise"],
+   "cues": ["achievement", "proud", "goal at work", "improve", "project", "planning", "plan", "change that improved", "success", "solved", "service", "customer", "patient"],
+   "openers": [
+    {"when_ar": "هدف حققته بالعمل", "en": "One of my important goals at work was to improve a service for patients."},
+    {"when_ar": "إنجاز تفتخر فيه", "en": "One achievement I am proud of was improving a service for patients."},
+    {"when_ar": "مشكلة حليتها", "en": "One problem I helped solve at work was the long waiting time for patients."},
+    {"when_ar": "مشروع فريق ناجح", "en": "One successful team project was improving a service for patients."},
+    {"when_ar": "ليش التخطيط مهم (رأي ثم مثال)", "en": "I think planning is important because it helps people solve problems in an organized way. For example, my team and I once worked to reduce waiting time for patients."},
+    {"when_ar": "تغيير حسّن شيئًا", "en": "One important change at work was changing the way we provided a service to patients."}
+   ],
+   "closers": [
+    {"when_ar": "درس", "en": "This experience taught me that good planning and teamwork can make a big difference."},
+    {"when_ar": "نتيجة", "en": "In the end, we reduced the waiting time a lot."}
+   ]
+  },
+  {
+   "id": 6, "key": "duolingo", "name_ar": "اختبار Duolingo", "one_line_ar": "هدف شخصي + محاولة + نتيجة أقل + تحسن", "group": "A",
+   "represents_ar": "هدف شخصي ← سبب ← صعوبة ← محاولة أولى ← تعلم ← استمرار",
+   "use_ar": "هدف شخصي أو دراسة أو اختبار أو فشل ثم تحسن أو الدافع أو التعلم من الأخطاء",
+   "text": "A personal goal I am working on now is improving my English and getting a good score on the Duolingo English Test. I started preparing because I need the score for my university studies. At first, I found reading and writing difficult. However, I started practicing every day and reviewing my mistakes. My first score was 85, but I learned a lot from the experience. Now, I am working hard to get a higher score.",
+   "skeleton": ["A personal goal I am working on is [goal].", "I started because [reason].", "At first, I found [difficulty] difficult.", "However, I started [practice].", "My first [attempt/result] was [result], but I learned [lesson].", "Now, I am working hard to [next goal]."],
+   "core": ["I started preparing because I need the score for my university studies.", "However, I started practicing every day and reviewing my mistakes.", "My first score was 85, but I learned a lot from the experience."],
+   "patterns": ["learned", "experience", "why", "change"],
+   "cues": ["personal goal", "exam", "test", "score", "fail", "did not get the result", "mistakes", "motivat", "education", "university", "hope to achieve", "study"],
+   "openers": [
+    {"when_ar": "هدف شخصي", "en": "A personal goal I am working on now is improving my English and getting a good score on the Duolingo English Test."},
+    {"when_ar": "مرة ما جبت النتيجة اللي تبغاها", "en": "One time I did not get the result I wanted was my first Duolingo English Test. My first score was 85, which was lower than my goal."},
+    {"when_ar": "شي تتمنى تحققه", "en": "One thing I hope to achieve is a higher score on the Duolingo English Test."},
+    {"when_ar": "ليش التعليم مهم لك", "en": "Education is important to me because I want to continue my university studies. That is one reason I am working on my English and preparing for the Duolingo English Test."},
+    {"when_ar": "ليش نتعلم من الأخطاء (رأي ثم مثال)", "en": "I think mistakes are useful because they show us what we need to improve. For example, my first Duolingo score was 85. I reviewed my mistakes and found that I needed to improve some skills."},
+    {"when_ar": "وش يحفزك تستمر", "en": "My university goal motivates me to keep improving my English."}
+   ],
+   "closers": [
+    {"when_ar": "استمرار", "en": "Now, I am working hard to get a higher score."},
+    {"when_ar": "أخطاء", "en": "Since then, I have been practicing more carefully."}
+   ]
+  },
+  {
+   "id": 7, "key": "technology", "name_ar": "التقنية قبل والحين والمستقبل", "one_line_ar": "ماضي + حاضر + سبب + ميزة + عيب + مستقبل", "group": "E",
+   "represents_ar": "Past ← Present ← Reason ← Advantage ← Disadvantage ← Future — قالب الأسئلة العامة",
+   "use_ar": "تغير عبر الزمن أو مميزات وعيوب أو المستقبل أو مقارنة أو رأي عام",
+   "text": "Ten years ago, we used more paper at work and many tasks took a long time. Today, we use computers and digital systems for most of our work. This change happened because technology became faster and easier to use. It has helped us save time and organize our work better. However, sometimes technical problems can stop the work for a short time. In the future, I think technology will become even more important and many tasks will become automatic.",
+   "skeleton": ["In the past, [old situation].", "Today, [current situation].", "This change happened because [reason].", "One advantage is [benefit].", "However, [disadvantage].", "In the future, I think [prediction]."],
+   "core": ["This change happened because technology became faster and easier to use.", "It has helped us save time and organize our work better.", "However, sometimes technical problems can stop the work for a short time."],
+   "patterns": ["change", "compare", "agree", "why", "preference"],
+   "cues": ["changed", "in the past", "future", "advantage", "disadvantage", "compare", "technology", "online", "internet", "communication", "education", "work", "society", "years ago"],
+   "openers": [
+    {"when_ar": "كيف تغير شي (عمل)", "en": "Ten years ago, we used more paper at work and many tasks took a long time. Today, we use computers and digital systems for most of our work."},
+    {"when_ar": "كيف تغير التعليم", "en": "In the past, students depended more on books and classroom lessons. Today, students can use online courses, videos, and digital tools."},
+    {"when_ar": "كيف تغير التواصل", "en": "In the past, communication was slower, and people depended more on phone calls and face-to-face meetings. Today, people can send messages or make video calls instantly."},
+    {"when_ar": "مميزات وعيوب", "en": "Technology has many advantages and disadvantages. It helps us save time and organize our work better. However, technical problems can sometimes stop the work."},
+    {"when_ar": "توقع للمستقبل (ابدأ من المستقبل)", "en": "In the future, I think technology will become even more important at work. Many routine tasks may become automatic."}
+   ],
+   "closers": [
+    {"when_ar": "مستقبل", "en": "In the future, I think technology will become even more important and many tasks will become automatic."},
+    {"when_ar": "رأي", "en": "Overall, I think technology is useful when people use it in a smart way."}
+   ]
+  }
+ ],
+ "keys": [
+  {"when_ar": "هدف", "en": "One of my current goals is…"},
+  {"when_ar": "تحدي", "en": "One challenge I faced was…"},
+  {"when_ar": "إنجاز", "en": "One achievement I am proud of is…"},
+  {"when_ar": "عادة", "en": "One useful habit I have is…"},
+  {"when_ar": "شخص", "en": "One person I really respect is…"},
+  {"when_ar": "نصيحة", "en": "One important piece of advice I received was…"},
+  {"when_ar": "موقف مفاجئ", "en": "One unexpected event happened when…"},
+  {"when_ar": "فريق", "en": "One good example of teamwork happened when…"},
+  {"when_ar": "درس", "en": "One experience that taught me an important lesson was…"},
+  {"when_ar": "تغير", "en": "A lot has changed over the years."},
+  {"when_ar": "مستقبل", "en": "In the future, I think…"},
+  {"when_ar": "رأي", "en": "In my opinion…"},
+  {"when_ar": "مميزات وعيوب", "en": "There are both advantages and disadvantages."}
+ ],
+ "closers": [
+  {"when_ar": "درس", "en": "This experience taught me that…"},
+  {"when_ar": "مستقبل", "en": "In the future, I hope to…"},
+  {"when_ar": "رأي", "en": "Overall, I think…"},
+  {"when_ar": "نتيجة", "en": "In the end, we…"},
+  {"when_ar": "أثر", "en": "This made a big difference in my life."}
+ ],
+ "rules_ar": [
+  "غيّر 20% فقط: أول جملة، جملة السبب، مثال واحد، آخر جملة — والجسم يبقى كما حفظته.",
+  "أول جملة لازم تثبت إنك فهمت السؤال: لو السؤال «Why is teamwork important?» لا تبدأ بالقصة؛ ابدأ «I think teamwork is important because…» ثم «For example, …» وخذ قلب القصة فقط.",
+  "لو السؤال محدد، احذف: خذ قلب القصة (3 جمل) مو القطعة كاملة.",
+  "أضف فقط ما يخدم السؤال (مثل: It was important to me because…). لا تضف جملًا بعيدة عشان الطول.",
+  "السؤال المركّب (What? Why? How? Result?) — قسّمه ذهنيًا وتأكد إن كل جزء له جملة.",
+  "لا تغيّر الشخص أو المكان في القصة إلا إذا السؤال يفرض ذلك أو عندك قصة حقيقية أسهل.",
+  "الخاتمة تختارها حسب المطلوب: درس / مستقبل / رأي / نتيجة / أثر."
+ ],
+ "transforms": [
+  {"q": "Describe a challenge you faced.", "story": 1, "opener_en": "One challenge I faced was improving my English speaking.", "closer_en": "Now, I can speak more easily, and I hope to improve even more in the future.", "change_ar": "غيّر أول جملة بس، والباقي نفس القصة.", "cut": false, "answer_en": "One challenge I faced was improving my English speaking. At first, speaking was difficult for me because I was afraid of making mistakes. I started practicing every day and learning useful words. Although it was difficult at first, I became more confident. Now, I can speak more easily, and I hope to improve even more in the future.", "src": "guide"},
+  {"q": "Describe a goal you are working on.", "story": 1, "opener_en": "One of my current goals is to improve my English.", "closer_en": "Now, I can speak more easily, and I hope to get a better score in the future.", "change_ar": "المدخل هدف بدل مهارة، والخاتمة تربطها بالدرجة.", "cut": false, "answer_en": "One of my current goals is to improve my English because I need it for my studies and work. At first, speaking was difficult for me because I was afraid of making mistakes. I started practicing every day and learning useful words. Although it was difficult at first, I became more confident. Now, I can speak more easily, and I hope to get a better score in the future.", "src": "guide"},
+  {"q": "Describe a useful habit you have.", "story": 1, "opener_en": "One useful habit I have is practicing English every day.", "closer_en": "Now, I can speak more easily, and I want to continue this habit in the future.", "change_ar": "المدخل عادة، وجملة السبب تصير «I started this habit because…»، والخاتمة استمرار العادة.", "cut": false, "answer_en": "One useful habit I have is practicing English every day. I started this habit because I need English for my studies and work. At first, speaking was difficult for me because I was afraid of making mistakes. However, daily practice helped me become more confident. Now, I can speak more easily, and I want to continue this habit in the future.", "src": "guide"},
+  {"q": "What advice would you give someone learning a new skill?", "story": 1, "opener_en": "I think the best advice is to practice every day.", "closer_en": "This experience taught me that regular practice can make a big difference.", "change_ar": "ما تبدأ بقصتك — ابدأ بالنصيحة ثم استخدم نفسك كمثال، والخاتمة درس.", "cut": false, "answer_en": "I think the best advice is to practice every day. When I started improving my English, speaking was difficult for me because I was afraid of making mistakes. I practiced every day and learned useful words. Although it was difficult at first, I became more confident. This experience taught me that regular practice can make a big difference.", "src": "guide"},
+  {"q": "Describe something that made you more confident.", "story": 1, "opener_en": "Learning English has made me more confident.", "closer_en": "Now, I can speak more easily, and I hope to improve even more in the future.", "change_ar": "المدخل بالثقة ثم جسم القصة نفسه.", "cut": false, "answer_en": "Learning English has made me more confident. At first, speaking was difficult for me because I was afraid of making mistakes. I started practicing every day and learning useful words and simple sentence structures. Although it was difficult at first, I became more confident. Now, I can speak more easily, and I hope to improve even more in the future.", "src": "guide"},
+  {"q": "Describe someone you respect.", "story": 2, "opener_en": "One person I really respect is my father.", "closer_en": "He taught me that patience and hard work can help people succeed.", "change_ar": "أول جملة بس، والباقي شبه نفسه.", "cut": false, "answer_en": "One person I really respect is my father. He is calm, hardworking, and always willing to help others. When I was younger, he taught me to take responsibility and work hard. I still remember his advice when I face difficult situations. Although we do not always agree, I respect his opinion. He taught me that patience and hard work can help people succeed.", "src": "guide"},
+  {"q": "Describe a role model in your life.", "story": 2, "opener_en": "My father is one of my biggest role models.", "closer_en": "For this reason, I try to follow his example in my own life.", "change_ar": "المدخل قدوة والخاتمة «أتبع مثاله».", "cut": false, "answer_en": "My father is one of my biggest role models. He is calm, hardworking, and always willing to help others. When I was younger, he taught me to take responsibility and work hard. I still remember his advice when I face difficult situations. Although we do not always agree, I respect his opinion. For this reason, I try to follow his example in my own life.", "src": "guide"},
+  {"q": "Describe an important piece of advice you received.", "story": 2, "opener_en": "One important piece of advice I received was to work hard and never give up easily. My father gave me this advice when I was younger.", "closer_en": "He taught me that patience and hard work can help people succeed.", "change_ar": "غيّر زاوية القصة: ابدأ بالنصيحة نفسها، ثم مين قالها، ثم الصفات والأثر.", "cut": false, "answer_en": "One important piece of advice I received was to work hard and never give up easily. My father gave me this advice when I was younger. He is calm, hardworking, and always willing to help others. I still remember his advice when I face difficult situations, and it helps me stay patient. Although we do not always agree, I respect his opinion. He taught me that patience and hard work can help people succeed.", "src": "guide"},
+  {"q": "Describe someone who helped you during a difficult time.", "story": 2, "opener_en": "My father helped me during a difficult time in my life.", "closer_en": "His support helped me deal with the situation better.", "change_ar": "المدخل «ساعدني»، ووسط القطعة «He stayed calm and gave me useful advice»، والخاتمة الأثر.", "cut": false, "answer_en": "My father helped me during a difficult time in my life. He is calm, hardworking, and always willing to help others. When I had a serious problem, he stayed calm and gave me useful advice. I still remember his words when I face difficult situations. His support helped me deal with the situation better, and it taught me that patience and hard work can help people succeed.", "src": "guide"},
+  {"q": "Describe a city you would recommend to tourists.", "story": 3, "opener_en": "I would recommend Madinah to tourists because it is a peaceful and interesting city.", "closer_en": "I think visitors can have a memorable experience there.", "change_ar": "المدخل توصية، الوسط «There are many places to visit, and people can enjoy a calm atmosphere»، والخاتمة عن الزوار.", "cut": false, "answer_en": "I would recommend Madinah to tourists because it is a peaceful and interesting city. There are many places to visit, and people can enjoy a calm atmosphere. I live here with my family, and we often go out for dinner, visit a park, or simply relax together. I have lived here for many years, which makes the city very special to me. I think visitors can have a memorable experience there.", "src": "guide"},
+  {"q": "Describe a place you like to visit in your free time.", "story": 3, "opener_en": "One place I enjoy visiting in my free time is a park in Madinah.", "closer_en": "In the future, I think Madinah will become even more modern and attractive.", "change_ar": "المكان تغير من المدينة كاملة إلى حديقة داخلها، ونفس القالب.", "cut": false, "answer_en": "One place I enjoy visiting in my free time is a park in Madinah, where I live with my family. It is a peaceful city with many interesting places, and this park is my favorite one. I usually go there with my family on weekends. Sometimes we go out for dinner, visit the park, or simply relax together. I have lived here for many years, which makes the city very special to me. In the future, I think Madinah will become even more modern and attractive.", "src": "guide"},
+  {"q": "Describe something you enjoy doing with your family.", "story": 3, "opener_en": "I enjoy spending time with my family on weekends.", "closer_en": "These simple activities are special to me because they help us spend quality time together.", "change_ar": "لا تجعل المكان الفكرة الأساسية — ابدأ بالفعل (spending time) والخاتمة عن الوقت مع العائلة.", "cut": false, "answer_en": "I enjoy spending time with my family on weekends. We live in Madinah, which is a peaceful city with many interesting places. Sometimes we go out for dinner, visit a park, or simply relax together. I have done this for many years, and it makes every weekend special. These simple activities are special to me because they help us spend quality time together.", "src": "guide"},
+  {"q": "How has your city changed over time?", "story": 3, "opener_en": "Madinah has changed a lot over the years.", "closer_en": "In the future, I think it will become even more modern and attractive.", "change_ar": "المدخل تغيّر، ثم «It has become more modern, and there are more services and interesting places»، واستخدم مستقبل القطعة.", "cut": false, "answer_en": "Madinah has changed a lot over the years. It has become more modern, and there are more services and interesting places. I have lived here with my family for many years, so I have seen these changes myself. Today, we can go out for dinner, visit a park, or simply relax together in places that did not exist before. In the future, I think it will become even more modern and attractive.", "src": "guide"},
+  {"q": "Describe an unexpected event.", "story": 4, "opener_en": "One unexpected event happened at work when our computer system suddenly went down.", "closer_en": "This experience taught me the importance of teamwork and being prepared.", "change_ar": "أول جملة بس ثم نفس القصة.", "cut": false, "answer_en": "One unexpected event happened at work when our computer system suddenly went down. It was a serious problem because we use the system for most of our work. First, I informed my team and asked them to use the backup plan. Then, we continued our work manually until the system came back. Although the situation was stressful, we managed it successfully. This experience taught me the importance of teamwork and being prepared.", "src": "guide"},
+  {"q": "Describe a time you worked successfully with a team.", "story": 4, "opener_en": "One good example of teamwork happened when our computer system went down at work.", "closer_en": "This experience showed me how important teamwork is during difficult situations.", "change_ar": "ركّز على الفريق: «I informed my team and explained the backup plan. Then, everyone worked together…».", "cut": false, "answer_en": "One good example of teamwork happened when our computer system went down at work. It was a serious problem because we use the system for most of our work. First, I informed my team and explained the backup plan. Then, everyone worked together to continue the service manually until the system came back. Although the situation was stressful, we managed it successfully. This experience showed me how important teamwork is during difficult situations.", "src": "guide"},
+  {"q": "Describe a time you had to lead other people.", "story": 4, "opener_en": "One time I had to lead my team was when our computer system suddenly went down.", "closer_en": "This experience taught me to stay calm and make clear decisions.", "change_ar": "ركّز على أفعالك: «I informed the team, explained the backup plan, and organized the work».", "cut": false, "answer_en": "One time I had to lead my team was when our computer system suddenly went down. It was a serious problem because we use the system for most of our work. I informed the team, explained the backup plan, and organized the work. Then, we continued our work manually until the system came back. Although the situation was stressful, we managed it successfully. This experience taught me to stay calm and make clear decisions.", "src": "guide"},
+  {"q": "What are some disadvantages of technology?", "story": 4, "opener_en": "One disadvantage of technology is that work can stop when a system fails.", "closer_en": "This is why organizations need a good backup plan.", "change_ar": "لا تبدأ بالقصة كاملة: ابدأ برأي، ثم «For example, …» بقلب القصة، والخاتمة رأي.", "cut": true, "answer_en": "One disadvantage of technology is that work can stop when a system fails. For example, our computer system once went down at work, and we had to continue manually. It was stressful because we use the system for most of our work, but my team used the backup plan and managed it successfully. Another disadvantage is that people can depend on technology too much. This is why organizations need a good backup plan.", "src": "guide"},
+  {"q": "Describe an experience that taught you an important lesson.", "story": 4, "opener_en": "One experience that taught me an important lesson happened at work.", "closer_en": "This experience taught me the importance of teamwork and being prepared.", "change_ar": "المدخل «درس»، والخاتمة مهمة جدًا هنا لأنها الجواب.", "cut": false, "answer_en": "One experience that taught me an important lesson happened at work. One day, our computer system suddenly went down, and it was a serious problem because we use the system for most of our work. First, I informed my team and asked them to use the backup plan. Then, we continued our work manually until the system came back. Although the situation was stressful, we managed it successfully. This experience taught me the importance of teamwork and being prepared.", "src": "guide"},
+  {"q": "Why is teamwork important?", "story": 4, "opener_en": "I think teamwork is important because it helps people solve problems faster.", "closer_en": "This experience showed me that teamwork can make a big difference.", "change_ar": "سؤال محدد: رأي أول ثم «For example» بقلب القصة فقط (3 جمل)، مو 70 كلمة عن النظام.", "cut": true, "answer_en": "I think teamwork is important because it helps people solve problems faster. For example, when our computer system went down at work, my team worked together and used the backup plan. Although the situation was stressful, we continued our work successfully. This experience showed me that teamwork can make a big difference.", "src": "guide"},
+  {"q": "Describe an achievement you are proud of.", "story": 5, "opener_en": "One achievement I am proud of was improving a service for patients.", "closer_en": "This experience taught me that good planning and teamwork can make a big difference.", "change_ar": "أول جملة بس ثم نفس القصة.", "cut": false, "answer_en": "One achievement I am proud of was improving a service for patients. The main problem was that patients had to wait for a long time. My team and I studied the problem and changed the way we worked. At first, it was difficult, but everyone worked together. In the end, we reduced the waiting time a lot. This experience taught me that good planning and teamwork can make a big difference.", "src": "guide"},
+  {"q": "Describe a problem you solved.", "story": 5, "opener_en": "One problem I helped solve at work was the long waiting time for patients.", "closer_en": "This experience taught me that good planning and teamwork can make a big difference.", "change_ar": "المدخل المشكلة نفسها ثم «My team and I studied the problem…».", "cut": false, "answer_en": "One problem I helped solve at work was the long waiting time for patients. It was a serious problem because many patients were unhappy. My team and I studied the problem and changed the way we worked. At first, it was difficult, but everyone worked together. In the end, we reduced the waiting time a lot. This experience taught me that good planning and teamwork can make a big difference.", "src": "guide"},
+  {"q": "Describe a successful team project.", "story": 5, "opener_en": "One successful team project was improving a service for patients.", "closer_en": "This experience taught me that good planning and teamwork can make a big difference.", "change_ar": "ركّز على الفريق: «My team and I studied the problem together…».", "cut": false, "answer_en": "One successful team project was improving a service for patients. The main problem was that patients had to wait for a long time. My team and I studied the problem together and changed the way we worked. At first, it was difficult, but everyone worked together and shared ideas. In the end, we reduced the waiting time a lot. This experience taught me that good planning and teamwork can make a big difference.", "src": "guide"},
+  {"q": "Why is planning important?", "story": 5, "opener_en": "I think planning is important because it helps people solve problems in an organized way.", "closer_en": "This experience taught me that good planning can make a big difference.", "change_ar": "رأي أول، ثم «For example, my team and I once worked to reduce waiting time…» بقلب القصة.", "cut": true, "answer_en": "I think planning is important because it helps people solve problems in an organized way. For example, my team and I once worked to reduce waiting time for patients. We studied the problem, made a clear plan, and changed the way we worked. In the end, we reduced the waiting time a lot. This experience taught me that good planning can make a big difference.", "src": "guide"},
+  {"q": "Describe a change that improved something.", "story": 5, "opener_en": "One important change at work was changing the way we provided a service to patients.", "closer_en": "This experience taught me that good planning and teamwork can make a big difference.", "change_ar": "المدخل «تغيير» ثم القصة نفسها.", "cut": false, "answer_en": "One important change at work was changing the way we provided a service to patients. Before the change, the main problem was that patients had to wait for a long time. My team and I studied the problem and changed the way we worked. At first, it was difficult, but everyone worked together. In the end, we reduced the waiting time a lot. This experience taught me that good planning and teamwork can make a big difference.", "src": "guide"},
+  {"q": "Describe a time you did not get the result you wanted.", "story": 6, "opener_en": "One time I did not get the result I wanted was my first Duolingo English Test. My first score was 85, which was lower than my goal.", "closer_en": "Now, I am working hard to get a higher score.", "change_ar": "المدخل النتيجة الأقل، ثم «However, I learned a lot from the experience and started reviewing my mistakes».", "cut": false, "answer_en": "One time I did not get the result I wanted was my first Duolingo English Test. I started preparing because I need the score for my university studies. At first, I found reading and writing difficult. My first score was 85, which was lower than my goal. However, I learned a lot from the experience and started practicing every day and reviewing my mistakes. Now, I am working hard to get a higher score.", "src": "guide"},
+  {"q": "Describe something you hope to achieve in the future.", "story": 6, "opener_en": "One thing I hope to achieve is a higher score on the Duolingo English Test.", "closer_en": "Now, I am working hard to get a higher score.", "change_ar": "المدخل أمل مستقبلي، ثم السبب والتدريب.", "cut": false, "answer_en": "One thing I hope to achieve is a higher score on the Duolingo English Test. I started preparing because I need the score for my university studies. At first, I found reading and writing difficult. However, I started practicing every day and reviewing my mistakes. My first score was 85, but I learned a lot from the experience. Now, I am working hard to get a higher score.", "src": "guide"},
+  {"q": "Why is education important to you?", "story": 6, "opener_en": "Education is important to me because I want to continue my university studies.", "closer_en": "Now, I am working hard to get a higher score.", "change_ar": "رأي أول، ثم قصة الاختبار كدليل: «That is one reason I am working on my English…».", "cut": true, "answer_en": "Education is important to me because I want to continue my university studies. That is one reason I am working on my English and preparing for the Duolingo English Test. At first, I found reading and writing difficult, but I started practicing every day and reviewing my mistakes. My first score was 85, but I learned a lot from the experience. Now, I am working hard to get a higher score.", "src": "guide"},
+  {"q": "Why is it important to learn from mistakes?", "story": 6, "opener_en": "I think mistakes are useful because they show us what we need to improve.", "closer_en": "Since then, I have been practicing more carefully.", "change_ar": "رأي ثم مثال الـ85 ومراجعة الأخطاء، والخاتمة «Since then…».", "cut": true, "answer_en": "I think mistakes are useful because they show us what we need to improve. For example, my first Duolingo score was 85. I reviewed my mistakes and found that I needed to improve some skills, especially reading and writing. Since then, I have been practicing more carefully every day, and I am working hard to get a higher score.", "src": "guide"},
+  {"q": "What motivates you to keep learning?", "story": 6, "opener_en": "My university goal motivates me to keep improving my English.", "closer_en": "Now, I am working hard to get a higher score.", "change_ar": "المدخل الدافع ثم القصة.", "cut": false, "answer_en": "My university goal motivates me to keep improving my English. I started preparing for the Duolingo English Test because I need the score for my university studies. At first, I found reading and writing difficult. However, I started practicing every day and reviewing my mistakes. My first score was 85, but I learned a lot from the experience. Now, I am working hard to get a higher score.", "src": "guide"},
+  {"q": "How has education changed over time?", "story": 7, "opener_en": "In the past, students depended more on books and classroom lessons.", "closer_en": "In the future, I think technology will become even more important in education.", "change_ar": "بدّل الماضي والحاضر للتعليم، والسبب والمستقبل بنفس القالب.", "cut": false, "answer_en": "In the past, students depended more on books and classroom lessons. Today, they can use online courses, videos, and digital tools. This change happened because technology became easier to use. One advantage is that students can learn from almost anywhere. However, online learning can sometimes be distracting. In the future, I think technology will become even more important in education.", "src": "guide"},
+  {"q": "How has communication changed?", "story": 7, "opener_en": "In the past, communication was slower, and people depended more on phone calls and face-to-face meetings.", "closer_en": "In the future, communication will probably become even faster.", "change_ar": "نفس القالب بموضوع التواصل.", "cut": false, "answer_en": "In the past, communication was slower, and people depended more on phone calls and face-to-face meetings. Today, people can send messages or make video calls instantly. This change happened because smartphones and the internet became widely available. It saves time and makes communication easier. However, people may spend less time talking face to face. In the future, communication will probably become even faster.", "src": "guide"},
+  {"q": "What are the advantages and disadvantages of technology?", "story": 7, "opener_en": "Technology has many advantages and disadvantages.", "closer_en": "Overall, I think technology is useful when people use it in a smart way.", "change_ar": "ما تحتاج الماضي والحاضر كاملًا: ابدأ مباشرة بالمميزات والعيوب من القطعة.", "cut": true, "answer_en": "Technology has many advantages and disadvantages. It helps us save time and organize our work better, and many tasks that took a long time are now fast. However, technical problems can sometimes stop the work, and people may depend on technology too much. Overall, I think technology is useful when people use it in a smart way.", "src": "guide"},
+  {"q": "How do you think work will change in the future?", "story": 7, "opener_en": "In the future, I think technology will become even more important at work. Many routine tasks may become automatic.", "closer_en": "Overall, I think these changes will help people work faster and better.", "change_ar": "ابدأ من المستقبل ثم ارجع للماضي والحاضر — ترتيب القالب يتغير حسب السؤال.", "cut": false, "answer_en": "In the future, I think technology will become even more important at work. Many routine tasks may become automatic. In the past, many tasks were done manually, but today we already use digital systems for most of our work. This change happened because technology became faster and easier to use. However, sometimes technical problems can stop the work for a short time. Overall, I think these changes will help people work faster and better.", "src": "guide"},
+  {"q": "Describe a skill you learned. Explain why you learned it and how it helped you.", "story": 1, "opener_en": "Recently, I started improving my English because I need it for my studies and work.", "closer_en": "Now, I can speak more easily, and I hope to improve even more in the future.", "change_ar": "سؤال مركّب: What (بدأت الإنجليزي) / Why (للدراسة والعمل) / How (تدريب يومي) / Result (أتكلم أسهل) — القطعة تغطيها كلها.", "cut": false, "answer_en": "Recently, I started improving my English because I need it for my studies and work. At first, speaking was difficult for me because I was afraid of making mistakes. I started practicing every day and learning useful words and simple sentence structures. Although it was difficult at first, I became more confident. This skill helped me at work and in my studies. Now, I can speak more easily, and I hope to improve even more in the future.", "src": "guide"}
+ ]
+}
