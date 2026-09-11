@@ -340,6 +340,7 @@ details.homeMore>summary::-webkit-details-marker{display:none}
     <h3>🚀 ابدأ من هنا — كل اللي تحتاجه اليوم بهالأزرار</h3>
     <div class="startGrid">
       <a class="startBtn" href="#skills/flex"><b>📦 قطعي المرنة</b><small>القصص الأربع + الفرعان: حفظ تدريجي ← تبديل سريع</small></a>
+      <a class="startBtn" href="#skills/flexq"><b>🧩 جاوب بقطعة</b><small>سؤال حقيقي وتجاوبه بقطعتك بتوقيت الاختبار (35 ث / 90 ث / 5 دقائق)</small></a>
       <a class="startBtn" href="#skills/patterns"><b>🧭 أنماط الأسئلة</b><small>كلمة وحدة تحدد النوع ← الترتيب</small></a>
       <a class="startBtn" href="#read/rc"><b>🧩 Read and Complete</b><small>أضعف مهارة — بالطريقة + الترجمة بعد التحقق</small></a>
       <button type="button" class="startBtn" id="startMockBtn"><b>🧑‍🏫 محاكاة كاملة مدرّبة</b><small>14 تمرين بترتيب الاختبار (~50 د)</small></button>
@@ -606,7 +607,7 @@ function related(kind, pool, keyFn, missKinds, max, fresh) {
   return shuffle(scored.slice(0, Math.max(max * 3, 6)).map(r => r.x)).slice(0, max);
 }
 const SKILLS = { reading: { ar: 'القراءة', d: ['rs', 'fib', 'rc', 'ir', 'evidence'] }, listening: { ar: 'الاستماع', d: ['lt', 'il'] }, writing: { ar: 'الكتابة', d: ['wp', 'iw', 'ws', 'sum', 'rewrite'] }, speaking: { ar: 'المحادثة', d: ['sp', 'rts', 'is', 'ss'] } };
-const DRILL_META = { flex: ['📦 قطعي المرنة (تبديل سريع)', 'skills/flex'], evidence: ['الاستنتاج والدليل', 'read/evidence'], rewrite: ['إعادة صياغة إجاباتي', 'write/rewrite'], ideas: ['⚡ الأفكار السريعة', 'skills/ideas'], kit: ['📦 عدة الحفظ', 'skills/kit'], typing: ['⌨️ سرعة الطباعة', 'skills/typing'], rs: ['🔤 Read and Select', 'read/rs'], fib: ['✏️ Fill in the Blanks', 'read/fib'], rc: ['🧩 Read and Complete', 'read/rc'], ir: ['📄 Interactive Reading', 'read/ir'], lt: ['⌨️ Listen and Type', 'listen/lt'], il: ['💬 Interactive Listening', 'listen/il'], wp: ['🖼️ Write About the Photo', 'write/wp'], iw: ['📝 Interactive Writing', 'write/iw'], ws: ['📜 Writing Sample', 'write/ws'], sum: ['🗒️ Summarize', 'write/sum'], sp: ['🖼️ Speak About the Photo', 'speak/sp'], rts: ['📖 Read Then Speak', 'speak/rts'], is: ['🤖 Interactive Speaking', 'speak/is'], ss: ['🎥 Speaking Sample', 'speak/ss'] };
+const DRILL_META = { flexq: ['🧩 جاوب بقطعة', 'skills/flexq'], flex: ['📦 قطعي المرنة (تبديل سريع)', 'skills/flex'], evidence: ['الاستنتاج والدليل', 'read/evidence'], rewrite: ['إعادة صياغة إجاباتي', 'write/rewrite'], ideas: ['⚡ الأفكار السريعة', 'skills/ideas'], kit: ['📦 عدة الحفظ', 'skills/kit'], typing: ['⌨️ سرعة الطباعة', 'skills/typing'], rs: ['🔤 Read and Select', 'read/rs'], fib: ['✏️ Fill in the Blanks', 'read/fib'], rc: ['🧩 Read and Complete', 'read/rc'], ir: ['📄 Interactive Reading', 'read/ir'], lt: ['⌨️ Listen and Type', 'listen/lt'], il: ['💬 Interactive Listening', 'listen/il'], wp: ['🖼️ Write About the Photo', 'write/wp'], iw: ['📝 Interactive Writing', 'write/iw'], ws: ['📜 Writing Sample', 'write/ws'], sum: ['🗒️ Summarize', 'write/sum'], sp: ['🖼️ Speak About the Photo', 'speak/sp'], rts: ['📖 Read Then Speak', 'speak/rts'], is: ['🤖 Interactive Speaking', 'speak/is'], ss: ['🎥 Speaking Sample', 'speak/ss'] };
 function recent(key, n = 3) { const h = S.hist[key] || []; if (!h.length) return null; const last = h.slice(-n); return Math.round(last.reduce((a, x) => a + x.s, 0) / last.length); }
 function analyze() {
   const skills = Object.entries(SKILLS).map(([k, v]) => { const vals = v.d.map(d => recent(d)).filter(x => x != null); return { k, ar: v.ar, avg: vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : null, tried: vals.length, total: v.d.length }; });
@@ -1436,7 +1437,7 @@ function flexPage() {
   const lvlOf = (id) => (prog[id] && prog[id].lvl) || 0;
   const ROLE = { core: ['🟢 أساسية — احفظها حرفيًا', 'var(--teal)'], branch: ['🌿 فرع قصير', '#7c2d12'], template: ['🧰 قالب (مو قصة)', '#4338ca'] };
   const order = (FLEX.stories || []).slice().sort((a, b) => ({ core: 0, branch: 1, template: 2 }[a.role || 'core'] - { core: 0, branch: 1, template: 2 }[b.role || 'core']) || a.id - b.id);
-  box.innerHTML = `<div class="card"><h3>📦 قطعي المرنة — 4 قصص أساسية + فرعان + قالب</h3><div class="hl-tip">${esc(FLEX.rule_ar || '')}</div>${(FLEX.groups_ar || []).map(g => `<div class="note a" style="margin:6px 0"><b>💡 الخطة المختصرة</b>${esc(g)}</div>`).join('')}${(FLEX.decide_ar || []).length ? `<div style="margin-top:6px;font-weight:800">⚡ الخطوة 1 — كلمة وحدة تحدد نوع السؤال:</div><table class="wtable">${FLEX.decide_ar.map(([k, v]) => `<tr><td class="en2" style="direction:ltr">${esc(k)}</td><td>${esc(v)}</td></tr>`).join('')}</table>` : ''}<div class="row" style="margin-top:6px"><button type="button" class="btn" id="flexSwapBtn">🔀 تبديل سريع ×10</button><a class="btn sm ghost" href="#skills/kit">🃏 مفاتيح التحويل (بطاقات)</a><a class="btn sm ghost" href="#skills/ideas">⚡ النمط + الأفكار</a></div><details class="tech" style="margin-top:8px"><summary>📜 قواعد التحويل (من دليلك)</summary><ol>${(FLEX.rules_ar || []).map(r => `<li>${esc(r)}</li>`).join('')}</ol><b>مفاتيح المدخل</b>${(FLEX.keys || []).map(k => `<div class="kitRow"><span class="en2">${esc(k.en)}</span><span class="kitAr">${esc(k.when_ar)}</span></div>`).join('')}<b style="display:block;margin-top:6px">الخواتم</b>${(FLEX.closers || []).map(k => `<div class="kitRow"><span class="en2">${esc(k.en)}</span><span class="kitAr">${esc(k.when_ar)}</span></div>`).join('')}</details></div>` +
+  box.innerHTML = `<div class="card"><h3>📦 قطعي المرنة — 4 قصص أساسية + فرعان + قالب</h3><div class="hl-tip">${esc(FLEX.rule_ar || '')}</div>${(FLEX.groups_ar || []).map(g => `<div class="note a" style="margin:6px 0"><b>💡 الخطة المختصرة</b>${esc(g)}</div>`).join('')}${(FLEX.decide_ar || []).length ? `<div style="margin-top:6px;font-weight:800">⚡ الخطوة 1 — كلمة وحدة تحدد نوع السؤال:</div><table class="wtable">${FLEX.decide_ar.map(([k, v]) => `<tr><td class="en2" style="direction:ltr">${esc(k)}</td><td>${esc(v)}</td></tr>`).join('')}</table>` : ''}<div class="row" style="margin-top:6px"><a class="btn" href="#skills/flexq" style="background:#7c2d12">🧩 جاوب بقطعة (توقيت الاختبار)</a><button type="button" class="btn" id="flexSwapBtn">🔀 تبديل سريع ×10</button><a class="btn sm ghost" href="#skills/kit">🃏 مفاتيح التحويل (بطاقات)</a><a class="btn sm ghost" href="#skills/ideas">⚡ النمط + الأفكار</a></div><details class="tech" style="margin-top:8px"><summary>📜 قواعد التحويل (من دليلك)</summary><ol>${(FLEX.rules_ar || []).map(r => `<li>${esc(r)}</li>`).join('')}</ol><b>مفاتيح المدخل</b>${(FLEX.keys || []).map(k => `<div class="kitRow"><span class="en2">${esc(k.en)}</span><span class="kitAr">${esc(k.when_ar)}</span></div>`).join('')}<b style="display:block;margin-top:6px">الخواتم</b>${(FLEX.closers || []).map(k => `<div class="kitRow"><span class="en2">${esc(k.en)}</span><span class="kitAr">${esc(k.when_ar)}</span></div>`).join('')}</details></div>` +
     order.map(st => { const trs = (FLEX.transforms || []).filter(x => x.story === st.id); const lv = lvlOf(st.id); const R = ROLE[st.role || 'core']; return `<div class="card flexCard" data-id="${st.id}"><h3>${st.id}. ${esc(st.name_ar)} <span class="pill" style="color:${R[1]}">${R[0]}${st.branch_of ? ' من القصة ' + st.branch_of : ''}</span> <small class="hl-tip">${esc(st.one_line_ar)}</small></h3><div class="hl-tip">📌 تنفع لـ: ${esc(st.use_ar)} · <b>${esc(st.represents_ar)}</b></div>${st.branch_text ? `<div class="note g" style="margin:4px 0"><b>الفرع اللي تحفظه فعلًا (ثم ترجع لجسم القصة ${st.branch_of})</b><span class="en2" style="display:block;direction:ltr;text-align:left">${esc(st.branch_text)}</span></div>` : ''}<div class="model" style="font-size:14px">${flexMarkCore(st)}</div><div class="hl-tip">المظلل = قلب القطعة (اللي لازم يبقى). مستواك بالحفظ: <b>${lv}/3</b>${prog[st.id] && prog[st.id].best != null ? ` · أفضل كتابة من الذاكرة ${prog[st.id].best}%` : ''}</div><div class="row"><button type="button" class="btn sm" data-memo="${st.id}">🧠 احفظها تدريجيًا</button><button type="button" class="btn sm ghost" data-read="${st.id}">🎙️ اقرأها بصوت</button><button type="button" class="btn sm ghost" data-recall="${st.id}">✍️ اكتبها من الذاكرة</button></div><details class="tech"><summary>🧱 الهيكل + المداخل والخواتم</summary><ol>${(st.skeleton || []).map(s => `<li class="en2" style="direction:ltr;text-align:left">${esc(s)}</li>`).join('')}</ol><b>المداخل حسب السؤال</b>${(st.openers || []).map(o => `<div class="kitRow"><span class="kitAr" style="flex:0 0 150px">${esc(o.when_ar)}</span><span class="en2">${esc(o.en)}</span></div>`).join('')}<b style="display:block;margin-top:6px">الخواتم</b>${(st.closers || []).map(o => `<div class="kitRow"><span class="kitAr" style="flex:0 0 150px">${esc(o.when_ar)}</span><span class="en2">${esc(o.en)}</span></div>`).join('')}</details>${trs.length ? `<details class="tech"><summary>🔀 تحويلات جاهزة (${trs.length} سؤال)</summary>${trs.slice(0, 40).map(x => `<div class="flexTr"><div class="en2" style="font-weight:800">${esc(x.q)}</div><div class="hl-tip">${esc(x.change_ar || '')}${x.cut ? ' · <b>خذ قلب القصة فقط</b>' : ''}</div><div class="en2">↳ ${esc(x.opener_en)}</div>${x.answer_en ? `<details><summary class="hl-tip">الجواب كامل</summary><div class="model" style="font-size:13px">${esc(x.answer_en)}</div></details>` : ''}</div>`).join('')}${trs.length > 40 ? `<div class="hl-tip">و${trs.length - 40} تحويلًا آخر يظهر لك تحت السؤال نفسه بالتمارين.</div>` : ''}</details>` : ''}</div>`; }).join('');
   $('flexSwapBtn').onclick = () => flexSwap();
   box.querySelectorAll('[data-memo]').forEach(b => b.onclick = () => flexMemo(+b.dataset.memo, Math.min(3, lvlOf(+b.dataset.memo) + 1)));
@@ -1515,7 +1516,7 @@ function flexRead(id) {
 function flexSwap() {
   if (!FLEX) return; const T = FLEX.transforms || []; const rounds = 10; let i = 0; const log = []; const t00 = Date.now();
   const pool = shuffle(T.map(x => ({ q: x.q, tr: x }))).slice(0, 7).concat(shuffle(allPrompts().filter(p => !T.some(x => x.q.toLowerCase() === p.q.toLowerCase()))).slice(0, 3).map(p => ({ q: p.q, tr: null })));
-  const f = frame('skillsDrill', '🔀 التبديل السريع', 0);
+  const f = frame('skillsDrill', '🔀 التبديل السريع — تمرين ذهني (مو توقيت الاختبار)', 0);
   function show() {
     if (i >= pool.length) return finish();
     const it = pool[i]; const expect = it.tr ? flexStory(it.tr.story) : (flexFor(it.q) || {}).story; const t0 = Date.now(); let chosen = null;
@@ -1548,6 +1549,60 @@ function flexSwap() {
     again(f.body, flexSwap, '🔄 جولة جديدة');
   }
   show();
+}
+
+/* ---------- جاوب بقطعة: سؤال حقيقي ← تجاوبه بقطعتك بتوقيت الاختبار الحقيقي ← فحص المدخل وجسم القطعة ---------- */
+const FLEXQ_MODES = {
+  s35: ['🎙️ تكلم 35 ثانية', 'speak', 35, 'Interactive Speaking: تسمع السؤال ثم 35 ثانية جواب', 'interactive'],
+  s90: ['🎙️ 20 ث تحضير + 90 ث كلام', 'speak', 90, 'Read Then Speak: 20 ثانية تحضير ثم 90 ثانية', 'sample'],
+  s180: ['🎙️ 30 ث تحضير + 3 دقائق', 'speak', 180, 'Speaking Sample: 30 ثانية تحضير ثم 3 دقائق', 'sample'],
+  w5: ['✍️ اكتب 5 دقائق (130 كلمة)', 'write', 300, 'Writing Sample / Interactive Writing: 5 دقائق', 130],
+  w1: ['✍️ اكتب دقيقة (تدريب سريع)', 'write', 60, 'مو توقيت اختبار — تدريب على المدخل + قلب القصة', 50],
+};
+const flexQPick = () => (FLEX && FLEX.transforms && FLEX.transforms.length) ? adaptPick(FLEX.transforms, () => 2, 'flexq', 1, { keyFn: x => x.q })[0] : null;
+/* فحص الجواب: أول جملة تجاوب السؤال؟ أي قطعة استخدمت وكم منها بقي؟ هل هي القطعة المتوقعة؟ */
+function flexCheck(q, txt) {
+  const first = (String(txt || '').split(/[.!?]/)[0] || '').trim(); const kws = kwFrom(q, 10); const fw = flexWords(first);
+  const hasKw = kws.some(k => first.toLowerCase().includes(k) || fw.some(w => w.length >= 5 && k.length >= 5 && w.slice(0, 5) === k.slice(0, 5)));
+  const keyStart = /^(one |i think|i believe|in my opinion|in the past|ten years ago|recently,|my |a personal|education|learning|technology|there are|yes,|no,|i (would|prefer|agree|disagree))/i.test(first);
+  const tw = flexWords(txt); const joined = tw.join(' '); let best = null;
+  (FLEX.stories || []).forEach(st => { const sw = new Set(flexWords(st.text)); const reuse = tw.length ? tw.filter(w => sw.has(w)).length / tw.length : 0; const kept = (st.core || []).filter(c => joined.includes(flexWords(c).slice(0, 5).join(' '))).length; const sc = reuse + kept * 0.25; if (!best || sc > best.sc) best = { st, reuse, kept, sc }; });
+  const tr = (FLEX.transforms || []).find(x => x.q.toLowerCase().trim() === String(q).toLowerCase().trim()) || null;
+  const expect = tr ? flexStory(tr.story) : ((flexFor(q) || {}).story || null);
+  const fam = (s) => s ? (s.branch_of || s.id) : null;
+  const usedStory = best && (best.kept >= 1 || best.reuse >= 0.4) ? best.st : null;
+  const rightStory = !!(usedStory && expect && fam(usedStory) === fam(expect));
+  return { first, hasKw, keyStart, best, usedStory, expect, tr, rightStory };
+}
+function flexQ(mode, item) {
+  const box = $('skillsDrill'); if (!FLEX) { box.innerHTML = '<div class="note r">⏳ ما تحمّلت قطعي المرنة بعد — أعد تحميل الصفحة.</div>'; return; }
+  if (!mode) {
+    box.innerHTML = `<div class="card"><h3>🧩 جاوب بقطعة — سؤال حقيقي وتجاوبه بقطعتك بتوقيت الاختبار</h3><div class="hl-tip">هذا التوقيت هو توقيت الاختبار نفسه. («التبديل السريع» 5+25 ثانية تمرين ذهني للاختيار بس، مو توقيت اختبار.) بعد الجواب أشيّك: أول جملتك تجاوب السؤال؟ أي قطعة استخدمت وكم بقي من جسمها؟ وأعرض لك التحويل النموذجي والجواب كامل.</div><div class="row" style="flex-direction:column;align-items:stretch">${Object.entries(FLEXQ_MODES).map(([k, m]) => `<button type="button" class="btn ${k === 'w1' ? 'ghost' : ''}" data-fq="${k}" style="text-align:right;justify-content:flex-start"><b>${m[0]}</b> <small style="font-weight:700;opacity:.85">— ${esc(m[3])}</small></button>`).join('')}</div><div class="row"><a class="btn sm ghost" href="#skills/flex">📦 القطع</a></div></div>`;
+    box.querySelectorAll('[data-fq]').forEach(b => b.onclick = () => flexQ(b.dataset.fq)); return;
+  }
+  const M = FLEXQ_MODES[mode]; if (!M) return flexQ(null);
+  const it = item || flexQPick(); if (!it) return flexQ(null); const t0 = Date.now();
+  const isWrite = M[1] === 'write'; const fmt = isWrite ? 'ws' : M[2] <= 45 ? 'is' : 'ss';
+  const f = frame('skillsDrill', '🧩 جاوب بقطعة — ' + M[0], isWrite ? M[2] : 0);
+  f.body.innerHTML = `<div class="sent" style="font-size:15px"><b>${esc(it.q)}</b></div><div class="hl-tip">${esc(M[3])}. الترتيب: اعرف النوع ← اختر القصة ← <b>أول جملة تجاوب السؤال بكلماته</b> ← الجسم المحفوظ ← الخاتمة حسب المطلوب.</div>${patStrip(it.q, fmt)}`;
+  function finish(txt, n, r) {
+    const c = flexCheck(it.q, txt); const rep = isWrite ? gradeWriting(txt, { prompt: it.q, keywords: kwFrom(it.q), min: M[4], kind: 'sample' }) : (r ? gradeSpeaking(r, { prompt: it.q, keywords: kwFrom(it.q), kind: M[2] <= 45 ? 'interactive' : 'sample' }) : null);
+    const opener = c.hasKw || c.keyStart; const body = c.best ? c.best.kept : 0;
+    const sc = Math.round((opener ? 30 : 0) + (body >= 2 ? 40 : body === 1 ? 25 : c.best && c.best.reuse >= 0.4 ? 15 : 0) + (c.rightStory ? 15 : 0) + (rep ? Math.round(rep.score * 0.15) : (isWrite ? Math.min(15, Math.round(15 * n / M[4])) : (r && r.dur >= M[2] * 0.8 ? 15 : 5))));
+    setBest('flexq', sc); logAttempt('flex-answer', { q: it.q, a: txt, sc, ms: Date.now() - t0, extra: { mode, words: n, opener, kept: body, used: c.usedStory ? c.usedStory.id : null, expect: c.expect ? c.expect.id : null, rightStory: c.rightStory, rubric: rep ? rep.score : null } });
+    const lines = [
+      `<div class="${opener ? 'rv-yes' : 'rv-no'}">${opener ? '✓' : '✗'} أول جملة: <span class="en2">${esc(c.first || '(فاضي)')}</span> — ${opener ? 'تجاوب السؤال' : 'ما فيها كلمات السؤال ولا مفتاح تحويل — ابدأ بجملة تجاوب السؤال مباشرة'}</div>`,
+      `<div class="${body >= 1 ? 'rv-yes' : 'rv-no'}">${body >= 1 ? '✓' : '✗'} الجسم: ${c.usedStory ? `استخدمت قطعة ${c.usedStory.id}. ${esc(c.usedStory.name_ar)} — ${body} من 3 جمل القلب موجودة، و${Math.round((c.best.reuse || 0) * 100)}% من كلماتك من القطعة` : 'ما تعرفت على أي قطعة محفوظة في جوابك — استخدم الجسم كما حفظته'}</div>`,
+      `<div class="${c.rightStory ? 'rv-yes' : 'rv-no'}">${c.rightStory ? '✓' : '•'} القطعة المتوقعة: ${c.expect ? `${c.expect.id}. ${esc(c.expect.name_ar)}` : '—'}${c.rightStory ? ' (نفسها)' : c.usedStory ? ' (استخدمت غيرها — مقبول لو المدخل يجاوب السؤال)' : ''}</div>`,
+    ].join('');
+    const model = c.tr ? `<h3>التحويل النموذجي</h3><div class="rv-item ok"><div>المدخل: <span class="en2">${esc(c.tr.opener_en)}</span></div><div class="rv-why">${esc(c.tr.change_ar)}${c.tr.cut ? ' · خذ قلب القصة فقط' : ''}</div><div class="hl-tip">الخاتمة: <span class="en2">${esc(c.tr.closer_en)}</span></div></div><h3>الجواب كامل بعد التحويل</h3><div class="model">${esc(c.tr.answer_en)}</div>` : '';
+    const stats = r ? `<div class="stat"><div><b>${Math.round(r.dur)}s</b><small>تكلمت من ${M[2]}s</small></div>${r.text ? `<div><b>${r.n}</b><small>كلمة</small></div><div><b>${r.wpm}</b><small>كلمة/دقيقة</small></div>` : ''}</div>${r.url ? `<audio controls src="${r.url}"></audio>` : ''}${r.text ? `<div class="transcript">${esc(r.text)}</div>` : '<div class="hl-tip">ما وصلني نص لكلامك (التحويل في كروم) — الفحص على الوقت.</div>'}` : `<h3>كتابتك</h3><div class="model">${esc(txt) || '(فاضي)'}</div>`;
+    result(f.body, sc, isWrite ? `${n} كلمة${n >= M[4] ? ' ✓' : ' — الهدف ' + M[4]}` : (r && r.dur < M[2] * 0.8 ? '⚠️ وقفت بدري — عبّي الوقت كله' : '✓ عبّيت الوقت'), `<h3>🧑‍🏫 فحص القطعة</h3><div class="rv-item ${sc >= 70 ? 'ok' : 'bad'}">${lines}</div>${stats}${rubricHtml(rep)}${model}`);
+    again(f.body, () => flexQ(mode), '🔄 سؤال جديد');
+    const r2 = el('div', 'row'); r2.innerHTML = '<button type="button" class="btn sm ghost" id="fqModes">⏱️ توقيت آخر</button>'; f.body.appendChild(r2); $('fqModes').onclick = () => flexQ(null);
+  }
+  if (isWrite) { writingBox(f.body, M[4], null, (txt, n) => finish(txt, n, null), { coach: { kind: writeKindOf('ws', it.q), drill: 'ws', scoreKind: 'sample', keywords: kwFrom(it.q) } }); f.timer.start(); }
+  else speakBox(f.body, M[2] === 35 ? 0 : M[2] === 90 ? 20 : 30, M[2], (r) => finish(r.text || '', r.n, r), M[4], patternOf(it.q));
 }
 
 /* ---------- تمرين الأفكار السريعة: 3 أفكار بـ30 ثانية ---------- */
@@ -1987,6 +2042,7 @@ function renderMenus() {
     { ic: '🎥', t: 'Speaking Sample', s: '30 ث + 3 دقائق — يشوفه مسؤول القبول', key: 'ss', hash: 'speak/ss' },
   ]);
   menu('skillsMenu', [
+    { ic: '🧩', t: 'جاوب بقطعة', s: 'سؤال حقيقي وتجاوبه بقطعتك بتوقيت الاختبار (35 ث / 90 ث / 3 د / 5 د) — فحص المدخل والجسم ثم التحويل النموذجي', key: 'flexq', hash: 'skills/flexq' },
     { ic: '📦', t: 'قطعي المرنة — ابدأ هنا', s: 'القصص الأربع + الفرعان + القالب: حفظ تدريجي، تبديل سريع، قراءة بصوت، ومفاتيح التحويل', key: 'flex', hash: 'skills/flex' },
     { ic: '🎓', t: 'الدروس العشرة', s: 'قواعد B1→B2 بالعربي مع تمارين', key: 'lessons', hash: 'skills/lessons' },
     { ic: '🃏', t: 'بطاقات المفردات', s: `${(BANKS.grammar_vocab?.vocab || []).length} كلمة بالمعنى والمثال`, key: 'vocab', hash: 'skills/vocab' },
@@ -2035,7 +2091,7 @@ function startMock() {
 const DRILLS = {};
 DRILLS.ideas = drillIdeas; DRILLS.kit = drillKit; DRILLS.typing = drillTyping; /* v5 (معرّفة فوق) */
 DRILLS.stories = drillStories; DRILLS.patterns = drillPatterns; /* v6 */
-DRILLS.flex = flexPage; /* v8 */
+DRILLS.flex = flexPage; DRILLS.flexq = () => flexQ(null); /* v8 */
 
 DRILLS.rs = function () {
   const real = adaptPick(BANKS.readselect.real, x => x.level, 'rs', 10, { kinds: ['rs', 'vocab', 'fib'], keyFn: x => x.w, max: 4 }).map(x => ({ ...x, real: true }));
