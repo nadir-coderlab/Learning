@@ -4,8 +4,9 @@
  "_readme_ar": "قطعي المرنة: 7 قطع يحفظها المتدرب (من دليله) بصيغة هيكل + مداخل وخواتم تتبدل حسب السؤال. transforms = تحويلات جاهزة لأسئلة البنك (المدخل، الخاتمة، وش يتغير، الجواب المعدّل). القاعدة: غيّر 20% فقط (أول جملة، السبب، مثال، آخر جملة) والجسم يبقى.",
  "rule_ar": "السؤال يتغير ← تحدد نوعه بثانيتين ← تختار أقرب قطعة ← تغيّر المدخل وبعض التفاصيل (20% فقط) ← تستخدم جسم القطعة المحفوظ ← تغيّر الخاتمة إذا احتجت. لا تجبر القطعة على السؤال؛ لو ما تناسبه اختر قطعة ثانية.",
  "groups_ar": [
-  "5 هياكل تكفي: القطعتان 1 و6 قصة وحدة (الإنجليزي) بمدخلين — احفظ جسمًا واحدًا وأضف جملة الـ85 لما يكون السؤال عن فشل أو هدف شخصي. القطعتان 4 و5 نفس الهيكل (مشكلة ← خطوات ← فريق ← نتيجة ← درس) بقلبين مختلفين — احفظ الهيكل مرة والقلبين جملتين لكل واحد.",
-  "الوحدة اللي تحفظها فعلًا: الهيكل + جملتان أو ثلاث «قلب» لكل قطعة + مفاتيح التحويل (13 مدخل و5 خواتم). الباقي تركيب."
+  "الخطة المختصرة (ملفك الثاني): 4 قصص أساسية تحفظها حرفيًا — الإنجليزي (1)، الوالد (2)، المدينة (3)، تعطل النظام (4) — وفرعان قصيران: نتيجة Duolingo (6 داخل 1) وتحسين الخدمة (5 داخل 4)، والقطعة 7 مو قصة: قالب Past → Present → Future لأسئلة التغيير والمقارنة والمستقبل.",
+  "الوحدة اللي تحفظها فعلًا: 4 نصوص + فرعان قصيران + المداخل (بدايات قصيرة تغيّر اتجاه الجواب) + 5 خواتم. أي سؤال: كلمة وحدة تحدد نوعه (learning / person / work / place / change) ← القصة الأقرب ← غيّر المدخل ← الجسم المحفوظ ← الخاتمة حسب المطلوب.",
+  "تحذير وحيد: أسئلة الرأي (Why…? / Do you agree? / advantages…) تبدأ برأي (In my opinion / I think … because …) ثم For example بقلب القصة — لا تبدأ بالقصة أبدًا. ولو ما فيه قصة تناسب (أكل، رياضة، إعلام…): قالب Past/Present/Future بكلمات السؤال + مثال من الشغل أو المدينة."
  ],
  "stories": [
   {
@@ -71,6 +72,22 @@
     {
      "when_ar": "شي زاد ثقتك",
      "en": "Learning English has made me more confident."
+    },
+    {
+     "when_ar": "المستقبل",
+     "en": "In the future, I want to improve my English speaking."
+    },
+    {
+     "when_ar": "نتيجة ما كانت مثل المطلوب (فرع Duolingo ثم ترجع للجسم)",
+     "en": "My first Duolingo score was 85, which was lower than my goal. However, I reviewed my mistakes and started practicing more."
+    },
+    {
+     "when_ar": "تعلمت من خطأ",
+     "en": "I learned an important lesson from my first Duolingo test. My score was 85, which was lower than my goal. However, I reviewed my mistakes and started practicing more."
+    },
+    {
+     "when_ar": "نتيجة حفزتك",
+     "en": "One result that motivated me was my first Duolingo score. I got 85, which was lower than my goal. However, I reviewed my mistakes and started practicing more."
     }
    ],
    "closers": [
@@ -86,7 +103,8 @@
      "when_ar": "عادة",
      "en": "Now, I can speak more easily, and I want to continue this habit in the future."
     }
-   ]
+   ],
+   "role": "core"
   },
   {
    "id": 2,
@@ -147,6 +165,14 @@
     {
      "when_ar": "شخص ساعدك بوقت صعب",
      "en": "My father helped me during a difficult time in my life. He stayed calm and gave me useful advice."
+    },
+    {
+     "when_ar": "شخص ساعدك كثير",
+     "en": "One person who helped me a lot is my father."
+    },
+    {
+     "when_ar": "نصيحة مهمة (ابدأ بالنصيحة مو بالشخص)",
+     "en": "One important piece of advice I received was from my father. He taught me to work hard and take responsibility."
     }
    ],
    "closers": [
@@ -162,7 +188,8 @@
      "when_ar": "ساعدك",
      "en": "His support helped me deal with the situation better."
     }
-   ]
+   ],
+   "role": "core"
   },
   {
    "id": 3,
@@ -227,6 +254,14 @@
     {
      "when_ar": "كيف تغيرت مدينتك",
      "en": "Madinah has changed a lot over the years. It has become more modern, and there are more services and interesting places."
+    },
+    {
+     "when_ar": "وقت الفراغ",
+     "en": "I enjoy spending my free time with my family in Madinah."
+    },
+    {
+     "when_ar": "المستقبل",
+     "en": "In the future, I think Madinah will become even more modern."
     }
    ],
    "closers": [
@@ -242,7 +277,8 @@
      "when_ar": "عائلة",
      "en": "These simple activities are special to me because they help us spend quality time together."
     }
-   ]
+   ],
+   "role": "core"
   },
   {
    "id": 4,
@@ -316,6 +352,14 @@
     {
      "when_ar": "ليش الفريق مهم (رأي ثم قلب القصة)",
      "en": "I think teamwork is important because it helps people solve problems faster. For example, when our computer system went down at work, my team worked together and used the backup plan."
+    },
+    {
+     "when_ar": "مشكلة واجهتها",
+     "en": "One problem I faced at work happened when our computer system went down."
+    },
+    {
+     "when_ar": "إنجاز (فرع تحسين الخدمة)",
+     "en": "One achievement I am proud of was improving a service for patients."
     }
    ],
    "closers": [
@@ -335,7 +379,8 @@
      "when_ar": "تقنية",
      "en": "This is why organizations need a good backup plan."
     }
-   ]
+   ],
+   "role": "core"
   },
   {
    "id": 5,
@@ -415,7 +460,10 @@
      "when_ar": "نتيجة",
      "en": "In the end, we reduced the waiting time a lot."
     }
-   ]
+   ],
+   "role": "branch",
+   "branch_of": 4,
+   "branch_text": "One achievement I am proud of was improving a service for patients. The main problem was that patients had to wait for a long time. My team and I studied the problem and changed the way we worked. In the end, we reduced the waiting time a lot."
   },
   {
    "id": 6,
@@ -494,7 +542,10 @@
      "when_ar": "أخطاء",
      "en": "Since then, I have been practicing more carefully."
     }
-   ]
+   ],
+   "role": "branch",
+   "branch_of": 1,
+   "branch_text": "My first Duolingo score was 85, which was lower than my goal. However, I reviewed my mistakes and started practicing more."
   },
   {
    "id": 7,
@@ -572,7 +623,8 @@
      "when_ar": "رأي",
      "en": "Overall, I think technology is useful when people use it in a smart way."
     }
-   ]
+   ],
+   "role": "template"
   }
  ],
  "keys": [
@@ -3872,5 +3924,31 @@
    "answer_en": "I would advise new employees to learn English first, because most jobs today need it for communication. The best way to learn it is to practice every day at work. For example, when I started improving my English, speaking was difficult for me because I was afraid of making mistakes. I started practicing every day and learning useful words and simple sentence structures. Although it was difficult at first, I became more confident. In their career, this skill will help them talk with colleagues and get better opportunities. This experience taught me that regular practice can make a big difference, and it will help them too.",
    "src": "gen"
   }
+ ],
+ "decide_ar": [
+  [
+   "learning",
+   "الإنجليزي (1) — ومعها فرع Duolingo"
+  ],
+  [
+   "person",
+   "الوالد (2)"
+  ],
+  [
+   "work / problem",
+   "تعطل النظام (4) — ومعها فرع تحسين الخدمة (5)"
+  ],
+  [
+   "place",
+   "المدينة (3)"
+  ],
+  [
+   "change / future / pros-cons",
+   "قالب Past → Present → Future (7)"
+  ],
+  [
+   "opinion (Why? Do you agree?)",
+   "رأي أول ثم For example بقلب أقرب قصة"
+  ]
  ]
 }
