@@ -34,6 +34,9 @@ on:
       - "public/det-bank2.json"
       - "public/det-explain.json"
       - "public/det-flex.json"
+      - "public/math.html"
+      - "public/math-gen.js"
+      - "public/math-lessons.json"
       - "public/assets/det/**"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
@@ -65,8 +68,8 @@ jobs:
           git show origin/main:public/study.html > study.html
           git show origin/main:public/det-study.js > det-study.js
           git show origin/main:public/det-study.css > det-study.css
-          # ملفات المدرّب الإضافية: محرك التقييم، المزامنة، قائمة الكلمات، حزمة المدرّب، والصور
-          for f in det-path120.js det-path120.css det-path120-bank.js det-path120-drills.js det-scoring.js det-sync.js det-words.txt det-packs.json det-kit.json det-bank2.json det-explain.json det-flex.json; do
+          # ملفات المدرّب الإضافية: محرك التقييم، المزامنة، قائمة الكلمات، حزمة المدرّب، والصور — وموقع «رياضياتي» للبنات (math.html)
+          for f in det-path120.js det-path120.css det-path120-bank.js det-path120-drills.js det-scoring.js det-sync.js det-words.txt det-packs.json det-kit.json det-bank2.json det-explain.json det-flex.json math.html math-gen.js math-lessons.json; do
             git show "origin/main:public/$f" > "$f" 2>/dev/null || rm -f "$f"
           done
           rm -rf assets/det && mkdir -p assets
@@ -78,7 +81,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           # ملف اختياري غير موجود بعد (مثل det-explain.json) لا يُفشل المزامنة: نضيف الموجود أو المتتبَّع فقط
-          for f in det-path120.js det-path120.css det-path120-bank.js det-path120-drills.js index.html det.html det-train.html study.html det-study.js det-study.css det-scoring.js det-sync.js det-words.txt det-packs.json det-kit.json det-bank2.json det-explain.json det-flex.json .nojekyll; do
+          for f in det-path120.js det-path120.css det-path120-bank.js det-path120-drills.js index.html det.html det-train.html study.html det-study.js det-study.css det-scoring.js det-sync.js det-words.txt det-packs.json det-kit.json det-bank2.json det-explain.json det-flex.json math.html math-gen.js math-lessons.json .nojekyll; do
             if [ -e "$f" ] || git ls-files --error-unmatch "$f" >/dev/null 2>&1; then git add -A -- "$f"; fi
           done
           git add -A assets/det
