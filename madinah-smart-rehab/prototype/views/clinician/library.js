@@ -10,9 +10,10 @@ function ExerciseCard({ ex, cat }) {
   const [play, setPlay] = useState(false);
   const prog = ex.prog ? getEx(ex.prog, cat)?.nameAr : null;
   const reg = ex.reg ? getEx(ex.reg, cat)?.nameAr : null;
+  const [hover, setHover] = useState(false);
   return html`<article class="card exercise-card" aria-labelledby=${`lib-${ex.id}-name`}>
-    <div class="exercise-media">
-      <${Figure} motion=${ex.motion} playing=${play} />
+    <div class="exercise-media" onMouseEnter=${() => setHover(true)} onMouseLeave=${() => setHover(false)}>
+      <${Figure} motion=${ex.motion} playing=${play || hover} />
       <button type="button" class="icon-btn media-play" id=${`lib-${ex.id}-play`} aria-pressed=${String(play)} aria-label=${play ? `إيقاف عرض ${ex.nameAr}` : `تشغيل عرض ${ex.nameAr}`} onClick=${() => setPlay(!play)}>
         ${play ? html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M9 6v12M15 6v12" /></svg>`
           : html`<${Icon} name="play" size=${16} />`}</button>
@@ -60,7 +61,7 @@ export function LibraryPage({ cat }) {
         ${cat.phases.map((x) => html`<option value=${String(x.id)}>المرحلة ${x.id} — ${x.nameAr}</option>`)}
       </select>
     </div>
-    <div class="row" role="group" aria-label="الفئة" style="gap:6px">
+    <div class="row chip-row" role="group" aria-label="الفئة" style="gap:6px">
       <button type="button" class="chip" id="lib-cat-all" aria-pressed=${String(c === 'all')} onClick=${() => setC('all')}>الكل</button>
       ${cats.map((k) => html`<button type="button" class="chip" key=${k} id=${`lib-cat-${k}`} aria-pressed=${String(c === k)} onClick=${() => setC(k)}>${CATEGORIES[k]}</button>`)}
     </div>

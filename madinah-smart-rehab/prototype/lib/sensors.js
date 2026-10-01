@@ -21,12 +21,17 @@ const CAM_MSG = {
   error: 'تعذّر تشغيل الكاميرا. جرّب الفيديو المسجل أو الصورة.',
 };
 
-/** True when this frame is not allowed to use the camera at all (e.g. an embedded artifact). */
-export function cameraBlockedByPolicy() {
+/** False when the page's permissions policy forbids a feature (e.g. inside an embedded frame). */
+export function policyAllows(feature) {
   try {
     const pol = document.permissionsPolicy || document.featurePolicy;
-    return pol && typeof pol.allowsFeature === 'function' ? !pol.allowsFeature('camera') : false;
-  } catch { return false; }
+    return pol && typeof pol.allowsFeature === 'function' ? pol.allowsFeature(feature) : true;
+  } catch { return true; }
+}
+
+/** True when this frame is not allowed to use the camera at all (e.g. an embedded artifact). */
+export function cameraBlockedByPolicy() {
+  return !policyAllows('camera');
 }
 
 export function cameraError(e) {
@@ -41,6 +46,8 @@ export function cameraError(e) {
 /** Opens the camera. facing: 'user' (front) | 'environment' (back). Rejects with { code, message }. */
 export async function openCamera(facing = 'user') {
   if (typeof window === 'undefined' || !window.isSecureContext) throw { code: 'insecure', message: CAM_MSG.insecure };
+  // Asking anyway would only log a policy violation and fail; answer straight away instead.
+  if (cameraBlockedByPolicy()) throw { code: 'policy', message: CAM_MSG.policy };
   if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== 'function') throw { code: 'nocamera', message: CAM_MSG.nocamera };
   const ideal = { audio: false, video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } } };
   try {
@@ -84,8 +91,9 @@ export function requestMotionPermission() {
 }
 
 /**
- * Streams device tilt (beta = front/back tilt in degrees). Calls onNoSensor if no real reading
- * arrives within timeoutMs (desktop browsers, or a sandboxed frame). Returns a stop function.
+ * Streams device tilt (beta = front/back tilt in degrees). Calls onNoSensor(reason) if no real
+ * reading arrives within timeoutMs — reason 'policy' (embedded frame), 'unsupported' or 'timeout'
+ * (desktop browsers usually). Returns a stop function.
  */
 export function watchOrientation({ onReading, onNoSensor, timeoutMs = 1500 } = {}) {
   let got = false; let stopped = false;
@@ -97,9 +105,11 @@ export function watchOrientation({ onReading, onNoSensor, timeoutMs = 1500 } = {
     if (onReading) onReading({ beta: b, gamma: e.gamma, alpha: e.alpha });
   };
   const supported = typeof window !== 'undefined' && 'DeviceOrientationEvent' in window;
-  if (supported) window.addEventListener('deviceorientation', handler);
-  const timer = setTimeout(() => { if (!got && !stopped && onNoSensor) onNoSensor(); }, supported ? timeoutMs : 0);
-  return () => { stopped = true; clearTimeout(timer); if (supported) window.removeEventListener('deviceorientation', handler); };
+  const allowed = supported && policyAllows('accelerometer') && policyAllows('gyroscope');
+  const reason = !supported ? 'unsupported' : !allowed ? 'policy' : 'timeout';
+  if (allowed) window.addEventListener('deviceorientation', handler);
+  const timer = setTimeout(() => { if (!got && !stopped && onNoSensor) onNoSensor(reason); }, allowed ? timeoutMs : 0);
+  return () => { stopped = true; clearTimeout(timer); if (allowed) window.removeEventListener('deviceorientation', handler); };
 }
 
 /* ---------- images ---------- */

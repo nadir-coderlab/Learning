@@ -1,7 +1,7 @@
 // Clinical decision-support logic: transparent rules, never a decision.
 // Every output carries its reason so the clinician can see why a patient is green, yellow or red.
 import * as D from './data.js';
-import { TODAY, addDays, daysBetween, mean, last, linreg, round } from './util.js';
+import { TODAY, addDays, daysBetween, mean, last, linreg, round, isoDate } from './util.js';
 
 export const DEFAULT_CATALOG = {
   phases: D.PHASES, gates: D.GATES, exercises: D.EXERCISES, education: D.EDUCATION,
@@ -71,7 +71,7 @@ export function adherenceByDay(p, days = 14, cat = DEFAULT_CATALOG) {
     const due = dueToday(p, d, cat);
     const ok = doneOn(p, d);
     const n = due.filter((it) => ok.has(it.exId)).length;
-    out.push({ day: d, pct: due.length ? Math.round((n / due.length) * 100) : 0, done: n, planned: due.length });
+    out.push({ day: d, pct: due.length ? Math.round((n / due.length) * 100) : 0, done: n, planned: due.length, rest: due.length === 0 });
   }
   return out;
 }
@@ -173,6 +173,10 @@ export function criteriaFor(p, toPhase, cat = DEFAULT_CATALOG) {
     if (c.metric === 'ikdc' && L.ikdcRec) src = `استبيان · اليوم ${L.ikdcRec.day}`;
     if (c.metric === 'painAdl') src = 'متوسط 7 أيام من تسجيل المريض';
     if (c.metric === 'runTolerated') src = 'آخر 3 جلسات جري';
+    if (c.metric === 'jumpLSI' && L.jump) src = `قفز عمودي بثني مسبق · اليوم ${L.jump.day}`;
+    if (c.metric === 'monthsPostOp') src = `اليوم ${L.day} بعد العملية`;
+    if (c.metric === 'sportDrills') src = 'يحدده الأخصائي بعد التدريب الخاص بالرياضة';
+    if (c.metric === 'noRedAlerts') src = 'التنبيهات المفتوحة الآن';
     // Home measurements alone never satisfy a criterion that needs an in-person value.
     const homeOnly = ['flex', 'flexPctOther', 'flexDiffOther'].includes(c.metric) ? L.flexRec && L.flexRec.source !== 'clinic'
       : c.metric === 'extDeficit' ? L.extRec && L.extRec.source !== 'clinic' : false;
@@ -262,7 +266,10 @@ export function statusOf(p, cat = DEFAULT_CATALOG) {
   const reasons = [];
   let code = 'green';
   const reds = alerts.filter((a) => a.level === 'red');
-  const yellows = alerts.filter((a) => a.level === 'yellow');
+  // A reviewed red alert keeps the patient visible (yellow) for 3 days instead of turning green at once.
+  const followUps = computeAlerts(p, cat).filter((a) => a.level === 'red' && a.acked && today - a.day <= 3)
+    .map((a) => ({ ...a, level: 'yellow', text: `متابعة بعد تنبيه أحمر تمت مراجعته: ${a.text}` }));
+  const yellows = [...alerts.filter((a) => a.level === 'yellow'), ...followUps];
   if (reds.length) { code = 'red'; reasons.push(...reds.map((a) => a.text)); }
   else if (sinceLast >= 5) { code = 'idle'; reasons.push(`آخر تسجيل قبل ${sinceLast} أيام`); }
   else if (yellows.length) { code = 'yellow'; reasons.push(...yellows.map((a) => a.text)); }
@@ -290,7 +297,7 @@ export function projectFlex(p, target = 120) {
   if (!fit || fit.slope < 0.25) return { stalled: true, slope: fit?.slope || 0 };
   const days = Math.ceil((target - cur.y) / fit.slope);
   const line = [{ x: cur.x, y: cur.y }, { x: cur.x + Math.min(days, 28), y: Math.min(target, cur.y + fit.slope * Math.min(days, 28)) }];
-  return { days: Math.max(0, days - (today - cur.x)), slopePerWeek: round(fit.slope * 7, 1), line, target };
+  return { days: Math.max(1, days - (today - cur.x)), slopePerWeek: round(fit.slope * 7, 1), line, target };
 }
 
 /* ---------- notes ---------- */
@@ -307,7 +314,7 @@ export function soapNote(p, { plan = [], visitType = 'virtual', by = 'PT' } = {}
   const ready = st.ready;
   const lines = [];
   lines.push(`ACLR rehabilitation — ${visitType === 'virtual' ? 'Virtual follow-up' : 'In-person assessment'} (Madinah Smart Rehab)`);
-  lines.push(`Date: ${TODAY.toISOString().slice(0, 10)} | POD ${day} (week ${weekOf(day)}) | ${p.side === 'R' ? 'Right' : 'Left'} ACLR, ${GRAFT_EN[p.graft] || p.graft}${p.meniscusRepair ? ' + meniscal repair' : ''}${p.meniscectomy ? ' + partial meniscectomy' : ''}${p.additional ? ` + ${p.additional}` : ''}`);
+  lines.push(`Date: ${isoDate(TODAY)} | POD ${day} (week ${weekOf(day)}) | ${p.side === 'R' ? 'Right' : 'Left'} ACLR, ${GRAFT_EN[p.graft] || p.graft}${p.meniscusRepair ? ' + meniscal repair' : ''}${p.meniscectomy ? ' + partial meniscectomy' : ''}${p.additional ? ` + ${p.additional}` : ''}`);
   lines.push(`Phase ${p.phase}: ${ph?.nameEn || ''}`);
   lines.push('');
   lines.push(`S: 7-day mean pain ${pains.length ? round(mean(pains), 1) : 'n/a'}/10${lastC ? `; last check-in POD ${lastC.day}: pain ${lastC.pain}/10, swelling ${SW_EN[lastC.swelling] || lastC.swelling} vs yesterday, giving way ${lastC.givingWay ? 'YES' : 'no'}` : ''}. Home programme adherence ${adh.pct ?? 'n/a'}% (${adh.done}/${adh.planned} sessions, 7 days).`);

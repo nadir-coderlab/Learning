@@ -5,8 +5,8 @@ import { BarChart } from '../../lib/charts.js';
 import { adherenceByDay, postOpDay } from '../../lib/engine.js';
 import { RUN_PROGRAM, PLYO_LEVELS } from '../../lib/data.js';
 import { dispatch } from '../../lib/store.js';
-import { relDay, round, mean } from '../../lib/util.js';
-import { BY, exName, Check } from './common.js';
+import { relDay } from '../../lib/util.js';
+import { BY, exName, Check, adhSummary, adhBars } from './common.js';
 
 const SWELL_AR = { none: 'لا يوجد', mild: 'خفيف', increased: 'زاد', more: 'زاد' };
 const DONE_AR = { yes: { tone: 'ok', icon: 'check', label: 'مكتملة' }, partial: { tone: 'warn', icon: 'alert', label: 'جزئية' }, no: { tone: 'alert', icon: 'x', label: 'لم تكتمل' } };
@@ -32,7 +32,7 @@ function PlyoLevels({ p, cat }) {
         ${isNext && asking ? html`<div class="stack-sm" style="margin-top:6px">
           <${Check} id=${`plyo-confirm-${lv.level}`} checked=${ok} onChange=${setOk}>راجعت جودة الهبوط والأعراض، وأعتمد فتح هذا المستوى<//>
           <div class="row" style="gap:6px"><button type="button" class="btn btn-sm btn-primary" id=${`plyo-unlock-confirm-${lv.level}`} disabled=${!ok} onClick=${unlock}>تأكيد فتح المستوى</button>
-            <button type="button" class="btn btn-sm btn-ghost" onClick=${() => { setAsking(false); setOk(false); }}>إلغاء</button></div></div>` : null}
+            <button type="button" class="btn btn-sm btn-ghost" id=${`plyo-cancel-${lv.level}`} onClick=${() => { setAsking(false); setOk(false); }}>إلغاء</button></div></div>` : null}
       </div>
       ${open ? html`<${Pill} tone="ok" icon="unlock">مفتوح<//>`
         : isNext && !asking ? html`<button type="button" class="btn btn-sm" id=${`plyo-unlock-${lv.level}`} onClick=${() => setAsking(true)}><${Icon} name="unlock" size=${15} />فتح المستوى</button>`
@@ -44,13 +44,19 @@ function PlyoLevels({ p, cat }) {
 export function ActivityTab({ p, cat }) {
   const day = postOpDay(p);
   const adh = adherenceByDay(p, 28, cat);
-  const avg = adh.length ? round(mean(adh.map((d) => d.pct))) : null;
+  const adhS = adhSummary(adh, day);
   const log = [...(p.exlog || [])].sort((a, b) => b.day - a.day).slice(0, 25);
   const runs = [...(p.runs || [])].reverse().slice(0, 10);
   return html`<div class="stack-lg">
-    <${Card} title="الالتزام اليومي — 28 يومًا" eyebrow=${avg !== null ? `المتوسط ${avg}% من التمارين المستحقة` : ''}>
-      ${adh.length ? html`<${BarChart} label="نسبة الالتزام اليومية لآخر 28 يومًا" max=${100} valueFormat=${(v) => `${v}%`} xTitle="اليوم بعد العملية"
-        data=${adh.map((d) => ({ label: String(d.day), value: d.pct, tip: `اليوم ${d.day}: ${d.done} من ${d.planned}` }))} />` : html`<${Empty} icon="list" title="لا بيانات" />`}
+    <${Card} title="الالتزام اليومي — 28 يومًا" eyebrow="نسبة المنجز من التمارين المستحقة كل يوم">
+      ${adh.length ? html`<div class="chart-split">
+        <${BarChart} label="نسبة الالتزام اليومية لآخر 28 يومًا" max=${100} valueFormat=${(v) => `${v}%`} xTitle="اليوم بعد العملية" height=${150} data=${adhBars(adh, day)} />
+        <div class="chart-side">
+          <div><span class="muted">المنجز من المستحق</span><div class="side-value">${adhS.pct === null ? '—' : `${adhS.pct}%`}</div></div>
+          <p>أيام بالتزام 80% أو أكثر: <strong class="num">${adhS.good} من ${adhS.dueDays}</strong></p>
+          ${adhS.restDays ? html`<p class="muted">النقطة الرمادية = يوم بلا تمارين مستحقة (${adhS.restDays} يومًا)، لا يُحسب كتفويت.</p>` : null}
+        </div>
+      </div>` : html`<${Empty} icon="list" title="لا بيانات" />`}
     <//>
     <${Card} title="سجل التمارين الأخير" eyebrow="من تطبيق المريض">
       ${log.length ? html`<div class="table-wrap" style="max-height:360px;overflow:auto"><table class="table">

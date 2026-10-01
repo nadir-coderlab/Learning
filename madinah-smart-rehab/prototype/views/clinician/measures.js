@@ -9,16 +9,26 @@ import { round, last } from '../../lib/util.js';
 import { BY, CriteriaList, CriteriaDone, CriteriaSummary, Check, FieldError, num } from './common.js';
 
 const lsi = (op, other) => (other ? (op / other) * 100 : undefined);
-const pctText = (v) => (Number.isFinite(v) ? `${round(v)}%` : '—');
+const pctText = (v) => (Number.isFinite(v) ? `${round(v, 1)}%` : '—');
 const gateTarget = (cat, metric) => (cat.gates.rts || []).find((c) => c.metric === metric)?.target;
 
 /* ---------- النتائج ---------- */
-function PromChart({ p, field, title, eyebrow, target, targetLabel }) {
+function PromChart({ p, field, title, eyebrow, target }) {
   const pts = (p.proms || []).filter((x) => Number.isFinite(x[field])).map((x) => ({ x: x.day, y: x[field] }));
+  const lastP = last(pts);
+  const first = pts[0];
+  const delta = pts.length > 1 ? lastP.y - first.y : null;
+  const side = lastP ? html`<div class="chart-side">
+      <div><span class="muted">آخر قيمة</span><div class="side-value">${lastP.y}</div><span class="muted">اليوم ${lastP.x}</span></div>
+      ${delta !== null ? html`<p>التغير منذ اليوم ${first.x}: <strong class="num"><bdi dir="ltr">${delta > 0 ? '+' : ''}${delta}</bdi></strong></p>` : null}
+      ${Number.isFinite(target) ? html`<p class="row" style="gap:6px">هدف العودة ${target} (الخط الأفقي):
+        ${lastP.y >= target ? html`<${Pill} tone="ok" icon="check">محقق<//>` : html`<${Pill} tone="warn" icon="alert">دون الهدف<//>`}</p>` : null}
+      <p class="muted">${pts.length} ${pts.length === 1 ? 'قياس' : 'قياسات'}</p>
+    </div>` : null;
   return html`<${Card} title=${title} eyebrow=${eyebrow}>
-    ${pts.length >= 2 ? html`<${LineChart} label=${title} series=${[{ label: title, color: 'var(--series-1)', points: pts, dots: 'all' }]}
-        yDomain=${[0, 100]} height=${180} refLines=${Number.isFinite(target) ? [{ y: target, label: targetLabel }] : []} />`
-      : pts.length === 1 ? html`<p class="stack-sm"><span class="small muted">قياس واحد حتى الآن (اليوم ${pts[0].x})</span><span style="font-size:1.6rem;font-weight:700">${pts[0].y}</span></p>`
+    ${pts.length >= 2 ? html`<div class="chart-split"><${LineChart} label=${title} series=${[{ label: title, color: 'var(--series-1)', points: pts, dots: 'all' }]}
+        yDomain=${[0, 100]} height=${170} refLines=${Number.isFinite(target) ? [{ y: target, label: '' }] : []} />${side}</div>`
+      : pts.length === 1 ? html`<div class="chart-split"><p class="small muted">قياس واحد حتى الآن؛ يظهر الاتجاه بعد التعبئة التالية حسب الجدول.</p>${side}</div>`
       : html`<${Empty} icon="clipboard" title="لم يُعبأ بعد">يظهر عند أول تعبئة حسب الجدول.<//>`}
   <//>`;
 }
@@ -27,10 +37,8 @@ export function OutcomesTab({ p, cat }) {
   const ikdcT = gateTarget(cat, 'ikdc');
   const rsiT = gateTarget(cat, 'aclRsi');
   return html`<div class="stack-lg">
-    <div class="grid-2">
-      <${PromChart} p=${p} field="ikdc" title="IKDC" eyebrow="نموذج تقييم الركبة الذاتي · 0–100" target=${ikdcT} targetLabel=${`هدف ${ikdcT}`} />
-      <${PromChart} p=${p} field="aclrsi" title="ACL-RSI" eyebrow="الجاهزية النفسية للعودة · 0–100" target=${rsiT} targetLabel=${`هدف ${rsiT}`} />
-    </div>
+    <${PromChart} p=${p} field="ikdc" title="IKDC" eyebrow="نموذج تقييم الركبة الذاتي · 0–100 · الأعلى أفضل" target=${ikdcT} />
+    <${PromChart} p=${p} field="aclrsi" title="ACL-RSI" eyebrow="الجاهزية النفسية للعودة · 0–100 · الأعلى أفضل" target=${rsiT} />
     <${PromChart} p=${p} field="sane" title="SANE" eyebrow="تقييم وظيفة الركبة بسؤال واحد · 0–100% · أسبوعيًا" />
     <${Card} title="جدول الاستبيانات">
       <div class="table-wrap"><table class="table">
@@ -95,22 +103,20 @@ export function StrengthTab({ p }) {
   const st = last(rows);
   const qPts = rows.filter((s) => s.quadOther).map((s) => ({ x: s.day, y: round(lsi(s.quadOp, s.quadOther)) }));
   const hPts = rows.filter((s) => s.hamOther).map((s) => ({ x: s.day, y: round(lsi(s.hamOp, s.hamOther)) }));
+  const bars = st ? html`<div class="stack">
+      <${LsiBar} label="العضلة الرباعية" value=${lsi(st.quadOp, st.quadOther)} threshold=${90} />
+      ${st.hamOther ? html`<${LsiBar} label="الهامسترينج" value=${lsi(st.hamOp, st.hamOther)} threshold=${90} />` : html`<p class="small muted">الهامسترينج: لم يُقس في هذا الاختبار.</p>`}
+      <p class="small muted"><bdi>${st.method}</bdi> · اليوم ${st.day}. الحد 90% = الخط الأسود في الأشرطة والخط الأفقي في الرسم. التماثل = المُجراة ÷ السليمة.</p></div>` : null;
   return html`<div class="stack-lg">
-    <div class="grid-2">
-      <${Card} title="آخر تماثل للقوة" eyebrow=${st ? `${st.method} · اليوم ${st.day}` : 'لا اختبارات بعد'}>
-        ${st ? html`<div class="stack">
-          <${LsiBar} label="العضلة الرباعية" value=${lsi(st.quadOp, st.quadOther)} threshold=${90} />
-          <${LsiBar} label="الهامسترينج" value=${lsi(st.hamOp, st.hamOther)} threshold=${90} />
-          <p class="small muted">الخط الأسود = حد 90%. التماثل = الطرف المُجرى ÷ السليم.</p></div>`
-          : html`<${Empty} icon="dumbbell" title="لا اختبارات قوة بعد">تبدأ عادة في المرحلة 3.<//>`}
-      <//>
-      <${Card} title="تطور التماثل" eyebrow="LSI % عبر الأيام">
-        ${qPts.length + hPts.length >= 2 ? html`<${LineChart} label="تماثل القوة عبر الأيام" unit="%" height=${190}
-            series=${[{ label: 'الرباعية', color: 'var(--series-1)', points: qPts, dots: 'all' }, { label: 'الهامسترينج', color: 'var(--series-2)', points: hPts, dots: 'all' }].filter((s) => s.points.length)}
-            refLines=${[{ y: 90, label: '90%' }]} yDomain=${[40, 110]} />`
-          : html`<${Empty} icon="chart" title="يحتاج قياسين على الأقل" />`}
-      <//>
-    </div>
+    <${Card} title="تماثل القوة (LSI)" eyebrow=${st ? 'عبر الأيام، وآخر قياس على الجانب' : 'لا اختبارات بعد'}>
+      ${!st ? html`<${Empty} icon="dumbbell" title="لا اختبارات قوة بعد">تبدأ عادة في المرحلة 3.<//>`
+        : qPts.length + hPts.length >= 2 ? html`<div class="chart-split">
+          <${LineChart} label="تماثل القوة عبر الأيام" unit="%" height=${190}
+            series=${[{ label: 'الرباعية', color: 'var(--series-1)', points: qPts, dots: 'all' }, { label: 'الهامسترينج', color: 'var(--series-2)', points: hPts, dots: 'all' }].filter((x) => x.points.length)}
+            refLines=${[{ y: 90, label: '' }]} yDomain=${[40, 110]} />
+          <div class="chart-side">${bars}</div></div>`
+        : bars}
+    <//>
     <${Card} title="سجل اختبارات القوة">
       ${rows.length ? html`<div class="table-wrap"><table class="table">
         <thead><tr><th class="num">اليوم</th><th>الطريقة</th><th class="num">الرباعية المُجراة</th><th class="num">الرباعية السليمة</th><th class="num">LSI الرباعية</th>
@@ -198,7 +204,7 @@ export function FunctionalTab({ p, cat }) {
   return html`<div class="stack-lg">
     <div class="grid-2">
       <${Card} title="اختبارات القفز الأربعة" eyebrow=${hop ? `آخر اختبار اليوم ${hop.day} · LSI %` : 'لا اختبارات بعد'}>
-        ${hop ? html`<div class="stack">${HOPS.map((h) => html`<${LsiBar} key=${h.key} label=${`${h.ar} (${h.en})`} value=${hop[h.key]} threshold=${90} />`)}</div>`
+        ${hop ? html`<div class="stack">${HOPS.map((h) => html`<${LsiBar} key=${h.key} label=${html`${h.ar} <bdi class="muted" dir="ltr">(${h.en})</bdi>`} value=${hop[h.key]} threshold=${90} />`)}</div>`
           : html`<${Empty} icon="activity" title="لم تُسجل اختبارات قفز">تُجرى عادة بعد تحقق معايير المرحلة 5.<//>`}
       <//>
       <${Card} title="القفز العمودي (CMJ)" eyebrow=${jump ? `آخر اختبار اليوم ${jump.day}` : 'لا اختبارات بعد'}>

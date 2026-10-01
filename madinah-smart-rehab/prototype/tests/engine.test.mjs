@@ -55,7 +55,13 @@ test('status precedence: red beats idle beats yellow beats green', () => {
   const idle = patient(12, { checkins: [calm(4)] });
   assert.equal(statusOf(idle).code, 'idle');
   const acked = patient(12, { checkins: [calm(12, { calf: true })], acks: { 'r_calf:12': { by: 'PT' } } });
-  assert.notEqual(statusOf(acked).code, 'red');
+  assert.equal(statusOf(acked).code, 'yellow'); // reviewed red alert stays visible for follow-up
+});
+test('SOAP note date uses the local calendar day', () => {
+  const note = soapNote(patient(10, { checkins: [calm(10)] }));
+  const d = new Date();
+  const local = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  assert.match(note, new RegExp(`Date: ${local}`));
 });
 test('extension deficit after day 21 is off-trajectory (yellow)', () => {
   const p = patient(30, { checkins: [calm(29), calm(30)], rom: [{ day: 28, flex: 125, ext: 4, source: 'clinic' }] });

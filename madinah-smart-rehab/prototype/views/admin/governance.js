@@ -7,7 +7,7 @@ import { dispatch } from '../../lib/store.js';
 import { fmtDateTime } from '../../lib/util.js';
 import { ADMIN, PageHead, Check, num } from './common.js';
 
-const OP = { '>=': '≥', '<=': '≤', '==': '=' };
+const OP = { '>=': 'على الأقل', '<=': 'بحد أقصى', '==': 'يساوي' };
 const UNIT = {
   flex: '°', extDeficit: '°', flexDiffOther: '°', flexPctOther: '%', quadLSI: '%', hamLSI: '%', hopLSI: '%', jumpLSI: '%',
   singleLegStance: 'ث', painAdl: '/10', monthsPostOp: 'شهر', aclRsi: 'نقطة', ikdc: 'نقطة',
@@ -30,8 +30,8 @@ function TargetEditor({ gate, c }) {
     toast(`حُفظ الحد الجديد لـ «${c.textAr}» — يُطبق على كل المرضى فورًا`);
   };
   return html`<div class="row target-editor" style="gap:6px;flex-wrap:nowrap">
-    <label class="sr-only" for=${id}>الحد لمعيار ${c.textAr}</label>
-    <span class="num muted" aria-hidden="true">${OP[c.op] || c.op}</span>
+    <label class="sr-only" for=${id}>الحد (${OP[c.op] || c.op}) لمعيار ${c.textAr}</label>
+    <span class="small muted nowrap" aria-hidden="true">${OP[c.op] || c.op}</span>
     ${c.metric === 'effusion'
       ? html`<select class="select" id=${id} style="width:auto" value=${v} onChange=${(e) => setV(e.currentTarget.value)}>
           ${EFFUSION_GRADES.map((g, i) => html`<option value=${String(i)}>${g}</option>`)}</select>`
@@ -59,7 +59,7 @@ function GateTable({ gate, items }) {
 export function PathwayPage({ state }) {
   const cat = state.catalog;
   return html`<div class="stack-lg">
-    <${PageHead} eyebrow="المسار بيانات لا كود: مسار جديد (مفصل الركبة، الكتف) = بيانات جديدة" title="المسار والمعايير" />
+    <${PageHead} eyebrow="المسار بيانات لا كود: مسار جديد (تبديل مفصل الركبة، الكتف، أسفل الظهر) = بيانات جديدة" title="المسار والمعايير" />
     <div class="note note-warn row" style="gap:8px;flex-wrap:nowrap;align-items:flex-start"><${Icon} name="alert" size=${16} />
       <span>تعديل الحدود يغيّر ما تعرضه المنصة لكل المرضى فورًا. الحدود المعلّمة «مثال» تحتاج اعتماد الفريق السريري قبل التشغيل. المنصة تعرض المعايير ولا تنقل أحدًا تلقائيًا.</span></div>
     ${cat.phases.map((ph) => html`<${Card} key=${ph.id} title=${`المرحلة ${ph.id}: ${ph.nameAr}`} eyebrow=${`${ph.nameEn} · ${ph.typical}`}>
@@ -99,11 +99,11 @@ function RuleRow({ rule, openNow }) {
       ${asking ? html`<div class="note note-alert stack-sm" role="alert" style="margin-top:6px">
         <span>إيقاف قاعدة حمراء يعني أن المنصة لن تنبه الفريق عن هذا العرض لأي مريض. هل أنت متأكد؟</span>
         <div class="row" style="gap:6px"><button type="button" class="btn btn-sm btn-danger" id=${`${id}-confirm-off`} onClick=${() => apply(false)}>نعم، أوقف القاعدة</button>
-          <button type="button" class="btn btn-sm btn-ghost" onClick=${() => setAsking(false)}>إلغاء</button></div></div>` : null}
+          <button type="button" class="btn btn-sm btn-ghost" id=${`${id}-cancel-off`} onClick=${() => setAsking(false)}>إلغاء</button></div></div>` : null}
     </div>
     <div class="row" style="gap:8px">
       ${on ? html`<${Pill} tone="ok" icon="check">مفعلة<//>` : html`<${Pill} tone="idle" icon="x">متوقفة<//>`}
-      <${Check} id=${id} role="switch" checked=${on} onChange=${onToggle}>${on ? 'إيقاف' : 'تفعيل'}<span class="sr-only"> قاعدة ${rule.nameAr}</span><//>
+      <${Check} id=${id} role="switch" checked=${on} onChange=${onToggle}>القاعدة فعّالة<span class="sr-only">: ${rule.nameAr}</span><//>
     </div>
   </div>`;
 }
@@ -129,10 +129,10 @@ export function RulesPage({ state }) {
 
 /* ---------- questionnaires ---------- */
 const LICENCE = {
-  ikdc: { tone: 'warn', icon: 'shield', text: 'ترخيص AOSSM مطلوب للأنظمة الصحية' },
-  aclrsi: { tone: 'info', icon: 'check', text: 'النسخة العربية القصيرة متحقق منها — يلزم إذن المؤلفين' },
-  sane: { tone: 'ok', icon: 'check', text: 'سؤال واحد بدون ترخيص' },
-  tsk: { tone: 'warn', icon: 'alert', text: 'نسخة عربية لآلام الظهر فقط' },
+  ikdc: { tone: 'warn', icon: 'shield', pill: 'ترخيص', text: 'ترخيص AOSSM مطلوب للأنظمة الصحية' },
+  aclrsi: { tone: 'info', icon: 'check', pill: 'إذن', text: 'النسخة العربية القصيرة متحقق منها — يلزم إذن المؤلفين' },
+  sane: { tone: 'ok', icon: 'check', pill: 'متاح', text: 'سؤال واحد بدون ترخيص' },
+  tsk: { tone: 'warn', icon: 'alert', pill: 'تحقق ناقص', text: 'نسخة عربية لآلام الظهر فقط' },
 };
 
 export function QuestionnairesPage({ state }) {
@@ -145,9 +145,9 @@ export function QuestionnairesPage({ state }) {
         const l = LICENCE[q.id];
         return html`<tr key=${q.id}>
           <td><div class="stack-sm" style="gap:0"><strong>${q.nameAr}</strong><span class="small muted"><bdi>${q.nameEn}</bdi> · ${q.higherBetter ? 'الأعلى أفضل' : 'الأقل أفضل'}</span></div></td>
-          <td class="num">${q.items}</td><td class="num"><bdi>${q.range}</bdi></td>
+          <td class="num">${q.items}</td><td class="num nowrap"><bdi>${q.range}</bdi></td>
           <td><div class="row" style="gap:4px">${q.schedule.map((s) => html`<span class="tag" key=${s}>${s}</span>`)}</div></td>
-          <td>${l ? html`<span class="row" style="gap:6px;flex-wrap:nowrap;align-items:flex-start"><${Pill} tone=${l.tone} icon=${l.icon}>${l.tone === 'ok' ? 'متاح' : l.tone === 'info' ? 'بإذن' : 'تنبيه'}<//><span class="small">${l.text}</span></span>` : '—'}</td>
+          <td>${l ? html`<span class="row" style="gap:6px;flex-wrap:nowrap;align-items:flex-start"><${Pill} tone=${l.tone} icon=${l.icon}>${l.pill}<//><span class="small">${l.text}</span></span>` : '—'}</td>
         </tr>`;
       })}</tbody></table></div>
     <p class="small muted">التحقق من الترجمة والترخيص مسؤولية الفريق قبل الاستخدام السريري.</p>

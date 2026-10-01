@@ -1,10 +1,10 @@
 // Overview tab: why this status, the key numbers, and the recovery curves against the reference corridor.
 import { html, useState } from '../../lib/h.js';
-import { Icon, Pill, Card, Empty, Seg } from '../../lib/ui.js';
+import { Icon, Pill, Card, Empty } from '../../lib/ui.js';
 import { LineChart, BarChart } from '../../lib/charts.js';
 import { latest, statusOf, adherence, adherenceByDay, projectFlex, riskOfDropout, postOpDay, corridorAt, streak } from '../../lib/engine.js';
-import { round, mean, last } from '../../lib/util.js';
-import { SOURCE_AR, bandTo } from './common.js';
+import { round, last } from '../../lib/util.js';
+import { SOURCE_AR, bandTo, adhSummary, adhBars, Choice } from './common.js';
 
 const RISK = {
   high: { tone: 'alert', icon: 'alert', label: 'مرتفع' },
@@ -35,30 +35,29 @@ export function OverviewTab({ p, cat, onTab }) {
   const proj = projectFlex(p, 120);
   const [painRange, setPainRange] = useState(day > 60 ? '60' : 'all');
   const openAlerts = st.alerts.length;
+  const ready = st.ready;
+  const r = RISK[risk.level];
 
   const flexSeries = romSeries(p, 'flex');
-  const lastRomDay = Math.max(0, ...(p.rom || []).map((r) => r.day));
-  const projEnd = proj?.line ? proj.line[1].x : 0;
-  const maxX = Math.max(14, day, projEnd, lastRomDay);
+  const lastRomDay = Math.max(0, ...(p.rom || []).map((x) => x.day));
+  const maxX = Math.max(14, day, proj?.line ? proj.line[1].x : 0, lastRomDay);
   if (proj?.line) flexSeries.push({ label: 'التقدير الإحصائي', color: 'var(--ink-3)', dashed: true, points: proj.line.map((q) => ({ x: q.x, y: round(q.y) })) });
   const flexVals = flexSeries.flatMap((s) => s.points.map((q) => q.y));
   const flexMin = Math.max(0, Math.floor((Math.min(60, ...flexVals) - 10) / 10) * 10);
+  const corridorNow = corridorAt(cat.corridor.flex, day);
 
   const extSeries = romSeries(p, 'ext');
   const extMax = Math.max(8, ...extSeries.flatMap((s) => s.points.map((q) => q.y + 1)));
-
-  const pains = (p.checkins || []).filter((c) => painRange === 'all' || day - c.day < Number(painRange)).map((c) => ({ x: c.day, y: c.pain }));
-  const adhDays = adherenceByDay(p, 14, cat);
-  const adh14 = adhDays.length ? round(mean(adhDays.map((d) => d.pct))) : null;
-  const r = RISK[risk.level];
-  const corridorNow = corridorAt(cat.corridor.flex, day);
   const fullExtDay = (cat.corridor.ext || []).find((q) => q.hi === 0)?.x;
   const extWhy = cat.rules.find((x) => x.id === 'y_trajectory')?.why;
+
+  const pains = (p.checkins || []).filter((c) => painRange === 'all' || day - c.day < Number(painRange)).map((c) => ({ x: c.day, y: c.pain }));
   const lastPain = last(p.checkins || []);
   const peak = pains.length ? pains.reduce((a, b) => (b.y > a.y ? b : a)) : null;
-  const goodDays = adhDays.filter((d) => d.pct >= 80).length;
+
+  const adhDays = adherenceByDay(p, 14, cat);
+  const adhS = adhSummary(adhDays, day);
   const streakDays = streak(p, cat);
-  const ready = st.ready;
 
   return html`<div class="stack-lg">
     <div class="grid-2">
@@ -105,7 +104,7 @@ export function OverviewTab({ p, cat, onTab }) {
         <div class="chart-side">
           ${Number.isFinite(L.flex) ? html`<div><span class="muted">آخر قياس</span><div class="side-value">${L.flex}°</div>
             <span class="muted">${SOURCE_AR[L.flexRec.source] || ''} · اليوم ${L.flexRec.day}</span></div>` : null}
-          ${corridorNow ? html`<p>المسار المرجعي في اليوم ${day}: <strong class="num">${Math.round(corridorNow.lo)}–${Math.round(corridorNow.hi)}°</strong></p>` : null}
+          ${corridorNow ? html`<p>المسار المرجعي في اليوم ${day}: <strong><bdi dir="ltr">${Math.round(corridorNow.lo)}–${Math.round(corridorNow.hi)}°</bdi></strong></p>` : null}
           ${proj?.line ? html`<p class="row" style="gap:6px;flex-wrap:nowrap;align-items:flex-start"><${Icon} name="target" size=${15} /><span>
             ${proj.days > 0 ? `التقدير: يصل لـ120° خلال ~${proj.days} يومًا — تقدير إحصائي وليس قرارًا` : 'التقدير: يُرجَّح أنه بلغ 120° تقريبًا — يحتاج قياسًا جديدًا للتأكد. تقدير إحصائي وليس قرارًا'}
             <span class="muted"> (${proj.slopePerWeek}° أسبوعيًا)</span></span></p>` : null}
@@ -132,7 +131,7 @@ export function OverviewTab({ p, cat, onTab }) {
     <//>
 
     <${Card} title="الألم اليومي" eyebrow="مقياس 0–10 من تسجيل المريض"
-      actions=${day > 60 ? html`<${Seg} label="مدة عرض الألم" value=${painRange} onChange=${setPainRange}
+      actions=${day > 60 ? html`<${Choice} id="ov-pain-range" label="مدة عرض الألم" value=${painRange} onChange=${setPainRange}
         options=${[{ id: '60', label: '60 يومًا' }, { id: 'all', label: 'كل الفترة' }]} />` : null}>
       ${pains.length > 1 ? html`<div class="chart-split">
         <${LineChart} label="الألم اليومي" unit="/10" series=${[{ label: 'الألم', color: 'var(--series-1)', points: pains }]}
@@ -147,12 +146,13 @@ export function OverviewTab({ p, cat, onTab }) {
 
     <${Card} title="الالتزام اليومي بالتمارين" eyebrow="آخر 14 يومًا">
       ${adhDays.length ? html`<div class="chart-split">
-        <${BarChart} label="نسبة التمارين المنجزة يوميًا" max=${100} valueFormat=${(v) => `${v}%`} xTitle="اليوم بعد العملية" height=${140}
-          data=${adhDays.map((d) => ({ label: String(d.day), value: d.pct, tip: `اليوم ${d.day}: ${d.done} من ${d.planned} تمارين` }))} />
+        <${BarChart} label="نسبة التمارين المنجزة يوميًا" max=${100} valueFormat=${(v) => `${v}%`} xTitle="اليوم بعد العملية" height=${140} data=${adhBars(adhDays, day)} />
         <div class="chart-side">
-          <div><span class="muted">المتوسط اليومي</span><div class="side-value">${adh14 === null ? '—' : `${adh14}%`}</div></div>
-          <p>أيام بالتزام 80% أو أكثر: <strong class="num">${goodDays} من ${adhDays.length}</strong></p>
+          <div><span class="muted">المنجز من المستحق</span><div class="side-value">${adhS.pct === null ? '—' : `${adhS.pct}%`}</div></div>
+          <p>أيام بالتزام 80% أو أكثر: <strong class="num">${adhS.good} من ${adhS.dueDays}</strong></p>
           <p>سلسلة الالتزام الحالية: <strong class="num">${streakDays}</strong> ${streakDays === 1 ? 'يوم' : 'أيام'}</p>
+          ${adhS.restDays ? html`<p class="muted">النقطة الرمادية = يوم بلا تمارين مستحقة (${adhS.restDays}).</p>` : null}
+          <p class="muted">النسبة لا تشمل اليوم الحالي لأنه لم ينتهِ.</p>
         </div>
       </div>` : html`<${Empty} icon="list" title="لا بيانات بعد" />`}
     <//>

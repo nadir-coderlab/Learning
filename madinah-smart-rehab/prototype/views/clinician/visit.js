@@ -66,7 +66,7 @@ function AiPanel({ p, cat }) {
     ${ai.status === 'thinking' ? html`<p class="small row thinking" style="gap:6px" role="status"><span class="pulse-dot" aria-hidden="true"></span>يفكر…${ai.chars ? html` <span class="muted num">(${ai.chars} حرفًا)</span>` : null}</p>` : null}
     ${ai.status === 'error' ? html`<div class="note note-info small" role="status">${ai.msg}</div>` : null}
     ${ai.status === 'done' ? html`<div class="stack-sm">
-      <${AiMark} />
+      <div><${AiMark} /></div>
       ${r.summary ? html`<p>${r.summary}</p>` : null}
       ${r.concerns.length ? html`<div><h4>نقاط تستدعي الانتباه</h4><ul class="plain-list">${r.concerns.map((c, i) => html`<li key=${i}>${c}</li>`)}</ul></div>` : null}
       ${r.discuss.length ? html`<div><h4>للنقاش مع المريض</h4><ul class="plain-list">${r.discuss.map((c, i) => html`<li key=${i}>${c}</li>`)}</ul></div>` : null}

@@ -74,7 +74,7 @@ export function AnalyticsPage({ state }) {
       <h2 id="an-care" class="section-title">الالتزام والزيارات</h2>
       <div class="grid-auto kpi-grid">
         <${Kpi} id="kpi-adherence" icon="list" label="متوسط الالتزام (14 يومًا)" value=${`${k.adh14}%`} sub="للمرضى النشطين" />
-        <${Kpi} id="kpi-visits" icon="video" label="زيارات افتراضية / حضورية" value=${`${k.vDone} / ${k.ipDone}`} sub=${`${visits ? Math.round((k.vDone / visits) * 100) : 0}% من الزيارات المنجزة افتراضية`} />
+        <${Kpi} id="kpi-visits" icon="video" label="زيارات افتراضية منجزة" value=${k.vDone} sub=${`مقابل ${k.ipDone} زيارة حضورية · ${visits ? Math.round((k.vDone / visits) * 100) : 0}% من الزيارات افتراضية`} />
         <${Kpi} id="kpi-redistributed" icon="refresh" label="زيارات حضورية أُعيد توزيعها (تقدير)" value=${k.vDone} sub="تقدير: كل زيارة افتراضية منجزة بدل زيارة حضورية" />
         <${Kpi} id="kpi-satisfaction" icon="heart" label="رضا المرضى" value=${Number.isFinite(k.satisfaction) ? `${k.satisfaction}/5` : '—'} sub=${`من ${k.satisfactionN} حالة مكتملة`} />
       </div>
@@ -83,16 +83,22 @@ export function AnalyticsPage({ state }) {
     <section class="stack-sm" aria-labelledby="an-out">
       <h2 id="an-out" class="section-title">النتائج</h2>
       <div class="grid-auto kpi-grid">
-        <${Kpi} id="kpi-rtr" icon="run" label="العودة للجري" value=${k.rtrActive} sub=${`نشطون في المرحلة 4 أو بعدها · الوسيط للمكتملين: اليوم ${Number.isFinite(k.rtrMedian) ? round(k.rtrMedian) : '—'}`} />
-        ${k.rts.map((s) => html`<${Kpi} key=${s.id} id=${`kpi-rts-${s.id}`} icon="trophy" label=${s.nameAr} value=${s.n} sub=${`أعلى خطوة معتمدة · ${s.nameEn}`} />`)}
+        <${Kpi} id="kpi-rtr" icon="run" label="العودة للجري" value=${k.rtrActive} sub=${`نشطون في المرحلة 4 فأكثر · وسيط المكتملين اليوم ${Number.isFinite(k.rtrMedian) ? round(k.rtrMedian) : '—'}`} />
+        ${k.rts.map((s) => html`<${Kpi} key=${s.id} id=${`kpi-rts-${s.id}`} icon="trophy" label=${s.nameAr} value=${s.n} sub=${html`أعلى خطوة معتمدة<br /><bdi>${s.nameEn}</bdi>`} />`)}
       </div>
     </section>
 
-    <div class="grid-2">
-      <${Card} title="المرضى النشطون حسب المرحلة" eyebrow=${`${k.active} مريضًا`}>
-        <${BarChart} label="عدد المرضى النشطين في كل مرحلة" xTitle="المرحلة" valueFormat=${(v) => `${round(v)}`}
+    <${Card} title="المرضى النشطون حسب المرحلة" eyebrow=${`${k.active} مريضًا`}>
+      <div class="chart-split">
+        <${BarChart} label="عدد المرضى النشطين في كل مرحلة" xTitle="المرحلة" valueFormat=${(v) => `${round(v)}`} height=${160}
           data=${k.byPhase.map(({ ph, n }) => ({ label: `المرحلة ${ph.id}`, value: n, tip: `المرحلة ${ph.id} — ${ph.nameAr}` }))} />
-      <//>
+        <div class="chart-side">
+          <ul class="phase-counts">${k.byPhase.map(({ ph, n }) => html`<li key=${ph.id}><span><span class="tag num">${ph.id}</span> ${ph.nameAr}</span><strong class="num">${n}</strong></li>`)}</ul>
+        </div>
+      </div>
+    <//>
+
+    <div class="grid-2">
       <${Card} title="توزيع الحالات" eyebrow="المرضى النشطون الآن">
         <div class="status-bars">${k.status.map((s) => html`<div class="status-bar" key=${s.code}>
           <${StatusPill} code=${s.code} />
@@ -100,28 +106,26 @@ export function AnalyticsPage({ state }) {
           <span class="num strong">${s.n}</span><span class="small muted num">${pct(s.n, k.active)}%</span>
         </div>`)}</div>
       <//>
-    </div>
-
-    <div class="grid-2">
-      <${Card} title="IKDC عند البدء وعند الخروج" eyebrow=${`متوسط الحالات المكتملة (n=${k.ikdcN}) · 0–100`}>
+      <${Card} title="IKDC عند البدء وعند الخروج" eyebrow=${`متوسط الحالات المكتملة (n=${k.ikdcN}) · 0–100 · الأعلى أفضل`}>
         <div class="stack">
-          ${[['عند البدء', k.ikdcStart, 'var(--series-2)'], ['عند الخروج', k.ikdcEnd, 'var(--series-1)']].map(([label, v, c]) => html`<div class="status-bar" key=${label}>
-            <span class="small strong" style="min-width:72px">${label}</span>
+          ${[['عند البدء', k.ikdcStart, 'var(--series-2)'], ['عند الخروج', k.ikdcEnd, 'var(--series-1)']].map(([label, v, c]) => html`<div class="status-bar ikdc-bar" key=${label}>
+            <span class="small strong">${label}</span>
             <div class="meter" role="img" aria-label=${`${label}: ${v}`}><span style=${`width:${v}%;background:${c}`}></span></div>
             <span class="num strong">${v}</span><span></span>
           </div>`)}
           <p class="small"><strong>+${k.ikdcEnd - k.ikdcStart} نقطة</strong> في المتوسط بين البداية والخروج.</p>
         </div>
       <//>
-      <${Card} title="عن هذه الأرقام">
-        <ul class="plain-list">
-          <li>تُحسب من المرضى النشطين (${k.active}) والحالات التي خرجت من البرنامج (${k.discharged}) في بيانات العرض.</li>
-          <li>«الزيارات الحضورية التي أُعيد توزيعها» تقدير وليس قياسًا مباشرًا.</li>
-          <li>الإدارة لا ترى أسماء المرضى ولا بياناتهم السريرية الفردية.</li>
-        </ul>
-        <div class="note note-info row" style="gap:8px;margin-top:12px;flex-wrap:nowrap;align-items:flex-start"><${Icon} name="info" size=${16} />
-          <span>مقارنة المنشآت تُفعَّل عند انضمام مراكز أخرى للمسار.</span></div>
-      <//>
     </div>
+
+    <${Card} title="عن هذه الأرقام">
+      <ul class="plain-list">
+        <li>تُحسب من المرضى النشطين (${k.active}) والحالات التي خرجت من البرنامج (${k.discharged}) في بيانات العرض.</li>
+        <li>«الزيارات الحضورية التي أُعيد توزيعها» تقدير وليس قياسًا مباشرًا.</li>
+        <li>الإدارة لا ترى أسماء المرضى ولا بياناتهم السريرية الفردية.</li>
+      </ul>
+      <div class="note note-info row" style="gap:8px;margin-top:12px;flex-wrap:nowrap;align-items:flex-start"><${Icon} name="info" size=${16} />
+        <span>مقارنة المنشآت تُفعَّل عند انضمام مراكز أخرى للمسار.</span></div>
+    <//>
   </div>`;
 }

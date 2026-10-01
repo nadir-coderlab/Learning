@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Measurement lab harness</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<!-- Mounts the measurement lab on its own (demo data) for manual and automated testing.
+     URL params: ?pid=p_ahmed (default) | p_sara (left knee) …   ?check=flex|ext|slr|squat|valgus opens a camera check. -->
+<div id="app"><p style="padding:24px">جاري التحميل…</p></div>
+<script type="module">
+import { html, render, useState } from '../lib/h.js';
+import { initStore, useStore, patientById, resetDemo } from '../lib/store.js';
+import { ToastHost } from '../lib/ui.js';
+import { getEx } from '../lib/engine.js';
+import { MeasureHub, CameraCheck } from '../views/measure.js';
+
+initStore();
+const q = new URLSearchParams(location.search);
+const pid = q.get('pid') || 'p_ahmed';
+const CHECKS = [['flex', 'heel_slides'], ['ext', 'heel_prop'], ['slr', 'slr'], ['squat', 'mini_squat'], ['valgus', 'step_down']];
+
+function Harness() {
+  useStore();
+  const p = patientById(pid);
+  const [check, setCheck] = useState(q.get('check'));
+  const [log, setLog] = useState([]);
+  const exId = (CHECKS.find(([m]) => m === check) || [])[1];
+  return html`<div class="patient-stage">
+    <div class="phone">
+      <div class="phone-head"><strong>${p.name}</strong><span class="small muted">قياس · ${p.side === 'R' ? 'الركبة اليمنى' : 'الركبة اليسرى'}</span></div>
+      <div class="phone-body"><${MeasureHub} patient=${p} /></div>
+    </div>
+    <aside class="side-panel">
+      <section class="card stack-sm">
+        <h3>تحقق بالكاميرا من بطاقة تمرين</h3>
+        <div class="row">${CHECKS.map(([m, ex]) => html`<button type="button" class="btn btn-sm" id=${`h-check-${m}`} onClick=${() => setCheck(m)}>${getEx(ex).nameAr} (${m})</button>`)}</div>
+      </section>
+      <section class="card stack-sm">
+        <h3>onDone</h3>
+        <pre class="code-note" id="h-log">${JSON.stringify(log, null, 1)}</pre>
+        <button type="button" class="btn btn-sm btn-ghost" id="h-reset" onClick=${() => { resetDemo(); setLog([]); }}>إعادة بيانات العرض</button>
+      </section>
+    </aside>
+    ${check ? html`<${CameraCheck} patient=${p} mode=${check} exercise=${exId ? getEx(exId) : null}
+      onDone=${(r) => setLog((xs) => [...xs, { mode: check, ...r }])} onClose=${() => setCheck(null)} />` : null}
+  </div>`;
+}
+
+const mount = document.getElementById('app');
+mount.textContent = '';
+render(html`<${Harness} /><${ToastHost} />`, mount);
+</script>
+</body>
+</html>

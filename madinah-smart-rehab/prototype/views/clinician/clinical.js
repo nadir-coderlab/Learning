@@ -38,9 +38,9 @@ function Modifiers({ p }) {
   if (!mods.length) return html`<p class="small muted">لا معدّلات على البروتوكول القياسي.</p>`;
   return html`<div class="list">${mods.map((m) => {
     const active = day < m.untilDay;
-    return html`<div class="list-row" key=${m.id}>
+    return html`<div class="list-row wrap" key=${m.id}>
       <span class=${`icon-tile ${active ? 'warn' : 'idle'}`} aria-hidden="true"><${Icon} name=${active ? 'shield' : 'check'} size=${18} /></span>
-      <span class="grow">${m.textAr}</span>
+      <span class="grow" style="flex-basis:180px">${m.textAr}</span>
       ${active ? html`<${Pill} tone="warn" icon="shield">سارٍ حتى اليوم ${m.untilDay} (باقي ${m.untilDay - day} يومًا)<//>`
         : html`<${Pill} tone="plain" icon="check">انتهى في اليوم ${m.untilDay}<//>`}
     </div>`;

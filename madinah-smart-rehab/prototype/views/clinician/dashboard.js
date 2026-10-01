@@ -27,6 +27,13 @@ function ApptRow({ r, a, onOpen }) {
   </button>`;
 }
 
+// Arabic number agreement for "N patients".
+function patientsAr(n) {
+  if (n === 1) return 'مريض واحد';
+  if (n === 2) return 'مريضان';
+  return `${n} ${n <= 10 ? 'مرضى' : 'مريضًا'}`;
+}
+
 export function Dashboard({ roster, onOpen, onFilter }) {
   const count = (id) => (id === 'all' ? roster.length : roster.filter((r) => r.st.code === id).length);
   const appts = roster.flatMap((r) => (r.p.appointments || []).map((a) => ({ r, a })));
@@ -44,7 +51,7 @@ export function Dashboard({ roster, onOpen, onFilter }) {
         <span class="eyebrow">مسار الرباط الصليبي الأمامي · ${fmtDateLong(TODAY)}</span>
         <h1>لوحة الرباط الصليبي</h1>
       </div>
-      <span class="small muted">مرحبًا ${BY}${count('red') ? ` — ${count('red')} ${count('red') === 1 ? 'تنبيه سريري ينتظر' : 'تنبيهات سريرية تنتظر'} مراجعتك` : ''}</span>
+      <span class="small muted">مرحبًا ${BY}${count('red') ? ` — ${patientsAr(count('red'))} بتنبيه سريري، ابدأ بهم` : ''}</span>
     </div>
 
     <div class="grid-auto dash-tiles" role="group" aria-label="ملخص حالات المرضى">
@@ -61,7 +68,7 @@ export function Dashboard({ roster, onOpen, onFilter }) {
         actions=${html`<span class="tag num">${priority.length}</span>`}>
         ${priority.length ? html`<div class="priority-list">${priority.map((r) => {
           const reason = r.code === 'approval' ? `معايير المرحلة ${r.st.ready.to} مكتملة — بانتظار مراجعتك` : r.st.reasons[0];
-          return html`<button type="button" class="priority-item" key=${r.p.id} onClick=${() => onOpen(r.p.id, 'overview')}>
+          return html`<button type="button" class="priority-item" key=${r.p.id} id=${`prio-${r.p.id}`} onClick=${() => onOpen(r.p.id, 'overview')}>
             <span class="severity-stripe" style=${`background:${STRIPE[r.code]}`}></span>
             <span class="row" style="gap:10px;flex-wrap:nowrap;min-width:0">
               <${Avatar} name=${r.p.name} small />

@@ -1,6 +1,23 @@
 // Hand-rolled SVG charts: thin 2px lines, ringed end-dots, hairline grid, crosshair tooltip,
 // and a data-table view so no value is hover-only. Charts read left-to-right (time) even in RTL.
-import { html, useMemo, useRef, useState } from './h.js';
+import { html, useEffect, useMemo, useRef, useState } from './h.js';
+
+// Width of the chart's own box, so the SVG is drawn 1:1 and its 11px labels stay 11px.
+function useBoxWidth(fallback = 640) {
+  const ref = useRef(null);
+  const [w, setW] = useState(fallback);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof ResizeObserver === 'undefined') return undefined;
+    const ro = new ResizeObserver((entries) => {
+      const cw = Math.round(entries[0].contentRect.width);
+      if (cw > 0) setW(Math.max(280, Math.min(cw, 1100)));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return [ref, w];
+}
 
 function niceTicks(min, max, count = 4) {
   const span = max - min || 1;
@@ -17,7 +34,8 @@ export function LineChart({
   series = [], band, refLines = [], xDomain, yDomain, height = 210, xFormat = (x) => x, yFormat = (y) => y,
   unit = '', label = 'رسم بياني', xTitle = 'اليوم بعد العملية', tableTitle,
 }) {
-  const W = 640; const H = height; const pad = { l: 40, r: 56, t: 14, b: 28 };
+  const [wrap, W] = useBoxWidth();
+  const H = height; const pad = { l: 40, r: 56, t: 14, b: 28 };
   const allPts = series.flatMap((s) => s.points);
   const xs = allPts.map((p) => p.x).concat(band ? band.points.map((p) => p.x) : []);
   const ys = allPts.map((p) => p.y).concat(band ? band.points.flatMap((p) => [p.lo, p.hi]) : []).concat(refLines.map((r) => r.y));
@@ -29,7 +47,6 @@ export function LineChart({
   const xTicks = niceTicks(x0, x1, 5);
   const [hover, setHover] = useState(null);
   const [showTable, setShowTable] = useState(false);
-  const wrap = useRef(null);
 
   const xsSorted = useMemo(() => [...new Set(xs)].sort((a, b) => a - b), [series, band]);
   const onMove = (e) => {
@@ -105,7 +122,8 @@ export function LineChart({
 }
 
 export function BarChart({ data, height = 150, max, valueFormat = (v) => v, label = 'رسم أعمدة', color = 'var(--series-1)', xTitle = 'اليوم' }) {
-  const W = 640; const H = height; const pad = { l: 34, r: 8, t: 10, b: 26 };
+  const [wrap, W] = useBoxWidth();
+  const H = height; const pad = { l: 34, r: 8, t: 10, b: 26 };
   const yMax = max ?? Math.max(1, ...data.map((d) => d.value));
   const n = data.length || 1;
   const slot = (W - pad.l - pad.r) / n;
@@ -114,7 +132,7 @@ export function BarChart({ data, height = 150, max, valueFormat = (v) => v, labe
   const ticks = niceTicks(0, yMax, 3);
   const [hover, setHover] = useState(null);
   const [showTable, setShowTable] = useState(false);
-  return html`<div class="chart" dir="ltr">
+  return html`<div class="chart" dir="ltr" ref=${wrap}>
     <svg viewBox=${`0 0 ${W} ${H}`} role="img" aria-label=${label} onPointerLeave=${() => setHover(null)}>
       <g class="grid">${ticks.map((t) => html`<line x1=${pad.l} x2=${W - pad.r} y1=${sy(t)} y2=${sy(t)} />`)}</g>
       <g class="axis">${ticks.map((t) => html`<text x=${pad.l - 6} y=${sy(t) + 4} text-anchor="end">${valueFormat(t)}</text>`)}</g>
@@ -158,13 +176,15 @@ export function Sparkline({ values, width = 96, height = 28, color = 'var(--seri
 
 // Limb-symmetry bar: operated vs uninjured with the clearance threshold marked.
 export function LsiBar({ value, threshold = 90, label }) {
-  const v = Math.max(0, Math.min(120, value || 0));
-  const tone = value >= threshold ? 'ok' : value >= threshold - 15 ? 'warn' : 'alert';
-  const icon = value >= threshold ? '✓' : '!';
+  const has = Number.isFinite(value);
+  const v = Math.max(0, Math.min(120, has ? value : 0));
+  const met = has && value >= threshold;
+  const tone = !has ? 'idle' : met ? 'ok' : value >= threshold - 15 ? 'warn' : 'alert';
+  const shown = has ? (Math.abs(value - Math.round(value)) < 0.05 ? String(Math.round(value)) : value.toFixed(1)) : '—';
   return html`<div class="stack-sm" style="gap:4px">
-    <div class="row-between small"><span>${label}</span><span class="num strong">${Number.isFinite(value) ? `${Math.round(value)}%` : '—'} <span class=${`pill pill-${tone}`} style="padding:0 7px">${icon} ${value >= threshold ? 'محقق' : 'دون الحد'}</span></span></div>
+    <div class="row-between small"><span>${label}</span><span class="num strong">${has ? `${shown}%` : '—'} <span class=${`pill pill-${tone}`} style="padding:0 7px">${!has ? 'لا قياس' : met ? '✓ محقق' : '! دون الحد'}</span></span></div>
     <div class="meter" style="position:relative" dir="ltr">
-      <span style=${`width:${(v / 120) * 100}%;background:var(--${tone === 'ok' ? 'ok' : tone === 'warn' ? 'warn-mark' : 'alert'})`}></span>
+      <span style=${`width:${(v / 120) * 100}%;background:var(--${tone === 'ok' ? 'ok' : tone === 'warn' ? 'warn-mark' : tone === 'idle' ? 'idle' : 'alert'})`}></span>
       <i style=${`position:absolute;top:-3px;bottom:-3px;left:${(threshold / 120) * 100}%;width:2px;background:var(--ink)`} title=${`الحد ${threshold}%`}></i>
     </div>
   </div>`;

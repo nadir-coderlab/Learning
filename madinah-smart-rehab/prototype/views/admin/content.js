@@ -3,7 +3,7 @@ import { html, useState } from '../../lib/h.js';
 import { Icon, Modal, Field, Empty, Figure, toast } from '../../lib/ui.js';
 import { CATEGORIES } from '../../lib/data.js';
 import { dispatch } from '../../lib/store.js';
-import { ADMIN, MOTIONS, PageHead, NumberChips, FieldError, num } from './common.js';
+import { ADMIN, MOTIONS, PageHead, NumberChips, FieldError, num, refocus } from './common.js';
 
 const PHASES = [1, 2, 3, 4, 5, 6];
 const holdText = (s) => (s >= 60 ? `${Math.round((s / 60) * 10) / 10} د` : `${s} ث`);
@@ -58,7 +58,7 @@ function ExerciseModal({ ex, cat, onClose }) {
           <${Field} label="المجموعات" htmlFor="exf-sets"><input class="input num" id="exf-sets" type="number" min="1" value=${f.sets} onInput=${set('sets')} /><//>
           <${Field} label="التكرارات" htmlFor="exf-reps"><input class="input num" id="exf-reps" type="number" min="1" value=${f.reps} onInput=${set('reps')} /><//>
           <${Field} label="الثبات (ثانية)" htmlFor="exf-hold"><input class="input num" id="exf-hold" type="number" min="0" value=${f.hold} onInput=${set('hold')} /><//>
-          <${Field} label="التكرار" htmlFor="exf-freq"><input class="input" id="exf-freq" value=${f.freq} onInput=${set('freq')} /><//>
+          <${Field} label="عدد المرات" htmlFor="exf-freq"><input class="input" id="exf-freq" value=${f.freq} onInput=${set('freq')} /><//>
         </div>
       </div>
       <div class="exercise-media ex-form-preview" aria-hidden="true"><${Figure} motion=${f.motion} /></div>
@@ -104,7 +104,7 @@ export function ExercisesPage({ state }) {
     </div>
     ${rows.length ? html`<div class="table-wrap"><table class="table">
       <caption class="sr-only">تمارين المكتبة</caption>
-      <thead><tr><th>التمرين</th><th>الفئة</th><th>المراحل</th><th>الجرعة</th><th>التكرار</th><th>فيديو</th><th><span class="sr-only">إجراءات</span></th></tr></thead>
+      <thead><tr><th>التمرين</th><th>الفئة</th><th>المراحل</th><th>الجرعة</th><th>عدد المرات</th><th>فيديو</th><th><span class="sr-only">إجراءات</span></th></tr></thead>
       <tbody>${rows.map((ex) => html`<tr key=${ex.id}>
         <td><div class="stack-sm" style="gap:0"><strong>${ex.nameAr}</strong><span class="small muted"><bdi>${ex.nameEn}</bdi></span></div></td>
         <td>${CATEGORIES[ex.cat] || ex.cat}</td>
@@ -113,7 +113,7 @@ export function ExercisesPage({ state }) {
         <td>${ex.video ? html`<span class="row nowrap" style="gap:4px;color:var(--ok)"><${Icon} name="video" size=${15} />مرفوع</span>` : html`<span class="muted small">عرض توضيحي</span>`}</td>
         <td><button type="button" class="btn btn-sm" id=${`adm-ex-edit-${ex.id}`} onClick=${() => setEdit(ex)}><${Icon} name="edit" size=${15} />تعديل</button></td>
       </tr>`)}</tbody></table></div>` : html`<div class="card"><${Empty} icon="search" title="لا نتائج" /></div>`}
-    ${edit ? html`<${ExerciseModal} ex=${edit === 'new' ? null : edit} cat=${cat} onClose=${() => setEdit(null)} />` : null}
+    ${edit ? html`<${ExerciseModal} ex=${edit === 'new' ? null : edit} cat=${cat} onClose=${() => { refocus(edit === 'new' ? 'adm-ex-add' : `adm-ex-edit-${edit.id}`); setEdit(null); }} />` : null}
   </div>`;
 }
 
@@ -173,6 +173,6 @@ export function EducationPage({ state }) {
         <td class="num">${it.minutes}</td><td class="num">${it.body.length}</td>
         <td><button type="button" class="btn btn-sm" id=${`adm-ed-edit-${it.id}`} onClick=${() => setEdit(it)}><${Icon} name="edit" size=${15} />تعديل</button></td>
       </tr>`)}</tbody></table></div>
-    ${edit ? html`<${EducationModal} item=${edit === 'new' ? null : edit} cats=${cats} onClose=${() => setEdit(null)} />` : null}
+    ${edit ? html`<${EducationModal} item=${edit === 'new' ? null : edit} cats=${cats} onClose=${() => { refocus(edit === 'new' ? 'adm-ed-add' : `adm-ed-edit-${edit.id}`); setEdit(null); }} />` : null}
   </div>`;
 }

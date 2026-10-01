@@ -76,12 +76,30 @@ function withTimeout(promise, ms) {
     .finally(() => clearTimeout(t));
 }
 
+// MediaPipe ≥ 1.0 posts anonymous usage statistics (task name, call counts, latency — no images or
+// landmarks) to this endpoint every minute, with no public switch to turn it off. This health app
+// promises that analysis stays on the device, so that one URL is answered locally with a 204; the
+// library then stops trying. Every other request goes to the real fetch untouched.
+const MP_TELEMETRY = 'https://odml.pa.googleapis.com/v1/log';
+function muteMediapipeTelemetry() {
+  if (typeof window === 'undefined' || typeof window.fetch !== 'function' || window.fetch.msrMuted) return;
+  const realFetch = window.fetch;
+  const guarded = function fetch(input, init) {
+    const url = typeof input === 'string' ? input : (input && (input.href || input.url)) || '';
+    if (url.startsWith(MP_TELEMETRY)) return Promise.resolve(new Response(null, { status: 204 }));
+    return realFetch.call(window, input, init);
+  };
+  guarded.msrMuted = true;
+  window.fetch = guarded;
+}
+
 const sleep = (ms) => new Promise((r) => { setTimeout(r, ms); });
 // A failed <script>/fetch (flaky mobile data) is worth one more try before giving up on a delegate.
 const networkish = (e) => (typeof Event !== 'undefined' && e instanceof Event) || /fetch|network|load|script/i.test(String((e && e.message) || e));
 
 async function create() {
   if (typeof WebAssembly !== 'object' || typeof document === 'undefined') throw poseError('unsupported');
+  muteMediapipeTelemetry();
   let vision;
   try { vision = await import(VISION_URL); } catch {
     await sleep(800);

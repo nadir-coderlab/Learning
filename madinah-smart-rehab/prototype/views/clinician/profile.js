@@ -2,7 +2,7 @@
 import { html, useEffect, useState } from '../../lib/h.js';
 import { Icon, StatusPill, Avatar, Tabs } from '../../lib/ui.js';
 import { statusOf, postOpDay, weekOf, GRAFT_AR, SIDE_AR } from '../../lib/engine.js';
-import { TABS, SEX_AR, phaseName } from './common.js';
+import { TABS, SEX_AR, phaseName, refocus } from './common.js';
 import { OverviewTab } from './overview.js';
 import { ClinicalTab } from './clinical.js';
 import { ProgramTab } from './program.js';
@@ -64,7 +64,7 @@ export function PatientProfile({ state, p, tab, setTab, onBack, intent, clearInt
     <div role="tabpanel" aria-labelledby=${`tab-${tab}`} key=${`${p.id}-${tab}`}>
       <${body} ...${props} />
     </div>
-    ${modal === 'approval' ? html`<${PhaseApprovalModal} p=${p} cat=${cat} onClose=${() => setModal(null)} />` : null}
-    ${modal === 'visit' ? html`<${VirtualVisitModal} p=${p} cat=${cat} onClose=${() => setModal(null)} />` : null}
+    ${modal === 'approval' ? html`<${PhaseApprovalModal} p=${p} cat=${cat} onClose=${() => { setModal(null); refocus('btn-criteria'); }} />` : null}
+    ${modal === 'visit' ? html`<${VirtualVisitModal} p=${p} cat=${cat} onClose=${() => { setModal(null); refocus('btn-visit'); }} />` : null}
   </div>`;
 }

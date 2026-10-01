@@ -98,7 +98,7 @@ function AlertRow({ p, a, rule, day }) {
     <span class="severity-stripe" style=${`background:${a.acked ? 'var(--line-strong)' : red ? 'var(--alert)' : 'var(--warn-mark)'}`}></span>
     <div class="stack-sm" style="gap:6px;min-width:0">
       <div class="row" style="gap:6px">
-        <${Pill} tone=${red ? 'alert' : 'warn'} icon="alert">${red ? 'تنبيه سريري' : 'يحتاج مراجعة'}<//>
+        <${Pill} tone=${a.acked ? 'plain' : red ? 'alert' : 'warn'} icon="alert">${red ? 'تنبيه سريري' : 'يحتاج مراجعة'}<//>
         ${a.emergency ? html`<${Pill} tone="alert" icon="phone">طوارئ — 997<//>` : null}
         <span class="small muted">اليوم ${a.day} (${relDay(a.day - day)})</span>
       </div>

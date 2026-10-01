@@ -114,10 +114,11 @@ export function Seg({ options, value, onChange, label }) {
 export function Modal({ title, onClose, children, footer, wide }) {
   const ref = useRef(null);
   useEffect(() => {
+    const opener = document.activeElement;
     const onKey = (e) => { if (e.key === 'Escape') onClose?.(); };
     window.addEventListener('keydown', onKey);
     ref.current?.querySelector('button, [href], input, select, textarea')?.focus?.();
-    return () => window.removeEventListener('keydown', onKey);
+    return () => { window.removeEventListener('keydown', onKey); if (opener && opener.focus && document.contains(opener)) opener.focus(); };
   }, []);
   return html`<div class="modal-backdrop" onClick=${(e) => { if (e.target === e.currentTarget) onClose?.(); }}>
     <div class=${`modal ${wide ? 'modal-wide' : ''}`} role="dialog" aria-modal="true" aria-label=${title} ref=${ref}>

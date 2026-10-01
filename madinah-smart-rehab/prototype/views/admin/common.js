@@ -13,6 +13,9 @@ export const MOTIONS = [
   ['hamCurl', 'ثني الركبة'], ['jump', 'القفز والهبوط'], ['run', 'الجري'],
 ];
 
+// The shared Modal does not hand focus back; return it to the control that opened it.
+export function refocus(id) { requestAnimationFrame(() => document.getElementById(id)?.focus()); }
+
 export function num(v) {
   if (v === '' || v === null || v === undefined) return NaN;
   return Number(String(v).replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)));

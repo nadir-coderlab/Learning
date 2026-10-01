@@ -34,13 +34,20 @@ export function fmtDateTime(ts) {
   const d = new Date(ts);
   return `${fmtShort(d)} · ${fmtTime(d.getHours(), d.getMinutes())}`;
 }
+function daysAr(n) {
+  if (n === 2) return 'يومين';
+  return n <= 10 ? `${n} أيام` : `${n} يومًا`;
+}
 export function relDay(n) {
   if (n === 0) return 'اليوم';
   if (n === 1) return 'غدًا';
   if (n === -1) return 'أمس';
-  if (n > 1 && n <= 10) return `بعد ${n} ${n <= 10 ? 'أيام' : 'يومًا'}`;
-  if (n < -1 && n >= -10) return `قبل ${-n} ${-n <= 10 ? 'أيام' : 'يومًا'}`;
-  return n > 0 ? `بعد ${n} يومًا` : `قبل ${-n} يومًا`;
+  return n > 0 ? `بعد ${daysAr(n)}` : `قبل ${daysAr(-n)}`;
+}
+// Local calendar date as YYYY-MM-DD (toISOString would shift to the previous day in UTC+3).
+export function isoDate(d) {
+  const x = new Date(d);
+  return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
 }
 export function weeksLabel(day) {
   const w = Math.floor(day / 7);

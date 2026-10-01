@@ -25,7 +25,7 @@ export const TABS = [
   { id: 'messages', label: 'الرسائل' },
   { id: 'record', label: 'السجل' },
 ];
-const TAB_ALIAS = { alert: 'alerts', redflag: 'alerts', message: 'messages', chat: 'messages', checkin: 'overview', checkins: 'overview', appointment: 'appointments', program: 'program', exercises: 'program' };
+const TAB_ALIAS = { alert: 'alerts', redflag: 'alerts', message: 'messages', chat: 'messages', checkin: 'overview', checkins: 'overview', appointment: 'appointments', exercises: 'program' };
 export function normalizeTab(t) {
   if (!t) return 'overview';
   if (TABS.some((x) => x.id === t)) return t;
@@ -89,6 +89,23 @@ export function doseLabel(it) {
   return `${it.sets}×${it.reps}${it.hold ? ` · ثبات ${holdText(it.hold)}` : ''}`;
 }
 
+/* ---------- adherence ---------- */
+// adherenceByDay() reports 0% on days with nothing due; those are rest days, not misses.
+// Today is still in progress, so the summary (like engine.adherence) counts finished days only.
+export function adhSummary(days, today) {
+  const due = days.filter((d) => d.planned > 0 && d.day !== today);
+  const planned = due.reduce((a, d) => a + d.planned, 0);
+  const done = due.reduce((a, d) => a + d.done, 0);
+  return { pct: planned ? Math.round((done / planned) * 100) : null, good: due.filter((d) => d.pct >= 80).length, dueDays: due.length, restDays: days.filter((d) => d.planned === 0).length };
+}
+export function adhBars(days, today) {
+  return days.map((d) => ({
+    label: String(d.day), value: d.pct, mark: d.planned === 0,
+    tip: !d.planned ? `اليوم ${d.day}: لا تمارين مستحقة`
+      : `اليوم ${d.day}${d.day === today ? ' (اليوم الحالي — لم ينتهِ)' : ''}: ${d.done} من ${d.planned} تمارين`,
+  }));
+}
+
 /* ---------- chart helpers ---------- */
 // Clip a corridor to [.., maxX] and close it with an interpolated edge point.
 export function bandTo(series, maxX) {
@@ -134,7 +151,7 @@ export function CriteriaList({ results, p }) {
       </span>
       ${r.homeOnly ? html`<span class="small row" style="gap:5px;color:var(--warn)"><${Icon} name="info" size=${14} />قياس منزلي — يُستحسن تأكيده حضوريًا</span>` : null}
     </div>
-    <span class="small strong" style="text-align:end">${r.valueText}<span class="sr-only"> — ${(CRIT[r.state] || CRIT.unknown).label}</span></span>
+    <span class="small strong" style="text-align:end">${r.valueText}</span>
   </div>`)}</div>`;
 }
 
@@ -155,7 +172,7 @@ export function CriteriaDone() {
     <${Icon} name="info" size=${18} />
     <div class="stack-sm" style="gap:2px">
       <strong><bdi lang="en" dir="ltr">Criteria appear completed – Clinical review required</bdi></strong>
-      <span>تبدو المعايير مكتملة – يلزم مراجعة سريرية قبل أي اعتماد</span>
+      <span>تبدو المعايير مكتملة – يلزم مراجعة سريرية</span>
     </div>
   </div>`;
 }
@@ -176,6 +193,9 @@ export function Check({ id, checked, onChange, children, disabled }) {
 export function FieldError({ text }) {
   return text ? html`<p class="field-error" role="alert"><${Icon} name="alert" size=${14} /> ${text}</p>` : null;
 }
+
+// The shared Modal does not hand focus back; return it to the control that opened it.
+export function refocus(id) { requestAnimationFrame(() => document.getElementById(id)?.focus()); }
 
 export function num(v) {
   if (v === '' || v === null || v === undefined) return NaN;

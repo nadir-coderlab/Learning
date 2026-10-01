@@ -5,13 +5,21 @@ import { LineChart } from '../../lib/charts.js';
 import { getEx, postOpDay, weekOf } from '../../lib/engine.js';
 import { CATEGORIES } from '../../lib/data.js';
 import { dispatch } from '../../lib/store.js';
-import { BY, doseLabel, Check, FieldError, num } from './common.js';
+import { BY, doseLabel, Check, FieldError, num, refocus } from './common.js';
 
+// Small load history for loaded exercises (kg by post-op week), with the latest value beside it.
 function LoadChart({ p, exId }) {
   const pts = (p.loads || []).filter((l) => l.exId === exId).map((l) => ({ x: weekOf(l.day), y: l.kg }));
   if (pts.length < 2) return html`<p class="small muted">لا أحمال كافية مسجلة لهذا التمرين بعد.</p>`;
-  return html`<${LineChart} label="الحمل بالكيلوغرام حسب الأسبوع" unit=" كغ" xTitle="الأسبوع" height=${150}
-    series=${[{ label: 'الحمل', color: 'var(--series-1)', points: pts }]} />`;
+  const a = pts[0]; const b = pts[pts.length - 1];
+  return html`<div class="load-chart">
+    <${LineChart} label="الحمل بالكيلوغرام حسب الأسبوع" unit=" كغ" xTitle="الأسبوع بعد العملية" height=${120}
+      series=${[{ label: 'الحمل', color: 'var(--series-1)', points: pts }]} />
+    <div class="small stack-sm" style="gap:2px">
+      <span class="muted">آخر حمل مسجل</span><strong class="num" style="font-size:1.1rem">${b.y} كغ</strong>
+      <span class="muted">الأسبوع ${b.x} · البداية ${a.y} كغ (الأسبوع ${a.x})</span>
+    </div>
+  </div>`;
 }
 
 function EditDose({ p, it, ex, onDone }) {
@@ -23,7 +31,7 @@ function EditDose({ p, it, ex, onDone }) {
     const sets = num(v.sets); const reps = num(v.reps); const hold = num(v.hold);
     if (!(sets >= 1 && sets <= 20) || !(reps >= 1 && reps <= 200)) return setErr('المجموعات والتكرارات أرقام موجبة.');
     if (!(hold >= 0 && hold <= 3600)) return setErr('الثبات بالثواني (0–3600).');
-    if (!v.freq.trim()) return setErr('اكتب التكرار الأسبوعي أو اليومي.');
+    if (!v.freq.trim()) return setErr('اكتب عدد المرات (يوميًا أو أسبوعيًا).');
     const changes = { sets, reps, hold, freq: v.freq.trim() };
     if (sets === it.sets && reps === it.reps && hold === (it.hold || 0) && changes.freq === it.freq) { onDone(); return undefined; }
     dispatch({ type: 'program/update', pid: p.id, exId: it.exId, exName: ex?.nameAr, changes, by: BY });
@@ -36,7 +44,7 @@ function EditDose({ p, it, ex, onDone }) {
       <div class="field"><label for=${`${pre}-sets`}>المجموعات</label><input class="input num" id=${`${pre}-sets`} type="number" min="1" max="20" value=${v.sets} onInput=${(e) => setV({ ...v, sets: e.currentTarget.value })} /></div>
       <div class="field"><label for=${`${pre}-reps`}>التكرارات</label><input class="input num" id=${`${pre}-reps`} type="number" min="1" max="200" value=${v.reps} onInput=${(e) => setV({ ...v, reps: e.currentTarget.value })} /></div>
       <div class="field"><label for=${`${pre}-hold`}>الثبات (ثانية)</label><input class="input num" id=${`${pre}-hold`} type="number" min="0" max="3600" value=${v.hold} onInput=${(e) => setV({ ...v, hold: e.currentTarget.value })} /></div>
-      <div class="field"><label for=${`${pre}-freq`}>التكرار</label><input class="input" id=${`${pre}-freq`} type="text" value=${v.freq} list="freq-options" onInput=${(e) => setV({ ...v, freq: e.currentTarget.value })} /></div>
+      <div class="field"><label for=${`${pre}-freq`}>عدد المرات</label><input class="input" id=${`${pre}-freq`} type="text" value=${v.freq} list="freq-options" onInput=${(e) => setV({ ...v, freq: e.currentTarget.value })} /></div>
     </div>
     <${FieldError} text=${err} />
     <div class="row"><button type="submit" class="btn btn-sm btn-primary" id=${`${pre}-save`}>حفظ الجرعة</button>
@@ -47,13 +55,12 @@ function EditDose({ p, it, ex, onDone }) {
 function ProgramItem({ p, it, cat }) {
   const ex = getEx(it.exId, cat);
   const [mode, setMode] = useState(null); // 'edit' | 'remove'
-  const [showLoad, setShowLoad] = useState(false);
   const remove = () => {
     dispatch({ type: 'program/remove', pid: p.id, exId: it.exId, exName: ex?.nameAr, by: BY });
     toast(`حُذف «${ex?.nameAr || it.exId}» من البرنامج`);
   };
   return html`<div class="prog-item">
-    <div class="row-between" style="align-items:flex-start">
+    <div class="prog-row">
       <div class="stack-sm" style="gap:2px;min-width:0">
         <strong>${ex?.nameAr || it.exId}</strong>
         <span class="small muted"><bdi>${ex?.nameEn || ''}</bdi></span>
@@ -63,21 +70,21 @@ function ProgramItem({ p, it, cat }) {
           ${ex?.level ? html`<span class="tag">قفز مستوى ${ex.level}</span>` : null}
         </span>
       </div>
-      <div class="dose"><span class="num">${doseLabel(it)}</span><span>${it.freq || ex?.freq || ''}</span></div>
+      <div class="prog-dose">
+        <div class="dose"><span class="num">${doseLabel(it)}</span><span>${it.freq || ex?.freq || ''}</span></div>
+        ${!mode ? html`<div class="row" style="gap:4px">
+          <button type="button" class="btn btn-sm" id=${`prog-${it.exId}-edit`} onClick=${() => setMode('edit')}><${Icon} name="edit" size=${15} />تعديل الجرعة</button>
+          <button type="button" class="btn btn-sm btn-ghost" id=${`prog-${it.exId}-remove`} onClick=${() => setMode('remove')} aria-label=${`حذف ${ex?.nameAr || it.exId}`}><${Icon} name="trash" size=${15} />حذف</button>
+        </div>` : null}
+      </div>
     </div>
     ${it.note ? html`<p class="small muted">${it.note}</p>` : null}
     ${mode === 'edit' ? html`<${EditDose} p=${p} it=${it} ex=${ex} onDone=${() => setMode(null)} />` : null}
     ${mode === 'remove' ? html`<div class="note note-warn row-between" role="alert">
         <span>حذف «${ex?.nameAr}» من برنامج ${p.name}؟</span>
         <span class="row" style="gap:6px"><button type="button" class="btn btn-sm btn-danger" id=${`prog-${it.exId}-confirm-remove`} onClick=${remove}>نعم، احذف</button>
-          <button type="button" class="btn btn-sm btn-ghost" onClick=${() => setMode(null)}>إلغاء</button></span></div>` : null}
-    ${!mode ? html`<div class="row" style="gap:6px">
-      <button type="button" class="btn btn-sm" id=${`prog-${it.exId}-edit`} onClick=${() => setMode('edit')}><${Icon} name="edit" size=${15} />تعديل الجرعة</button>
-      <button type="button" class="btn btn-sm btn-ghost" id=${`prog-${it.exId}-remove`} onClick=${() => setMode('remove')}><${Icon} name="trash" size=${15} />حذف</button>
-      ${ex?.load ? html`<button type="button" class="btn btn-sm btn-ghost" id=${`prog-${it.exId}-loads`} aria-expanded=${String(showLoad)} onClick=${() => setShowLoad(!showLoad)}>
-        <${Icon} name="chart" size=${15} />${showLoad ? 'إخفاء الأحمال' : 'الأحمال المسجلة'}</button>` : null}
-    </div>` : null}
-    ${ex?.load && showLoad ? html`<div class="card card-flat card-tight"><${LoadChart} p=${p} exId=${it.exId} /></div>` : null}
+          <button type="button" class="btn btn-sm btn-ghost" id=${`prog-${it.exId}-cancel-remove`} onClick=${() => setMode(null)}>إلغاء</button></span></div>` : null}
+    ${ex?.load ? html`<${LoadChart} p=${p} exId=${it.exId} />` : null}
   </div>`;
 }
 
@@ -101,7 +108,7 @@ function AddModal({ p, cat, onClose }) {
         <input class="input" id="add-ex-search" type="search" placeholder="ابحث بالعربي أو الإنجليزي" value=${q} onInput=${(e) => setQ(e.currentTarget.value)} autocomplete="off" /></div>
       <${Check} id="add-ex-fit" checked=${fit} onChange=${setFit}>مناسب للمرحلة ${p.phase} فقط<//>
     </div>
-    <div class="row" role="group" aria-label="الفئة" style="gap:6px">
+    <div class="row chip-row" role="group" aria-label="الفئة" style="gap:6px">
       <button type="button" class="chip" id="add-ex-cat-all" aria-pressed=${String(c === 'all')} onClick=${() => setC('all')}>الكل</button>
       ${cats.map((k) => html`<button type="button" class="chip" key=${k} id=${`add-ex-cat-${k}`} aria-pressed=${String(c === k)} onClick=${() => setC(k)}>${CATEGORIES[k]}</button>`)}
     </div>
@@ -141,6 +148,6 @@ export function ProgramTab({ p, cat }) {
       </datalist>
     <//>
     <p class="small muted">كل تعديل يُسجل في سجل التغييرات باسم ${BY}، ويظهر للمريض في تطبيقه.</p>
-    ${adding ? html`<${AddModal} p=${p} cat=${cat} onClose=${() => setAdding(false)} />` : null}
+    ${adding ? html`<${AddModal} p=${p} cat=${cat} onClose=${() => { setAdding(false); refocus('prog-add'); }} />` : null}
   </div>`;
 }

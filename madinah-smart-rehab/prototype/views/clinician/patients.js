@@ -30,7 +30,7 @@ export function PatientList({ roster, list, setList, onOpen, cat }) {
         ${cat.phases.map((ph) => html`<option value=${String(ph.id)}>المرحلة ${ph.id} — ${ph.nameAr}</option>`)}
       </select>
     </div>
-    <div class="row" role="group" aria-label="تصفية حسب الحالة" style="gap:6px">
+    <div class="row chip-row" role="group" aria-label="تصفية حسب الحالة" style="gap:6px">
       ${STATUS_FILTERS.map((f) => html`<button type="button" class="chip" id=${`pt-status-${f.id}`} key=${f.id} aria-pressed=${String(list.status === f.id)}
         onClick=${() => setList({ ...list, status: f.id })}>${f.label} <span class="num muted">${count(f.id)}</span></button>`)}
     </div>
@@ -49,7 +49,7 @@ export function PatientList({ roster, list, setList, onOpen, cat }) {
             <td><div class="row" style="gap:8px;flex-wrap:nowrap">
               <${Avatar} name=${r.p.name} small />
               <div class="stack-sm" style="gap:0">
-                <button type="button" class="link-btn" onClick=${(e) => { e.stopPropagation(); onOpen(r.p.id); }}>${r.p.name}</button>
+                <button type="button" class="link-btn" id=${`pt-open-${r.p.id}`} onClick=${(e) => { e.stopPropagation(); onOpen(r.p.id); }}>${r.p.name}</button>
                 <span class="small muted"><bdi>${r.p.mrn}</bdi></span>
               </div></div></td>
             <td class="num">${r.day}</td>
