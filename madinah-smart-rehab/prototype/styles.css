@@ -633,3 +633,8 @@ ol.journey { margin: 0; padding: 0; list-style: none; }
 .ex-form { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 16px; align-items: start; }
 @media (max-width: 720px) { .ex-form { grid-template-columns: minmax(0, 1fr); } .ex-form-preview { max-width: 260px; } }
 @media (max-width: 600px) { .gate-row { grid-template-columns: 26px minmax(0, 1fr); } .gate-row .target-editor { grid-column: 2; } }
+.chart-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(190px, 250px); gap: 20px; align-items: start; }
+@media (max-width: 1100px) { .chart-split { grid-template-columns: minmax(0, 1fr); gap: 12px; } }
+.chart-side { display: flex; flex-direction: column; gap: 10px; font-size: var(--step--1); color: var(--ink-2); border-inline-start: 1px solid var(--line); padding-inline-start: 16px; }
+@media (max-width: 1100px) { .chart-side { border-inline-start: 0; padding-inline-start: 0; border-top: 1px solid var(--line); padding-top: 12px; } }
+.side-value { font-size: 1.5rem; font-weight: 700; color: var(--ink); line-height: 1.3; }

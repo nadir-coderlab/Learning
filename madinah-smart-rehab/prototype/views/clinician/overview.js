@@ -2,8 +2,8 @@
 import { html, useState } from '../../lib/h.js';
 import { Icon, Pill, Card, Empty, Seg } from '../../lib/ui.js';
 import { LineChart, BarChart } from '../../lib/charts.js';
-import { latest, statusOf, adherence, adherenceByDay, projectFlex, riskOfDropout, postOpDay } from '../../lib/engine.js';
-import { round, mean } from '../../lib/util.js';
+import { latest, statusOf, adherence, adherenceByDay, projectFlex, riskOfDropout, postOpDay, corridorAt, streak } from '../../lib/engine.js';
+import { round, mean, last } from '../../lib/util.js';
 import { SOURCE_AR, bandTo } from './common.js';
 
 const RISK = {
@@ -51,6 +51,13 @@ export function OverviewTab({ p, cat, onTab }) {
   const adhDays = adherenceByDay(p, 14, cat);
   const adh14 = adhDays.length ? round(mean(adhDays.map((d) => d.pct))) : null;
   const r = RISK[risk.level];
+  const corridorNow = corridorAt(cat.corridor.flex, day);
+  const fullExtDay = (cat.corridor.ext || []).find((q) => q.hi === 0)?.x;
+  const extWhy = cat.rules.find((x) => x.id === 'y_trajectory')?.why;
+  const lastPain = last(p.checkins || []);
+  const peak = pains.length ? pains.reduce((a, b) => (b.y > a.y ? b : a)) : null;
+  const goodDays = adhDays.filter((d) => d.pct >= 80).length;
+  const streakDays = streak(p, cat);
   const ready = st.ready;
 
   return html`<div class="stack-lg">
@@ -91,39 +98,63 @@ export function OverviewTab({ p, cat, onTab }) {
     </div>
 
     <${Card} title="الثني عبر الوقت مقابل المسار المرجعي" eyebrow="درجات · اليوم بعد العملية">
-      ${flexSeries.length ? html`<${LineChart} label="ثني الركبة عبر الأيام" unit="°" series=${flexSeries}
+      ${flexSeries.length ? html`<div class="chart-split">
+        <${LineChart} label="ثني الركبة عبر الأيام" unit="°" series=${flexSeries}
           band=${{ label: 'المسار المرجعي', points: bandTo(cat.corridor.flex, maxX) }}
           xDomain=${[0, maxX]} yDomain=${[flexMin, 150]} height=${230} />
-        <div class="stack-sm small" style="margin-top:6px">
-          ${proj?.line ? html`<p class="row" style="gap:6px"><${Icon} name="target" size=${15} />
-            ${proj.days > 0 ? `التقدير: يصل لـ120° خلال ~${proj.days} يومًا — تقدير إحصائي وليس قرارًا` : 'التقدير: يُرجح أنه بلغ 120° تقريبًا — يحتاج قياسًا جديدًا للتأكد. تقدير إحصائي وليس قرارًا'}
-            <span class="muted">(${proj.slopePerWeek}° أسبوعيًا)</span></p>` : null}
-          ${proj?.stalled ? html`<p class="row" style="gap:6px;color:var(--warn)"><${Icon} name="alert" size=${15} />تحسن الثني شبه متوقف في آخر 3 أسابيع — راجع البرنامج.</p>` : null}
+        <div class="chart-side">
+          ${Number.isFinite(L.flex) ? html`<div><span class="muted">آخر قياس</span><div class="side-value">${L.flex}°</div>
+            <span class="muted">${SOURCE_AR[L.flexRec.source] || ''} · اليوم ${L.flexRec.day}</span></div>` : null}
+          ${corridorNow ? html`<p>المسار المرجعي في اليوم ${day}: <strong class="num">${Math.round(corridorNow.lo)}–${Math.round(corridorNow.hi)}°</strong></p>` : null}
+          ${proj?.line ? html`<p class="row" style="gap:6px;flex-wrap:nowrap;align-items:flex-start"><${Icon} name="target" size=${15} /><span>
+            ${proj.days > 0 ? `التقدير: يصل لـ120° خلال ~${proj.days} يومًا — تقدير إحصائي وليس قرارًا` : 'التقدير: يُرجَّح أنه بلغ 120° تقريبًا — يحتاج قياسًا جديدًا للتأكد. تقدير إحصائي وليس قرارًا'}
+            <span class="muted"> (${proj.slopePerWeek}° أسبوعيًا)</span></span></p>` : null}
+          ${proj?.stalled ? html`<p class="row" style="gap:6px;flex-wrap:nowrap;align-items:flex-start;color:var(--warn)"><${Icon} name="alert" size=${15} /><span>تحسن الثني شبه متوقف في آخر 3 أسابيع — راجع البرنامج.</span></p>` : null}
           ${p.meniscusRepair ? html`<p class="muted">المسار المرجعي لا يراعي قيود المدى بعد إصلاح الغضروف الهلالي (${p.romRestriction}).</p>` : null}
-          <p class="muted">مصادر القياس: ${sourceCounts(p) || '—'} · ${cat.corridor.source}</p>
-        </div>`
-        : html`<${Empty} icon="knee" title="لا قياسات للمدى بعد" />`}
+          <p class="muted">مصادر القياس: ${sourceCounts(p) || '—'}</p>
+          <p class="muted">${cat.corridor.source}</p>
+        </div>
+      </div>` : html`<${Empty} icon="knee" title="لا قياسات للمدى بعد" />`}
     <//>
 
-    <div class="grid-2">
-      <${Card} title="نقص الفرد" eyebrow="0° = فرد كامل؛ الأقل أفضل">
-        ${extSeries.length ? html`<${LineChart} label="نقص فرد الركبة عبر الأيام" unit="°" series=${extSeries}
-            band=${{ label: 'المسار المرجعي', points: bandTo(cat.corridor.ext, maxX) }}
-            xDomain=${[0, maxX]} yDomain=${[0, extMax]} height=${200} />` : html`<${Empty} icon="knee" title="لا قياسات" />`}
-      <//>
-      <${Card} title="الألم اليومي" eyebrow="مقياس 0–10 من تسجيل المريض"
-        actions=${day > 60 ? html`<${Seg} label="مدة عرض الألم" value=${painRange} onChange=${setPainRange}
-          options=${[{ id: '60', label: '60 يومًا' }, { id: 'all', label: 'كل الفترة' }]} />` : null}>
-        ${pains.length > 1 ? html`<${LineChart} label="الألم اليومي" unit="/10" series=${[{ label: 'الألم', color: 'var(--series-1)', points: pains }]}
-            yDomain=${[0, 10]} xDomain=${[Math.min(...pains.map((q) => q.x)), Math.max(day, ...pains.map((q) => q.x))]} height=${200} />`
-          : html`<${Empty} icon="activity" title="تسجيلات قليلة" />`}
-      <//>
-    </div>
+    <${Card} title="نقص الفرد" eyebrow="0° = فرد كامل؛ الأقل أفضل">
+      ${extSeries.length ? html`<div class="chart-split">
+        <${LineChart} label="نقص فرد الركبة عبر الأيام" unit="°" series=${extSeries}
+          band=${{ label: 'المسار المرجعي', points: bandTo(cat.corridor.ext, maxX) }}
+          xDomain=${[0, maxX]} yDomain=${[0, extMax]} height=${180} />
+        <div class="chart-side">
+          ${Number.isFinite(L.extDeficit) ? html`<div><span class="muted">آخر قياس</span><div class="side-value">${L.extDeficit === 0 ? 'كامل' : `ينقص ${L.extDeficit}°`}</div>
+            <span class="muted">${SOURCE_AR[L.extRec.source] || ''} · اليوم ${L.extRec.day}</span></div>` : null}
+          ${fullExtDay ? html`<p>المسار المرجعي: فرد كامل بحلول اليوم ${fullExtDay}.</p>` : null}
+          ${extWhy ? html`<p class="muted">${extWhy}</p>` : null}
+        </div>
+      </div>` : html`<${Empty} icon="knee" title="لا قياسات" />`}
+    <//>
 
-    <${Card} title="الالتزام اليومي بالتمارين" eyebrow=${`آخر 14 يومًا${adh14 !== null ? ` · المتوسط ${adh14}%` : ''}`}>
-      ${adhDays.length ? html`<${BarChart} label="نسبة التمارين المنجزة يوميًا" max=${100} valueFormat=${(v) => `${v}%`} xTitle="اليوم بعد العملية"
-        data=${adhDays.map((d) => ({ label: String(d.day), value: d.pct, tip: `اليوم ${d.day}: ${d.done} من ${d.planned} تمارين` }))} />`
-        : html`<${Empty} icon="list" title="لا بيانات بعد" />`}
+    <${Card} title="الألم اليومي" eyebrow="مقياس 0–10 من تسجيل المريض"
+      actions=${day > 60 ? html`<${Seg} label="مدة عرض الألم" value=${painRange} onChange=${setPainRange}
+        options=${[{ id: '60', label: '60 يومًا' }, { id: 'all', label: 'كل الفترة' }]} />` : null}>
+      ${pains.length > 1 ? html`<div class="chart-split">
+        <${LineChart} label="الألم اليومي" unit="/10" series=${[{ label: 'الألم', color: 'var(--series-1)', points: pains }]}
+          yDomain=${[0, 10]} xDomain=${[Math.min(...pains.map((q) => q.x)), Math.max(day, ...pains.map((q) => q.x))]} height=${180} />
+        <div class="chart-side">
+          <div><span class="muted">متوسط 7 أيام</span><div class="side-value">${Number.isFinite(L.painAdl) ? `${round(L.painAdl, 1)}/10` : '—'}</div></div>
+          ${lastPain ? html`<p>آخر تسجيل: <strong class="num">${lastPain.pain}/10</strong> · اليوم ${lastPain.day}</p>` : null}
+          ${peak ? html`<p>الأعلى في الفترة المعروضة: <strong class="num">${peak.y}/10</strong> · اليوم ${peak.x}</p>` : null}
+        </div>
+      </div>` : html`<${Empty} icon="activity" title="تسجيلات قليلة" />`}
+    <//>
+
+    <${Card} title="الالتزام اليومي بالتمارين" eyebrow="آخر 14 يومًا">
+      ${adhDays.length ? html`<div class="chart-split">
+        <${BarChart} label="نسبة التمارين المنجزة يوميًا" max=${100} valueFormat=${(v) => `${v}%`} xTitle="اليوم بعد العملية" height=${140}
+          data=${adhDays.map((d) => ({ label: String(d.day), value: d.pct, tip: `اليوم ${d.day}: ${d.done} من ${d.planned} تمارين` }))} />
+        <div class="chart-side">
+          <div><span class="muted">المتوسط اليومي</span><div class="side-value">${adh14 === null ? '—' : `${adh14}%`}</div></div>
+          <p>أيام بالتزام 80% أو أكثر: <strong class="num">${goodDays} من ${adhDays.length}</strong></p>
+          <p>سلسلة الالتزام الحالية: <strong class="num">${streakDays}</strong> ${streakDays === 1 ? 'يوم' : 'أيام'}</p>
+        </div>
+      </div>` : html`<${Empty} icon="list" title="لا بيانات بعد" />`}
     <//>
   </div>`;
 }
