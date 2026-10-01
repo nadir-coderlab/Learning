@@ -238,12 +238,13 @@ export function onceEvent(target, names, timeoutMs = 8000) {
   });
 }
 
-/** Seeks and resolves once the frame at time t is ready to read. */
+/** Seeks and resolves true once the frame at time t is ready to read (false on timeout). */
 export function seekTo(video, t, timeoutMs = 4000) {
   return new Promise((resolve) => {
-    const done = () => { clearTimeout(timer); video.removeEventListener('seeked', done); resolve(); };
-    const timer = setTimeout(done, timeoutMs);
-    video.addEventListener('seeked', done);
+    const done = (ok) => { clearTimeout(timer); video.removeEventListener('seeked', onSeeked); resolve(ok); };
+    const onSeeked = () => done(true);
+    const timer = setTimeout(() => done(false), timeoutMs);
+    video.addEventListener('seeked', onSeeked);
     video.currentTime = t;
   });
 }

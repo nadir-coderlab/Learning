@@ -45,7 +45,9 @@ export function poseError(code, cause) {
 const isPoseError = (e) => e && typeof e === 'object' && typeof e.code === 'string' && typeof e.message === 'string' && MESSAGES[e.code];
 
 /* ---------- loader (singleton) ---------- */
-let pending = null;
+let inflight = null; // the actual download/compile; survives a timeout so a retry can reuse it
+let pending = null; // inflight wrapped with the user-facing timeout
+let ready = false;
 
 function localUrl(rel) {
   try {
@@ -66,6 +68,17 @@ async function modelSource() {
     if (r.ok && !/text\/html/i.test(r.headers.get('content-type') || '')) {
       const buf = new Uint8Array(await r.arrayBuffer());
       if (buf.byteLength > 100000) return { opts: { modelAssetBuffer: buf }, src: 'local' };
+    }
+  } catch { /* try the base64 copy */ }
+  // Hosts that serve only web file types (the Claude artifact viewer) get the same model as a
+  // base64 ES module next to it: `export default '<base64>'`.
+  try {
+    const mod = await import(localUrl(`${LOCAL_MODEL}.js`));
+    if (typeof mod.default === 'string' && mod.default.length > 100000) {
+      const bin = atob(mod.default);
+      const buf = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+      return { opts: { modelAssetBuffer: buf }, src: 'local' };
     }
   } catch { /* use the CDN copy */ }
   return { opts: { modelAssetPath: CDN_MODEL }, src: 'cdn' };
@@ -167,7 +180,10 @@ function makeApi(inst) {
  */
 export async function loadPose(runningMode = 'IMAGE') {
   if (!pending) {
-    pending = withTimeout(create(), 60000).catch((e) => {
+    // ~17 MB on first use (WASM + model), so slow mobile data gets two minutes; after a timeout the
+    // download keeps going and the next attempt picks it up instead of starting over.
+    if (!inflight) inflight = create().then((inst) => { ready = true; return inst; }, (e) => { inflight = null; throw e; });
+    pending = withTimeout(inflight, 120000).catch((e) => {
       pending = null;
       throw isPoseError(e) ? e : poseError('load', e);
     });
@@ -179,7 +195,8 @@ export async function loadPose(runningMode = 'IMAGE') {
   if (!inst.api) inst.api = makeApi(inst);
   return inst.api;
 }
-export function poseLoaded() { return Boolean(pending); }
+/** True once the detector is ready (the next call answers without downloading). */
+export function poseLoaded() { return ready; }
 
 /* ---------- pure geometry (no DOM) ---------- */
 const DEG = 180 / Math.PI;

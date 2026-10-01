@@ -654,7 +654,8 @@ ol.journey { margin: 0; padding: 0; list-style: none; }
 
 /* measurement lab additions */
 .mx-hub { display: flex; flex-direction: column; gap: 12px; }
-.mx-hub .seg, .modal .seg { align-self: flex-start; }
+.mx-hub .seg, .mx-cc .seg { align-self: flex-start; }
+.mx-cc { display: contents; }
 .mx-intro { display: flex; flex-direction: column; gap: 12px; }
 .mx-intro h2 { font-size: var(--step-1); }
 .mx-intro-head { display: flex; align-items: flex-start; gap: 12px; }

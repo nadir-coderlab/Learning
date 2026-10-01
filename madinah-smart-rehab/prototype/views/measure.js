@@ -25,14 +25,13 @@ const MAX_VIDEO_SEC = 90;
 const VIDEO_STEP = 0.1; // seconds between analysed frames (~10 per second)
 
 const fin = Number.isFinite;
-const iso = (s) => `⁦${s}⁩`; // keeps "95°" readable inside Arabic sentences
+const iso = (s) => `\u2066${s}\u2069`; // keeps "95°" readable inside Arabic sentences
 const degTxt = (v) => (fin(v) ? `${Math.round(v)}°` : '—');
 const signedTxt = (v) => {
   if (!fin(v)) return '—';
   const r = Math.round(v);
   return `${r > 0 ? '+' : r < 0 ? '−' : ''}${Math.abs(r)}°`;
 };
-const extTxt = (v) => (fin(v) ? (Math.round(v) <= 0 ? 'كامل' : `ينقص ${iso(degTxt(v))}`) : '—');
 const Deg = ({ v, signed }) => html`<span class="ltr">${signed ? signedTxt(v) : degTxt(v)}</span>`;
 const clampNum = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
@@ -125,8 +124,11 @@ function drawSkeleton(ctx, lm, w, h, { side, mirror, colors, label }) {
   if (head && head.v > 0.3) { ctx.beginPath(); ctx.arc(head.x, head.y, 7 * s, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fill(); }
   for (const [a, b] of [[l.hip, l.knee], [l.knee, l.ankle], [l.ankle, l.heel], [l.heel, l.toe], [l.ankle, l.toe]]) {
     const A = P(a); const B = P(b);
-    if (A && B) haloLine(ctx, A, B, colors.op, 7 * s);
+    if (!A || !B) continue;
+    ctx.globalAlpha = Math.min(A.v, B.v) < 0.5 ? 0.45 : 1; // a guessed (hidden) leg is drawn faint
+    haloLine(ctx, A, B, colors.op, 7 * s);
   }
+  ctx.globalAlpha = 1;
   for (const i of [l.hip, l.knee, l.ankle]) {
     const p = P(i);
     if (!p) continue;
@@ -192,7 +194,8 @@ function drawGoniometer(ctx, P, { dpr, active, value, measure, colors }) {
 }
 
 /** A drawn side view of a supine leg at a known angle, so the tool can be tried without a photo. */
-function makeDemoLeg(flex = 95) {
+const DEMO = { flex: { flex: 95 }, ext: { flex: 6, prop: true }, lag: { flex: 9, thigh: 32 } };
+function makeDemoLeg({ flex = 95, thigh, prop } = {}) {
   const c = document.createElement('canvas');
   c.width = 960; c.height = 640;
   const x = c.getContext('2d');
@@ -203,7 +206,7 @@ function makeDemoLeg(flex = 95) {
   x.fillStyle = '#56656d'; x.beginPath(); if (x.roundRect) x.roundRect(30, 478, 900, 44, 14); else x.rect(30, 478, 900, 44); x.fill();
   const rad = (d) => (d * Math.PI) / 180;
   const hip = { x: 360, y: 430 };
-  const alpha = 43; const beta = flex - alpha;
+  const alpha = thigh ?? Math.min(43, flex * 0.45); const beta = flex - alpha;
   const knee = { x: hip.x + 250 * Math.cos(rad(alpha)), y: hip.y - 250 * Math.sin(rad(alpha)) };
   const ankle = { x: knee.x + 240 * Math.cos(rad(beta)), y: knee.y + 240 * Math.sin(rad(beta)) };
   const seg = (a, b, w, col) => { x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(b.x, b.y); x.lineWidth = w; x.strokeStyle = col; x.lineCap = 'round'; x.stroke(); };
@@ -212,8 +215,10 @@ function makeDemoLeg(flex = 95) {
   seg({ x: 150, y: 452 }, { x: 300, y: 462 }, 30, skin); // arm
   x.fillStyle = skin; x.beginPath(); x.arc(70, 404, 46, 0, Math.PI * 2); x.fill();
   x.fillStyle = '#2b2622'; x.beginPath(); x.arc(62, 392, 44, Math.PI * 0.95, Math.PI * 1.9); x.fill();
+  if (prop) { x.fillStyle = '#e8e2d6'; x.beginPath(); x.arc(ankle.x + 6, ankle.y + 34, 26, 0, Math.PI * 2); x.fill(); } // towel roll under the heel
   seg(knee, ankle, 64, skin); // shank
-  seg({ x: ankle.x - 6, y: ankle.y + 8 }, { x: ankle.x + 92, y: ankle.y + 16 }, 30, skin); // foot
+  if (beta > 30) seg({ x: ankle.x - 6, y: ankle.y + 8 }, { x: ankle.x + 92, y: ankle.y + 16 }, 30, skin); // foot flat on the mat
+  else seg(ankle, { x: ankle.x + 70 * Math.cos(rad(beta - 90)), y: ankle.y + 70 * Math.sin(rad(beta - 90)) }, 28, skin); // toes up
   seg(hip, knee, 84, skin); // thigh
   seg(hip, { x: hip.x + 0.42 * (knee.x - hip.x), y: hip.y + 0.42 * (knee.y - hip.y) }, 98, '#2b2f33'); // shorts
   x.fillStyle = 'rgba(19,32,41,0.55)'; x.font = '600 22px sans-serif'; x.direction = 'rtl'; x.textAlign = 'right';
@@ -231,7 +236,7 @@ const PHOTO_LABEL = { flex: 'ثني الركبة', ext: 'نقص الفرد', lag
 function PhotoResult({ idp, measure, value }) {
   if (!fin(value)) return null;
   if (measure === 'fppa') {
-    return html`<div class="mx-result" id=${`${idp}-photo-value`}>
+    return html`<div class="mx-result" id=${`${idp}-photo-value`} data-value=${Math.round(value)}>
       <span class="mx-big">${signedTxt(value)}</span>
       <span class="small muted">${value >= 0 ? 'ميل الركبة للداخل' : 'ميل الركبة للخارج'} (FPPA)</span>
       <span class="pill pill-gold">${VISUAL_ONLY}</span></div>`;
@@ -390,7 +395,7 @@ function PhotoTool({ idp, side = 'R', measure = 'flex', measures, onMeasure, onR
     ${compact ? null : html`<${Tips} items=${PHOTO_TIPS[view]} />`}
     <div class="row">
       <${FileButton} id=${`${idp}-photo-file`} accept="image/*" capture="environment" label=${img ? 'صورة ثانية' : 'التقط صورة'} icon="camera" primary=${!img} onFile=${onFile} />
-      <button type="button" class="btn btn-ghost btn-sm" id=${`${idp}-photo-demo`} onClick=${() => take(makeDemoLeg(), true)}><${Icon} name="image" size=${16} />صورة توضيحية</button>
+      ${DEMO[measure] ? html`<button type="button" class="btn btn-ghost btn-sm" id=${`${idp}-photo-demo`} onClick=${() => take(makeDemoLeg(DEMO[measure]), DEMO[measure].flex)}><${Icon} name="image" size=${16} />صورة توضيحية</button>` : null}
     </div>
     ${img ? html`
       <div class="steps-inline" aria-hidden="true">${['الورك', 'الركبة', 'الكاحل'].map((n, i) => html`<span data-on=${String(i === pts.length)}>${i + 1} ${n}</span>`)}</div>
@@ -404,13 +409,13 @@ function PhotoTool({ idp, side = 'R', measure = 'flex', measures, onMeasure, onR
         <button type="button" class="btn btn-sm" id=${`${idp}-photo-auto`} disabled=${busy || img.demo} onClick=${runAuto}><${Icon} name="sparkle" size=${16} />اقتراح النقاط تلقائيًا</button>
         <button type="button" class="btn btn-sm btn-ghost" id=${`${idp}-photo-reset`} disabled=${!pts.length} onClick=${() => { setPts([]); setActive(-1); setSavedKey(null); }}><${Icon} name="refresh" size=${16} />إعادة النقاط</button>
       </div>
-      ${img.demo ? html`<p class="small muted">صورة مرسومة للتجربة (زاويتها قرابة ${iso('95°')}). التعرف التلقائي يحتاج صورة حقيقية.</p>` : null}
+      ${img.demo ? html`<p class="small muted">صورة مرسومة للتجربة (انثناء الركبة فيها قرابة ${iso(`${img.demo}°`)}). التعرف التلقائي يحتاج صورة حقيقية.</p>` : null}
       ${auto ? html`<div class=${`note note-${auto.tone}`} role="status" id=${`${idp}-photo-auto-msg`}>${auto.text}</div>` : null}
       <${PhotoResult} idp=${idp} measure=${measure} value=${value} />
       ${fin(value) ? html`<p class="small muted" style="text-align:center">${FOLLOW_UP}</p>` : null}
       ${onSave ? html`<button type="button" class="btn btn-primary btn-block" id=${`${idp}-photo-save`} disabled=${!fin(value) || saved}
         onClick=${() => { onSave({ measure, value }); setSavedKey(ptsKey); }}>${saved ? html`<${Icon} name="check" size=${16} />تم الحفظ` : 'حفظ القياس'}</button>` : null}`
-    : html`<${Empty} icon="image" text="لا توجد صورة بعد. صوّر الساق من الجانب أو جرّب الصورة التوضيحية." />`}
+    : html`<${Empty} icon="image" text=${measure === 'fppa' ? 'لا توجد صورة بعد. صوّر الساقين من الأمام.' : DEMO[measure] ? 'لا توجد صورة بعد. صوّر الساق من الجانب أو جرّب الصورة التوضيحية.' : 'لا توجد صورة بعد. صوّر من الجانب والجسم كامل ظاهر.'} />`}
   </div>`;
 }
 
@@ -508,8 +513,11 @@ function LiveTool({ idp, side: opSide = 'R', kind = 'rom', onResult, onSave, onF
     if (token !== r.token) { if (cam.status === 'fulfilled') stopStream(cam.value); return; }
     if (cam.status === 'rejected') { setErr(cam.reason); setStatus('error'); return; }
     if (model.status === 'rejected') { stopStream(cam.value); setErr(model.reason); setStatus('error'); return; }
-    r.stream = cam.value; r.pose = model.value;
     const v = videoRef.current;
+    if (!v) { stopStream(cam.value); setStatus('idle'); return; }
+    r.stream = cam.value; r.pose = model.value;
+    // camera unplugged or permission withdrawn mid-session: keep the numbers, stop cleanly
+    r.stream.getVideoTracks().forEach((t) => t.addEventListener('ended', () => { if (token === run.current.token) { publish(true); halt(); setStatus('stopped'); } }));
     v.setAttribute('playsinline', ''); v.muted = true; v.srcObject = r.stream;
     try { await v.play(); } catch { /* autoplay muted is allowed; keep going */ }
     await videoReady(v);
@@ -660,11 +668,13 @@ function VideoTool({ idp, side: opSide = 'R', kind = 'rom', onResult, onSave, ma
     const pts = [];
     const n = Math.max(1, Math.floor(limit / VIDEO_STEP));
     const k = Math.min(1, 960 / (v.videoWidth || 960));
+    let stuck = 0;
     for (let i = 0; i <= n; i++) {
       if (my !== token.current) return;
       const t = Math.min(limit - 0.02, i * VIDEO_STEP);
-      await seekTo(v, Math.max(0, t));
+      stuck = (await seekTo(v, Math.max(0, t))) ? 0 : stuck + 1;
       if (my !== token.current) return;
+      if (stuck >= 3) { setErr('تعذّر التنقل داخل هذا الفيديو. جرّب تسجيله من جديد (يفضّل صيغة MP4).'); setStatus('error'); return; }
       let lm = null;
       try { lm = pose.detectForVideo(v, base + t * 1000); } catch { /* skip this frame */ }
       const fr = an.push(lm, v.videoWidth, v.videoHeight, t * 1000);
@@ -700,7 +710,12 @@ function VideoTool({ idp, side: opSide = 'R', kind = 'rom', onResult, onSave, ma
     setDims({ w: v.videoWidth, h: v.videoHeight });
     analyze();
   };
-  const cancel = () => { token.current += 1; setStatus(sum && sum.used ? 'done' : 'idle'); };
+  const cancel = () => {
+    token.current += 1;
+    // keep what was analysed so far
+    setStatus(sum && sum.used ? 'done' : 'idle');
+    if (sum && sum.used && onResultRef.current) onResultRef.current({ method: 'video', ...sum });
+  };
   const busy = status === 'opening' || status === 'loading' || status === 'analyzing';
   const note = status === 'done' ? sessionNote(kind, sum) : null;
   return html`<div class="stack" id=${`${idp}-video`}>
@@ -743,7 +758,8 @@ function PhoneTool({ idp, measure = 'flex', measures, onMeasure, onResult, onSav
   const stopRef = useRef(null);
   const buf = useRef([]);
   const lastUi = useRef(0);
-  useEffect(() => () => { if (stopRef.current) stopRef.current(); }, []);
+  const startTok = useRef(0);
+  useEffect(() => () => { startTok.current = -1; if (stopRef.current) stopRef.current(); }, []);
   const isSim = status === 'sim';
   const current = isSim ? sim : live;
   const sum = fin(b1) && fin(b2) ? b1 + b2 : NaN;
@@ -761,7 +777,9 @@ function PhoneTool({ idp, measure = 'flex', measures, onMeasure, onResult, onSav
     buf.current = [];
     restart();
     setNote(''); setStatus('waiting');
+    const tok = ++startTok.current;
     perm.then((p) => {
+      if (tok !== startTok.current) return; // unmounted, or started again meanwhile
       if (p === 'denied') { setStatus('sim'); setNote('ما سُمح بالوصول لمستشعر الحركة، فنعرض محاكاة للفكرة.'); return; }
       stopRef.current = watchOrientation({
         timeoutMs: 1500,
@@ -970,7 +988,7 @@ function ToolCard({ tool, open, onToggle, children }) {
 
 function LatestTile({ label, rec, text }) {
   return html`<div class="stat"><span class="label">${label}</span><span class="value">${text}</span>
-    <span class="sub">${rec ? `${SOURCE_AR[rec.source] || rec.source} · اليوم ${rec.day}` : 'لا يوجد بعد'}</span></div>`;
+    <span class="sub">${rec ? `${SOURCE_AR[rec.source] || rec.source} · اليوم\u00a0${rec.day}` : 'لا يوجد بعد'}</span></div>`;
 }
 
 export function MeasureHub({ patient }) {
@@ -1109,7 +1127,7 @@ export function CameraCheck({ patient, mode = 'flex', exercise, onDone, onClose 
   const footer = html`<button type="button" class="btn btn-ghost" id="cc-cancel" onClick=${onClose}>إلغاء</button>
     <button type="button" class="btn btn-primary" id="cc-confirm" disabled=${!verified} onClick=${confirm}><${Icon} name="check" size=${16} />اعتماد النتيجة</button>`;
   const common = { idp: 'cc', side, maxH: '40vh', onResult: setResult, compact: true };
-  return html`<${Modal} title=${title} onClose=${onClose} footer=${footer}>
+  return html`<${Modal} title=${title} onClose=${onClose} footer=${footer}><div class="mx-cc" id="cc-body">
     <p class="small">${cfg.hint}</p>
     ${cfg.methods.length > 1 ? html`<${MxSeg} id="cc-method" label="طريقة القياس" options=${cfg.methods.map((m) => ({ id: m, label: METHOD_AR[m] }))} value=${method} onChange=${pick} />` : null}
     ${mode === 'valgus' ? html`<div class="note note-warn" id="cc-visual-only"><strong>${VISUAL_ONLY}</strong></div>` : null}
@@ -1121,5 +1139,5 @@ export function CameraCheck({ patient, mode = 'flex', exercise, onDone, onClose 
       ${verified ? html`<strong>النتيجة: </strong>${verified.note}` : 'ابدأ القياس لتظهر النتيجة هنا، ثم اعتمدها.'}
     </div>
     <p class="small muted">${FOLLOW_UP}</p>
-  </${Modal}>`;
+  </div></${Modal}>`;
 }
