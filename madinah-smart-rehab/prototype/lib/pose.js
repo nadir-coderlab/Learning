@@ -13,6 +13,7 @@ const CDN_WASM = `${MP_CDN}/wasm`;
 const CDN_MODEL = 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task';
 // Optional self-hosted copies (not committed — too large). Same place as './vendor/mediapipe/…'
 // next to index.html; resolved from this module so test pages in sub-folders find them too.
+const LOCAL_VISION = 'vendor/mediapipe/vision_bundle.mjs';
 const LOCAL_WASM = 'vendor/mediapipe/wasm';
 const LOCAL_MODEL = 'vendor/mediapipe/pose_landmarker_lite.task';
 
@@ -114,9 +115,12 @@ async function create() {
   if (typeof WebAssembly !== 'object' || typeof document === 'undefined') throw poseError('unsupported');
   muteMediapipeTelemetry();
   let vision;
-  try { vision = await import(VISION_URL); } catch {
-    await sleep(800);
-    try { vision = await import(`${VISION_URL}?retry=1`); } catch (e) { throw poseError('load', e); }
+  try { vision = await import(localUrl(LOCAL_VISION)); } catch { /* use the CDN copy */ }
+  if (!vision) {
+    try { vision = await import(VISION_URL); } catch {
+      await sleep(800);
+      try { vision = await import(`${VISION_URL}?retry=1`); } catch (e) { throw poseError('load', e); }
+    }
   }
   const local = localUrl(LOCAL_WASM);
   const wasmBase = (await exists(`${local}/vision_wasm_internal.wasm`)) ? local : CDN_WASM;
