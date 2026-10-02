@@ -227,6 +227,18 @@ export function imageQuality(source, width, height) {
   return { brightness, sharpness, width, height, ...assessQuality({ brightness, sharpness, width, height }) };
 }
 
+/** Mean luma (0–255) of a video frame, from a 32×24 copy; cheap enough to run every second. */
+let lumaCanvas = null;
+export function sampleLuma(source) {
+  try {
+    if (!lumaCanvas) { lumaCanvas = document.createElement('canvas'); lumaCanvas.width = 32; lumaCanvas.height = 24; }
+    const ctx = lumaCanvas.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(source, 0, 0, 32, 24);
+    const { data } = ctx.getImageData(0, 0, 32, 24);
+    return meanOf(grayscale(data, 32, 24));
+  } catch { return NaN; }
+}
+
 /* ---------- recorded video ---------- */
 /** Waits for one of the events (or the timeout). Resolves with the event name, or 'timeout'. */
 export function onceEvent(target, names, timeoutMs = 8000) {

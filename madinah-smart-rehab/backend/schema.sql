@@ -5,7 +5,7 @@
 --     pathways are new rows, not new code.
 --   * Every clinical value carries when, who and source (patient / clinician / camera / phone).
 --   * Nothing is ever deleted silently: changes go through audit_log; clinical decisions are rows.
---   * Names follow HL7 FHIR concepts in comments so a future integration (NPHIES, Raqeem) maps cleanly.
+--   * Names follow HL7 FHIR concepts in comments so a future integration (e.g. NPHIES) maps cleanly.
 --   * Host inside the Kingdom; enable row-level security (RLS) so a patient reads only their rows,
 --     a physiotherapist only their caseload, management only aggregates (views at the end).
 
@@ -36,7 +36,7 @@ create table patient (                        -- FHIR Patient (minimum necessary
   id uuid primary key default gen_random_uuid(),
   user_id uuid unique references app_user(id),
   facility_id uuid not null references facility(id),
-  mrn text not null,                           -- reference to the official record (Raqeem); text only, no link
+  mrn text not null,                           -- reference to the official medical record; text only, no link
   sex text check (sex in ('M', 'F')),
   birth_year int,
   primary_pt_id uuid references app_user(id),

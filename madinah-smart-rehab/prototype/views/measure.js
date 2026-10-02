@@ -3,17 +3,19 @@
 // Every number here is for follow-up, never for a decision: the in-clinic measurement is the
 // reference. Photos and video stay on the device; only numbers are saved to the record.
 import { html, useEffect, useRef, useState } from '../lib/h.js';
-import { Icon, Gauge, Modal, Pill, toast } from '../lib/ui.js';
+import { Icon, Gauge, Modal, Pill, Ring, toast } from '../lib/ui.js';
 import { dispatch, useStore, patientById } from '../lib/store.js';
-import { postOpDay, latest, lastWhere, SIDE_AR } from '../lib/engine.js';
+import { postOpDay, latest, lastWhere, readyForNext, SIDE_AR } from '../lib/engine.js';
 import { relDay } from '../lib/util.js';
 import { LineChart, Sparkline } from '../lib/charts.js';
 import {
-  loadPose, poseLoaded, createAnalyzer, flexionFromPoints, fppaFromPoints, pickLeg, median, LEG, POSE_LINKS, otherSide,
+  loadPose, poseLoaded, createAnalyzer, flexionFromPoints, fppaFromPoints, pickLeg, median, LEG, POSE_LINKS, otherSide, kneeFlexion, fppa,
 } from '../lib/pose.js';
+import { assessFrame, createCoach, createVoice, COACH_SPEECH, uprightError, rateReps, scoreConfidence, CONF_AR, REP_Q_AR, arabicCount, flexTarget } from '../lib/coach.js';
+import { Guide, GuideFigure } from '../lib/guides.js';
 import {
   cssVar, openCamera, stopStream, cameraBlockedByPolicy, videoReady, requestMotionPermission, watchOrientation,
-  decodeImage, toCanvas, imageQuality, onceEvent, seekTo, videoDuration,
+  decodeImage, toCanvas, imageQuality, onceEvent, seekTo, videoDuration, sampleLuma,
 } from '../lib/sensors.js';
 
 const FOLLOW_UP = 'للمتابعة وليس للقرار — القياس الحضوري هو المرجع';
@@ -53,10 +55,6 @@ function FileButton({ id, accept, capture, label, icon = 'camera', primary, onFi
 
 function Stat({ id, label, children, live }) {
   return html`<div class="stat" id=${id} aria-live=${live ? 'polite' : undefined}><span class="label">${label}</span><span class="value num">${children}</span></div>`;
-}
-
-function Tips({ items }) {
-  return html`<ul class="mx-tips">${items.map((t) => html`<li>${t}</li>`)}</ul>`;
 }
 
 /** Box with the media's aspect ratio, capped in height so phones keep the controls in view. */
@@ -227,10 +225,6 @@ function makeDemoLeg({ flex = 95, thigh, prop } = {}) {
 }
 
 /* ---------- photo goniometer ---------- */
-const PHOTO_TIPS = {
-  side: ['صوّر من الجانب', 'الجوال بمستوى الركبة', 'الساق كاملة ظاهرة', 'ملابس ضيقة أو شورت'],
-  front: ['صوّر من الأمام', 'الجوال بمستوى الركبة', 'الساقان ظاهرتان من الورك للقدم', 'ملابس ضيقة أو شورت'],
-};
 const PHOTO_LABEL = { flex: 'ثني الركبة', ext: 'نقص الفرد', lag: 'انثناء الركبة والساق مرفوعة', depth: 'عمق القرفصاء', fppa: 'ميل الركبة للداخل' };
 
 function PhotoResult({ idp, measure, value }) {
@@ -392,7 +386,7 @@ function PhotoTool({ idp, side = 'R', measure = 'flex', measures, onMeasure, onR
   const nextName = ['الورك', 'الركبة', 'الكاحل'][pts.length];
   return html`<div class="stack" id=${`${idp}-photo`}>
     ${measures ? html`<${MxSeg} id=${`${idp}-photo-type`} label="نوع القياس" options=${measures} value=${measure} onChange=${(m) => { onMeasure(m); setSavedKey(null); }} />` : null}
-    ${compact ? null : html`<${Tips} items=${PHOTO_TIPS[view]} />`}
+    ${compact ? null : html`<${Guide} id=${measure === 'fppa' ? 'valgusFront' : measure === 'ext' ? 'extProp' : measure === 'lag' ? 'slr' : measure === 'depth' ? 'squatSide' : 'flexSide'} extra="التقط الصورة ثم اضغط على الورك والركبة والكاحل بالترتيب، أو اترك المنصة تقترح النقاط." />`}
     <div class="row">
       <${FileButton} id=${`${idp}-photo-file`} accept="image/*" capture="environment" label=${img ? 'صورة ثانية' : 'التقط صورة'} icon="camera" primary=${!img} onFile=${onFile} />
       ${DEMO[measure] ? html`<button type="button" class="btn btn-ghost btn-sm" id=${`${idp}-photo-demo`} onClick=${() => take(makeDemoLeg(DEMO[measure]), DEMO[measure].flex)}><${Icon} name="image" size=${16} />صورة توضيحية</button>` : null}
@@ -423,15 +417,16 @@ function PhotoTool({ idp, side = 'R', measure = 'flex', measures, onMeasure, onR
 function SessionStats({ idp, kind, s, frame }) {
   const f = frame && frame.visible ? frame : null;
   const count = s ? s.count : 0;
+  const best = s && fin(s.heldMax) && s.heldMax > 0 ? s.heldMax : s && s.maxFlex;
   let items;
   if (kind === 'slr') {
     items = [['ثني الركبة الآن', html`<${Deg} v=${f && f.knee} />`], ['رفع الساق', html`<${Deg} v=${f && f.hip} />`], ['تأخر الفرد', html`<${Deg} v=${s && s.lag} />`], ['مرات الرفع', count]];
   } else if (kind === 'valgus') {
     items = [['ميل الركبة الآن', html`<${Deg} v=${f && f.fppa} signed />`], ['أعلى ميل', html`<${Deg} v=${s && s.fppaPeak} signed />`], ['متوسط الميل', html`<${Deg} v=${s && s.fppa} signed />`], ['التكرارات', count]];
   } else if (kind === 'squat') {
-    items = [['الزاوية الآن', html`<${Deg} v=${f && f.knee} />`], ['أعمق نزول', html`<${Deg} v=${s && s.maxFlex} />`], ['متوسط العمق', html`<${Deg} v=${s && s.avgDepth} />`], ['التكرارات', count]];
+    items = [['الزاوية الآن', html`<${Deg} v=${f && f.knee} />`], ['أعمق نزول', html`<${Deg} v=${best} />`], ['متوسط العمق', html`<${Deg} v=${s && s.avgDepth} />`], ['التكرارات', count]];
   } else {
-    items = [['الزاوية الآن', html`<${Deg} v=${f && f.knee} />`], ['أعلى ثني', html`<${Deg} v=${s && s.maxFlex} />`], ['أفضل فرد', s && fin(s.extDeficit) ? html`<span class="ltr">${degTxt(s.extDeficit)}</span>` : '—'], ['التكرارات', count]];
+    items = [['الزاوية الآن', html`<${Deg} v=${f && f.knee} />`], ['أعلى ثني مثبّت', html`<${Deg} v=${best} />`], ['أفضل فرد', s && fin(s.extDeficit) ? html`<span class="ltr">${degTxt(s.extDeficit)}</span>` : '—'], ['التكرارات', count]];
   }
   return html`<div class="mx-stats" id=${`${idp}-stats`}>
     ${items.map(([label, val], i) => html`<${Stat} id=${`${idp}-stat-${i}`} label=${label} live=${i === 3}>${val}</${Stat}>`)}
@@ -455,38 +450,109 @@ function LegPicker({ id, side, value, onChange, disabled }) {
     <${MxSeg} id=${id} label="الساق المقاسة" options=${opts} value=${value} onChange=${onChange} disabled=${disabled} /></div>`;
 }
 
-function paintOverlay(canvas, lm, frame, { side, mirror, skeletonOnly, colors, kind, w, h, video }) {
+/** Per-rep bars (height = peak against the target), colored by quality. */
+function RepStrip({ reps, target, max = 150 }) {
+  if (!reps || !reps.length) return null;
+  const top = Math.max(max, target || 0, ...reps.map((r) => r.peak || 0));
+  const style = fin(target) ? `--target-y:${Math.round(100 - (target / top) * 100)}%` : '';
+  return html`<div class="stack-sm" style="gap:4px">
+    <div class=${`rep-strip ${fin(target) ? 'rep-strip-target' : ''}`} style=${style} role="img" aria-label=${`${reps.length} تكرارات`}>
+      ${reps.map((r, i) => html`<span key=${i} data-q=${r.q} style=${`height:${Math.max(6, Math.round((r.peak / top) * 100))}%`} title=${`تكرار ${i + 1}: ${degTxt(r.peak)}${fin(r.dur) ? ` · ${r.dur.toFixed(1)} ث` : ''} · ${REP_Q_AR[r.q]}`}></span>`)}
+    </div>
+    <div class="row small muted" style="gap:10px">
+      <span><span class="dot" style="background:var(--accent)"></span> كاملة ${reps.filter((r) => r.q === 'full').length}</span>
+      ${reps.some((r) => r.q === 'low') ? html`<span><span class="dot" style="background:var(--warn-mark)"></span> قصيرة ${reps.filter((r) => r.q === 'low').length}</span>` : null}
+      ${reps.some((r) => r.q === 'fast') ? html`<span><span class="dot" style="background:var(--series-2)"></span> سريعة ${reps.filter((r) => r.q === 'fast').length}</span>` : null}
+      ${fin(target) ? html`<span>الخط المتقطع: الهدف ${iso(`${Math.round(target)}°`)}</span>` : null}
+    </div>
+  </div>`;
+}
+
+function Confidence({ q, frames }) {
+  if (!q) return null;
+  const c = scoreConfidence({ ...q, frames });
+  return html`<div class="stack-sm" style="gap:4px">
+    <span class="quality" data-level=${c.level} title=${`${c.score}/100`}><${Icon} name=${c.level === 'high' ? 'check' : 'info'} size=${14} stroke=${2.2} />${CONF_AR[c.level]} · ${c.score}/100</span>
+    ${c.reasons.length ? html`<ul class="mx-tips">${c.reasons.map((r, i) => html`<li key=${i}>${r}</li>`)}</ul>` : null}
+  </div>`;
+}
+
+/** Dashed target line + arc at the knee: where the shank needs to reach for the goal angle. */
+function drawTarget(ctx, lm, w, h, { side, mirror, target, s, colors }) {
+  const l = LEG[side] || LEG.R;
+  const P = (i) => { const p = lm[i]; return p ? { x: (mirror ? 1 - p.x : p.x) * w, y: p.y * h } : null; };
+  const H = P(l.hip); const K = P(l.knee); const A = P(l.ankle);
+  if (!H || !K || !A) return;
+  const tx = K.x - H.x; const ty = K.y - H.y; const lt = Math.hypot(tx, ty) || 1;
+  const ux = tx / lt; const uy = ty / lt; // thigh direction, hip → knee
+  const len = Math.max(40 * s, Math.hypot(A.x - K.x, A.y - K.y));
+  // bend toward the side the real shank is on
+  const cross = ux * (A.y - K.y) - uy * (A.x - K.x);
+  const sign = cross >= 0 ? 1 : -1;
+  const a = (target * Math.PI) / 180;
+  const cos = Math.cos(a); const sin = Math.sin(a) * sign;
+  const dx = ux * cos - uy * sin; const dy = ux * sin + uy * cos; // thigh direction rotated by target
+  const E = { x: K.x + dx * len, y: K.y + dy * len };
+  ctx.save();
+  ctx.setLineDash([7 * s, 6 * s]);
+  haloLine(ctx, K, E, colors.brass, 3 * s);
+  ctx.setLineDash([]);
+  const a0 = Math.atan2(uy, ux); const r = 34 * s;
+  ctx.beginPath(); ctx.arc(K.x, K.y, r, a0, a0 + a * sign, sign < 0);
+  ctx.strokeStyle = colors.brass; ctx.lineWidth = 2 * s; ctx.stroke();
+  textTag(ctx, `${Math.round(target)}°`, E.x, E.y - 14 * s, { size: 12 * s, font: colors.font, bg: 'rgba(166,118,28,0.9)' });
+  ctx.restore();
+}
+
+function paintOverlay(canvas, lm, frame, { side, mirror, skeletonOnly, colors, kind, w, h, video, target, hit }) {
   if (canvas.width !== w) canvas.width = w;
   if (canvas.height !== h) canvas.height = h;
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, w, h);
   if (skeletonOnly) { ctx.fillStyle = '#0b1114'; ctx.fillRect(0, 0, w, h); } else if (video) ctx.drawImage(video, 0, 0, w, h);
   const label = frame && frame.visible ? (kind === 'valgus' ? signedTxt(frame.fppa) : degTxt(frame.knee)) : '';
-  drawSkeleton(ctx, lm, w, h, { side, mirror, colors, label });
+  if (lm && fin(target) && (kind === 'rom' || kind === 'squat')) drawTarget(ctx, lm, w, h, { side, mirror, target, s: Math.max(1, Math.min(w, h) / 360), colors });
+  drawSkeleton(ctx, lm, w, h, { side, mirror, colors: hit ? { ...colors, op: colors.accent } : colors, label });
 }
 
-function LiveTool({ idp, side: opSide = 'R', kind = 'rom', onResult, onSave, onFallback, maxH = '56vh', compact }) {
+const COUNTDOWN_FROM = 3;
+
+function LiveTool({ idp, side: opSide = 'R', kind = 'rom', onResult, onSave, onFallback, maxH = '56vh', compact, target, guide }) {
   const [status, setStatus] = useState('idle'); // idle | starting | running | stopped | error
+  const [phase, setPhase] = useState('aim'); // while running: aim (coaching only) | count | rec
+  const [count, setCount] = useState(0);
+  const [coach, setCoach] = useState(null); // { code, text, tone, ok, ready }
   const [err, setErr] = useState(null);
   const [facing, setFacing] = useState('user');
   const [skeleton, setSkeleton] = useState(false);
+  const [voiceOn, setVoiceOn] = useState(true);
+  const [auto, setAuto] = useState(true);
   const [legSide, setLegSide] = useState(opSide);
   const [read, setRead] = useState(null); // { s, f }
   const [dims, setDims] = useState({ w: 640, h: 480 });
   const [slow, setSlow] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [flash, setFlash] = useState(0);
   const [blocked] = useState(() => cameraBlockedByPolicy());
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const run = useRef({ token: 0, stream: null, raf: 0, pose: null, analyzer: null, lastTime: -1, lastUi: 0, colors: null, errors: 0 });
+  const run = useRef({
+    token: 0, stream: null, raf: 0, pose: null, analyzer: null, coach: null, voice: null, lastTime: -1, lastUi: 0, colors: null, errors: 0,
+    luma: NaN, lumaAt: 0, tilt: NaN, stopTilt: null, phase: 'aim', countTimer: 0, coachCode: null, coachUiAt: 0, coachSpokenAt: 0, hitSpokenRep: -1,
+  });
   const opts = useRef({});
-  opts.current = { skeleton, facing, legSide, kind, onResult };
+  opts.current = { skeleton, facing, legSide, kind, onResult, auto, target };
+  if (!run.current.voice) run.current.voice = createVoice();
+  run.current.voice.enabled = voiceOn;
 
   const halt = () => {
     const r = run.current;
     r.token += 1;
     cancelAnimationFrame(r.raf); r.raf = 0;
+    clearInterval(r.countTimer); r.countTimer = 0;
     stopStream(r.stream); r.stream = null;
+    if (r.stopTilt) { r.stopTilt(); r.stopTilt = null; }
+    r.voice.stop();
     if (videoRef.current) videoRef.current.srcObject = null;
   };
   useEffect(() => halt, []);
@@ -501,11 +567,42 @@ function LiveTool({ idp, side: opSide = 'R', kind = 'rom', onResult, onSave, onF
     if (opts.current.onResult) opts.current.onResult({ method: 'live', ...s });
   };
 
+  const setPhaseBoth = (p) => { run.current.phase = p; setPhase(p); };
+  const startRecording = () => {
+    const r = run.current;
+    clearInterval(r.countTimer); r.countTimer = 0;
+    r.analyzer = createAnalyzer({ kind: opts.current.kind, side: opts.current.legSide });
+    r.hitSpokenRep = -1;
+    setRead(null); setSaved(false);
+    setPhaseBoth('rec');
+    r.voice.say('ابدأ', { force: true, interrupt: true });
+  };
+  const beginCountdown = () => {
+    const r = run.current;
+    if (r.phase !== 'aim') return;
+    setPhaseBoth('count');
+    let n = COUNTDOWN_FROM;
+    setCount(n);
+    r.voice.say(arabicCount(n), { force: true, interrupt: true });
+    r.countTimer = setInterval(() => {
+      n -= 1;
+      if (n <= 0) { startRecording(); return; }
+      setCount(n);
+      r.voice.say(arabicCount(n), { force: true, interrupt: true });
+    }, 1000);
+  };
+  const cancelCountdown = () => {
+    const r = run.current;
+    clearInterval(r.countTimer); r.countTimer = 0;
+    setPhaseBoth('aim');
+  };
+
   const start = async (face = facing) => {
     halt();
     const r = run.current;
     const token = r.token;
-    setErr(null); setStatus('starting'); setSlow(false); setSaved(false);
+    setErr(null); setStatus('starting'); setSlow(false); setSaved(false); setCoach(null); setRead(null);
+    setPhaseBoth('aim');
     const slowTimer = setTimeout(() => { if (run.current.token === token) setSlow(true); }, 6000);
     const [cam, model] = await Promise.allSettled([openCamera(face), loadPose('VIDEO')]);
     clearTimeout(slowTimer);
@@ -516,16 +613,20 @@ function LiveTool({ idp, side: opSide = 'R', kind = 'rom', onResult, onSave, onF
     const v = videoRef.current;
     if (!v) { stopStream(cam.value); setStatus('idle'); return; }
     r.stream = cam.value; r.pose = model.value;
-    // camera unplugged or permission withdrawn mid-session: keep the numbers, stop cleanly
     r.stream.getVideoTracks().forEach((t) => t.addEventListener('ended', () => { if (token === run.current.token) { publish(true); halt(); setStatus('stopped'); } }));
     v.setAttribute('playsinline', ''); v.muted = true; v.srcObject = r.stream;
     try { await v.play(); } catch { /* autoplay muted is allowed; keep going */ }
     await videoReady(v);
     if (token !== r.token) return;
     setDims({ w: v.videoWidth || 640, h: v.videoHeight || 480 });
-    r.analyzer = createAnalyzer({ kind, side: opts.current.legSide });
-    r.colors = themeColors(); r.lastTime = -1; r.errors = 0;
-    setRead(null); setStatus('running');
+    r.analyzer = null;
+    r.coach = createCoach({ holdMs: 1500 });
+    r.colors = { ...themeColors(), brass: cssVar('--brass', '#A6761C') };
+    r.lastTime = -1; r.errors = 0; r.luma = NaN; r.lumaAt = 0; r.tilt = NaN; r.coachCode = null; r.coachSpokenAt = 0;
+    // phone tilt, where the browser hands it over without a permission prompt (never asks on iOS)
+    r.stopTilt = watchOrientation({ timeoutMs: 2500, onReading: ({ beta, gamma }) => { r.tilt = uprightError(beta, gamma); }, onNoSensor: () => { r.tilt = NaN; } });
+    setStatus('running');
+    r.voice.say('ثبّت الجوال وابتعد حتى تظهر الساق كاملة', { force: true });
     const loop = () => {
       if (token !== run.current.token) return;
       r.raf = requestAnimationFrame(loop);
@@ -540,29 +641,59 @@ function LiveTool({ idp, side: opSide = 'R', kind = 'rom', onResult, onSave, onF
         return;
       }
       const o = opts.current;
-      const frame = r.analyzer.push(lm, v.videoWidth, v.videoHeight, now);
-      paintOverlay(c, lm, frame, { side: o.legSide, mirror: o.facing === 'user', skeletonOnly: o.skeleton, colors: r.colors, kind: o.kind, w: v.videoWidth, h: v.videoHeight });
-      publish(false);
+      const W = v.videoWidth; const H = v.videoHeight;
+      if (now - r.lumaAt > 1000) { r.luma = sampleLuma(v); r.lumaAt = now; }
+      const a = assessFrame({ lm, world: lm && lm.world, w: W, h: H, side: o.legSide, view: o.kind === 'valgus' ? 'front' : 'side', luma: r.luma, tilt: r.tilt });
+      const cs = r.coach.push(a, now);
+      if (cs.code !== r.coachCode || now - r.coachUiAt > 400) { r.coachCode = cs.code; r.coachUiAt = now; setCoach(cs); }
+      if (!cs.ok && r.phase !== 'count' && now - r.coachSpokenAt > 4500) { if (r.voice.say(COACH_SPEECH[cs.code])) r.coachSpokenAt = now; }
+      let frame;
+      if (r.phase === 'rec') {
+        frame = r.analyzer.push(lm, W, H, now);
+        if (frame.counted) {
+          setFlash(now);
+          r.voice.say(arabicCount(frame.count), { force: true, interrupt: true });
+        } else if (fin(o.target) && frame.visible && fin(frame.knee) && frame.knee >= o.target && r.hitSpokenRep !== frame.count) {
+          r.hitSpokenRep = frame.count;
+          r.voice.say('ممتاز، وصلت الهدف', { force: true });
+        }
+      } else {
+        if (r.phase === 'count' && !cs.ok) cancelCountdown();
+        if (r.phase === 'aim' && cs.ready && o.auto) beginCountdown();
+        const knee = lm && a.code !== 'none' && a.code !== 'leg' ? (o.kind === 'valgus' ? fppa(lm, o.legSide, W, H) : kneeFlexion(lm, o.legSide, W, H)) : NaN;
+        frame = { visible: fin(knee), knee: o.kind === 'valgus' ? NaN : knee, fppa: o.kind === 'valgus' ? knee : NaN, count: 0 };
+        if (now - r.lastUi > 125) { r.lastUi = now; setRead((x) => ({ s: x && x.s, f: frame })); }
+      }
+      const hit = fin(o.target) && frame && frame.visible && fin(frame.knee) && frame.knee >= o.target - 1;
+      paintOverlay(c, lm, frame, { side: o.legSide, mirror: o.facing === 'user', skeletonOnly: o.skeleton, colors: r.colors, kind: o.kind, w: W, h: H, target: o.target, hit });
+      if (r.phase === 'rec') publish(false);
     };
     r.raf = requestAnimationFrame(loop);
   };
-  const stop = () => { publish(true); halt(); setStatus('stopped'); };
+  const stop = () => {
+    const r = run.current;
+    if (r.phase === 'rec') publish(true);
+    const s = r.analyzer && r.analyzer.summary();
+    halt();
+    setStatus('stopped');
+    if (s && s.used && (s.count || fin(s.heldMax))) r.voice.say(s.count ? `انتهت الجلسة، ${arabicCount(s.count)} تكرارات` : 'انتهت الجلسة', { force: true });
+  };
   const resetSession = () => {
     const r = run.current;
-    r.analyzer = createAnalyzer({ kind, side: legSide });
+    if (status === 'running') { clearInterval(r.countTimer); r.countTimer = 0; r.analyzer = null; setPhaseBoth('aim'); if (r.coach) r.coach.reset(); }
     setRead(null); setSaved(false);
   };
   const changeLeg = (s) => {
     setLegSide(s);
     opts.current.legSide = s;
-    if (run.current.analyzer) { run.current.analyzer = createAnalyzer({ kind, side: s }); setRead(null); setSaved(false); }
+    const r = run.current;
+    if (r.analyzer) { r.analyzer = createAnalyzer({ kind, side: s }); setRead(null); setSaved(false); }
   };
   const changeFacing = (f) => { setFacing(f); if (status === 'running' || status === 'starting') start(f); };
 
   const s = read && read.s;
   const f = read && read.f;
   const running = status === 'running';
-  const flag = running && f && !f.visible ? (f.reason === 'none' ? 'لا يظهر أحد في الكاميرا — ابتعد قليلًا حتى يظهر جسمك' : 'تأكد أن الساق كاملة ظاهرة') : '';
   const note = sessionNote(kind, s);
   const canSave = s && s.used > 0 && !saved && (fin(s.maxFlex) || fin(s.extDeficit) || s.count > 0);
   const saveNow = () => {
@@ -571,15 +702,22 @@ function LiveTool({ idp, side: opSide = 'R', kind = 'rom', onResult, onSave, onF
     onSave(final, 'camera');
     setSaved(true);
   };
+  const reps = s ? rateReps(s.reps, { target: kind === 'rom' || kind === 'squat' ? target : undefined, minDur: kind === 'slr' ? 1 : 1.2 }) : [];
+  const hit = fin(target) && f && f.visible && fin(f.knee) && f.knee >= target - 1;
+  const angleLabel = kind === 'valgus' ? 'ميل الركبة' : kind === 'slr' ? 'ثني الركبة' : 'زاوية الركبة';
+  const voice = run.current.voice;
   return html`<div class="stack" id=${`${idp}-live`}>
-    ${compact ? null : html`<${Tips} items=${kind === 'valgus'
-      ? ['ثبّت الجوال أمامك بمستوى الركبة', 'ابتعد حتى يظهر جسمك من الورك للقدم', 'إضاءة جيدة وملابس ضيقة']
-      : ['ثبّت الجوال على جانبك بمستوى الركبة', 'ابتعد حتى تظهر الساق كاملة من الورك للكاحل', 'إضاءة جيدة وملابس ضيقة أو شورت']} />`}
-    <div class="row">
+    ${compact ? null : html`<${Guide} id=${guide || (kind === 'valgus' ? 'valgusFront' : kind === 'squat' ? 'squatSide' : kind === 'slr' ? 'slr' : 'flexSide')} />`}
+    ${compact ? null : html`<p class="small muted">الكاميرا تدرّبك بنفسها: تخبرك إذا كان الجوال بعيدًا أو مايلًا أو الإضاءة ضعيفة، وتبدأ العد تلقائيًا عندما يصبح الوضع صحيحًا${voice.available ? '، وتعدّ التكرارات بصوت عربي' : ''}.</p>`}
+    <div class="live-controls">
       ${running || status === 'starting'
         ? html`<button type="button" class="btn" id=${`${idp}-live-stop`} onClick=${stop}><${Icon} name="x" size=${16} />إيقاف</button>`
         : html`<button type="button" class="btn btn-primary" id=${`${idp}-live-start`} onClick=${() => start()}><${Icon} name="camera" size=${16} />${status === 'stopped' ? 'تشغيل من جديد' : 'تشغيل الكاميرا'}</button>`}
+      ${running && phase === 'aim' ? html`<button type="button" class="btn btn-ok" id=${`${idp}-live-go`} onClick=${startRecording}><${Icon} name="play" size=${16} fill=${true} />ابدأ الآن</button>` : null}
+      ${running && phase === 'count' ? html`<button type="button" class="btn btn-ghost" onClick=${cancelCountdown}>إلغاء العد</button>` : null}
       <${MxSeg} id=${`${idp}-live-facing`} label="الكاميرا" options=${[{ id: 'user', label: 'أمامية' }, { id: 'environment', label: 'خلفية' }]} value=${facing} onChange=${changeFacing} />
+      ${voice.available ? html`<button type="button" class="btn btn-sm toggle-btn" id=${`${idp}-live-voice`} aria-pressed=${String(voiceOn)} onClick=${() => setVoiceOn(!voiceOn)} title="الإرشاد الصوتي"><${Icon} name="speaker" size=${16} />${voiceOn ? 'الصوت مفعّل' : 'الصوت متوقف'}</button>` : null}
+      <button type="button" class="btn btn-sm toggle-btn" id=${`${idp}-live-auto`} aria-pressed=${String(auto)} onClick=${() => setAuto(!auto)} title="يبدأ العد بنفسه عندما يصبح الوضع صحيحًا"><${Icon} name="bolt" size=${16} />بدء تلقائي</button>
     </div>
     <label class="mx-check" for=${`${idp}-live-skeleton`}>
       <input type="checkbox" id=${`${idp}-live-skeleton`} checked=${skeleton} onChange=${(e) => setSkeleton(e.currentTarget.checked)} />
@@ -597,15 +735,27 @@ function LiveTool({ idp, side: opSide = 'R', kind = 'rom', onResult, onSave, onF
       ? html`<${StageBox} w=${dims.w} h=${dims.h} maxH=${maxH} className=${skeleton ? 'mx-skeleton' : ''}>
           <video ref=${videoRef} id=${`${idp}-live-video`} class=${facing === 'user' ? 'mx-mirror' : ''} muted playsinline autoplay aria-hidden="true"></video>
           <canvas ref=${canvasRef} id=${`${idp}-live-canvas`} role="img" aria-label="هيكل الجسم وزاوية الركبة"></canvas>
-          ${flag ? html`<div class="mx-flag" role="status" id=${`${idp}-live-flag`}><${Icon} name="alert" size=${16} />${flag}</div>` : null}
+          ${running ? html`<div class="hud" aria-hidden="true">
+            <div class="hud-top">${coach ? html`<div class="hud-coach" data-tone=${phase === 'rec' && coach.ok ? 'rec' : coach.tone} id=${`${idp}-live-coach`}>
+              ${phase === 'rec' && coach.ok ? html`<span class="rec-dot"></span>يسجّل… استمر` : phase === 'aim' && coach.ok ? (auto ? 'الوضع ممتاز — يبدأ العد خلال لحظات' : 'الوضع ممتاز — اضغط «ابدأ الآن»') : coach.text}
+            </div>` : null}</div>
+            <div class="hud-mid">${phase === 'count' ? html`<div class="hud-count" key=${count}>${count}</div>` : null}</div>
+            <div class="hud-bottom">
+              <div class="hud-angle"><span class=${`v ${hit ? 'hit' : ''}`}>${kind === 'valgus' ? signedTxt(f && f.fppa) : degTxt(f && f.knee)}</span><span class="l">${angleLabel}${fin(target) && kind !== 'valgus' ? ` · الهدف ${Math.round(target)}°` : ''}</span></div>
+              ${phase === 'rec' ? html`<div class="hud-reps"><${Ring} value=${Math.min(100, ((s && s.count) || 0) * 10)} size=${64} stroke=${7}><span class="ring-num">${(s && s.count) || 0}</span><span class="ring-cap">تكرار</span><//></div>` : null}
+            </div>
+          </div>` : null}
+          ${flash ? html`<div class="hud-flash" key=${flash}></div>` : null}
         </${StageBox}>`
       : html`<${Empty} icon="camera" text=${status === 'stopped' ? 'توقفت الكاميرا. النتائج محفوظة أدناه حتى تحفظها أو تبدأ من جديد.' : 'شغّل الكاميرا، وضع الجوال بمستوى الركبة.'} />`}
     <p class="small muted row" style="gap:6px"><${Icon} name="shield" size=${16} />${ON_DEVICE}</p>
     ${running || s ? html`<${SessionStats} idp=${`${idp}-live`} kind=${kind} s=${s} frame=${running ? f : null} />` : null}
+    ${s && s.used && (kind === 'rom' || kind === 'squat' || kind === 'slr') && reps.length ? html`<${RepStrip} reps=${reps} target=${kind === 'slr' ? undefined : target} max=${kind === 'slr' ? 90 : 150} />` : null}
+    ${status === 'stopped' && s && s.used ? html`<${Confidence} q=${s.quality} frames=${s.frames} />` : null}
     ${running || s ? html`<${LegPicker} id=${`${idp}-live-leg`} side=${opSide} value=${legSide} onChange=${changeLeg} />` : null}
     ${note ? html`<div class=${`note note-${note.tone}`}>${note.text}</div>` : null}
     ${running || s ? html`<div class="row">
-      <button type="button" class="btn btn-sm btn-ghost" id=${`${idp}-live-reset`} onClick=${resetSession}><${Icon} name="refresh" size=${16} />تصفير العداد</button>
+      <button type="button" class="btn btn-sm btn-ghost" id=${`${idp}-live-reset`} onClick=${resetSession}><${Icon} name="refresh" size=${16} />تصفير الجلسة</button>
       ${onSave ? html`<button type="button" class="btn btn-primary btn-sm" id=${`${idp}-live-save`} disabled=${!canSave}
         onClick=${saveNow}>${saved ? 'تم الحفظ' : running ? 'إيقاف وحفظ' : 'حفظ الجلسة'}</button>` : null}
     </div>` : null}
@@ -625,7 +775,7 @@ function VideoChart({ kind, series, duration }) {
     unit="°" xFormat=${(x) => `${x}ث`} yFormat=${(y) => Math.round(y)} label=${kind === 'valgus' ? 'ميل الركبة خلال الفيديو' : 'زاوية الركبة خلال الفيديو'} xTitle="الثانية" />`;
 }
 
-function VideoTool({ idp, side: opSide = 'R', kind = 'rom', onResult, onSave, maxH = '56vh', compact }) {
+function VideoTool({ idp, side: opSide = 'R', kind = 'rom', onResult, onSave, maxH = '56vh', compact, target }) {
   const [status, setStatus] = useState('idle'); // idle | opening | loading | analyzing | done | error
   const [err, setErr] = useState('');
   const [progress, setProgress] = useState(0);
@@ -719,9 +869,7 @@ function VideoTool({ idp, side: opSide = 'R', kind = 'rom', onResult, onSave, ma
   const busy = status === 'opening' || status === 'loading' || status === 'analyzing';
   const note = status === 'done' ? sessionNote(kind, sum) : null;
   return html`<div class="stack" id=${`${idp}-video`}>
-    ${compact ? html`<p class="small muted">10–30 ثانية تكفي (نحلل أول 90 ثانية).</p>` : html`<${Tips} items=${kind === 'valgus'
-      ? ['صوّر من الأمام والجوال بمستوى الركبة', 'الجسم ظاهر من الورك للقدم', '10–30 ثانية تكفي']
-      : ['صوّر من الجانب والجوال ثابت بمستوى الركبة', 'الساق كاملة ظاهرة طوال الفيديو', '10–30 ثانية تكفي (نحلل أول 90 ثانية)']} />`}
+    ${compact ? html`<p class="small muted">10–30 ثانية تكفي (نحلل أول 90 ثانية).</p>` : html`<${Guide} id=${kind === 'valgus' ? 'valgusFront' : kind === 'squat' ? 'squatSide' : kind === 'slr' ? 'slr' : 'flexSide'} extra="سجّل 10–30 ثانية بكاميرا الجوال ثم اختر الفيديو هنا؛ نحلل أول 90 ثانية." />`}
     <div class="row">
       <${FileButton} id=${`${idp}-video-file`} accept="video/*" capture="environment" label=${hasFile ? 'فيديو ثاني' : 'سجّل أو اختر فيديو'} icon="video" primary=${!hasFile} onFile=${onFile} disabled=${busy} />
       ${busy ? html`<button type="button" class="btn btn-sm btn-ghost" id=${`${idp}-video-cancel`} onClick=${cancel}>إيقاف التحليل</button>` : null}
@@ -738,6 +886,8 @@ function VideoTool({ idp, side: opSide = 'R', kind = 'rom', onResult, onSave, ma
     ${status === 'done' || (status === 'error' && hasFile) ? html`<${LegPicker} id=${`${idp}-video-leg`} side=${opSide} value=${legSide} onChange=${(s2) => { setLegSide(s2); analyze(s2); }} />` : null}
     ${status === 'done' && sum ? html`<p class="small muted" id=${`${idp}-video-frames`}>إطارات ظهرت فيها الساق: <span class="ltr">${sum.used} / ${sum.frames}</span></p>` : null}
     ${status === 'done' ? html`<${VideoChart} kind=${kind} series=${series} duration=${duration} />` : null}
+    ${status === 'done' && sum && sum.used && kind !== 'valgus' && sum.reps && sum.reps.length ? html`<${RepStrip} reps=${rateReps(sum.reps, { target: kind === 'slr' ? undefined : target, minDur: kind === 'slr' ? 1 : 1.2 })} target=${kind === 'slr' ? undefined : target} max=${kind === 'slr' ? 90 : 150} />` : null}
+    ${status === 'done' && sum && sum.used ? html`<${Confidence} q=${sum.quality} frames=${sum.frames} />` : null}
     ${note ? html`<div class=${`note note-${note.tone}`}>${note.text}</div>` : null}
     <p class="small muted row" style="gap:6px"><${Icon} name="shield" size=${16} />${ON_DEVICE}</p>
     ${onSave && status === 'done' ? html`<button type="button" class="btn btn-primary btn-block" id=${`${idp}-video-save`} disabled=${saved}
@@ -808,8 +958,8 @@ function PhoneTool({ idp, measure = 'flex', measures, onMeasure, onResult, onSav
   const started = status !== 'idle';
   return html`<div class="stack" id=${`${idp}-phone`}>
     ${measures ? html`<${MxSeg} id=${`${idp}-phone-type`} label="نوع القياس" options=${measures} value=${measure} onChange=${(m) => { onMeasure(m); restart(m); }} />` : null}
-    <p class="small">ضع الجوال على مقدمة الفخذ وأعلاه نحو الركبة والشاشة للخارج، ثبّت القراءة، ثم كرر على الساق. <strong>الثني = ميل الفخذ + ميل الساق</strong>.</p>
-    ${measure === 'ext' ? html`<p class="small muted">للفرد: استلقِ والركبة مفرودة قدر ما تقدر، والكعب على لفافة.</p>` : null}
+    ${measures ? html`<${Guide} id=${measure === 'ext' ? 'extProp' : 'phoneLeg'} extra=${measure === 'ext' ? 'ضع الجوال على الفخذ ثم على الساق كما في القياس العادي؛ الفرد الكامل يقرأ قريبًا من الصفر.' : 'الثني = ميل الفخذ + ميل الساق.'} />`
+      : html`<p class="small">ضع الجوال على مقدمة الفخذ وأعلاه نحو الركبة والشاشة للخارج، ثبّت القراءة، ثم كرر على الساق. <strong>الثني = ميل الفخذ + ميل الساق</strong>.</p>`}
     <div class="row">
       <button type="button" class=${started ? 'btn' : 'btn btn-primary'} id=${`${idp}-phone-start`} onClick=${start}><${Icon} name="target" size=${16} />${started ? 'إعادة تشغيل المستشعر' : 'تشغيل المستشعر'}</button>
       ${isSim ? html`<${Pill} tone="gold" icon="info">محاكاة للعرض</${Pill}>` : null}
@@ -871,7 +1021,7 @@ function WoundTool({ patient }) {
   };
   const q = shot && shot.q;
   return html`<div class="stack" id="mx-wound">
-    <${Tips} items=${['إضاءة نهار وبدون فلاش قريب', 'الجوال على بعد 20–30 سم والجرح في منتصف الصورة', 'المس الشاشة على الجرح ليركّز ثم صوّر']} />
+    <${Guide} id="wound" />
     ${sent ? html`<div class="note note-ok stack-sm" role="status" id="mx-wound-sent">
         <strong>وصلت لأخصائيك — لا يوجد تشخيص آلي للصور</strong>
         <span class="small">يراجعها أخصائيك ويرد عليك في الرسائل.</span>
@@ -921,7 +1071,7 @@ function GirthTool({ patient }) {
     setOp(''); setOther('');
   };
   return html`<div class="stack" id="mx-girth">
-    <p class="small">قِس حول منتصف الرضفة بشريط القياس والساق مفرودة ومرتخية، وقِس الساقين بنفس الطريقة.</p>
+    <${Guide} id="girth" />
     <div class="grid-2" style="grid-template-columns:repeat(2,minmax(0,1fr))">
       <div class="field"><label for="mx-girth-op">الساق المصابة (سم)</label>
         <input class="input num" id="mx-girth-op" type="number" inputmode="decimal" step="0.1" min="20" max="90" placeholder="مثال 41.5" value=${op} onInput=${(e) => setOp(e.currentTarget.value)} /></div>
@@ -958,7 +1108,10 @@ function RomHistory({ patient }) {
     ${rows.length ? html`<div class="list">${rows.map((r) => html`<div class="list-row">
         <div class="grow stack-sm" style="gap:0"><span class="strong">${romText(r)}</span>
           <span class="small muted">اليوم ${r.day} بعد العملية · ${relDay(r.day - today)}</span></div>
-        <${Pill} tone=${r.source === 'clinic' ? 'info' : 'plain'} icon=${r.source === 'clinic' ? 'check' : undefined}>${SOURCE_AR[r.source] || r.source || '—'}${r.sim ? ' · محاكاة' : ''}</${Pill}>
+        <span class="stack-sm" style="gap:3px;align-items:flex-end">
+          <${Pill} tone=${r.source === 'clinic' ? 'info' : 'plain'} icon=${r.source === 'clinic' ? 'check' : undefined}>${SOURCE_AR[r.source] || r.source || '—'}${r.sim ? ' · محاكاة' : ''}</${Pill}>
+          ${r.conf ? html`<span class="quality" data-level=${r.conf} style="font-size:0.68rem;padding:1px 7px">${CONF_AR[r.conf]}</span>` : null}
+        </span>
       </div>`)}</div>` : html`<p class="small muted">لا توجد قياسات بعد.</p>`}
     <p class="small muted" style="margin-top:8px">القياس الحضوري هو المرجع؛ قياسات البيت تساعد على متابعة الاتجاه بين الزيارات.</p>
   </section>`;
@@ -966,19 +1119,19 @@ function RomHistory({ patient }) {
 
 /* ---------- hub ---------- */
 const TOOLS = [
-  { id: 'photo', icon: 'image', title: 'زاوية الركبة من صورة', sub: 'صورة جانبية وتحدد ثلاث نقاط' },
-  { id: 'live', icon: 'camera', title: 'الكاميرا المباشرة', sub: 'الزاوية وعدّ التكرارات وأنت تتمرن' },
-  { id: 'video', icon: 'video', title: 'تحليل فيديو مسجل', sub: 'سجّل التمرين بالجوال ونحلله هنا' },
-  { id: 'phone', icon: 'target', title: 'الجوال كمنقلة', sub: 'ضع الجوال على الفخذ ثم على الساق' },
-  { id: 'wound', icon: 'shield', title: 'صورة الجرح', sub: 'فحص جودة الصورة ثم إرسالها لأخصائيك' },
-  { id: 'girth', icon: 'knee', title: 'محيط الركبة', sub: 'متابعة التورم بشريط القياس' },
+  { id: 'live', icon: 'camera', guide: 'flexSide', title: 'الكاميرا الذكية', sub: 'تدرّبك على الوضع، وتبدأ بنفسها، وتعدّ التكرارات بصوتك' },
+  { id: 'photo', icon: 'image', guide: 'flexSide', title: 'زاوية الركبة من صورة', sub: 'صورة جانبية والمنصة تقترح النقاط' },
+  { id: 'video', icon: 'video', guide: 'squatSide', title: 'تحليل فيديو مسجل', sub: 'سجّل التمرين بالجوال ونحلله هنا' },
+  { id: 'phone', icon: 'target', guide: 'phoneLeg', title: 'الجوال كمنقلة', sub: 'ضع الجوال على الفخذ ثم على الساق' },
+  { id: 'wound', icon: 'shield', guide: 'wound', title: 'صورة الجرح', sub: 'فحص جودة الصورة ثم إرسالها لأخصائيك' },
+  { id: 'girth', icon: 'knee', guide: 'girth', title: 'محيط الركبة', sub: 'متابعة التورم بشريط القياس' },
 ];
 const FLEX_EXT = [{ id: 'flex', label: 'ثني' }, { id: 'ext', label: 'فرد' }];
 
 function ToolCard({ tool, open, onToggle, children }) {
   return html`<section class="card mx-tool" id=${`mx-tool-${tool.id}`}>
     <button type="button" class="mx-tool-head" id=${`mx-tool-${tool.id}-toggle`} aria-expanded=${String(open)} aria-controls=${`mx-tool-${tool.id}-body`} onClick=${onToggle}>
-      <span class="icon-tile" aria-hidden="true"><${Icon} name=${tool.icon} size=${20} /></span>
+      ${tool.guide ? html`<${GuideFigure} id=${tool.guide} thumb />` : html`<span class="icon-tile" aria-hidden="true"><${Icon} name=${tool.icon} size=${20} /></span>`}
       <span class="grow stack-sm" style="gap:0"><strong>${tool.title}</strong><span class="small muted">${tool.sub}</span></span>
       <span class="mx-chev" aria-hidden="true"><${Icon} name="forward" size=${18} /></span>
     </button>
@@ -992,13 +1145,15 @@ function LatestTile({ label, rec, text }) {
 }
 
 export function MeasureHub({ patient }) {
-  useStore();
+  const state = useStore();
   const p = (patient && patientById(patient.id)) || patient;
   const [open, setOpen] = useState(null);
   const [photoMeasure, setPhotoMeasure] = useState('flex');
   const [phoneMeasure, setPhoneMeasure] = useState('flex');
   if (!p) return html`<div class="card">لا توجد بيانات مريض.</div>`;
   const L = latest(p);
+  const ready = readyForNext(p, state.catalog);
+  const tgt = flexTarget({ results: ready.results, contralateral: p.contralateral && p.contralateral.flex, lastFlex: L.flex });
   const openTool = (id) => {
     setOpen(id);
     setTimeout(() => {
@@ -1017,8 +1172,10 @@ export function MeasureHub({ patient }) {
   };
   const saveSession = (s, origin) => {
     const rom = { source: 'camera' };
-    if (fin(s.maxFlex) && s.maxFlex >= 15) rom.flex = Math.round(s.maxFlex);
+    const best = fin(s.heldMax) && s.heldMax >= 15 ? s.heldMax : s.maxFlex; // the sustained peak, not a one-frame spike
+    if (fin(best) && best >= 15) rom.flex = Math.round(best);
     if (fin(s.extDeficit)) rom.ext = Math.max(0, Math.round(s.extDeficit));
+    if (s.quality) rom.conf = scoreConfidence({ ...s.quality, frames: s.frames }).level;
     const parts = [];
     if (rom.flex !== undefined || rom.ext !== undefined) {
       dispatch({ type: 'rom/add', pid: p.id, rom });
@@ -1031,8 +1188,8 @@ export function MeasureHub({ patient }) {
   };
   const bodies = {
     photo: () => html`<${PhotoTool} idp="mx" side=${p.side} measure=${photoMeasure} measures=${FLEX_EXT} onMeasure=${setPhotoMeasure} onSave=${saveAngle('photo')} />`,
-    live: () => html`<${LiveTool} idp="mx" side=${p.side} kind="rom" onSave=${saveSession} onFallback=${openTool} />`,
-    video: () => html`<${VideoTool} idp="mx" side=${p.side} kind="rom" onSave=${saveSession} />`,
+    live: () => html`<${LiveTool} idp="mx" side=${p.side} kind="rom" onSave=${saveSession} onFallback=${openTool} target=${tgt && tgt.value} />`,
+    video: () => html`<${VideoTool} idp="mx" side=${p.side} kind="rom" onSave=${saveSession} target=${tgt && tgt.value} />`,
     phone: () => html`<${PhoneTool} idp="mx" measure=${phoneMeasure} measures=${FLEX_EXT} onMeasure=${setPhoneMeasure} onSave=${saveAngle('phone')} />`,
     wound: () => html`<${WoundTool} patient=${p} />`,
     girth: () => html`<${GirthTool} patient=${p} />`,
@@ -1048,6 +1205,7 @@ export function MeasureHub({ patient }) {
         <${LatestTile} label="آخر ثني" rec=${L.flexRec} text=${html`<span class="ltr">${degTxt(L.flex)}</span>`} />
         <${LatestTile} label="آخر فرد" rec=${L.extRec} text=${fin(L.ext) ? (L.ext <= 0 ? 'كامل' : html`ينقص <span class="ltr">${degTxt(L.ext)}</span>`) : '—'} />
       </div>
+      ${tgt ? html`<p class="small row" style="gap:6px;flex-wrap:nowrap;align-items:flex-start"><${Icon} name="target" size=${16} /><span>هدف الثني الحالي <strong class="ltr">${Math.round(tgt.value)}°</strong> <span class="muted">(${tgt.why})</span> — يظهر كخط ذهبي في الكاميرا.</span></p>` : null}
       <p class="small muted row" style="gap:6px;flex-wrap:nowrap;align-items:flex-start"><${Icon} name="info" size=${16} />${FOLLOW_UP}</p>
     </section>
     ${TOOLS.map((t) => html`<${ToolCard} key=${t.id} tool=${t} open=${open === t.id} onToggle=${() => setOpen(open === t.id ? null : t.id)}>
@@ -1077,7 +1235,7 @@ function verifiedFrom(mode, r) {
   if (!single && fin(r.count)) v.count = r.count;
   const reps = v.count ? ` · ${v.count} تكرار` : '';
   if (mode === 'flex') {
-    const flex = single ? r.value : r.maxFlex;
+    const flex = single ? r.value : (fin(r.heldMax) && r.heldMax >= 15 ? r.heldMax : r.maxFlex);
     if (!fin(flex) || flex < 5) return null;
     v.maxFlex = Math.round(flex);
     v.note = `أعلى ثني ${iso(`${v.maxFlex}°`)}${reps}`;
@@ -1107,12 +1265,14 @@ function verifiedFrom(mode, r) {
 }
 
 export function CameraCheck({ patient, mode = 'flex', exercise, onDone, onClose }) {
+  const state = useStore();
   const p = (patient && patientById(patient.id)) || patient;
   const cfg = CHECK_MODES[mode] || CHECK_MODES.flex;
   const [method, setMethod] = useState(cfg.methods[0]);
   const [result, setResult] = useState(null);
   const side = (p && p.side) || 'R';
   const verified = verifiedFrom(mode, result);
+  const tgt = p && mode === 'flex' ? flexTarget({ results: readyForNext(p, state.catalog).results, contralateral: p.contralateral && p.contralateral.flex, lastFlex: latest(p).flex }) : null;
   const pick = (m) => { setResult(null); setMethod(m); };
   const confirm = () => {
     if (!verified) return;
@@ -1126,7 +1286,7 @@ export function CameraCheck({ patient, mode = 'flex', exercise, onDone, onClose 
   const title = `تحقق بالكاميرا · ${(exercise && exercise.nameAr) || cfg.title}`;
   const footer = html`<button type="button" class="btn btn-ghost" id="cc-cancel" onClick=${onClose}>إلغاء</button>
     <button type="button" class="btn btn-primary" id="cc-confirm" disabled=${!verified} onClick=${confirm}><${Icon} name="check" size=${16} />اعتماد النتيجة</button>`;
-  const common = { idp: 'cc', side, maxH: '40vh', onResult: setResult, compact: true };
+  const common = { idp: 'cc', side, maxH: '40vh', onResult: setResult, compact: true, target: tgt ? tgt.value : undefined };
   return html`<${Modal} title=${title} onClose=${onClose} footer=${footer}><div class="mx-cc" id="cc-body">
     <p class="small">${cfg.hint}</p>
     ${cfg.methods.length > 1 ? html`<${MxSeg} id="cc-method" label="طريقة القياس" options=${cfg.methods.map((m) => ({ id: m, label: METHOD_AR[m] }))} value=${method} onChange=${pick} />` : null}
