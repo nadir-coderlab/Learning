@@ -57,6 +57,7 @@ const ICONS = {
   mic: 'M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zM6 11a6 6 0 0 0 12 0M12 17v4',
   eye: 'M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
   logout: 'M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10',
+  speaker: 'M4 9.5h3.5L13 5v14l-5.5-4.5H4zM16.5 9.5a3.5 3.5 0 0 1 0 5M19 7a7 7 0 0 1 0 10',
 };
 
 export function Icon({ name, size = 20, stroke = 1.8, title, fill = false }) {
@@ -64,6 +65,28 @@ export function Icon({ name, size = 20, stroke = 1.8, title, fill = false }) {
   return html`<svg width=${size} height=${size} viewBox="0 0 24 24" aria-hidden=${title ? undefined : 'true'} role=${title ? 'img' : undefined}
     fill=${fill ? 'currentColor' : 'none'} stroke="currentColor" stroke-width=${stroke} stroke-linecap="round" stroke-linejoin="round">
     ${title ? html`<title>${title}</title>` : null}<path d=${d} /></svg>`;
+}
+
+/** Brand glyph: a recovery ring, nearly closed. */
+export function Mark({ size = 32 }) {
+  return html`<svg width=${size} height=${size} viewBox="0 0 32 32" aria-hidden="true">
+    <circle cx="16" cy="16" r="10.5" fill="none" stroke="currentColor" stroke-opacity="0.25" stroke-width="3.2" />
+    <path d="M16 5.5a10.5 10.5 0 1 1-7.4 3.1" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" />
+    <circle cx="16" cy="16" r="2.6" fill="currentColor" /></svg>`;
+}
+
+/** Progress ring (the signature element). value 0–100; children render in the middle. */
+export function Ring({ value = 0, size = 112, stroke = 8, tone = '', label, children }) {
+  const r = 50 - stroke / 2;
+  const c = 2 * Math.PI * r;
+  const v = Math.max(0, Math.min(100, Number.isFinite(value) ? value : 0));
+  return html`<div class="ring" style=${`--ring:${size}px`} role=${label ? 'img' : undefined} aria-label=${label}>
+    <svg viewBox="0 0 100 100" aria-hidden="true">
+      <circle class="ring-track" cx="50" cy="50" r=${r} stroke-width=${stroke} />
+      <circle class=${`ring-fill ${tone}`} cx="50" cy="50" r=${r} stroke-width=${stroke} stroke-dasharray=${c.toFixed(2)} stroke-dashoffset=${(c * (1 - v / 100)).toFixed(2)} />
+    </svg>
+    <div class="ring-center">${children}</div>
+  </div>`;
 }
 
 export const STATUS = {

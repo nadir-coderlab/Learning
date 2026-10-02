@@ -156,7 +156,13 @@ async function create() {
 
 function makeApi(inst) {
   const need = (mode) => { if (inst.mode !== mode) throw poseError('mode'); };
-  const first = (res) => (res && res.landmarks && res.landmarks[0]) || null;
+  // The 33 normalized landmarks of the first person; the metric 3D "world" landmarks ride along as
+  // lm.world so every caller that only wants 2D keeps working.
+  const first = (res) => {
+    const lm = (res && res.landmarks && res.landmarks[0]) || null;
+    if (lm && res.worldLandmarks && res.worldLandmarks[0]) lm.world = res.worldLandmarks[0];
+    return lm;
+  };
   return {
     get delegate() { return inst.delegate; },
     get source() { return { wasm: inst.wasm, model: inst.model }; },
@@ -303,6 +309,19 @@ export function pickLeg(lm, side = 'R', min = 0.5) {
   return null;
 }
 
+/** Mean obliquity (degrees from the image plane) of the thigh and shank, from metric world landmarks. */
+function segObliquity(world, side) {
+  const l = LEG[side] || LEG.R;
+  const seg = (a, b) => {
+    const A = world[a]; const B = world[b];
+    if (!A || !B || !Number.isFinite(A.z) || !Number.isFinite(B.z)) return NaN;
+    const len = Math.hypot(B.x - A.x, B.y - A.y, B.z - A.z);
+    return len > 1e-6 ? Math.asin(Math.min(1, Math.abs(B.z - A.z) / len)) * DEG : NaN;
+  };
+  const v = [seg(l.hip, l.knee), seg(l.knee, l.ankle)].filter(Number.isFinite);
+  return v.length ? v.reduce((a, b) => a + b, 0) / v.length : NaN;
+}
+
 export function median(arr) {
   const v = (arr || []).filter((x) => Number.isFinite(x)).sort((a, b) => a - b);
   if (!v.length) return NaN;
@@ -322,7 +341,9 @@ export function createRepCounter({
   minRange = 20, hiFrac = 0.65, loFrac = 0.35, riseFloorPerSec = 1, decayPerSec = 3, fps = 30, rearmSec = 20,
 } = {}) {
   let lo = NaN; let hi = NaN; let phase = 'low'; let count = 0; let peak = -Infinity; let lastT = null; let heldFor = 0;
+  let upAt = NaN; // timestamp (ms) the current rep started, for its duration
   const peaks = [];
+  const reps = []; // [{ peak, dur }] — dur in seconds, NaN without timestamps
   const th = () => {
     const range = Math.max(hi - lo, minRange);
     return { high: lo + hiFrac * range, low: lo + loFrac * range };
@@ -341,13 +362,14 @@ export function createRepCounter({
       if (phase === 'low') {
         lo = Math.min(v, lo + riseFloorPerSec * dt);
         hi = Math.max(v, hi - decayPerSec * dt, lo + minRange);
-        if (v > th().high) { phase = 'high'; peak = v; heldFor = 0; }
+        if (v > th().high) { phase = 'high'; peak = v; heldFor = 0; upAt = Number.isFinite(t) ? t : NaN; }
       } else {
         hi = Math.max(hi, v);
         peak = Math.max(peak, v);
         heldFor += dt;
         if (v < th().low) {
           count += 1; counted = true; peaks.push(peak);
+          reps.push({ peak, dur: Number.isFinite(t) && Number.isFinite(upAt) ? (t - upAt) / 1000 : NaN });
           phase = 'low'; peak = -Infinity;
         } else if (heldFor > rearmSec) {
           // Stuck high (e.g. the baseline moved): re-arm without counting.
@@ -358,8 +380,9 @@ export function createRepCounter({
     },
     get count() { return count; },
     get peaks() { return peaks.slice(); },
+    get reps() { return reps.map((r) => ({ ...r })); },
     get phase() { return phase; },
-    reset() { lo = NaN; hi = NaN; phase = 'low'; count = 0; peak = -Infinity; lastT = null; heldFor = 0; peaks.length = 0; },
+    reset() { lo = NaN; hi = NaN; phase = 'low'; count = 0; peak = -Infinity; lastT = null; heldFor = 0; upAt = NaN; peaks.length = 0; reps.length = 0; },
   };
 }
 
@@ -388,10 +411,19 @@ export function createAnalyzer({ kind = 'rom', side = 'R', minVisibility = 0.5, 
     frames: 0, used: 0, maxFlex: -Infinity, minFlex: Infinity,
     rest: [], lagNow: -Infinity, lags: [], fppaNow: -Infinity, fppaReps: [], fppaMax: -Infinity, fppaMin: Infinity,
     refH: NaN, lastT: null, current: null,
+    // quality bookkeeping for the confidence score
+    visSum: 0, obSum: 0, obN: 0, jitSum: 0, jitN: 0, lastKnee: NaN, heldMax: -Infinity, hold: [],
   };
   const smooth = (key, v) => {
     if (Number.isFinite(v)) { win[key].push(v); if (win[key].length > 5) win[key].shift(); }
     return median(win[key]);
+  };
+  // Highest flexion sustained for ~0.7 s (rolling minimum, then its maximum): a one-frame spike never counts.
+  const hold = (v, t) => {
+    if (!Number.isFinite(v) || !Number.isFinite(t)) return;
+    s.hold.push({ t, v });
+    while (s.hold.length && t - s.hold[0].t > 700) s.hold.shift();
+    if (s.hold.length > 1 && t - s.hold[0].t >= 600) s.heldMax = Math.max(s.heldMax, Math.min(...s.hold.map((x) => x.v)));
   };
   function push(lm, w = 1, h = 1, t) {
     s.frames += 1;
@@ -400,7 +432,15 @@ export function createAnalyzer({ kind = 'rom', side = 'R', minVisibility = 0.5, 
     if (!lm) { s.current = { visible: false, reason: 'none', count: counter.count }; return s.current; }
     if (!visibleEnough(lm, need, minVisibility)) { s.current = { visible: false, reason: 'leg', count: counter.count }; return s.current; }
     s.used += 1;
+    s.visSum += legVisibility(lm, side);
+    if (lm.world) {
+      const ob = segObliquity(lm.world, side);
+      if (Number.isFinite(ob)) { s.obSum += ob; s.obN += 1; }
+    }
     const knee = smooth('knee', kneeFlexion(lm, side, w, h));
+    if (Number.isFinite(knee) && Number.isFinite(s.lastKnee)) { s.jitSum += Math.abs(knee - s.lastKnee); s.jitN += 1; }
+    if (Number.isFinite(knee)) s.lastKnee = knee;
+    hold(knee, t);
     const frame = { visible: true, knee };
     let signal = knee;
     if (kind === 'slr') { signal = smooth('sig', hipFlexion(lm, side, w, h)); frame.hip = signal; }
@@ -434,7 +474,14 @@ export function createAnalyzer({ kind = 'rom', side = 'R', minVisibility = 0.5, 
     return frame;
   }
   function summary() {
-    const base = { kind, side, frames: s.frames, used: s.used, count: counter.count };
+    const quality = {
+      usedFrac: s.frames ? s.used / s.frames : 0,
+      meanVis: s.used ? s.visSum / s.used : NaN,
+      obliquity: s.obN ? s.obSum / s.obN : NaN,
+      jitter: s.jitN ? s.jitSum / s.jitN : NaN,
+      frames: s.frames,
+    };
+    const base = { kind, side, frames: s.frames, used: s.used, count: counter.count, reps: counter.reps, quality, heldMax: Number.isFinite(s.heldMax) ? s.heldMax : NaN };
     if (!s.used) return base;
     if (kind === 'slr') {
       const rest = median(s.rest);

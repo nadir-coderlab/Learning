@@ -2,7 +2,7 @@
 // measure → progress → more (education, assistant, appointments, messages, notifications).
 import { html, useEffect, useMemo, useState } from '../lib/h.js';
 import { useStore, dispatch } from '../lib/store.js';
-import { Icon, Pill, StatusPill, Meter, Modal, NRS, Seg, toast } from '../lib/ui.js';
+import { Icon, Mark, Ring, Pill, StatusPill, Meter, Modal, NRS, Seg, toast } from '../lib/ui.js';
 import { LineChart } from '../lib/charts.js';
 import {
   postOpDay, weekOf, phaseOf, dueToday, doneOn, adherence, streak, statusOf, readyForNext, latest, milestonesFor,
@@ -29,7 +29,7 @@ const TABS = [
   { id: 'more', label: 'المزيد', icon: 'grid' },
 ];
 const EXPLAIN = {
-  login: { title: 'دخول بدون ربط مع رقيم', points: ['الأخصائي يسجل المريض ويرسل له رابطًا ورمز QR.', 'الدخول برقم الجوال ورمز تحقق — بدون رقم هوية.', 'على iPhone: المشاركة ثم "إضافة إلى الشاشة الرئيسية" ليصبح مثل التطبيق وتصله الإشعارات.'] },
+  login: { title: 'دخول مستقل عن أنظمة المركز', points: ['الأخصائي يسجل المريض ويرسل له رابطًا ورمز QR.', 'الدخول برقم الجوال ورمز تحقق — بدون رقم هوية.', 'على iPhone: المشاركة ثم "إضافة إلى الشاشة الرئيسية" ليصبح مثل التطبيق وتصله الإشعارات.'] },
   home: { title: 'الصفحة الرئيسية', points: ['اليوم بعد العملية + المرحلة الحالية + نسبة المعايير المحققة للمرحلة القادمة.', 'مهام اليوم: التسجيل اليومي، التمارين، القياس الأسبوعي، مادة تعليمية.', 'الموعد القادم ونوعه (افتراضي أو حضوري).'] },
   checkin: { title: 'التسجيل اليومي والعلامات الحمراء', points: ['أسئلة مغلقة سريعة + خريطة ألم للركبة + نص حر.', 'إذا تحققت علامة خطر تظهر إرشادات المسار المعتمد ويصل تنبيه للفريق فورًا.', 'المنصة لا تشخّص؛ تصنّف وتوجّه حسب قواعد يعتمدها الفريق.'] },
   program: { title: 'برنامج اليوم', points: ['التمارين من مكتبة يديرها الفريق، وليست مكتوبة داخل البرمجة.', 'كل تمرين: اسم عربي وإنجليزي، عرض للحركة، الجرعة، الاحتياطات، زر "أكملت"، والألم أثناء التمرين.', 'بعض التمارين فيها "تحقق بالكاميرا" لعدّ التكرارات وقياس الزاوية.'] },
@@ -70,8 +70,8 @@ export function PatientApp() {
   return html`<div class="patient-stage">
     <div class="phone" aria-label="تطبيق المريض">
       <div class="phone-head">
-        ${sub && logged ? html`<button class="icon-btn" aria-label="رجوع" onClick=${() => setSub(null)}><${Icon} name="back" /></button>` : html`<span class="brand-mark" style="width:30px;height:30px;border-radius:9px" aria-hidden="true"><${Icon} name="knee" size=${17} stroke=${2} /></span>`}
-        <div class="grow" style="min-width:0"><div class="strong" style="line-height:1.2">${logged ? p.name : 'تأهيل الرباط الصليبي'}</div><div class="small muted" style="line-height:1.2">${logged ? `اليوم ${postOpDay(p)} بعد العملية` : 'Madinah Smart Rehab'}</div></div>
+        ${sub && logged ? html`<button class="icon-btn" aria-label="رجوع" onClick=${() => setSub(null)}><${Icon} name="back" /></button>` : html`<span class="brand-mark" aria-hidden="true"><${Mark} size=${28} /></span>`}
+        <div class="grow" style="min-width:0"><div class="strong" style="line-height:1.2">${logged ? p.name : 'تأهيل المدينة'}</div><div class="small muted" style="line-height:1.2">${logged ? `اليوم ${postOpDay(p)} بعد العملية` : 'مسار الرباط الصليبي'}</div></div>
         ${logged ? html`<button class="icon-btn" aria-label="الرسائل" onClick=${() => openSub('messages')}><${Icon} name="chat" /></button>` : null}
       </div>
       <div class="phone-body">${body}</div>
@@ -81,14 +81,14 @@ export function PatientApp() {
     </div>
     <aside class="side-panel">
       <section class="card stack-sm">
-        <span class="eyebrow">جرّب المنصة بعيون مريض مختلف</span>
+        <span class="eyebrow eyebrow-rule">جرّب المنصة بعيون مريض مختلف</span>
         <div class="list">
           ${PERSONAS.map((x) => {
             const pp = s.patients.find((q) => q.id === x.id);
             if (!pp) return null;
             const st = statusOf(pp, cat);
             return html`<button class="list-row clickable" aria-pressed=${String(pid === x.id)} onClick=${() => { setPid(x.id); setSub(null); setTab('home'); }}
-              style=${pid === x.id ? 'background:var(--accent-soft);border-radius:10px;padding-inline:8px' : 'padding-inline:8px'}>
+              style=${pid === x.id ? 'background:var(--accent-soft);border-radius:10px;padding-inline:10px' : 'padding-inline:10px'}>
               <span class="grow"><span class="strong">${pp.name}</span><br /><span class="small muted">${x.note}</span></span>
               <${StatusPill} code=${st.code} />
             </button>`;
@@ -96,7 +96,7 @@ export function PatientApp() {
         </div>
       </section>
       <section class="card explain">
-        <span class="eyebrow">ماذا تعرض هذه الشاشة؟</span>
+        <span class="eyebrow eyebrow-rule">ماذا تعرض هذه الشاشة؟</span>
         <h2>${ex.title}</h2>
         <ul>${ex.points.map((t) => html`<li>${t}</li>`)}</ul>
       </section>
@@ -110,8 +110,17 @@ function Login({ patient, onDone }) {
   const [phone, setPhone] = useState('05XXXXXXXX');
   const [step, setStep] = useState(1);
   const [code, setCode] = useState('');
-  return html`<div class="stack-lg" style="padding-top:12px">
-    <div class="stack-sm"><h1>أهلًا بك في رحلة التأهيل</h1><p class="muted">سجّل دخولك برقم جوالك المسجل لدى أخصائيك.</p></div>
+  return html`<div class="stack-lg">
+    <div class="login-cover">
+      <svg class="ring-bg" viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="50" r="42" fill="none" stroke="var(--accent-soft)" stroke-width="8" />
+        <path d="M50 8a42 42 0 1 1-29.7 12.3" fill="none" stroke="var(--accent)" stroke-width="8" stroke-linecap="round" opacity="0.6" />
+      </svg>
+      <span class="brand-mark" style="color:var(--accent)" aria-hidden="true"><${Mark} size=${44} /></span>
+      <span class="eyebrow eyebrow-rule">مسار الرباط الصليبي</span>
+      <h1>تعافيك بعد العملية، يومًا بيوم</h1>
+      <p class="muted">تمارينك وقياساتك وفريقك في مكان واحد. سجّل دخولك برقم جوالك المسجل لدى أخصائيك.</p>
+    </div>
     ${step === 1 ? html`<div class="stack">
       <div class="field"><label for="login-phone">رقم الجوال</label><input id="login-phone" class="input ltr" inputmode="tel" value=${phone} onInput=${(e) => setPhone(e.target.value)} /></div>
       <button class="btn btn-primary btn-lg btn-block" onClick=${() => setStep(2)}>أرسل رمز التحقق</button>
@@ -122,9 +131,9 @@ function Login({ patient, onDone }) {
     </div>`}
     <section class="card card-flat stack-sm">
       <strong>أضف المنصة لشاشتك الرئيسية</strong>
-      <ol class="small" style="margin:0;padding-inline-start:18px">
-        <li>iPhone: اضغط زر المشاركة ثم "إضافة إلى الشاشة الرئيسية".</li>
-        <li>Android: سيظهر لك زر "تثبيت التطبيق".</li>
+      <ol class="small steps-list">
+        <li>iPhone: زر المشاركة ثم "إضافة إلى الشاشة الرئيسية".</li>
+        <li>Android: يظهر لك زر "تثبيت التطبيق".</li>
       </ol>
       <span class="small muted">بعدها تفتح مثل التطبيق وتصلك التذكيرات.</span>
     </section>
@@ -154,26 +163,35 @@ function Home({ patient: p, catalog, onCheckin, onTab, onOpen }) {
     <span class="task-check"><${Icon} name="check" size=${16} stroke=${3} /></span>
     <span class="grow"><span class="task-title">${title}</span><br /><span class="small muted">${sub}</span></span>
     <${Icon} name=${icon} size=${20} /></button>`;
+  const first = p.name.split(' ')[0];
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'صباح الخير' : 'مساء الخير';
   return html`<div class="stack">
-    <div class="hello"><span class="eyebrow">${fmtDateLong(new Date())}</span><h1>مرحبًا ${p.name.split(' ')[0]}</h1>
-      <span class="muted">اليوم ${day} بعد العملية · الأسبوع ${weekOf(day)}</span></div>
+    <div class="hero">
+      <${Ring} value=${progress} size=${118} stroke=${7} label=${`معايير الانتقال المحققة ${progress}%`}>
+        <span class="ring-num">${day}</span><span class="ring-cap">بعد العملية</span>
+      <//>
+      <div class="stack-sm" style="gap:0;min-width:0">
+        <span class="eyebrow">${greet}، ${first} · ${fmtDateLong(new Date())}</span>
+        <h1 class="hero-title">${ph.nameAr}</h1>
+        <div class="hero-goal">المرحلة ${p.phase} من 6 · الأسبوع ${weekOf(day)}</div>
+        <div class="hero-meter"><${Meter} value=${progress} thin label="معايير الانتقال" /><span class="num nowrap">${ready.metCount}/${ready.results.length} معايير</span></div>
+      </div>
+    </div>
     ${red.length ? html`<div class="redflag" role="alert"><div class="row"><${Icon} name="alert" size=${22} /><strong>تنبيه سريري مفتوح</strong></div>
       <div class="small">${red[0].text}. تم إبلاغ فريقك. تواصل معهم اليوم، وفي الطوارئ اتصل بالإسعاف 997.</div></div>` : null}
-    <section class="phase-card">
-      <span class="eyebrow">مرحلتك الحالية: المرحلة ${p.phase} من 6</span>
-      <h2 style="font-size:var(--step-1)">${ph.nameAr}</h2>
-      <div class="row-between small"><span>معايير الانتقال المحققة: ${ready.metCount} من ${ready.results.length}</span><span class="num">${progress}%</span></div>
-      <${Meter} value=${progress} label="تقدم المرحلة" />
-      <div class="small">الهدف الحالي: ${ph.goalAr}</div>
-    </section>
-    <section class="card card-tight">
-      <div class="row-between" style="margin-bottom:2px"><h3>اليوم لديك</h3><span class="small muted">${[!!todayCheck, nDone === due.length && due.length > 0].filter(Boolean).length} من ${measureDue ? 4 : 3}</span></div>
+    <section class="stack-sm" style="gap:2px">
+      <div class="section-label"><h3>اليوم لديك</h3><span class="small muted">${[!!todayCheck, nDone === due.length && due.length > 0].filter(Boolean).length} من ${measureDue ? 4 : 3}</span></div>
       <div class="task-list">
         ${task(!!todayCheck, 'clipboard', 'تسجيل حالة الركبة', todayCheck ? `الألم ${todayCheck.pain}/10 · تم` : 'الألم والتورم والأعراض — دقيقة واحدة', onCheckin)}
         ${task(due.length > 0 && nDone === due.length, 'dumbbell', `تمارين اليوم: ${nDone} من ${due.length}`, due.slice(0, 3).map((it) => getEx(it.exId, catalog)?.nameAr).join('، '), () => onTab('program'))}
         ${measureDue ? task(false, 'camera', 'قياس زاوية الركبة الأسبوعي', 'بالصورة أو الجوال على الساق', () => onTab('measure')) : null}
         ${edu ? task(false, 'book', `مادة اليوم: ${edu.titleAr}`, `${edu.minutes} دقيقة`, () => onOpen('article', edu)) : null}
       </div>
+    </section>
+    <section class="phase-card">
+      <span class="eyebrow">هدف مرحلتك الحالية</span>
+      <div class="small">${ph.goalAr}</div>
     </section>
     ${p.phase === 4 ? html`<section class="card card-tight row-between"><div><strong>جلسة الجري — المستوى ${p.runLevel || 1}</strong><div class="small muted">${RUN_PROGRAM[(p.runLevel || 1) - 1]?.textAr}</div></div><button class="btn btn-sm btn-primary" onClick=${() => onTab('program')}>افتح</button></section>` : null}
     ${next ? html`<section class="card card-tight">
@@ -203,8 +221,13 @@ function Program({ patient: p, catalog, onCheckin }) {
   const isRest = (p.restDays || []).includes(day);
   const nDone = due.filter((it) => done.has(it.exId)).length;
   return html`<div class="stack">
-    <div class="row-between"><h2>برنامجك اليوم</h2><span class="num strong">${nDone}/${due.length}</span></div>
-    <${Meter} value=${due.length ? (nDone / due.length) * 100 : 0} tone="ok" label="تمارين اليوم" />
+    <div class="hero" style="padding-top:2px">
+      <${Ring} value=${due.length ? (nDone / due.length) * 100 : 0} size=${84} stroke=${7} label="تمارين اليوم المنجزة">
+        <span class="ring-num">${nDone}</span><span class="ring-cap">من ${due.length}</span>
+      <//>
+      <div class="stack-sm" style="gap:0"><span class="eyebrow">اليوم ${day} بعد العملية</span><h1 class="hero-title">برنامجك اليوم</h1>
+        <div class="hero-goal">${due.length ? `${due.length} تمارين مستحقة اليوم` : 'لا تمارين مستحقة اليوم'}${isRest ? ' · يوم راحة موجّه' : ''}</div></div>
+    </div>
     ${!todayCheck ? html`<button class="note note-info" style="text-align:start;cursor:pointer" onClick=${onCheckin}><strong>ابدأ بتسجيل حالة ركبتك</strong> — قبل التمارين.</button>` : null}
     ${highPain && !isRest ? html`<div class="note note-warn stack-sm"><strong>ألمك اليوم ${todayCheck.pain}/10</strong><span class="small">خفف الشدة أو خذ راحة إذا وجّهك أخصائيك بذلك. يوم الراحة الموجّه لا يكسر سلسلة التزامك.</span>
       <button class="btn btn-sm" onClick=${() => { dispatch({ type: 'restday/add', pid: p.id }); toast('سُجل يوم راحة موجّه — سلسلتك محفوظة'); }}>سجّل يوم راحة بتوجيه أخصائيي</button></div>` : null}
@@ -287,7 +310,13 @@ function Progress({ patient: p, catalog }) {
   const remaining = ready.results.filter((r) => r.state !== 'met');
   const phases = catalog.phases;
   return html`<div class="stack">
-    <h2>رحلتي</h2>
+    <div class="hero" style="padding-top:2px">
+      <${Ring} value=${ready.results.length ? (ready.metCount / ready.results.length) * 100 : 0} size=${84} stroke=${7} label="معايير الانتقال المحققة">
+        <span class="ring-num">${ready.metCount}</span><span class="ring-cap">من ${ready.results.length}</span>
+      <//>
+      <div class="stack-sm" style="gap:0"><span class="eyebrow">المرحلة ${p.phase} من 6</span><h1 class="hero-title">رحلتي</h1>
+        <div class="hero-goal">معايير ${ready.to === 'rts' ? 'العودة للرياضة' : 'المرحلة القادمة'} · يحدد فريقك جاهزيتك</div></div>
+    </div>
     <section class="card stack-sm">
       <p>أنت في <strong>اليوم ${day}</strong> بعد العملية، في <strong>المرحلة ${p.phase} من 6</strong>. حققت <strong>${ready.metCount} من ${ready.results.length}</strong> من معايير ${ready.to === 'rts' ? 'العودة للرياضة' : 'المرحلة القادمة'}، وسيحدد فريقك العلاجي جاهزيتك.</p>
       ${remaining.length ? html`<div class="small"><strong>ما زال مطلوبًا:</strong><ul style="margin:4px 0 0;padding-inline-start:18px">${remaining.slice(0, 4).map((r) => html`<li>${r.c.textAr}</li>`)}</ul></div>` : html`<div class="note note-ok small">المعايير تبدو مكتملة — بانتظار مراجعة أخصائيك واعتماده.</div>`}
@@ -326,7 +355,7 @@ function More({ patient: p, onOpen, onLogout }) {
   const item = (kind, icon, title, sub, tone = '') => html`<button class="list-row clickable" onClick=${() => onOpen(kind)}>
     <span class=${`icon-tile ${tone}`}><${Icon} name=${icon} /></span><span class="grow"><span class="strong">${title}</span><br /><span class="small muted">${sub}</span></span><${Icon} name="forward" size=${18} /></button>`;
   return html`<div class="stack">
-    <h2>المزيد</h2>
+    <div class="stack-sm" style="gap:0"><span class="eyebrow">${p.name}</span><h1 class="hero-title">المزيد</h1></div>
     <section class="card card-tight list">
       ${item('education', 'book', 'تعلّم', 'مواد قصيرة لمرحلتك')}
       ${item('assistant', 'sparkle', 'اسأل مساعد التأهيل', 'إجابات من المكتبة المعتمدة')}

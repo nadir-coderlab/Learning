@@ -1,4 +1,4 @@
-// Virtual-visit modal: rule-based brief (always works), optional AI summary, plan, and a SOAP note ready for Raqeem.
+// Virtual-visit modal: rule-based brief (always works), optional AI summary, plan, and a SOAP note ready to paste into the medical record.
 import { html, useEffect, useRef, useState } from '../../lib/h.js';
 import { Icon, Modal, AiMark, StatusPill, toast } from '../../lib/ui.js';
 import { preVisitBrief, soapNote, statusOf, postOpDay, weekOf } from '../../lib/engine.js';
@@ -92,7 +92,7 @@ export function VirtualVisitModal({ p, cat, onClose }) {
 
   const copy = async () => {
     const ok = await copyText(note, pre.current);
-    toast(ok ? 'نُسخت الملاحظة — الصقها في رقيم' : 'تعذر النسخ التلقائي — النص محدد، انسخه يدويًا');
+    toast(ok ? 'نُسخت الملاحظة — الصقها في الملف الطبي' : 'تعذر النسخ التلقائي — النص محدد، انسخه يدويًا');
   };
   const save = () => {
     dispatch({ type: 'note/add', pid: p.id, by: BY, text: note });
@@ -127,7 +127,7 @@ export function VirtualVisitModal({ p, cat, onClose }) {
         <input class="input" id="vv-plan-free" type="text" value=${free} onInput=${(e) => setFree(e.currentTarget.value)} placeholder="مثال: Add Nordic curls 2x/week from next week" /></div>
     </section>
     <section class="stack-sm" aria-labelledby="vv-note-title">
-      <div class="row-between"><h3 id="vv-note-title">ملاحظة جاهزة للنسخ إلى رقيم</h3>
+      <div class="row-between"><h3 id="vv-note-title">ملاحظة جاهزة للنسخ إلى الملف الطبي</h3>
         <button type="button" class="btn btn-sm" id="vv-copy-inline" onClick=${copy}><${Icon} name="copy" size=${15} />نسخ</button></div>
       <pre class="code-note" style="margin:0" ref=${pre} tabindex="0" aria-label="نص الملاحظة بصيغة SOAP">${note}</pre>
       <span class="small muted">تتحدث تلقائيًا مع اختيارات الخطة. راجعها قبل اللصق في الملف الطبي.</span>

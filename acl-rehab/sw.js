@@ -1,5 +1,5 @@
 // Offline shell for the installable prototype. Network first, cache as fallback.
-const CACHE = 'msr-proto-v1';
+const CACHE = 'msr-proto-v2';
 self.addEventListener('install', (e) => { self.skipWaiting(); });
 self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
 self.addEventListener('fetch', (e) => {

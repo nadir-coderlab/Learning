@@ -1,7 +1,7 @@
 // Madinah Smart Rehabilitation — interactive prototype (demo data only).
 import { html, render, useEffect, useState } from './lib/h.js';
 import { initStore, useStore, resetDemo } from './lib/store.js';
-import { Icon, Seg, ToastHost, toast } from './lib/ui.js';
+import { Icon, Mark, ToastHost, toast } from './lib/ui.js';
 import { storage } from './lib/util.js';
 import { PatientApp } from './views/patient.js';
 import { ClinicianApp } from './views/clinician.js';
@@ -38,12 +38,14 @@ function App() {
     <header class="topbar">
       <div class="topbar-inner">
         <div class="brand">
-          <span class="brand-mark" aria-hidden="true"><${Icon} name="knee" size=${20} stroke=${2} /></span>
-          <div><div class="brand-name">Madinah Smart Rehab</div><div class="brand-sub">مسار التأهيل الرقمي بعد عملية الرباط الصليبي</div></div>
+          <span class="brand-mark" aria-hidden="true"><${Mark} size=${32} /></span>
+          <div><div class="brand-name">تأهيل المدينة</div><div class="brand-sub">Madinah Smart Rehab</div></div>
         </div>
-        <span class="demo-flag">نموذج أولي · بيانات وهمية</span>
+        <span class="demo-flag">نموذج أولي · بيانات تجريبية</span>
         <span class="topbar-spacer"></span>
-        <${Seg} label="عرض المنصة كـ" options=${ROLES} value=${role} onChange=${setRole} />
+        <div class="role-tabs" role="group" aria-label="عرض المنصة كـ">
+          ${ROLES.map((r) => html`<button type="button" key=${r.id} aria-pressed=${String(role === r.id)} onClick=${() => setRole(r.id)}>${r.label}</button>`)}
+        </div>
         ${confirmReset
           ? html`<span class="row" style="gap:6px"><span class="small muted">مسح كل تعديلاتك؟</span>
               <button class="btn btn-sm btn-danger" onClick=${doReset}>نعم، أعد الضبط</button>
@@ -54,7 +56,7 @@ function App() {
     <main>
       ${role === 'patient' ? html`<${PatientApp} />` : role === 'clinician' ? html`<${ClinicianApp} />` : html`<${AdminApp} />`}
     </main>
-    <p class="footer-note">نموذج أولي لمبادرة Madinah Smart Rehabilitation. كل الأسماء والأرقام وهمية. المنصة لا تشخّص ولا تعتمد العودة للجري أو للرياضة؛ القرار للأخصائي أو الفريق المعتمد.</p>
+    <p class="footer-note">نموذج أولي لمبادرة تأهيل المدينة الذكي. كل الأسماء والأرقام تجريبية. المنصة لا تشخّص ولا تعتمد العودة للجري أو للرياضة؛ القرار للأخصائي أو الفريق المعتمد.</p>
     <${ToastHost} />
   </div>`;
 }
