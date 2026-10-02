@@ -1,0 +1,15 @@
+{
+  "name": "Madinah Smart Rehabilitation",
+  "short_name": "تأهيل المدينة",
+  "description": "مسار التأهيل الرقمي بعد عملية الرباط الصليبي — نموذج أولي",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./index.html#patient",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F4F5F2",
+  "theme_color": "#176B50",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

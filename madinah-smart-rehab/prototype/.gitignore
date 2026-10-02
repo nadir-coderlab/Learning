@@ -1,0 +1,3 @@
+# Self-hosted MediaPipe copies (vision_bundle.mjs, wasm/, pose_landmarker_lite.task) are too large
+# for the repo; drop them in vendor/mediapipe/ locally or on the host. The app falls back to the CDN.
+vendor/mediapipe
