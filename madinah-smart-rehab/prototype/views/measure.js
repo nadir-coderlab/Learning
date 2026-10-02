@@ -11,7 +11,7 @@ import { LineChart, Sparkline } from '../lib/charts.js';
 import {
   loadPose, poseLoaded, createAnalyzer, flexionFromPoints, fppaFromPoints, pickLeg, median, LEG, POSE_LINKS, otherSide, kneeFlexion, fppa,
 } from '../lib/pose.js';
-import { assessFrame, createCoach, createVoice, COACH_SPEECH, uprightError, rateReps, scoreConfidence, CONF_AR, REP_Q_AR, arabicCount, flexTarget } from '../lib/coach.js';
+import { assessFrame, createCoach, createVoice, COACH_SPEECH, VOICE_LINES, uprightError, rateReps, scoreConfidence, CONF_AR, REP_Q_AR, arabicCount, flexTarget } from '../lib/coach.js';
 import { Guide, GuideFigure } from '../lib/guides.js';
 import {
   cssVar, openCamera, stopStream, cameraBlockedByPolicy, videoReady, requestMotionPermission, watchOrientation,
@@ -575,7 +575,7 @@ function LiveTool({ idp, side: opSide = 'R', kind = 'rom', onResult, onSave, onF
     r.hitSpokenRep = -1;
     setRead(null); setSaved(false);
     setPhaseBoth('rec');
-    r.voice.say('ابدأ', { force: true, interrupt: true });
+    r.voice.say(VOICE_LINES.start, { force: true, interrupt: true });
   };
   const beginCountdown = () => {
     const r = run.current;
@@ -626,7 +626,8 @@ function LiveTool({ idp, side: opSide = 'R', kind = 'rom', onResult, onSave, onF
     // phone tilt, where the browser hands it over without a permission prompt (never asks on iOS)
     r.stopTilt = watchOrientation({ timeoutMs: 2500, onReading: ({ beta, gamma }) => { r.tilt = uprightError(beta, gamma); }, onNoSensor: () => { r.tilt = NaN; } });
     setStatus('running');
-    r.voice.say('ثبّت الجوال وابتعد حتى تظهر الساق كاملة', { force: true });
+    r.voice.warm();
+    r.voice.say(VOICE_LINES.intro, { force: true });
     const loop = () => {
       if (token !== run.current.token) return;
       r.raf = requestAnimationFrame(loop);
@@ -655,7 +656,7 @@ function LiveTool({ idp, side: opSide = 'R', kind = 'rom', onResult, onSave, onF
           r.voice.say(arabicCount(frame.count), { force: true, interrupt: true });
         } else if (fin(o.target) && frame.visible && fin(frame.knee) && frame.knee >= o.target && r.hitSpokenRep !== frame.count) {
           r.hitSpokenRep = frame.count;
-          r.voice.say('ممتاز، وصلت الهدف', { force: true });
+          r.voice.say(VOICE_LINES.target, { force: true });
         }
       } else {
         if (r.phase === 'count' && !cs.ok) cancelCountdown();
@@ -676,7 +677,7 @@ function LiveTool({ idp, side: opSide = 'R', kind = 'rom', onResult, onSave, onF
     const s = r.analyzer && r.analyzer.summary();
     halt();
     setStatus('stopped');
-    if (s && s.used && (s.count || fin(s.heldMax))) r.voice.say(s.count ? `انتهت الجلسة، ${arabicCount(s.count)} تكرارات` : 'انتهت الجلسة', { force: true });
+    if (s && s.used && (s.count || fin(s.heldMax))) r.voice.say(VOICE_LINES.done, { force: true, interrupt: true });
   };
   const resetSession = () => {
     const r = run.current;

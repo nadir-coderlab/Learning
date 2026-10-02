@@ -226,45 +226,101 @@ export function scoreConfidence({ usedFrac, meanVis, obliquity, jitter, frames =
 }
 export const CONF_AR = { high: 'موثوقية عالية', medium: 'موثوقية متوسطة', low: 'موثوقية منخفضة' };
 
-/* ---------- Arabic voice (Web Speech API) ---------- */
-/** Speaks short Arabic cues; silent where speech is unavailable. Rate-limited per message. */
-export function createVoice({ lang = 'ar-SA', minGapMs = 900 } = {}) {
+/* ---------- Arabic voice ---------- */
+/** Arabic word for small counts (1–20), falling back to digits. */
+const AR_NUM = ['صفر', 'واحد', 'اثنين', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة', 'عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر', 'عشرين'];
+export function arabicCount(n) { return AR_NUM[n] || String(n); }
+
+export const VOICE_LINES = {
+  intro: 'ثبّت الجوال وابتعد حتى تظهر الساق كاملة',
+  start: 'ابدأ',
+  target: 'ممتاز، وصلت الهدف',
+  done: 'انتهت الجلسة، أحسنت',
+};
+/**
+ * Every spoken cue → the name of a recorded clip in assets/voice/<name>.mp3. Recorded clips (a real
+ * Arabic voice) play first; the browser's own speech synthesis is only the fallback.
+ */
+export const VOICE_CLIPS = (() => {
+  const m = {};
+  for (const [code, text] of Object.entries(COACH_SPEECH)) m[text] = `coach-${code}`;
+  for (const [key, text] of Object.entries(VOICE_LINES)) m[text] = key;
+  for (let n = 1; n <= 20; n++) m[AR_NUM[n]] = `count-${n}`;
+  return m;
+})();
+
+/** Speaks short Arabic cues: a recorded clip when one exists, else Web Speech. Rate-limited per message. */
+export function createVoice({ lang = 'ar-SA', minGapMs = 900, base } = {}) {
   const synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
-  let enabled = Boolean(synth);
+  const canAudio = typeof Audio !== 'undefined';
+  let enabled = Boolean(synth || canAudio);
   let lastAt = 0; let lastText = '';
+  let current = null; // the clip playing now
+  const clips = new Map(); // name → HTMLAudioElement | null (null = missing)
+  const root = base || (typeof document !== 'undefined' ? new URL('assets/voice/', document.baseURI).href : 'assets/voice/');
   const pickVoice = () => {
     try {
       const vs = synth.getVoices() || [];
       return vs.find((v) => /^ar[-_]SA/i.test(v.lang)) || vs.find((v) => /^ar/i.test(v.lang)) || null;
     } catch { return null; }
   };
+  const clipFor = (text) => {
+    const name = VOICE_CLIPS[text];
+    if (!name || !canAudio) return null;
+    if (!clips.has(name)) {
+      const a = new Audio(`${root}${name}.mp3`);
+      a.preload = 'auto';
+      a.addEventListener('error', () => clips.set(name, null));
+      clips.set(name, a);
+    }
+    return clips.get(name);
+  };
+  const speakTts = (text, interrupt) => {
+    if (!synth) return false;
+    try {
+      if (interrupt) synth.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = lang; u.rate = 1.0; u.pitch = 1.0;
+      const v = pickVoice();
+      if (v) u.voice = v;
+      synth.speak(u);
+      return true;
+    } catch { return false; }
+  };
   return {
-    get available() { return Boolean(synth); },
+    get available() { return Boolean(synth || canAudio); },
     get enabled() { return enabled; },
-    set enabled(v) { enabled = Boolean(v) && Boolean(synth); if (!enabled && synth) { try { synth.cancel(); } catch { /* ignore */ } } },
+    set enabled(v) { enabled = Boolean(v) && Boolean(synth || canAudio); if (!enabled) this.stop(); },
     hasArabicVoice() { return Boolean(synth && pickVoice()); },
+    /** Create the Audio objects early (after a user gesture) so the first cue plays without delay. */
+    warm() { for (const text of Object.keys(VOICE_CLIPS)) clipFor(text); },
+    /** True when at least one recorded clip loaded. */
+    get recorded() { for (const a of clips.values()) if (a && a.readyState >= 1) return true; return false; },
     say(text, { force = false, interrupt = false } = {}) {
-      if (!enabled || !synth || !text) return false;
+      if (!enabled || !text) return false;
       const now = Date.now();
       if (!force && (now - lastAt < minGapMs || (text === lastText && now - lastAt < 4000))) return false;
-      try {
-        if (interrupt) synth.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = lang; u.rate = 1.0; u.pitch = 1.0;
-        const v = pickVoice();
-        if (v) u.voice = v;
-        synth.speak(u);
-        lastAt = now; lastText = text;
-        return true;
-      } catch { return false; }
+      lastAt = now; lastText = text;
+      const clip = clipFor(text);
+      if (clip) {
+        if (interrupt && current && current !== clip) { try { current.pause(); current.currentTime = 0; } catch { /* ignore */ } }
+        if (!interrupt && current && !current.paused && !current.ended) return true; // let the current cue finish
+        try {
+          clip.currentTime = 0;
+          const p = clip.play();
+          current = clip;
+          if (p && p.catch) p.catch(() => { clips.set(VOICE_CLIPS[text], null); speakTts(text, interrupt); });
+          return true;
+        } catch { clips.set(VOICE_CLIPS[text], null); }
+      }
+      return speakTts(text, interrupt);
     },
-    stop() { if (synth) { try { synth.cancel(); } catch { /* ignore */ } } },
+    stop() {
+      if (synth) { try { synth.cancel(); } catch { /* ignore */ } }
+      if (current) { try { current.pause(); current.currentTime = 0; } catch { /* ignore */ } current = null; }
+    },
   };
 }
-
-/** Arabic word for small counts (1–20), falling back to digits. */
-const AR_NUM = ['صفر', 'واحد', 'اثنين', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة', 'عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر', 'عشرين'];
-export function arabicCount(n) { return AR_NUM[n] || String(n); }
 
 /** The flexion a live session should aim for: the next gate's threshold, else a little past the last best. */
 export function flexTarget({ results = [], contralateral, lastFlex } = {}) {
