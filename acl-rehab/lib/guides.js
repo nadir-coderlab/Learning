@@ -4,35 +4,35 @@ import { html, useState } from './h.js';
 
 export const GUIDES = {
   flexSide: {
-    title: 'ثني الركبة من الجانب', file: 'knee-flexion-side.png', pict: 'sideLying',
+    title: 'ثني الركبة من الجانب', file: 'knee-flexion-side.jpg', pict: 'sideLying',
     steps: ['استلقِ على ظهرك والساق المصابة أقرب للكاميرا.', 'ثبّت الجوال على كرسي بمستوى الركبة، على بعد مترين تقريبًا، والشاشة باتجاهك.', 'شورت أو ملابس ضيقة، وإضاءة من الأمام لا من الخلف.'],
   },
   extProp: {
-    title: 'فرد الركبة والكعب على لفافة', file: 'knee-extension-heel-prop.png', pict: 'extProp',
+    title: 'فرد الركبة والكعب على لفافة', file: 'knee-extension-heel-prop.jpg', pict: 'extProp',
     steps: ['استلقِ وضع الكعب على منشفة ملفوفة، والركبة مرتخية.', 'صوّر الساق كاملة من الجانب والجوال بمستوى الركبة.', 'لا تضغط الركبة بيدك أثناء التصوير.'],
   },
   phoneLeg: {
-    title: 'الجوال كمنقلة على الساق', file: 'phone-inclinometer.png', pict: 'phoneThigh',
+    title: 'الجوال كمنقلة على الساق', file: 'phone-inclinometer.jpg', pict: 'phoneThigh',
     steps: ['اجلس أو استلقِ واثنِ الركبة إلى أقصى ما تقدر براحة.', 'ضع الجوال على مقدمة الفخذ (الحافة الطويلة على طول العظم) وثبّت القراءة.', 'ثم ضعه على مقدمة الساق بنفس الطريقة وثبّت القراءة الثانية.'],
   },
   slr: {
-    title: 'رفع الساق مستقيمة', file: 'straight-leg-raise.png', pict: 'slr',
+    title: 'رفع الساق مستقيمة', file: 'straight-leg-raise.jpg', pict: 'slr',
     steps: ['استلقِ على ظهرك والساق الأخرى مثنية والقدم على الأرض.', 'الجوال على الجانب بمستوى الورك وعلى بعد مترين، والجسم كامل ظاهر.', 'شد الفخذ أولًا ثم ارفع الساق مستقيمة ببطء.'],
   },
   squatSide: {
-    title: 'القرفصاء من الجانب', file: 'squat-side.png', pict: 'squatSide',
+    title: 'القرفصاء من الجانب', file: 'squat-side.jpg', pict: 'squatSide',
     steps: ['قف جانبًا للكاميرا على بعد مترين والجسم كامل ظاهر.', 'الجوال على كرسي بمستوى الركبة.', 'انزل واطلع بهدوء، ثانيتين نزول وثانيتين صعود.'],
   },
   valgusFront: {
-    title: 'اتجاه الركبة من الأمام', file: 'knee-valgus-front.png', pict: 'valgusFront',
+    title: 'اتجاه الركبة من الأمام', file: 'knee-valgus-front.jpg', pict: 'valgusFront',
     steps: ['واجه الكاميرا وقف على بعد مترين، والساقان ظاهرتان من الورك للقدم.', 'الجوال بمستوى الركبة على كرسي.', 'انزل في قرفصاء خفيفة وراقب أن الركبة فوق القدم لا داخلها.'],
   },
   wound: {
-    title: 'صورة الجرح', file: 'wound-photo.png', pict: 'wound',
+    title: 'صورة الجرح', file: 'wound-photo.jpg', pict: 'wound',
     steps: ['إضاءة نهار وبدون فلاش قريب.', 'الجوال على بعد 20–30 سم والجرح في منتصف الصورة.', 'المس الشاشة على الجرح ليركّز ثم صوّر.'],
   },
   girth: {
-    title: 'محيط الركبة', file: 'knee-girth-tape.png', pict: 'girth',
+    title: 'محيط الركبة', file: 'knee-girth-tape.jpg', pict: 'girth',
     steps: ['الساق مفرودة ومرتخية.', 'لف شريط القياس حول منتصف الرضفة بدون شد.', 'قِس الركبتين بنفس الطريقة وسجّل الرقمين.'],
   },
 };
