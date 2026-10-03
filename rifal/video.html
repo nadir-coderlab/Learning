@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>الرياضيات في حياتنا | ريفال الرشيدي</title>
+<meta name="description" content="مقطع موشن يربط دروس الرياضيات 2-1 بواقع الحياة من خلال قصة محل ريفال.">
+<meta name="theme-color" content="#FF5C9A">
+<meta property="og:title" content="الرياضيات في حياتنا 🎬">
+<meta property="og:description" content="قصة محل ريفال: من الخصم إلى المواقف إلى أعلى ربح.. والرياضيات معنا في كل خطوة.">
+<meta property="og:image" content="poster.jpg">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='28' width='100' height='100' fill='%23FF5C9A'/><path d='M38 30 L72 50 L38 70Z' fill='white'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@600;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.head{text-align:center;margin:10px 0 18px}
+.head .k{display:inline-block;font-weight:800;color:var(--rose);background:#fff;border-radius:999px;padding:6px 16px;font-size:14px;box-shadow:var(--shadow)}
+.head h1{font-family:'Baloo Bhaijaan 2';font-weight:800;font-size:clamp(32px,7vw,50px);line-height:1.2;margin-top:12px;
+  background:linear-gradient(90deg,var(--rose),var(--pink) 45%,var(--lav));-webkit-background-clip:text;background-clip:text;color:transparent}
+.head p{color:var(--ink-2);font-size:17px;margin-top:6px;line-height:1.7}
+.player{padding:10px;border-radius:32px}
+.player video{display:block;width:100%;aspect-ratio:16/9;border-radius:24px;background:#FFE3EE}
+.marks{margin-top:18px;padding:18px}
+.marks h2{font-size:19px;font-weight:800;margin:0 4px 12px}
+.ml{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+@media (max-width:560px){.ml{grid-template-columns:1fr}}
+.m{display:flex;align-items:center;gap:12px;width:100%;text-align:right;font-family:inherit;cursor:pointer;background:#fff;border:2px solid var(--line);border-radius:18px;padding:10px 12px;transition:.2s}
+.m:hover{border-color:var(--pink-2);transform:translateX(-3px)}
+.m.on{border-color:var(--pink);background:var(--pink-soft)}
+.m .tm{flex:none;font-weight:800;font-size:14px;color:#fff;background:linear-gradient(135deg,var(--pink),var(--lav));border-radius:12px;padding:6px 10px;direction:ltr;min-width:58px;text-align:center}
+.m b{display:block;font-size:16px;color:var(--ink)}
+.m small{display:block;font-size:13px;color:var(--ink-2);font-weight:700}
+.cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"><div class="b b1"></div><div class="b b2"></div><div class="b b3"></div></div>
+<main class="wrap">
+  <div class="head">
+    <span class="k">🎬 مقطع موشن · رياضيات <span dir="ltr">2-1</span></span>
+    <h1>الرياضيات في حياتنا</h1>
+    <p>قصة محل ريفال الصغير.. وكيف ساعدتها دروس الفصل الأول في كل قرار</p>
+  </div>
+  <div class="player glass">
+    <video id="vid" controls playsinline preload="metadata" poster="poster.jpg">
+      <source src="video.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="marks glass">
+    <h2>📍 انتقلي لأي جزء</h2>
+    <div class="ml" id="ml"></div>
+  </div>
+  <div class="cta">
+    <a class="btn btn-main" href="quiz.html">جربي اختبار الفصل ✨</a>
+    <a class="btn btn-ghost" href="./">الصفحة الرئيسية</a>
+  </div>
+  <div class="foot">إعداد وتقديم <b>ريفال الرشيدي</b> · الصف <span dir="ltr">2/1</span><br>بإشراف المعلمة <b>إيمان الأحمدي</b></div>
+</main>
+<script>
+const M = [
+  [0, 'البداية', 'معكم ريفال الرشيدي'],
+  [16, 'الشراء والخصم', 'خاصية التوزيع · 1-1'],
+  [40, 'مواقف السيارة', 'الدالة الدرجية · 1-3'],
+  [64, 'تسعير الكب كيك', 'الدوال المنفصلة · 1-2'],
+  [86.5, 'الميزانية', 'المتباينات الخطية · 1-4'],
+  [108.5, 'شروط المحل', 'أنظمة المتباينات · 1-5'],
+  [128.5, 'أعلى ربح', 'البرمجة الخطية · 1-6'],
+  [151, 'الختام', 'الرياضيات حولنا في كل مكان'],
+];
+const v = document.getElementById('vid'), ml = document.getElementById('ml');
+const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+M.forEach(([t, a, b], i) => {
+  const e = document.createElement('button'); e.className = 'm';
+  e.innerHTML = `<span class="tm">${fmt(t)}</span><span><b>${a}</b><small>${b.replace(/(\d-\d)/, '<span dir="ltr">$1</span>')}</small></span>`;
+  e.onclick = () => { v.currentTime = t; v.play(); window.scrollTo({top: 0, behavior: 'smooth'}); };
+  ml.appendChild(e);
+});
+v.addEventListener('timeupdate', () => {
+  let k = 0; M.forEach(([t], i) => { if (v.currentTime >= t - .2) k = i; });
+  [...ml.children].forEach((e, i) => e.classList.toggle('on', i === k));
+});
+const bg = document.querySelector('.bg');
+['x','y','π','√','ƒ','%','≤','+'].forEach((s, i) => { const e = document.createElement('div'); e.className = 's'; e.textContent = s;
+  e.style.left = (i * 12.5 + Math.random() * 5) + '%'; e.style.fontSize = (26 + Math.random() * 30) + 'px';
+  e.style.animationDuration = (18 + Math.random() * 14) + 's'; e.style.animationDelay = (-Math.random() * 30) + 's'; bg.appendChild(e); });
+</script>
+</body>
+</html>

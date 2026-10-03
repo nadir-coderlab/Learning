@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>تحدّي الرياضيات 2-1</title>
+<meta name="description" content="اختبار تفاعلي في الرياضيات 2-1: اختاري الفصل وجاوبي على أسئلة عشوائية جديدة كل مرة.">
+<meta name="theme-color" content="#FF5C9A">
+<meta property="og:title" content="تحدّي الرياضيات 2-1 ✨">
+<meta property="og:description" content="اكتبي اسمك، اختاري الفصل، وجاوبي على أسئلة عشوائية جديدة كل مرة.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='28' width='100' height='100' fill='%23FF5C9A'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='serif' font-style='italic'>ƒ</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@600;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="style.css">
+<style>
+.screen{display:none;animation:in .5s cubic-bezier(.2,.8,.2,1)}
+.screen.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+
+/* welcome */
+.hero{padding:40px 26px 34px;text-align:center;margin-top:4vh}
+.logo{width:96px;height:96px;margin:0 auto 18px;border-radius:30px;display:grid;place-items:center;color:#fff;font-size:46px;
+  background:linear-gradient(135deg,var(--pink),var(--lav));box-shadow:0 18px 34px -12px rgba(255,92,154,.7);transform:rotate(-6deg);
+  font-family:'Times New Roman',serif;font-style:italic;animation:bob 3.6s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:rotate(-6deg) translateY(0)}50%{transform:rotate(4deg) translateY(-8px)}}
+.hero h1{font-family:'Baloo Bhaijaan 2';font-weight:800;font-size:clamp(34px,7vw,52px);line-height:1.15;
+  background:linear-gradient(90deg,var(--rose),var(--pink) 40%,var(--lav));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--ink-2);font-size:18px;margin:12px auto 26px;max-width:460px;line-height:1.7}
+.field{position:relative;max-width:420px;margin:0 auto 18px}
+.field input{width:100%;font-family:inherit;font-size:20px;font-weight:700;color:var(--ink);text-align:center;
+  padding:17px 22px;border-radius:999px;border:2px solid var(--pink-3);background:#fff;outline:none;transition:border .2s,box-shadow .2s}
+.field input:focus{border-color:var(--pink);box-shadow:0 0 0 6px #FF5C9A22}
+.field input::placeholder{color:#C9A9B8;font-weight:500}
+.hero .btn{min-width:220px}
+.badges{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:22px}
+
+/* chapters */
+.hello{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 4px 18px;flex-wrap:wrap}
+.hello h2{font-family:'Baloo Bhaijaan 2';font-size:clamp(26px,5.4vw,36px);font-weight:800}
+.hello h2 span{color:var(--pink)}
+.hello p{color:var(--ink-2);font-size:16px;margin-top:2px}
+.link{background:none;border:0;font-family:inherit;color:var(--rose);font-weight:800;font-size:15px;cursor:pointer;text-decoration:underline;text-underline-offset:4px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media (max-width:620px){.grid{grid-template-columns:1fr}}
+.ch{position:relative;text-align:right;cursor:pointer;border:0;font-family:inherit;color:var(--ink);padding:20px 20px 18px;border-radius:var(--r-lg);
+  background:#fff;box-shadow:var(--shadow);overflow:hidden;transition:transform .2s ease,box-shadow .2s;animation:in .5s both}
+.ch:hover{transform:translateY(-4px) rotate(-.4deg);box-shadow:0 24px 44px -18px rgba(232,62,126,.45)}
+.ch .num{position:absolute;left:-6px;bottom:-30px;font-family:'Baloo Bhaijaan 2';font-weight:800;font-size:130px;line-height:1;opacity:.12}
+.ch .ic{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;font-size:24px;font-weight:700;color:#fff;margin-bottom:12px;
+  font-family:'Times New Roman',serif;font-style:italic}
+.ch h3{font-size:21px;font-weight:800;line-height:1.35}
+.ch .ls{font-size:13.5px;color:var(--ink-2);margin-top:6px;line-height:1.7}
+.ch .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.ch .meta span{font-size:13px;font-weight:800;border-radius:999px;padding:4px 12px}
+.ch.all{grid-column:1/-1;color:#fff;background:linear-gradient(120deg,#FF5C9A 0%,#FF7AA8 35%,#A87BFF 100%)}
+.ch.all .ls{color:#fff;opacity:.92}.ch.all .num{opacity:.18}
+.ch.all .ic{background:#ffffff33}
+
+/* quiz */
+.qtop{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.xbtn{width:44px;height:44px;border-radius:50%;border:0;background:#fff;color:var(--ink-2);font-size:20px;cursor:pointer;box-shadow:var(--shadow);flex:none}
+.qtop .tt{flex:1;min-width:0}
+.qtop .tt b{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar{height:12px;border-radius:99px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--pink),var(--lav));transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.score{flex:none;font-weight:800;color:var(--ok);background:#fff;border-radius:999px;padding:9px 14px;box-shadow:var(--shadow);font-size:15px}
+.qcard{padding:26px 22px 22px}
+.qcard.slide{animation:qin .55s cubic-bezier(.2,.8,.2,1)}
+@keyframes qin{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:none}}
+.qn{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:14px;color:var(--rose);background:var(--pink-soft);border-radius:999px;padding:6px 14px}
+.qt{font-size:clamp(20px,4.4vw,24px);font-weight:800;line-height:1.75;margin:14px 0 18px}
+.opts{display:grid;gap:11px}
+.opt{display:flex;align-items:center;gap:14px;width:100%;text-align:right;font-family:inherit;font-size:18.5px;font-weight:700;color:var(--ink);
+  background:#fff;border:2px solid var(--line);border-radius:var(--r-md);padding:13px 14px;cursor:pointer;transition:transform .15s,border-color .2s,background .2s,box-shadow .2s;line-height:1.6}
+.opt:hover{border-color:var(--pink-2);transform:translateX(-4px);box-shadow:0 10px 22px -14px rgba(255,92,154,.6)}
+.opt .L{flex:none;width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:var(--pink-soft);color:var(--rose);font-weight:800;font-size:17px;transition:.2s}
+.opt .T{flex:1;min-width:0;overflow-x:auto}
+.opt.ok{border-color:var(--ok);background:var(--ok-soft)}
+.opt.ok .L{background:var(--ok);color:#fff}
+.opt.bad{border-color:var(--bad);background:var(--bad-soft);animation:shake .45s}
+.opt.bad .L{background:var(--bad);color:#fff}
+.opt.dim{opacity:.5}
+.opts.done .opt{pointer-events:none}
+@keyframes shake{20%,60%{transform:translateX(7px)}40%,80%{transform:translateX(-7px)}}
+.pop{animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{0%{transform:scale(.96)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
+.ex{display:none;margin-top:16px;padding:14px 16px;border-radius:var(--r-md);font-size:17px;line-height:1.85;font-weight:500;background:#FFF8E6;border:1.5px dashed #FFD27A}
+.ex.on{display:block;animation:in .35s}
+.ex b{font-weight:800}
+.ex.ok{background:var(--ok-soft);border-color:#9EDFC5}
+.ex.bad{background:#FFF1F4;border-color:#F7B4C3}
+.next{margin-top:16px;width:100%;display:none}
+.next.on{display:flex;animation:in .3s}
+
+/* result */
+.res{padding:30px 22px 24px;text-align:center}
+.ring{position:relative;width:190px;height:190px;margin:4px auto 10px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .v{position:absolute;inset:0;display:grid;place-items:center;align-content:center}
+.ring .v b{font-family:'Baloo Bhaijaan 2';font-size:54px;font-weight:800;line-height:1;color:var(--ink);direction:ltr}
+.ring .v small{color:var(--ink-2);font-weight:700;font-size:16px;margin-top:4px}
+.stars{font-size:34px;letter-spacing:6px;margin:4px 0 6px}
+.stars span{display:inline-block;filter:grayscale(1);opacity:.3;transform:scale(.6);transition:.5s cubic-bezier(.3,1.7,.5,1)}
+.stars span.on{filter:none;opacity:1;transform:scale(1)}
+.res h2{font-family:'Baloo Bhaijaan 2';font-size:clamp(26px,5.6vw,34px);font-weight:800;line-height:1.3}
+.res .sub{color:var(--ink-2);font-size:17px;margin:8px 0 18px;line-height:1.7}
+.res .stats{display:flex;justify-content:center;gap:8px;margin:0 auto 20px;max-width:440px}
+.res .stats div{flex:1;min-width:0;background:var(--pink-soft);border-radius:18px;padding:10px 6px}
+.res .stats b{display:block;font-size:22px;font-weight:800;color:var(--rose)}
+.res .stats span{font-size:13px;color:var(--ink-2);font-weight:700}
+.acts{display:grid;gap:10px;max-width:420px;margin:0 auto}
+.rev{margin-top:18px;text-align:right}
+.rev h3{font-size:20px;font-weight:800;margin:6px 4px 12px}
+.ri{background:#fff;border-radius:var(--r-md);padding:14px 16px;margin-bottom:10px;border-right:6px solid var(--bad);box-shadow:0 8px 22px -16px rgba(45,35,64,.4);line-height:1.8}
+.ri .q{font-weight:800;font-size:16.5px}
+.ri .a{font-size:15.5px;margin-top:6px}
+.ri .a .y{color:var(--bad);font-weight:800}.ri .a .c{color:var(--ok);font-weight:800}
+.ri .e{font-size:14.5px;color:var(--ink-2);margin-top:4px}
+.perfect{background:var(--ok-soft);color:#13805A;border-radius:var(--r-md);padding:14px;font-weight:800;text-align:center}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"><div class="b b1"></div><div class="b b2"></div><div class="b b3"></div></div>
+<canvas id="confetti"></canvas>
+<main class="wrap">
+
+  <!-- 1) الترحيب -->
+  <section class="screen on" id="sWelcome">
+    <div class="hero glass">
+      <div class="logo">ƒ</div>
+      <h1>تحدّي الرياضيات</h1>
+      <p>اختبري نفسك في فصول الرياضيات <span dir="ltr">2-1</span>.. كل مرة تدخلين بتجيك أسئلة جديدة وبترتيب مختلف ✨</p>
+      <form id="nameForm" autocomplete="off">
+        <div class="field"><input id="nameIn" maxlength="30" placeholder="اكتبي اسمك هنا" aria-label="الاسم"></div>
+        <button class="btn btn-main" id="goBtn" type="submit" disabled>يلا نبدأ ←</button>
+      </form>
+      <div class="badges">
+        <span class="chip">🎲 أسئلة عشوائية</span><span class="chip">📚 4 فصول</span><span class="chip">💡 شرح لكل إجابة</span>
+      </div>
+    </div>
+    <div class="foot">من إعداد <b>ريفال الرشيدي</b> · الصف <span dir="ltr">2/1</span><br>بإشراف المعلمة <b>إيمان الأحمدي</b></div>
+  </section>
+
+  <!-- 2) اختيار الفصل -->
+  <section class="screen" id="sChapters">
+    <div class="hello">
+      <div><h2>أهلًا <span id="helloName"></span> 👋</h2><p>اختاري الفصل اللي تبين تختبرين فيه</p></div>
+      <button class="link" id="changeName">تغيير الاسم</button>
+    </div>
+    <div class="grid" id="chGrid"></div>
+    <div class="foot">كل اختبار <b>10 أسئلة</b> مختارة عشوائيًا من بنك الأسئلة، والاختبار الشامل <b>12 سؤال</b> من كل الفصول</div>
+  </section>
+
+  <!-- 3) الأسئلة -->
+  <section class="screen" id="sQuiz">
+    <div class="qtop">
+      <button class="xbtn" id="quitBtn" aria-label="خروج">✕</button>
+      <div class="tt"><b id="qChTitle"></b><div class="bar"><i id="qBar"></i></div></div>
+      <div class="score">✓ <span id="qScore">0</span></div>
+    </div>
+    <div class="qcard glass" id="qCard">
+      <span class="qn">السؤال <span id="qNum" dir="ltr"></span></span>
+      <div class="qt" id="qText"></div>
+      <div class="opts" id="qOpts"></div>
+      <div class="ex" id="qEx"></div>
+      <button class="btn btn-main next" id="nextBtn">السؤال التالي ←</button>
+    </div>
+  </section>
+
+  <!-- 4) النتيجة -->
+  <section class="screen" id="sResult">
+    <div class="res glass">
+      <div class="ring">
+        <svg viewBox="0 0 200 200"><defs><linearGradient id="rg" x1="0" x2="1"><stop offset="0" stop-color="#FF5C9A"/><stop offset="1" stop-color="#A87BFF"/></linearGradient></defs>
+          <circle cx="100" cy="100" r="86" fill="none" stroke="#FFE3EE" stroke-width="18"/>
+          <circle id="ringArc" cx="100" cy="100" r="86" fill="none" stroke="url(#rg)" stroke-width="18" stroke-linecap="round" stroke-dasharray="540.35" stroke-dashoffset="540.35" style="transition:stroke-dashoffset 1.4s cubic-bezier(.2,.8,.2,1)"/></svg>
+        <div class="v"><b id="rPct">0%</b><small id="rFrac"></small></div>
+      </div>
+      <div class="stars"><span>⭐</span><span>⭐</span><span>⭐</span></div>
+      <h2 id="rTitle"></h2>
+      <p class="sub" id="rSub"></p>
+      <div class="stats">
+        <div><b id="rOk">0</b><span>إجابة صحيحة</span></div>
+        <div><b id="rBad">0</b><span>تحتاج مراجعة</span></div>
+        <div><b id="rTime" dir="ltr">0:00</b><span>الوقت</span></div>
+      </div>
+      <div class="acts">
+        <button class="btn btn-main" id="againBtn">🎲 اختبار جديد بنفس الفصل</button>
+        <button class="btn btn-ghost" id="otherBtn">اختاري فصل ثاني</button>
+      </div>
+      <div class="rev" id="review"></div>
+    </div>
+    <div class="foot">من إعداد <b>ريفال الرشيدي</b> · رياضيات <span dir="ltr">2-1</span></div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="questions.js"></script>
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const LETTERS = ['أ','ب','ج','د'];
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem('rifalQuiz.'+k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem('rifalQuiz.'+k, JSON.stringify(v)); }catch(e){} }
+};
+const math = el => { if (window.renderMathInElement) renderMathInElement(el, {delimiters:[{left:'$',right:'$',display:false}], throwOnError:false}); };
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+// floating symbols
+const bg = document.querySelector('.bg');
+['x','y','π','√','ƒ','∑','≤','%','i','∞','+','÷'].forEach((s, i) => {
+  const e = document.createElement('div'); e.className = 's'; e.textContent = s;
+  e.style.left = (i * 8.3 + Math.random() * 4) + '%'; e.style.fontSize = (26 + Math.random() * 34) + 'px';
+  e.style.animationDuration = (18 + Math.random() * 14) + 's'; e.style.animationDelay = (-Math.random() * 30) + 's';
+  bg.appendChild(e);
+});
+
+function show(id){ document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id)); window.scrollTo({top:0, behavior:'smooth'}); }
+
+// ---------- الاسم ----------
+let name = store.get('name', '');
+const nameIn = $('nameIn');
+nameIn.value = name;
+const syncBtn = () => $('goBtn').disabled = nameIn.value.trim().length < 2;
+nameIn.addEventListener('input', syncBtn); syncBtn();
+$('nameForm').addEventListener('submit', e => { e.preventDefault(); name = nameIn.value.trim(); if (name.length < 2) return; store.set('name', name); openChapters(); });
+$('changeName').onclick = () => { show('sWelcome'); setTimeout(() => nameIn.focus(), 300); };
+
+// ---------- الفصول ----------
+function openChapters(){
+  $('helloName').textContent = name;
+  const best = store.get('best', {});
+  const g = $('chGrid'); g.innerHTML = '';
+  CHAPTERS.forEach((c, i) => {
+    const b = document.createElement('button'); b.className = 'ch'; b.style.animationDelay = (i * .07) + 's';
+    const bs = best[c.id];
+    b.innerHTML = `<div class="num" style="color:${c.color}">${c.id}</div><div class="ic" style="background:${c.color}">${c.icon}</div>
+      <h3>الفصل ${c.id}: ${c.title}</h3><div class="ls">${c.lessons}</div>
+      <div class="meta"><span style="background:${c.soft};color:${c.color}">10 أسئلة</span>${bs != null ? `<span style="background:#E1F7EE;color:#13805A">أفضل نتيجة: ${bs}%</span>` : ''}</div>`;
+    b.onclick = () => start(c.id);
+    g.appendChild(b);
+  });
+  const a = document.createElement('button'); a.className = 'ch all'; a.style.animationDelay = '.3s';
+  const ba = best.all;
+  a.innerHTML = `<div class="num">★</div><div class="ic">∑</div><h3>الاختبار الشامل</h3>
+    <div class="ls">أسئلة من الفصول الأربعة كلها مع بعض.. تحدّي حقيقي!</div>
+    <div class="meta"><span style="background:#ffffff33">12 سؤال</span>${ba != null ? `<span style="background:#ffffff33">أفضل نتيجة: ${ba}%</span>` : ''}</div>`;
+  a.onclick = () => start('all');
+  g.appendChild(a);
+  show('sChapters');
+}
+
+// كيس عشوائي لكل فصل: ما يتكرر السؤال إلا بعد ما تمر كل الأسئلة
+function draw(chId, n){
+  const ch = CHAPTERS.find(c => c.id === chId);
+  let bag = store.get('bag' + chId, []).filter(i => i < ch.q.length);
+  const out = [];
+  while (out.length < n) {
+    if (!bag.length) bag = shuffle([...ch.q.keys()].filter(i => !out.includes(i)));
+    out.push(bag.pop());
+  }
+  store.set('bag' + chId, bag);
+  return out.map(i => ({ ...ch.q[i], ch }));
+}
+
+// ---------- الاختبار ----------
+let S = null;
+function start(key){
+  let qs;
+  if (key === 'all') qs = shuffle(CHAPTERS.flatMap(c => draw(c.id, 3)));
+  else qs = shuffle(draw(key, 10));
+  qs = qs.map(q => { const order = shuffle([0,1,2,3]); return { ...q, opts: order.map(k => q.o[k]), correct: order.indexOf(0) }; });
+  S = { key, qs, i: 0, ok: 0, answers: [], t0: Date.now(),
+        title: key === 'all' ? 'الاختبار الشامل' : `الفصل ${key}: ${CHAPTERS.find(c => c.id === key).title}` };
+  $('qChTitle').textContent = S.title;
+  $('qScore').textContent = '0';
+  show('sQuiz'); render();
+}
+function render(){
+  const q = S.qs[S.i], n = S.qs.length;
+  $('qNum').textContent = `${S.i + 1} / ${n}`;
+  $('qBar').style.width = (S.i / n * 100) + '%';
+  const card = $('qCard'); card.classList.remove('slide'); void card.offsetWidth; card.classList.add('slide');
+  $('qText').innerHTML = q.t;
+  const box = $('qOpts'); box.innerHTML = ''; box.classList.remove('done');
+  q.opts.forEach((o, k) => {
+    const b = document.createElement('button'); b.className = 'opt';
+    b.innerHTML = `<span class="L">${LETTERS[k]}</span><span class="T">${o}</span>`;
+    b.onclick = () => answer(k);
+    box.appendChild(b);
+  });
+  $('qEx').className = 'ex'; $('qEx').innerHTML = '';
+  $('nextBtn').classList.remove('on');
+  $('nextBtn').textContent = S.i === n - 1 ? 'شوفي النتيجة 🎉' : 'السؤال التالي ←';
+  math(card);
+}
+function answer(k){
+  const q = S.qs[S.i], box = $('qOpts');
+  if (box.classList.contains('done')) return;
+  box.classList.add('done');
+  const btns = [...box.children], right = k === q.correct;
+  btns.forEach((b, j) => { if (j === q.correct) b.classList.add('ok', 'pop'); else if (j === k) b.classList.add('bad'); else b.classList.add('dim'); });
+  btns[q.correct].querySelector('.L').textContent = '✓';
+  if (!right) btns[k].querySelector('.L').textContent = '✕';
+  if (right) { S.ok++; $('qScore').textContent = S.ok; }
+  S.answers.push({ q, pick: k, right });
+  const ex = $('qEx');
+  const praise = ['أحسنتِ!', 'صح عليك!', 'ممتاز!', 'برافو!', 'إجابة صحيحة!'];
+  ex.className = 'ex on ' + (right ? 'ok' : 'bad');
+  ex.innerHTML = `<b>${right ? '🎉 ' + praise[Math.floor(Math.random() * praise.length)] : '💡 الإجابة الصحيحة: ' + q.opts[q.correct]}</b><br>${q.e}`;
+  math(ex);
+  $('qBar').style.width = ((S.i + 1) / S.qs.length * 100) + '%';
+  $('nextBtn').classList.add('on');
+}
+$('nextBtn').onclick = () => { S.i++; if (S.i < S.qs.length) render(); else finish(); };
+$('quitBtn').onclick = () => { if (confirm('تبين تطلعين من الاختبار؟ ما راح تنحفظ النتيجة.')) openChapters(); };
+document.addEventListener('keydown', e => {
+  if (!$('sQuiz').classList.contains('on')) return;
+  const k = ['1','2','3','4'].indexOf(e.key); if (k > -1) answer(k);
+  if (e.key === 'Enter' && $('nextBtn').classList.contains('on')) $('nextBtn').click();
+});
+
+// ---------- النتيجة ----------
+function finish(){
+  const n = S.qs.length, pct = Math.round(S.ok / n * 100), secs = Math.round((Date.now() - S.t0) / 1000);
+  const best = store.get('best', {}); const k = S.key;
+  if (best[k] == null || pct > best[k]) { best[k] = pct; store.set('best', best); }
+  let t, s;
+  if (pct === 100) { t = `علامة كاملة يا ${name}! 🌟`; s = 'ما شاء الله عليك، فاهمة كل شي في هذا الفصل.'; }
+  else if (pct >= 80) { t = `ممتاز يا ${name}! 💖`; s = 'مستواك عالي، راجعي الأسئلة البسيطة اللي فاتتك وتصيرين كاملة.'; }
+  else if (pct >= 60) { t = `جيد جدًا يا ${name} 👏`; s = 'باقي لك شوي وتوصلين للقمة، شوفي الشرح تحت وجربي مرة ثانية.'; }
+  else if (pct >= 40) { t = `بداية حلوة يا ${name} 🌱`; s = 'راجعي أخطاءك بهدوء، وبعدها جربي اختبار جديد.. الأسئلة بتتغير.'; }
+  else { t = `ولا يهمك يا ${name} 🤍`; s = 'كل محاولة تقربك أكثر. راجعي الدروس وارجعي تحدّي نفسك.'; }
+  $('rTitle').textContent = t; $('rSub').textContent = s;
+  $('rFrac').textContent = `${S.ok} من ${n}`;
+  $('rOk').textContent = S.ok; $('rBad').textContent = n - S.ok;
+  $('rTime').textContent = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
+  const stars = pct >= 90 ? 3 : pct >= 60 ? 2 : pct >= 30 ? 1 : 0;
+  document.querySelectorAll('.stars span').forEach((e, i) => { e.classList.remove('on'); setTimeout(() => e.classList.toggle('on', i < stars), 700 + i * 250); });
+  const arc = $('ringArc'); arc.style.transition = 'none'; arc.style.strokeDashoffset = 540.35; void arc.offsetWidth;
+  arc.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(.2,.8,.2,1)';
+  setTimeout(() => arc.style.strokeDashoffset = 540.35 * (1 - pct / 100), 120);
+  let cur = 0; const step = () => { cur = Math.min(pct, cur + Math.max(1, Math.round(pct / 40))); $('rPct').textContent = cur + '%'; if (cur < pct) requestAnimationFrame(step); };
+  $('rPct').textContent = '0%'; setTimeout(step, 150);
+  const wrong = S.answers.filter(a => !a.right), rv = $('review');
+  rv.innerHTML = wrong.length ? `<h3>📝 راجعي أخطاءك</h3>` + wrong.map(a => `<div class="ri"><div class="q">${a.q.t}</div>
+      <div class="a">إجابتك: <span class="y">${a.q.opts[a.pick]}</span></div><div class="a">الصحيحة: <span class="c">${a.q.opts[a.q.correct]}</span></div>
+      <div class="e">${a.q.e}</div></div>`).join('') : `<div class="perfect">ولا غلطة! كل إجاباتك صحيحة 🎯</div>`;
+  math(rv);
+  show('sResult');
+  if (pct >= 70) setTimeout(confetti, 600);
+}
+$('againBtn').onclick = () => start(S.key);
+$('otherBtn').onclick = openChapters;
+
+// ---------- كونفيتي ----------
+function confetti(){
+  const cv = $('confetti'), cx = cv.getContext('2d'); const W = cv.width = innerWidth, H = cv.height = innerHeight;
+  const cols = ['#FF5C9A','#FFC94D','#A87BFF','#2EC4B6','#FF8A65','#FF85B3'];
+  const P = Array.from({length: 160}, () => ({ x: Math.random() * W, y: -20 - Math.random() * H * .6, w: 6 + Math.random() * 8, h: 8 + Math.random() * 10,
+    vx: -2 + Math.random() * 4, vy: 2 + Math.random() * 4, r: Math.random() * 6, vr: -.2 + Math.random() * .4, c: cols[Math.floor(Math.random() * cols.length)] }));
+  let f = 0;
+  (function loop(){ cx.clearRect(0, 0, W, H);
+    P.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += .04; p.r += p.vr; cx.save(); cx.translate(p.x, p.y); cx.rotate(p.r); cx.fillStyle = p.c; cx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); cx.restore(); });
+    if (++f < 260) requestAnimationFrame(loop); else cx.clearRect(0, 0, W, H); })();
+}
+
+if (name) { $('helloName').textContent = name; }
+})();
+</script>
+</body>
+</html>
