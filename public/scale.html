@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ميزاني</title>
+<meta name="description" content="ميزاني: اربط ميزان الجسم بالبلوتوث، شوف وزنك مباشرة، واحفظ سجلك ورسم تغيّر وزنك.">
+<meta name="theme-color" content="#0f766e" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b1412" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="scale-app/manifest.webmanifest">
+<link rel="icon" href="scale-app/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="scale-app/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="scale-app/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <img src="scale-app/icon.svg" alt="" width="30" height="30">
+    <span>ميزاني</span>
+  </div>
+  <div id="connPill" class="pill off" role="status" aria-live="polite"><i aria-hidden="true"></i><span id="connText">غير متصل</span></div>
+</header>
+
+<main>
+  <!-- ============ الميزان ============ -->
+  <section id="tab-scale">
+    <p id="support" class="notice" hidden></p>
+
+    <div class="who" aria-label="مين يوزن؟"></div>
+
+    <div id="dial" class="dial" data-mode="idle">
+      <svg class="ring" viewBox="0 0 220 220" aria-hidden="true">
+        <circle class="track" cx="110" cy="110" r="96"></circle>
+        <circle class="arc" cx="110" cy="110" r="96" pathLength="100"></circle>
+      </svg>
+      <div class="reading" aria-live="polite">
+        <span id="weight" class="weight">0.0</span>
+        <span class="unit">كجم</span>
+        <svg class="check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>
+      </div>
+    </div>
+    <p id="hint" class="hint" aria-live="polite"></p>
+
+    <div class="actions">
+      <button id="btnConnect" class="btn primary big" type="button" data-action="connect">اتصل بالميزان</button>
+      <button id="btnAll" class="link" type="button">ميزانك ما طلع بالقائمة؟ اعرض كل الأجهزة</button>
+    </div>
+
+    <div id="result" class="card result" hidden></div>
+
+    <details class="card tips">
+      <summary>طريقة الاستخدام</summary>
+      <ol>
+        <li>شغّل البلوتوث في الجوال، وسكّر تطبيق الميزان الرسمي (الميزان يتصل بتطبيق واحد بس).</li>
+        <li>اطلع على الميزان عشان يصحى، واضغط «اتصل بالميزان» واختر اسمه (مثل MIBFS أو MI SCALE2 أو QN-Scale).</li>
+        <li>اثبت على الميزان حافي لين يطلع الصح ✓. الوزن ينحفظ لحاله، ولو فيه أكثر من شخص يختار اللي وزنه أقرب.</li>
+        <li>المرة الجاية بس اطلع على الميزان واضغط «اتصل».</li>
+      </ol>
+      <button id="btnDemo" class="btn small" type="button">جرّب بدون ميزان</button>
+    </details>
+  </section>
+
+  <!-- ============ السجل ============ -->
+  <section id="tab-history" hidden>
+    <div class="who" aria-label="سجل مين؟"></div>
+    <div class="card">
+      <div class="card-head">
+        <h2 id="histTitle">الوزن</h2>
+        <div id="range" class="seg" role="group" aria-label="الفترة">
+          <button type="button" data-days="7" aria-pressed="false">أسبوع</button>
+          <button type="button" data-days="30" aria-pressed="true">شهر</button>
+          <button type="button" data-days="90" aria-pressed="false">3 شهور</button>
+          <button type="button" data-days="0" aria-pressed="false">الكل</button>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <div id="chart" class="chart"></div>
+        <div id="chartTip" class="chart-tip" hidden></div>
+      </div>
+      <div id="stats" class="tiles"></div>
+    </div>
+
+    <form id="manualForm" class="card manual">
+      <h2>أضف وزن يدوي</h2>
+      <div class="fields">
+        <label>الوزن (كجم)<input id="manW" inputmode="decimal" autocomplete="off" placeholder="72.4" required></label>
+        <label>الوقت<input id="manT" type="datetime-local"></label>
+      </div>
+      <button class="btn" type="submit">احفظ</button>
+    </form>
+
+    <div class="card">
+      <h2>كل القياسات</h2>
+      <ul id="list" class="list"></ul>
+    </div>
+  </section>
+
+  <!-- ============ الإعدادات ============ -->
+  <section id="tab-settings" hidden>
+    <div class="card">
+      <div class="card-head"><h2>الأشخاص</h2><button id="btnAddProfile" class="btn small" type="button">+ شخص</button></div>
+      <p class="muted small">حط طول كل شخص عشان نحسب مؤشر كتلة الجسم (BMI). التصنيف للكبار فقط.</p>
+      <ul id="profiles" class="list"></ul>
+    </div>
+
+    <div class="card">
+      <h2>الميزان</h2>
+      <p id="deviceInfo" class="muted"></p>
+      <button id="btnForget" class="btn small" type="button" hidden>انسَ الميزان</button>
+    </div>
+
+    <div class="card">
+      <h2>خيارات</h2>
+      <label class="switch"><input id="optVoice" type="checkbox"><span>اقرأ الوزن بصوت لما يثبت</span></label>
+    </div>
+
+    <div class="card">
+      <h2>ثبّت التطبيق على الجوال</h2>
+      <button id="btnInstall" class="btn primary" type="button" hidden>ثبّت ميزاني</button>
+      <p id="installHelp" class="muted small">من كروم: اضغط ⋮ فوق ← «إضافة إلى الشاشة الرئيسية» أو «تثبيت التطبيق». بعدها يفتح مثل أي تطبيق.</p>
+    </div>
+
+    <div class="card">
+      <h2>نسخة احتياطية</h2>
+      <p class="muted small">بياناتك محفوظة في الجوال هذا فقط. خذ نسخة عشان تنقلها لجوال ثاني.</p>
+      <div class="btn-row">
+        <button id="btnCsv" class="btn small" type="button">تصدير Excel (CSV)</button>
+        <button id="btnJson" class="btn small" type="button">نسخة احتياطية</button>
+        <label class="btn small file">استرجاع نسخة<input id="fileImport" type="file" accept="application/json,.json"></label>
+      </div>
+    </div>
+
+    <details id="diag" class="card diag">
+      <summary>وضع الفحص (لو الميزان ما ضبط)</summary>
+      <p class="muted small">هنا كل البيانات اللي يرسلها الميزان. لو ميزانك ما طلع وزنه: اتصل، اطلع على الميزان لين يثبت، وبعدين اضغط «شارك السجل» وأرسله عشان نضيف دعم ميزانك.</p>
+      <pre id="log" dir="ltr"></pre>
+      <div class="btn-row">
+        <button id="btnCopyLog" class="btn small" type="button">شارك السجل</button>
+        <button id="btnClearLog" class="btn small" type="button">امسح</button>
+        <button id="btnDemo2" class="btn small" type="button">جرّب بدون ميزان</button>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary>الموازين المدعومة</summary>
+      <ul class="plain">
+        <li><b>شاومي:</b> Mi Smart Scale (الإصدار 1 و 2) و Mi Body Composition Scale 2 — الوزن والمقاومة.</li>
+        <li><b>الموازين القياسية:</b> أي ميزان يدعم خدمة Weight Scale أو Body Composition الرسمية — الوزن ونسبة الدهون لو الميزان يرسلها.</li>
+        <li><b>QN / Renpho / FITINDEX:</b> موازين تطبيقات Renpho و FITINDEX و QN-Scale.</li>
+        <li>غيرها: افتح «وضع الفحص» وأرسل السجل.</li>
+      </ul>
+      <p class="muted small">يشتغل على Google Chrome في أندرويد والكمبيوتر. الآيفون يحتاج متصفح Bluefy.</p>
+    </details>
+  </section>
+</main>
+
+<nav class="tabs" aria-label="الأقسام">
+  <button type="button" data-tab="scale" aria-current="true">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8.5 9.5a5 5 0 0 1 7 0M12 12.5l1.6-2.4"/></svg>
+    <span>الميزان</span>
+  </button>
+  <button type="button" data-tab="history" aria-current="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5h16M5 15l4.5-4.5 3.5 3 6-6.5"/></svg>
+    <span>السجل</span>
+  </button>
+  <button type="button" data-tab="settings" aria-current="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2M6 6l1.6 1.6M16.4 16.4L18 18M6 18l1.6-1.6M16.4 7.6L18 6"/></svg>
+    <span>الإعدادات</span>
+  </button>
+</nav>
+
+<dialog id="profileDlg">
+  <form id="profileForm" method="dialog">
+    <h2 id="pdTitle">شخص جديد</h2>
+    <label>الاسم<input id="pdName" maxlength="24" required autocomplete="off"></label>
+    <label>الطول (سم)<input id="pdHeight" inputmode="decimal" placeholder="170" autocomplete="off"></label>
+    <label>الوزن المطلوب (كجم) — اختياري<input id="pdGoal" inputmode="decimal" placeholder="70" autocomplete="off"></label>
+    <div class="btn-row">
+      <button class="btn primary" type="submit">احفظ</button>
+      <button id="pdCancel" class="btn" type="button">إلغاء</button>
+      <button id="pdDelete" class="link danger" type="button" hidden>احذف الشخص</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="scale-app/protocols.js"></script>
+<script src="scale-app/app.js"></script>
+</body>
+</html>
