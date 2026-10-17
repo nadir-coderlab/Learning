@@ -447,40 +447,130 @@ const TG2 = {
   // النماذج كما هي (بنفس ترتيبها وأسئلتها) — للحل المعروض وللاختبار «بالضبط»
   papers: [
     {
-      id: "A", title: "نموذج ١ — اختبار الفترة الأولى", sub: "وزارة التعليم · الخامس الابتدائي · من 20", marks: 20,
+      id: "A", name: "الورقة الأولى", title: "نموذج ١ — اختبار الفترة الأولى", sub: "وزارة التعليم · من 20", marks: 20,
       parts: [
-        { h: "I. General Questions:", sub: "A- Match the questions with the correct answers:", subAr: "وصّلي السؤال بالجواب", marks: 4, as: "match", items: ["g1", "g2", "g3", "g5"], matchOrder: ["g3", "g1", "g5", "g2"] },
-        { h: "II. Controlled Writing:", sub: "A. Rearrange the words to form sentences:", subAr: "رتّبي الكلمات", marks: 2, as: "build", items: ["o1", "o2"] },
-        { h: "III. Reading:", sub: "A. Read and choose True or False.", subAr: "صح أو خطأ", marks: 4, as: "choice", items: ["t1", "t2", "t3", "t4"] },
-        { h: "IV. Grammar:", sub: "A- Choose the correct answer:", subAr: "اختاري الإجابة الصحيحة", marks: 4, as: "choice", items: ["tm1", "tm2", "tm3", "cp1"] },
-        { h: "V. Vocabulary:", sub: "B- Write the words under the correct pictures:", subAr: "اكتبي الكلمة تحت الصورة", marks: 4, as: "box", box: ["Gate", "ride", "layout", "snail"], items: ["v1", "v2", "v3", "v4"] },
-        { h: "VI. Orthography:", sub: "C- Fill in the missing letters:", subAr: "كمّلي الحرف الناقص", marks: 2, as: "box", box: ["i", "o", "e", "u"], items: ["sp1", "sp2", "sp3", "sp4"] }
+        {
+          h: "I. General Questions:", sub: "A- Match the questions with the correct answers:", marks: 4, as: "match",
+          items: ["g1", "g2", "g3", "g5"], matchOrder: ["g3", "g1", "g5", "g2"],
+          t: "وصّلي السؤال بجوابه 🔗",
+          how: ["اقري السؤال اللي في اليسار.", "دوري جوابه في العمود اللي جنبه.", "اكتبي رقم السؤال في المربع الصغير اللي جنب الجواب."]
+        },
+        {
+          h: "II. Controlled Writing:", sub: "A. Rearrange the words to form sentences:", marks: 2, as: "build", items: ["o1", "o2"],
+          t: "رتّبي الكلمات 🔀",
+          how: ["الكلمات ملخبطة.", "الكلمة اللي أول حرف فيها كبير (مثل We) تجي أول.", "رتّبي الباقي واكتبي الجملة كاملة على السطر."]
+        },
+        {
+          h: "III. Reading:", sub: "A. Read and choose True or False.", marks: 4, as: "choice", items: ["t1", "t2", "t3", "t4"],
+          t: "صح أو خطأ ✅❌",
+          how: ["شوفي الصورة.", "اقري الجملة.", "إذا الجملة نفس الصورة حوطي ✓ ، وإذا غلط حوطي ✗"]
+        },
+        {
+          h: "IV. Grammar:", sub: "A- Choose the correct answer:", marks: 4, as: "choice", items: ["tm1", "tm2", "tm3", "cp1"],
+          t: "اختاري الكلمة الصح 👆",
+          how: ["اقري الجملة.", "دوري كلمة تساعدك، مثل: Last week (الأسبوع الماضي) أو than (من).", "حوطي الكلمة الصح من اللي بين القوسين."]
+        },
+        {
+          h: "V. Vocabulary:", sub: "B- Write the words under the correct pictures:", marks: 4, as: "box", box: ["Gate", "ride", "layout", "snail"], items: ["v1", "v2", "v3", "v4"],
+          t: "اكتبي الكلمة تحت الصورة 🖼️",
+          how: ["الكلمات مكتوبة لك في المربع.", "شوفي الصورة واعرفي وش هي.", "انسخي الكلمة تحت صورتها."]
+        },
+        {
+          h: "VI. Orthography:", sub: "C- Fill in the missing letters:", marks: 2, as: "box", box: ["i", "o", "e", "u"], items: ["sp1", "sp2", "sp3", "sp4"],
+          t: "كمّلي الحرف الناقص 🔤",
+          how: ["الحروف مكتوبة لك في المربع: i – o – e – u", "قولي الكلمة بصوت عالي.", "اكتبي الحرف الناقص مكان الشرطة _"]
+        }
       ]
     },
     {
-      id: "C", title: "نموذج ٢ — First Period Exam", sub: "منصة مدرستي · الجزء التحريري من 10", marks: 10,
+      id: "C", name: "الورقة الثانية", title: "نموذج ٢ — First Period Exam", sub: "مدرستي · من 10", marks: 10,
       parts: [
-        { h: "Choose the correct answer:", subAr: "اختاري الإجابة الصحيحة", marks: 1, as: "cfmt", items: ["g3", "g2"] },
-        { h: "Choose ✓ or ✗:", subAr: "صح أو خطأ", marks: 1.5, as: "choice", items: ["t5", "t6", "t7"] },
-        { h: "Do as shown between brackets:", subAr: "سوّي المطلوب بين القوسين", marks: 1.5, as: "write", items: ["mo6", "un1", "un2"] },
-        { h: "Choose the correct word:", subAr: "اختاري الكلمة الصحيحة", marks: 1.5, as: "choice", items: ["h2", "tm6", "tm7"] },
-        { h: "Choose the correct word:", subAr: "اختاري الكلمة الصحيحة للصورة", marks: 3, as: "pair", items: ["w1", "w2", "w3", "w4", "w5", "w6"] },
-        { h: "Choose the correct letter to fill in the blank:", subAr: "اختاري الحرف الصحيح", marks: 1.5, as: "choice", items: ["sp5", "sp6", "sp7"] }
+        {
+          h: "Choose the correct answer:", marks: 1, as: "cfmt", items: ["g3", "g2"],
+          t: "اختاري الجواب الصح 👆",
+          how: ["اقري السؤال.", "عندك جوابين: A و B.", "حوطي الجواب الصح."]
+        },
+        {
+          h: "Choose ✓ or ✗:", marks: 1.5, as: "choice", items: ["t5", "t6", "t7"],
+          t: "صح أو خطأ ✅❌",
+          how: ["اقري الجملة وشوفي الصورة اللي تحتها.", "إذا الجملة نفس الصورة حوطي ✓", "إذا غلط حوطي ✗"]
+        },
+        {
+          h: "Do as shown between brackets:", marks: 1.5, as: "write", items: ["mo6", "un1", "un2"],
+          t: "سوّي اللي بين القوسين 📌",
+          how: ["(Rearrange) يعني: رتّبي الشهور من أول السنة.", "(Rewrite the words using un) يعني: اكتبي الكلمة وحطي un في أولها.", "اكتبي الجواب على السطر."]
+        },
+        {
+          h: "Choose the correct word:", marks: 1.5, as: "choice", items: ["h2", "tm6", "tm7"],
+          t: "كمّلي الفراغ بالكلمة الصح 👆",
+          how: ["اقري الجملة.", "جنبها كلمات، اختاري اللي تناسب الفراغ.", "حوطي الكلمة الصح."]
+        },
+        {
+          h: "Choose the correct word:", marks: 3, as: "pair", items: ["w1", "w2", "w3", "w4", "w5", "w6"],
+          t: "اختاري اسم الصورة 🖼️",
+          how: ["تحت كل صورة كلمتين.", "وحدة صح ووحدة غلط.", "حوطي الكلمة اللي هي اسم الصورة."]
+        },
+        {
+          h: "Choose the correct letter to fill in the blank:", marks: 1.5, as: "choice", items: ["sp5", "sp6", "sp7"],
+          t: "اختاري الحرف الناقص 🔤",
+          how: ["شوفي الصورة واقري الكلمة.", "تحت الكلمة حرفين.", "حوطي الحرف اللي يكمّل الكلمة."]
+        }
       ]
     },
     {
-      id: "B", title: "ورقة المراجعة — Welcome!", sub: "Ms. Tahani · كل سؤال بدرجة", marks: null,
+      id: "B", name: "الورقة الثالثة", title: "ورقة المراجعة — Welcome!", sub: "أ. تهاني", marks: null,
       parts: [
-        { h: "I. General Questions:", sub: "A- Match the questions with the correct answers:", subAr: "وصّلي السؤال بالجواب", as: "match", items: ["g6", "g4", "g7", "g8", "g9", "g10"], matchOrder: ["g4", "g9", "g8", "g10", "g6", "g7"] },
-        { h: "II. Controlled Writing:", sub: "A- Rearrange the words to form sentences:", subAr: "رتّبي الكلمات", as: "build", items: ["o3", "o4", "o5"] },
-        { h: "", sub: "B- Write the opposite of the following words:", subAr: "اكتبي العكس", as: "write", items: ["op1", "op2", "op3"] },
-        { h: "", sub: "C- 1. Write the months of the year in the correct order:", subAr: "كمّلي الشهور الناقصة من المربع", as: "box", box: ["August", "November", "March", "June", "April"], items: ["mo1", "mo2", "mo3", "mo4", "mo5"] },
-        { h: "", sub: "C- 2. Complete the chart:", subAr: "كمّلي جدول الماضي", as: "write", items: ["p1", "p2", "p3", "p4", "p5", "p6"] },
-        { h: "IV. Reading Short Sentence:", sub: "A- Read the sentences then match them with the correct pictures:", subAr: "اختاري الجملة اللي تطابق الصورة", as: "choice", items: ["s1", "s2", "s3", "s4"] },
-        { h: "", sub: "B- Read and complete. Use the words in the box:", subAr: "كمّلي من المربع", as: "box", box: ["comic book", "calendar", "lion", "snail"], items: ["c1", "c2", "c3", "c4"] },
-        { h: "V. Grammar:", sub: "A- Choose the correct answer:", subAr: "اختاري الإجابة الصحيحة", as: "choice", items: ["h1", "h2", "h3", "h4", "tm4", "tm5", "cp2", "cp3"] },
-        { h: "VI. Vocabulary:", sub: "A- Write the words under the correct pictures:", subAr: "اكتبي الكلمة تحت الصورة", as: "box", box: ["months", "late", "date", "plus", "classroom"], items: ["v5", "v6", "v7", "v8", "v9"] },
-        { h: "VII. Orthography:", sub: "A- Fill in the missing letters:", subAr: "كمّلي الحرف الناقص", as: "write", items: ["sb1", "sb2", "sb3", "sb4", "sb5", "sb6", "sb7"] }
+        {
+          h: "I. General Questions:", sub: "A- Match the questions with the correct answers:", as: "match",
+          items: ["g6", "g4", "g7", "g8", "g9", "g10"], matchOrder: ["g4", "g9", "g8", "g10", "g6", "g7"],
+          t: "وصّلي السؤال بجوابه 🔗",
+          how: ["اقري السؤال اللي في اليسار.", "دوري جوابه في العمود اللي جنبه.", "اكتبي رقم السؤال في المربع الصغير اللي جنب الجواب."]
+        },
+        {
+          h: "II. Controlled Writing:", sub: "A- Rearrange the words to form sentences:", as: "build", items: ["o3", "o4", "o5"],
+          t: "رتّبي الكلمات 🔀",
+          how: ["الكلمات ملخبطة.", "الكلمة اللي أول حرف فيها كبير تجي أول.", "الكلمة اللي معها علامة ؟ تجي آخر شي."]
+        },
+        {
+          h: "", sub: "B- Write the opposite of the following words:", as: "write", items: ["op1", "op2", "op3"],
+          t: "اكتبي العكس ↔️",
+          how: ["opposite يعني: العكس.", "مثل: صغير عكسه كبير.", "اكتبي الكلمة العكس بعد علامة ≠"]
+        },
+        {
+          h: "", sub: "C- 1. Write the months of the year in the correct order:", as: "box", box: ["August", "November", "March", "June", "April"], items: ["mo1", "mo2", "mo3", "mo4", "mo5"],
+          t: "كمّلي الشهور 📅",
+          how: ["الشهور الناقصة مكتوبة لك في المربع.", "شوفي رقم الشهر.", "اكتبي اسم الشهر في مكانه."]
+        },
+        {
+          h: "", sub: "C- 2. Complete the chart:", as: "write", items: ["p1", "p2", "p3", "p4", "p5", "p6"],
+          t: "كمّلي جدول الماضي 📋",
+          how: ["Verb = الفعل ، و Past form = الماضي حقه.", "بعض المربعات فاضية.", "اكتبي الكلمة الناقصة في المربع الفاضي."]
+        },
+        {
+          h: "IV. Reading Short Sentence:", sub: "A- Read the sentences then match them with the correct pictures:", as: "choice", items: ["s1", "s2", "s3", "s4"],
+          t: "اختاري الجملة اللي تناسب الصورة 🖼️",
+          how: ["تحت كل صورة جملتين: a و b.", "الجملتين يختلفون في كلمة وحدة بس.", "اختاري الجملة اللي توصف الصورة."]
+        },
+        {
+          h: "", sub: "B- Read and complete. Use the words in the box:", as: "box", box: ["comic book", "calendar", "lion", "snail"], items: ["c1", "c2", "c3", "c4"],
+          t: "كمّلي من المربع 📦",
+          how: ["الكلمات مكتوبة لك في المربع.", "اقري الجملة وشوفي الصورة.", "انسخي الكلمة المناسبة."]
+        },
+        {
+          h: "V. Grammar:", sub: "A- Choose the correct answer:", as: "choice", items: ["h1", "h2", "h3", "h4", "tm4", "tm5", "cp2", "cp3"],
+          t: "اختاري الجواب الصح 👆",
+          how: ["اقري الجملة.", "الاختيارات مكتوبة بين القوسين.", "حوطي الصح."]
+        },
+        {
+          h: "VI. Vocabulary:", sub: "A- Write the words under the correct pictures:", as: "box", box: ["months", "late", "date", "plus", "classroom"], items: ["v5", "v6", "v7", "v8", "v9"],
+          t: "اكتبي الكلمة تحت الصورة 🖼️",
+          how: ["الكلمات مكتوبة لك في المربع.", "شوفي الصورة واعرفي وش هي.", "انسخي الكلمة تحت صورتها."]
+        },
+        {
+          h: "VII. Orthography:", sub: "A- Fill in the missing letters:", as: "write", items: ["sb1", "sb2", "sb3", "sb4", "sb5", "sb6", "sb7"],
+          t: "كمّلي الحرف الناقص 🔤",
+          how: ["هنا ما فيه مربع حروف.", "قولي الكلمة بصوت عالي.", "اكتبي الحرف الناقص مكان الشرطتين __"]
+        }
       ]
     }
   ]

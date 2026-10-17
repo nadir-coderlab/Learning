@@ -42,9 +42,9 @@ for (const exam of EXAMS) {
         assert.ok(!ids.has(it.id), `معرّف مكرر ${it.id}`);
         ids.add(it.id);
         if (it.pic) assert.ok(existsSync(path.join(pub, it.pic)), `${it.id}: الصورة غير موجودة ${it.pic}`);
-        const learn = E.learnHtml(it, exam), solved = E.solvedHtml(it, 'cfmt', 1);
-        assert.ok(learn && solved, `${it.id}: بلا بطاقة`);
-        assert.ok(!/undefined|NaN|\[object/.test(learn + solved), `${it.id}: نص فيه undefined`);
+        const card = E.studyCardHtml(it);
+        assert.ok(card.includes('الجواب الصح') && card.includes('يعني'), `${it.id}: بطاقة المذاكرة ناقصة`);
+        assert.ok(!/undefined|NaN|\[object/.test(card), `${it.id}: نص فيه undefined`);
         for (const mode of MODES) {
           for (let k = 0; k < 20; k++) {
             const group = [it, ...L.items.filter((x) => x !== it).slice(0, 3)];
@@ -88,6 +88,37 @@ for (const exam of EXAMS) {
       const want = part.matchOrder.map((id) => idx.items[id].a);
       for (const q of m.parts[pi].qs) assert.deepEqual(q.options.map((o) => o.val), want);
       assert.deepEqual(m.parts[pi].qs.map((q) => q.itemId), part.items, 'ترتيب الأسئلة');
+    }
+  });
+
+  test(`${exam.id}: أسئلة الأوراق كلها بالضغط (بدون كتابة) والخيارات من نفس الفقرة`, () => {
+    for (const paper of exam.papers) for (const part of paper.parts) {
+      const allowed = new Set(['T', 'F', ...(part.box || []), ...MONTHS.map((m) => m.en)]);
+      part.items.forEach((id) => {
+        const it = idx.items[id];
+        [it.a, it.w, it.alt, it.answer, it.letter, ...(it.cfmt?.opts || []), ...(it.opts || [])]
+          .filter((v) => typeof v === 'string').forEach((v) => allowed.add(v));
+      });
+      for (const id of part.items) for (const mock of [false, true]) for (let k = 0; k < 10; k++) {
+        const q = E.paperQuestion(idx.items[id], part, idx, mock);
+        assert.ok(q.kind === 'choice' || q.kind === 'build', `${paper.id}/${id}: سؤال كتابة`);
+        checkQuestion(q, `${paper.id}/${id}`);
+        if (q.kind === 'choice' && !['order', 'monthOrder'].includes(idx.items[id].type)) {
+          for (const o of q.options) assert.ok(allowed.has(o.val), `${paper.id}/${id}: خيار من برا الفقرة «${o.val}»`);
+        }
+        if (part.box && q.kind === 'choice' && ['word', 'spell', 'complete', 'month'].includes(idx.items[id].type)) {
+          assert.deepEqual(q.options.map((o) => o.val), part.box, `${paper.id}/${id}: نفس مربع الورقة`);
+        }
+      }
+    }
+  });
+
+  test(`${exam.id}: كل فقرة لها شرح بالعربي لطريقة الحل`, () => {
+    for (const paper of exam.papers) {
+      assert.ok(paper.name, `${paper.id}: بلا اسم عربي`);
+      for (const part of paper.parts) {
+        assert.ok(part.t && Array.isArray(part.how) && part.how.length >= 2, `${paper.id}: فقرة بلا شرح`);
+      }
     }
   });
 

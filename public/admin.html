@@ -388,15 +388,18 @@ function openDetail(u, st) {
     const pr = sklDoc?.exams?.[ex.id];
     const myMocks = st.mocks.filter((q) => q.examId === ex.id);
     if (!pr && !myMocks.length) return "";
-    const lessons = ex.sections.flatMap((s) => s.lessons);
-    const done = lessons.filter((L) => pr?.lessons?.[L.id]?.done);
-    const pAvg = done.length ? Math.round(done.reduce((a, L) => a + (pr.lessons[L.id].acc || 0), 0) / done.length) : null;
-    const weakN = Object.values(pr?.weak || {}).filter((n) => n > 0).length;
+    // التقدم: كم سؤال ذاكرت (ودقتها من أول محاولة)
+    const first = pr?.v === 2 ? (pr.first || {}) : {};
+    const studied = pr?.v === 2 ? (pr.studied ?? Object.keys(first).length) : 0;
+    const total = ex.papers.reduce((a, p) => a + p.parts.reduce((b, x) => b + x.items.length, 0), 0);
+    const tried = Object.values(first);
+    const pAvg = tried.length ? Math.round(100 * tried.filter(Boolean).length / tried.length) : null;
+    const weakN = Object.values(first).filter((ok) => !ok).length;
     const last = myMocks[0];
-    const lessonRows = lessons.map((L) => {
-      const x = pr?.lessons?.[L.id];
-      const v = x?.done ? `<span class="${scoreClass(x.acc)}">${x.acc}%</span>` : x?.learned ? "ذاكرته" : "—";
-      return `<span class="badge role" style="margin:2px">${L.icon} ${esc(L.title)}: ${v}</span>`;
+    const lessonRows = ex.papers.map((p) => {
+      const ids = p.parts.flatMap((x) => x.items);
+      const d = ids.filter((id) => id in first).length;
+      return `<span class="badge role" style="margin:2px">📄 ${esc(p.name || p.title)}: ${d}/${ids.length}</span>`;
     }).join("");
     const mockRows = myMocks.slice(0, 6).map((q) => `<tr><td style="font-size:12px">${fmtDate(tsMs(q.ts))}</td><td>${esc(q.mockName || "")}</td>
       <td><span class="${scoreClass(q.pct)}">${q.score}/${q.outOf} (${q.pct}%)</span></td><td>${fmtDuration(q.durationSec)}</td></tr>`).join("");
@@ -411,10 +414,10 @@ function openDetail(u, st) {
     return `<div style="margin-bottom:12px">
       <div style="font-weight:900; margin-bottom:8px">${ex.icon} ${esc(ex.titleAr)} <span class="en" style="color:var(--muted); font-size:12px">${esc(ex.title)}</span></div>
       <div class="stat-cards" style="margin-bottom:10px">
-        <div class="stat-card"><div class="v">${done.length}/${lessons.length}</div><div class="k">دروس خلصتها</div></div>
-        <div class="stat-card"><div class="v">${pAvg == null ? "—" : pAvg + "%"}</div><div class="k">دقة التدريب</div></div>
+        <div class="stat-card"><div class="v">${studied}/${total}</div><div class="k">أسئلة ذاكرتها</div></div>
+        <div class="stat-card"><div class="v">${pAvg == null ? "—" : pAvg + "%"}</div><div class="k">صح من أول محاولة</div></div>
         <div class="stat-card"><div class="v">${last ? `${last.score}/${last.outOf}` : "—"}</div><div class="k">آخر اختبار تجريبي</div></div>
-        <div class="stat-card"><div class="v">${weakN}</div><div class="k">أسئلة تحتاج مراجعة</div></div>
+        <div class="stat-card"><div class="v">${weakN}</div><div class="k">غلطت فيها بالمذاكرة</div></div>
       </div>
       ${lastParts ? `<div style="margin-bottom:10px">${lastParts}</div>` : ""}
       <div style="margin-bottom:10px">${lessonRows}</div>
