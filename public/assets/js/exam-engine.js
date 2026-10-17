@@ -87,10 +87,6 @@ function picHtml(it, cls = "xpic") {
   return "";
 }
 
-function srcTags(it, exam) {
-  return (it.src || []).map((k) => `<span class="src-tag">${esc(exam.sources[k]?.name || k)}</span>`).join("");
-}
-
 const monthOf = (it) => MONTHS[it.m - 1];
 
 // ---------------------------------------------------------------
@@ -206,166 +202,72 @@ function spellHtml(it, filled) {
 }
 
 // ---------------------------------------------------------------
-// بطاقة المذاكرة (الإجابة ملونة)
+// بطاقة المذاكرة البسيطة: في الورقة مكتوب ← يعني ← الجواب الصح ← كيف أعرف؟
 // ---------------------------------------------------------------
 
-export function learnHtml(it, exam) {
-  const tags = `<div class="src-row">${srcTags(it, exam)}</div>`;
-  const trick = (t) => (t ? `<div class="trick">🔑 <b>الحيلة:</b> ${t}</div>` : "");
-  const sayRow = (s) => (s ? `<div class="xsay">🗣️ تنقرأ: ${esc(s)}</div>` : "");
+function paperView(it) {
   switch (it.type) {
-    case "inst":
-      return `${tags}<div class="xemoji">${it.emoji}</div>
-        <div class="xlabel">التعليمات في الورقة:</div>
-        <div class="xen exam-font">${hl(it.en, it.kw)} ${sayBtn(it.en)}</div>
-        <div class="xlabel ok">معناها ✅</div>
-        <div class="ans big-ar">${esc(it.ar)}</div>
-        <div class="howto">✍️ وش تسوين: ${esc(it.how)}</div>
-        ${trick(`الكلمة المهمة: <b>${esc(it.kw)}</b> = ${esc(it.kwAr)}`)}`;
-
-    case "qa": {
-      const also = (it.also || []).map((x) => `<div class="also">✅ وممكن يجي الجواب: <span class="en">${esc(x)}</span></div>`).join("");
-      const nope = (it.wrong || []).map((x) => `<div class="nope">❌ <span class="en">${esc(x)}</span> ← غلط</div>`).join("");
-      return `${tags}${picHtml(it)}
-        <div class="xlabel">السؤال ❓</div>
-        <div class="xen">${hl(it.q, it.qKey)} ${sayBtn(it.q)}</div>
-        <div class="xmean">${esc(it.qAr)}</div>${sayRow(it.qSay)}
-        <div class="xlabel ok">الجواب ✅</div>
-        <div class="xen"><span class="ans">${hl(it.a, it.aKey, "kw2")}</span> ${sayBtn(it.a)}</div>
-        <div class="xmean">${esc(it.aAr)}</div>${sayRow(it.aSay)}
-        ${also}${nope}${trick(it.trick)}`;
-    }
-
-    case "order":
-      return `${tags}
-        <div class="xlabel">الكلمات في الورقة (ملخبطة):</div>
-        <div class="xen words">${it.words.map(esc).join(" – ")}</div>
-        <div class="xlabel ok">الجملة المرتبة ✅</div>
-        <div class="xen"><span class="ans">${esc(answerText(it))}</span> ${sayBtn(sayText(it))}</div>
-        <div class="chunks">${it.chunks.map((c, i) => `<span class="chunk c${i % 3}">${esc(c)}</span>`).join('<span class="arrow">→</span>')}</div>
-        <div class="xmean">${esc(it.ar)}</div>${sayRow(it.say)}
-        ${trick(it.trick)}`;
-
+    case "qa": return `<div class="xen">${esc(it.q)} ${sayBtn(it.q)}</div>`;
+    case "order": return `<div class="xen words">${it.words.map(esc).join(" – ")}</div>`;
     case "month": {
-      const m = monthOf(it), prev = MONTHS[it.m - 2], next = MONTHS[it.m];
-      return `${tags}<div class="xemoji">📅</div>
-        <div class="xen seq">${it.m - 1}- ${esc(prev.en)} · <span class="ans">${it.m}- ${esc(m.en)}</span> · ${it.m + 1}- ${esc(next?.en || "")}</div>
-        <div class="xen"><span class="ans">${esc(m.en)}</span> ${sayBtn(m.en)}</div>
-        <div class="xmean">= ${esc(m.ar)} (الشهر رقم ${it.m})</div>${sayRow(m.say)}
-        ${trick(it.trick)}`;
+      const prev = MONTHS[it.m - 2], next = MONTHS[it.m];
+      return `<div class="xen seq">${it.m - 1}- ${esc(prev.en)} &nbsp; ${it.m}- <span class="blank">&nbsp;?&nbsp;</span> &nbsp; ${next ? `${it.m + 1}- ${esc(next.en)}` : ""}</div>`;
     }
-
-    case "monthOrder":
-      return `${tags}<div class="xemoji">📅🔀</div>
-        <div class="xlabel">في الورقة:</div>
-        <div class="xen words">${it.given.map(esc).join(" – ")} <span class="exam-red">(Rearrange)</span></div>
-        <div class="xlabel ok">بالترتيب ✅</div>
-        <div class="xen"><span class="ans">${esc(answerText(it))}</span> ${sayBtn(sayText(it))}</div>
-        <div class="xmean">يناير ← فبراير ← مارس ← أبريل</div>
-        ${trick(it.trick)}`;
-
-    case "pair": {
-      let body;
+    case "monthOrder": return `<div class="xen words">${it.given.map(esc).join(" – ")} (Rearrange)</div>`;
+    case "pair":
       if (it.kind === "past") {
-        const left = it.dir === "rev" ? `<span class="ans">${esc(it.a)}</span>` : esc(it.w);
-        const right = it.dir === "rev" ? esc(it.w) : `<span class="ans">${esc(it.a)}</span>`;
-        body = `<table class="chart"><tr><th>Verb</th><th>Past form</th></tr><tr><td class="en">${left}</td><td class="en">${right}</td></tr></table>
-          <div class="xmean">${it.dir === "rev" ? `${esc(it.aAr)} ← ${esc(it.wAr)}` : `${esc(it.wAr)} ← ${esc(it.aAr)}`}</div>`;
-      } else {
-        const sign = it.kind === "opp" ? "≠" : "→";
-        body = `<div class="xen big">${esc(it.w)} ${sign} <span class="ans">${esc(it.a)}</span></div>
-          <div class="xmean">${esc(it.wAr)} ${it.kind === "opp" ? "↔" : "←"} ${esc(it.aAr)}</div>`;
+        const l = it.dir === "rev" ? `<span class="blank">&nbsp;?&nbsp;</span>` : esc(it.w);
+        const r = it.dir === "rev" ? esc(it.w) : `<span class="blank">&nbsp;?&nbsp;</span>`;
+        return `<table class="chart"><tr><th>Verb</th><th>Past form</th></tr><tr><td class="en">${l}</td><td class="en">${r}</td></tr></table>`;
       }
-      return `${tags}<div class="xemoji">${it.kind === "opp" ? "↔️" : it.kind === "un" ? "✏️" : "📋"}</div>
-        ${body} <div>${sayBtn(sayText(it))}</div>${sayRow(it.aSay)}${trick(it.trick)}`;
-    }
-
-    case "tf":
-      return `${tags}${picHtml(it)}
-        <div class="xen">${hl(it.s, it.key)} ${sayBtn(it.s)}</div>
-        <div class="xmean">${esc(it.sAr)}</div>${sayRow(it.say)}
-        <div class="tf-ans ${it.answer ? "ok" : "no"}">${it.answer ? "✓ صح (True)" : "✗ خطأ (False)"}</div>
-        ${trick(it.why)}`;
-
-    case "pick2":
-      return `${tags}${picHtml(it)}
-        ${it.opts.map((o, i) => `<div class="xen pick ${i === it.answer ? "" : "faded"}">${String.fromCharCode(97 + i)}- ${i === it.answer ? `<span class="ans">${hl(o, it.key, "kw2")}</span> ✅` : `<span class="nope en">${esc(o)}</span>`}</div>`).join("")}
-        <div>${sayBtn(sayText(it))}</div>${sayRow(it.say)}
-        <div class="xmean">${esc(it.key)} = ${esc(it.keyAr)}</div>
-        ${trick(it.trick)}`;
-
-    case "complete":
-      return `${tags}${picHtml(it)}
-        <div class="xen">${it.s.includes("___") ? fillBlank(it.s, it.answer) : `${esc(it.s)}<br><span class="ans-in">${esc(it.answer)}</span>`} ${sayBtn(sayText(it))}</div>
-        <div class="xmean">${esc(it.sAr)} ← ${esc(it.answer)} = ${esc(it.ansAr)}</div>${sayRow(it.say)}
-        ${trick(it.trick)}`;
-
-    case "choose":
-      return `${tags}
-        <div class="xen">${hl(it.s.replace("___", "⟪⟫"), it.clue, "clue").replace("⟪⟫", `<span class="ans-in">${esc(it.answer)}</span>`)} ${sayBtn(sayText(it))}</div>
-        <div class="opts-inline">( ${it.opts.map((o) => (o === it.answer ? `<b class="ans">${esc(o)}</b>` : `<span class="nope en">${esc(o)}</span>`)).join(" / ")} )</div>
-        <div class="xmean">${esc(it.ar)}</div>${sayRow(it.say)}
-        ${trick(it.trick)}`;
-
-    case "word":
-      return `${tags}${picHtml(it)}
-        <div class="xen big"><span class="ans">${esc(it.w)}</span> ${sayBtn(it.w)}</div>
-        ${it.alt ? `<div class="nope">❌ <span class="en">${esc(it.alt)}</span> ← الكلمة الغلط اللي جنبها في الورقة</div>` : ""}
-        <div class="xmean">= ${esc(it.ar)}</div>${sayRow(it.say)}
-        ${trick(it.trick)}`;
-
-    case "spell":
-      return `${tags}${picHtml(it)}
-        <div class="xen big spell">${spellHtml(it, false)}</div>
-        <div class="xen big spell"><span class="ans">${spellHtml(it, true)}</span> ${sayBtn(it.w)}</div>
-        ${it.opts ? `<div class="xmean">الحروف في الورقة: <span class="wordbox en">${it.opts.map(esc).join(" – ")}</span></div>` : ""}
-        <div class="xmean">${esc(it.w)} = ${esc(it.ar)}</div>${sayRow(it.say)}
-        ${trick(it.trick)}`;
+      return `<div class="xen big">${esc(it.w)} ${it.kind === "opp" ? "≠" : "→"} <span class="blank">&nbsp;?&nbsp;</span></div>`;
+    case "tf": return `${picHtml(it)}<div class="xen">${esc(it.s)} ${sayBtn(it.s)}</div>`;
+    case "pick2": return `${picHtml(it)}${it.opts.map((o, i) => `<div class="xen pick">${String.fromCharCode(97 + i)}- ${esc(o)}</div>`).join("")}`;
+    case "complete": return `${picHtml(it)}<div class="xen">${it.s.includes("___") ? fillBlank(it.s) : `${esc(it.s)} <span class="blank">&nbsp;?&nbsp;</span>`}</div>`;
+    case "choose": return `<div class="xen">${fillBlank(it.s)}</div><div class="opts-inline">( ${it.opts.map(esc).join(" / ")} )</div>`;
+    case "word": return `${picHtml(it)}${it.alt ? `<div class="xen">${esc(it.w)} &nbsp;/&nbsp; ${esc(it.alt)}</div>` : ""}`;
+    case "spell": return `${picHtml(it)}<div class="xen big spell">${spellHtml(it, false)}</div>${it.opts && it.opts.length === 2 ? `<div class="xen">${it.opts.map(esc).join(" &nbsp; ")}</div>` : ""}`;
   }
   return "";
 }
 
-// ---------------------------------------------------------------
-// عرض «النموذج محلول» — سطر مختصر لكل سؤال
-// ---------------------------------------------------------------
-
-export function solvedHtml(it, as, n) {
-  const num = `<span class="snum">${n}</span>`;
-  const sp = sayBtn(sayText(it));
+function meaningOf(it) {
   switch (it.type) {
-    case "qa":
-      if (as === "cfmt" && it.cfmt) {
-        return `<div class="srow">${num}<div class="sbody"><div class="en">${esc(it.q)}</div>
-          <div class="en">${it.cfmt.opts.map((o, i) => `${String.fromCharCode(65 + i)}. ${o === it.cfmt.answer ? `<span class="ans">${esc(o)}</span>` : `<span class="nope">${esc(o)}</span>`}`).join(" &nbsp; ")}</div></div>${sp}</div>`;
-      }
-      return `<div class="srow">${num}<div class="sbody"><div class="en">${esc(it.q)}</div><div class="en"><span class="ans">${esc(it.a)}</span></div></div>${sp}</div>`;
-    case "order":
-      return `<div class="srow">${num}<div class="sbody"><div class="en muted">${it.words.map(esc).join(" – ")}</div><div class="en"><span class="ans">${esc(answerText(it))}</span></div></div>${sp}</div>`;
-    case "month":
-      return `<div class="srow">${num}<div class="sbody en"><span class="ans">${it.m}- ${esc(monthOf(it).en)}</span> <small class="muted ar">${esc(monthOf(it).ar)}</small></div>${sp}</div>`;
-    case "monthOrder":
-      return `<div class="srow">${num}<div class="sbody"><div class="en muted">${it.given.map(esc).join(" – ")} (Rearrange)</div><div class="en"><span class="ans">${esc(answerText(it))}</span></div></div>${sp}</div>`;
+    case "qa": return esc(it.qAr);
+    case "order": return `الكلمات ملخبطة. لما نرتبها تصير جملة معناها: «${esc(it.ar)}»`;
+    case "month": return `وش اسم الشهر رقم ${it.m}؟ (${esc(MONTHS[it.m - 1].ar)})`;
+    case "monthOrder": return "رتّبي الشهور من أول السنة: يناير، فبراير، مارس، أبريل";
     case "pair":
-      if (it.kind === "past") {
-        return `<div class="srow">${num}<div class="sbody en">${it.dir === "rev" ? `<span class="ans">${esc(it.a)}</span> → ${esc(it.w)}` : `${esc(it.w)} → <span class="ans">${esc(it.a)}</span>`}</div>${sp}</div>`;
-      }
-      return `<div class="srow">${num}<div class="sbody en">${esc(it.w)} ${it.kind === "opp" ? "≠" : "→"} <span class="ans">${esc(it.a)}</span></div>${sp}</div>`;
-    case "tf":
-      return `<div class="srow">${num}${picHtml(it, "spic")}<div class="sbody"><div class="en">${esc(it.s)}</div><div><span class="ans">${it.answer ? "✓" : "✗"}</span></div><div class="why">${it.why}</div></div>${sp}</div>`;
-    case "pick2":
-      return `<div class="srow">${num}${picHtml(it, "spic")}<div class="sbody en">${it.opts.map((o, i) => `${String.fromCharCode(97 + i)}- ${i === it.answer ? `<span class="ans">${esc(o)}</span>` : `<span class="nope">${esc(o)}</span>`}`).join("<br>")}</div>${sp}</div>`;
-    case "complete":
-      return `<div class="srow">${num}${picHtml(it, "spic")}<div class="sbody en">${it.s.includes("___") ? fillBlank(it.s, it.answer, "ans") : `${esc(it.s)} <span class="ans">${esc(it.answer)}</span>`}</div>${sp}</div>`;
-    case "choose":
-      return `<div class="srow">${num}<div class="sbody en">${fillBlank(it.s, it.answer, "ans")} <small class="hint-en">(${it.opts.map(esc).join(" / ")})</small></div>${sp}</div>`;
-    case "word":
-      return `<div class="srow">${num}${picHtml(it, "spic")}<div class="sbody en"><span class="ans">${esc(it.w)}</span>${it.alt ? ` <span class="nope">${esc(it.alt)}</span>` : ""} <small class="muted ar">${esc(it.ar)}</small></div>${sp}</div>`;
-    case "spell":
-      return `<div class="srow">${num}${picHtml(it, "spic")}<div class="sbody en big">${spellHtml(it, true)}${it.opts && it.opts.length === 2 ? ` <small class="hint-en">(${it.opts.join(" / ")})</small>` : ""}</div>${sp}</div>`;
-    case "inst":
-      return `<div class="srow">${num}<div class="sbody"><div class="en">${esc(it.en)}</div><div class="ans">${esc(it.ar)}</div></div>${sp}</div>`;
+      if (it.kind === "opp") return `وش عكس كلمة ${esc(it.w)} (${esc(it.wAr)})؟`;
+      if (it.kind === "un") return `حطي un قبل كلمة ${esc(it.w)} (${esc(it.wAr)})`;
+      return it.dir === "rev"
+        ? `${esc(it.w)} (${esc(it.wAr)}) هي الماضي. وش الفعل حقها؟`
+        : `وش الماضي من ${esc(it.w)} (${esc(it.wAr)})؟`;
+    case "tf": return `${esc(it.sAr)} — هل هذا صح حسب الصورة؟`;
+    case "pick2": return "أي جملة توصف الصورة؟";
+    case "complete": return esc(it.sAr);
+    case "choose": return esc(it.ar);
+    case "word": return "وش اسم الصورة؟";
+    case "spell": return `وش الحرف الناقص في كلمة ${esc(it.w)} (${esc(it.ar)})؟`;
   }
   return "";
+}
+
+function readAs(it) {
+  return { qa: it.aSay, order: it.say, month: it.m && MONTHS[it.m - 1].say, pair: it.aSay, tf: it.say, pick2: it.say,
+    complete: it.say, choose: it.say, word: it.say, spell: it.say }[it.type] || "";
+}
+
+export function studyCardHtml(it) {
+  const say = readAs(it);
+  const t = trickOf(it);
+  return `
+    <div class="st-block"><div class="st-label">📄 في الورقة مكتوب:</div>${paperView(it)}</div>
+    <div class="st-block mean"><div class="st-label">🤔 يعني:</div><div class="st-ar">${meaningOf(it)}</div></div>
+    <div class="st-block good"><div class="st-label">✅ الجواب الصح:</div>
+      <div class="st-ans">${correctHtml(it)} ${sayBtn(sayText(it))}</div>
+      ${say ? `<div class="xsay">🗣️ تنقرأ: ${esc(say)}</div>` : ""}</div>
+    ${t ? `<div class="trick">💡 <b>كيف أعرف؟</b><br>${t}</div>` : ""}`;
 }
 
 // ---------------------------------------------------------------
@@ -592,47 +494,35 @@ function uniqueWords(items) {
 // بناء الاختبار التجريبي
 // ---------------------------------------------------------------
 
-// يحدد شكل السؤال في الاختبار حسب نوع العنصر وطريقة القسم
-function mockMode(it, as) {
-  if (as === "match") return it.type === "qa" ? "match" : "choice";
-  if (as === "build") return it.type === "order" || it.type === "monthOrder" ? "build" : "write";
-  if (as === "write") {
-    if (it.type === "monthOrder") return "build";
-    if (["pick2", "tf", "choose"].includes(it.type)) return "choice";
-    return "write";
+// سؤال من الورقة — كل الأسئلة بالضغط (بدون كيبورد) والخيارات من نفس الفقرة في الورقة فقط
+export function paperQuestion(it, part, idx, mock = false) {
+  const pool = part.items.map((id) => idx.items[id]);
+  const ctx = { pool, mock };
+  if (it.type === "order" || it.type === "monthOrder") return makeQuestion(it, "build", ctx);
+  if (part.as === "match") return makeQuestion(it, "match", { ...ctx, group: (part.matchOrder || part.items).map((id) => idx.items[id]) });
+  if (part.as === "cfmt") return makeQuestion(it, "cfmt", ctx);
+  if (part.as === "pair") return makeQuestion(it, "pair", ctx);
+  const q = makeQuestion(it, "choice", ctx);
+  const ans = { word: it.w, spell: it.letter, complete: it.answer, month: it.m && MONTHS[it.m - 1].en }[it.type];
+  if (part.box && ans) {
+    // نفس مربع الكلمات/الحروف اللي في الورقة
+    q.options = part.box.map((v) => opt(v, it.type === "spell" ? "en letter" : "en"));
+    q.answer = ans;
+    q.keepOrder = true;
+    q.box = null;
   }
-  if (as === "box") return ["word", "spell", "complete", "month"].includes(it.type) ? "box" : "choice";
-  if (as === "cfmt") return "cfmt";
-  if (as === "pair") return "pair";
-  return "choice";
+  return q;
 }
 
-function partQuestions(items, as, idx, box, matchOrder) {
-  const ctxBase = { mock: true };
-  let group = null, boxWords = box || null;
-  if (as === "match") group = matchOrder ? matchOrder.map((id) => idx.items[id]) : shuffle(items);
-  if (as === "box" && !boxWords) {
-    if (items.every((x) => x.type === "spell")) boxWords = shuffle([...new Set(items.map((x) => x.letter))]);
-    else if (items.every((x) => x.type === "word")) boxWords = shuffle(uniqueWords(items));
-    else if (items.every((x) => x.type === "complete")) boxWords = shuffle(items.map((x) => x.answer));
-  }
-  return items.map((it) => {
-    const pool = idx.lessonOfItem[it.id].items;
-    return makeQuestion(it, mockMode(it, as), { ...ctxBase, pool, group, box: boxWords });
-  });
-}
-
-// نموذج كما هو بالضبط
+// الورقة كاملة كاختبار — نفس الأسئلة ونفس الترتيب
 export function buildPaperMock(exam, idx, paperId) {
   const paper = exam.papers.find((p) => p.id === paperId);
-  const parts = paper.parts.map((p) => {
-    const items = p.items.map((id) => idx.items[id]);
-    // نفس ترتيب الأسئلة في الورقة، وأجوبة المطابقة بنفس ترتيبها في الورقة
-    const qs = partQuestions(items, p.as, idx, p.box, p.matchOrder);
-    return { h: p.h, sub: p.sub || "", subAr: p.subAr, marks: p.marks ?? null, qs, box: p.box || qs.find((x) => x.box)?.box || null };
-  });
+  const parts = paper.parts.map((p) => ({
+    h: p.h, sub: p.sub || "", t: p.t, marks: p.marks ?? null,
+    qs: p.items.map((id) => paperQuestion(idx.items[id], p, idx, true))
+  }));
   const outOf = paper.marks ?? parts.reduce((a, p) => a + p.qs.length, 0);
-  return { kind: paperId, title: paper.title, outOf, parts };
+  return { kind: paperId, title: paper.name, outOf, parts };
 }
 
 // حساب الدرجة: كل قسم = (الصح ÷ عدد الأسئلة) × درجته
@@ -644,7 +534,7 @@ export function scoreMock(mock, answers) {
     const marks = p.marks ?? n;
     const got = n ? (c / n) * marks : 0;
     total += got;
-    return { h: p.h || p.sub, sub: p.subAr, c, n, marks, got: Math.round(got * 100) / 100 };
+    return { h: p.h || p.sub, t: p.t, c, n, marks, got: Math.round(got * 100) / 100 };
   });
   const outOf = mock.outOf;
   const score = Math.round(total * 2) / 2;
