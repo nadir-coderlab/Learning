@@ -389,8 +389,8 @@ function openDetail(u, st) {
     const myMocks = st.mocks.filter((q) => q.examId === ex.id);
     if (!pr && !myMocks.length) return "";
     // التقدم: كم سؤال ذاكرت (ودقتها من أول محاولة)
-    const first = pr?.v === 2 ? (pr.first || {}) : {};
-    const studied = pr?.v === 2 ? (pr.studied ?? Object.keys(first).length) : 0;
+    const first = pr?.v >= 2 ? (pr.first || {}) : {};
+    const studied = pr?.v >= 2 ? (pr.studied ?? Object.keys(first).length) : 0;
     const total = ex.papers.reduce((a, p) => a + p.parts.reduce((b, x) => b + x.items.length, 0), 0);
     const tried = Object.values(first);
     const pAvg = tried.length ? Math.round(100 * tried.filter(Boolean).length / tried.length) : null;
@@ -398,7 +398,8 @@ function openDetail(u, st) {
     const last = myMocks[0];
     const lessonRows = ex.papers.map((p) => {
       const ids = p.parts.flatMap((x) => x.items);
-      const d = ids.filter((id) => id in first).length;
+      // مفاتيح لعبة القص بصيغة «الورقة-السؤال» (A-g1)، والقديمة بدون الورقة
+      const d = ids.filter((id) => (`${p.id}-${id}` in first) || (id in first)).length;
       return `<span class="badge role" style="margin:2px">📄 ${esc(p.name || p.title)}: ${d}/${ids.length}</span>`;
     }).join("");
     const mockRows = myMocks.slice(0, 6).map((q) => `<tr><td style="font-size:12px">${fmtDate(tsMs(q.ts))}</td><td>${esc(q.mockName || "")}</td>

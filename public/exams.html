@@ -7,20 +7,25 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/app.css">
+<style>
+  /* رسالة «صح!» فوق عشان ما تغطي زر الفقرة الجاية */
+  #toast { bottom: auto; top: 18px; transform: translate(50%, -20px); }
+  #toast.show { transform: translate(50%, 0); }
+</style>
 </head>
 <body>
 
 <div class="loading-screen" id="loading">
   <div class="spinner"></div>
-  <div>لحظة… 📚</div>
+  <div>لحظة… ✂️</div>
 </div>
 
 <div id="page" style="display:none">
   <div class="top">
     <div class="wrap">
       <div>
-        <div class="brand">📚 مذاكرة الاختبار</div>
-        <h1 id="topTitle">اختبار الإنجليزي</h1>
+        <div class="brand">✂️ مذاكرة الاختبار</div>
+        <h1>اختبار الإنجليزي</h1>
       </div>
       <div class="topbtns">
         <button class="tbtn" id="homeBtn">🏠 البداية</button>
@@ -37,42 +42,29 @@
 import {
   requireSession, saveQuizResult, db, doc, getDoc, setDoc, serverTimestamp
 } from "/assets/js/auth.js";
-import { EXAMS, PARENT_WHATSAPP, MONTHS } from "/assets/js/exams-data.js";
-import {
-  esc, shuffle, indexExam, studyCardHtml, paperQuestion, explainHtml, correctHtml,
-  answerText, sayText, sayBtn, buildPaperMock, scoreMock, levelFor
-} from "/assets/js/exam-engine.js";
-import { speak, speakAr } from "/assets/js/speech.js";
+import { EXAMS, PARENT_WHATSAPP } from "/assets/js/exams-data.js";
+import { indexExam, answerText, levelFor, esc } from "/assets/js/exam-engine.js";
+import { BOARDS, CUT_BASE } from "/assets/js/exam-cuts.js";
 import { startTracking } from "/assets/js/tracker.js";
 
 // ---------------------------------------------------------------
-// صفحة بسيطة: زرين بس — 📖 ذاكري (سؤال سؤال مع الشرح) و 📝 اختبري نفسك (نفس الورقة)
+// لعبة القص واللصق: كل سؤال مقصوص من ورقة الاختبار، والأجوبة قطع مقصوصة
+// (من الورقة نفسها، أو من ورقة الحل إذا الجواب مو مطبوع). بدون أي صوت.
 // ---------------------------------------------------------------
 
 const $ = (id) => document.getElementById(id);
 const main = $("main");
-const PRAISES = ["صح! 👏", "ممتاز! 🌟", "شطورة! 💚", "برافو! 🎉", "صح عليك! 👍"];
-const praise = () => PRAISES[Math.floor(Math.random() * PRAISES.length)];
-const LOCALE = "ar-SA-u-ca-gregory-nu-latn";
-const NUM = ["", "الأولى", "الثانية", "الثالثة", "الرابعة", "الخامسة", "السادسة", "السابعة", "الثامنة", "التاسعة", "العاشرة"];
-
 const exam = EXAMS[0];
 const idx = indexExam(exam);
-let session = null, tracker = null, prog = null, view = null;
+const LOCALE = "ar-SA-u-ca-gregory-nu-latn";
+const PRAISES = ["صح! 👏", "ممتاز! 🌟", "شطورة! 💚", "برافو! 🎉"];
+const praise = () => PRAISES[Math.floor(Math.random() * PRAISES.length)];
+const paperOf = (b) => exam.papers.find((p) => p.id === b.paper);
+const partOf = (b) => paperOf(b).parts[b.part];
+const itemOf = (q) => idx.items[q.id.split("-").slice(1).join("-")];
+const Q_TOTAL = BOARDS.reduce((a, b) => a + b.qs.length, 0);
 
-// خطوات المذاكرة: الورقة ← الفقرة (شرح طريقة الحل) ← أسئلتها واحد واحد
-const STEPS = [];
-exam.papers.forEach((paper, pi) => {
-  STEPS.push({ k: "paper", pi });
-  paper.parts.forEach((part, ri) => {
-    STEPS.push({ k: "part", pi, ri });
-    part.items.forEach((id, qi) => STEPS.push({ k: "q", pi, ri, qi, id }));
-  });
-});
-STEPS.push({ k: "end" });
-const Q_TOTAL = STEPS.filter((s) => s.k === "q").length;
-// عدد الأسئلة اللي خلصتها (اللي عدّتها في المذاكرة) — يُحسب من أبعد خطوة وصلت لها
-const studiedCount = () => STEPS.slice(0, prog.maxPos || 0).filter((s) => s.k === "q").length;
+let session = null, tracker = null, prog = null, view = null, run = null;
 
 requireSession(async (s) => {
   session = s;
@@ -99,7 +91,7 @@ function toast(text) {
   t.textContent = text;
   t.className = "show";
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => (t.className = ""), 2500);
+  toastTimer = setTimeout(() => (t.className = ""), 1600);
 }
 
 const clean = (o) => JSON.parse(JSON.stringify(o));
@@ -107,27 +99,30 @@ const fmtNum = (n) => (Math.round(n * 100) / 100).toString();
 const today = () => new Date().toLocaleDateString("en-CA");
 const firstName = () => session.profile?.displayName || session.profile?.username || "";
 
+// صورة قطعة مقصوصة. kind: q (سؤال) / p (قطعة جواب) / h (عنوان الفقرة)
+// القطع الصغيرة (حرف/كلمة) تكبر شوي، والقطع الطويلة (جملة) تصغر حتى ما تغطي الشاشة
+function cutImg(e, kind = "q", extra = "") {
+  let w;
+  if (kind === "p") w = Math.min(Math.max(e.w * 1.6, 44), 230);
+  else if (kind === "t") w = Math.min(Math.max(e.w * 1.5, 40), 160);
+  else w = e.w * (kind === "h" ? 1.3 : 1.7);
+  return `<img class="cut cut-${kind}" src="${CUT_BASE}${esc(e.s)}" alt="" draggable="false"
+    style="width:${Math.round(w)}px" ${extra}>`;
+}
+
 function examDateLine() {
   const d0 = new Date(today() + "T00:00:00"), d1 = new Date(exam.date + "T00:00:00");
   const d = Math.round((d1 - d0) / 86400000);
   if (d < 0) return "";
   const when = d1.toLocaleDateString(LOCALE, { weekday: "long", day: "numeric", month: "long" });
-  return d === 0 ? `الاختبار اليوم! 💪` : d === 1 ? `الاختبار بكرة (${when}) 🔥` : `الاختبار ${when}`;
+  return d === 0 ? "الاختبار اليوم! 💪" : d === 1 ? `الاختبار بكرة (${when}) 🔥` : `الاختبار ${when}`;
 }
 
-document.addEventListener("click", (e) => {
-  const b = e.target.closest("[data-say]");
-  if (!b) return;
-  e.preventDefault();
-  e.stopPropagation();
-  speak(b.dataset.say, { rate: 0.7 });
-}, true);
-
 // ---------------------------------------------------------------
-// حفظ التقدم (الجهاز + Firestore eduSkills/{uid}.exams.{examId})
+// حفظ التقدم
 // ---------------------------------------------------------------
 
-const lsKey = () => `examprep2:${session.user.uid}:${exam.id}`;
+const lsKey = () => `examcut:${session.user.uid}:${exam.id}`;
 const skillsRef = () => doc(db, "eduSkills", session.user.uid);
 
 async function loadProg() {
@@ -136,10 +131,10 @@ async function loadProg() {
   try {
     const snap = await getDoc(skillsRef());
     const r = snap.exists() ? snap.data().exams?.[exam.id] : null;
-    remote = r && r.v === 2 ? r : null;
+    remote = r && r.v === 3 ? r : null;
   } catch (e) { console.warn("تعذر تحميل التقدم:", e); }
   const best = [remote, local].filter(Boolean).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
-  prog = { v: 2, guideSeen: false, pos: 0, maxPos: 0, first: {}, mocks: [], updatedAt: 0, ...(best || {}) };
+  prog = { v: 3, guideSeen: false, board: 0, first: {}, mocks: [], updatedAt: 0, ...(best || {}) };
   prog.first = prog.first || {};
   prog.mocks = Array.isArray(prog.mocks) ? prog.mocks : [];
 }
@@ -147,8 +142,7 @@ async function loadProg() {
 let saveTimer = null;
 function saveProg(now = false) {
   prog.updatedAt = Date.now();
-  prog.maxPos = Math.max(prog.maxPos || 0, prog.pos || 0);
-  prog.studied = studiedCount();
+  prog.studied = Object.keys(prog.first).length;
   prog.total = Q_TOTAL;
   try { localStorage.setItem(lsKey(), JSON.stringify(prog)); } catch (e) { /* تجاهل */ }
   clearTimeout(saveTimer);
@@ -169,12 +163,11 @@ window.addEventListener("pagehide", () => { if (prog) saveProg(true); tracker?.s
 // ---------------------------------------------------------------
 
 function showHome() {
-  window.speechSynthesis?.cancel();
-  const studied = studiedCount();
+  run = null;
+  const studied = Object.keys(prog.first).length;
   const pct = Math.round((100 * studied) / Q_TOTAL);
-  const atStart = prog.pos === 0;
-  const finished = STEPS[prog.pos]?.k === "end";
   const lm = prog.mocks[prog.mocks.length - 1];
+  const started = prog.board > 0 || studied > 0;
   show(`
     <div class="hello-card">
       <div class="hello">أهلًا ${esc(firstName())} ${session.profile?.avatar || "🌸"}</div>
@@ -182,9 +175,9 @@ function showHome() {
     </div>
 
     <button class="big-choice study" data-act="study">
-      <span class="bc-ic">📖</span>
-      <span class="bc-t">${atStart ? "ذاكري" : finished ? "ذاكري مرة ثانية" : "كمّلي المذاكرة"}</span>
-      <span class="bc-s">${atStart ? "أشرح لك الأوراق سؤال سؤال بالعربي" : finished ? "خلصتي كل الأسئلة 🎉" : `وصلتي للسؤال ${Math.min(STEPS.slice(0, prog.pos).filter((x) => x.k === "q").length + 1, Q_TOTAL)} من ${Q_TOTAL}`}</span>
+      <span class="bc-ic">✂️</span>
+      <span class="bc-t">${started ? "كمّلي المذاكرة" : "ذاكري"}</span>
+      <span class="bc-s">${started ? `الفقرة ${prog.board + 1} من ${BOARDS.length}` : "لعبة: حطي كل جواب في مكانه"}</span>
     </button>
 
     <button class="big-choice test" data-act="testmenu">
@@ -195,24 +188,24 @@ function showHome() {
 
     <div class="home-progress">
       <div class="pbar"><div style="width:${pct}%"></div></div>
-      <div>ذاكرتي <b>${studied}</b> من <b>${Q_TOTAL}</b> سؤال</div>
+      <div>حليتي <b>${studied}</b> من <b>${Q_TOTAL}</b> سؤال</div>
     </div>
 
     <div class="home-links">
-      <button class="linkbtn" data-act="guide">❓ كيف أستخدم الموقع؟</button>
-      ${!atStart ? `<button class="linkbtn" data-act="restart">🔄 ابدئي المذاكرة من الأول</button>` : ""}
+      <button class="linkbtn" data-act="guide">❓ كيف ألعب؟</button>
+      ${started ? `<button class="linkbtn" data-act="restart">🔄 ابدئي من أول فقرة</button>` : ""}
     </div>`, "home");
 }
 
 // ---------------------------------------------------------------
-// شرح طريقة الاستخدام (أول مرة)
+// شرح اللعبة
 // ---------------------------------------------------------------
 
 const GUIDE = [
-  { ic: "👋", t: "أهلًا! هذا الموقع يساعدك تذاكرين اختبار الإنجليزي.", s: "فيه زرين بس: <b>📖 ذاكري</b> و <b>📝 اختبري نفسك</b>" },
-  { ic: "📖", t: "في «ذاكري» نمشي مع الأوراق اللي عندك، سؤال سؤال.", s: "أقولك وش معنى السؤال بالعربي، و<b class=\"ans\">الجواب الصح باللون الأخضر</b>" },
-  { ic: "🔊", t: "اضغطي الزر 🔊 عشان تسمعين الكلمة بالإنجليزي.", s: "وبعد كل سؤال اضغطي <b>«جربي بنفسك»</b> واختاري الجواب" },
-  { ic: "📝", t: "لما تخلصين، ادخلي «اختبري نفسك» وحلي الورقة لحالك.", s: "في الآخر تطلع درجتك، وترسلينها لبابا 📤" }
+  { ic: "✂️", t: "قصّينا لك أوراق الاختبار قطع صغيرة.", s: "كل سؤال مقصوص من الورقة، والأجوبة قطع مقصوصة جنبه." },
+  { ic: "👆", t: "اضغطي على الجواب، وبعدين اضغطي على مكانه.", s: "أو اسحبيه بإصبعك وحطيه في المربع الفاضي." },
+  { ic: "✅", t: "إذا صح ينلصق، ويطلع لك الحل بالأخضر.", s: "وإذا غلط يرجع مكانه، وحاولي مرة ثانية." },
+  { ic: "📝", t: "لما تخلصين، ادخلي «اختبري نفسك».", s: "نفس اللعبة بس بدون تصحيح، وفي الآخر تطلع درجتك وترسلينها لبابا 📤" }
 ];
 
 function showGuide(i) {
@@ -227,253 +220,390 @@ function showGuide(i) {
       <div class="dots">${GUIDE.map((_, k) => `<span class="dot ${k === i ? "on" : k < i ? "past" : ""}"></span>`).join("")}</div>
       <div class="lnav">
         ${i > 0 ? `<button class="btn ghost" data-act="guideprev">رجوع</button>` : "<span></span>"}
-        <button class="btn big-go" data-act="${last ? "guidedone" : "guidenext"}">${last ? "فهمت، يلا نبدأ ✅" : "التالي ◀"}</button>
+        <button class="btn big-go" data-act="${last ? "guidedone" : "guidenext"}">${last ? "فهمت، يلا ✅" : "التالي ◀"}</button>
       </div>
     </div>`, "guide");
   view = { name: "guide", i };
-  speakAr(g.t.replace(/[«»]/g, ""));
 }
 
 // ---------------------------------------------------------------
-// المذاكرة
+// اللوحة (فقرة من الورقة)
 // ---------------------------------------------------------------
 
-function crumbs(st) {
-  const paper = exam.papers[st.pi];
-  const part = st.ri != null ? paper.parts[st.ri] : null;
-  return `<div class="crumbs"><b>📄 ${esc(paper.name)}</b>${part ? ` · الفقرة ${st.ri + 1} من ${paper.parts.length}` : ""}</div>`;
+function startBoard(bi, mode, opts = {}) {
+  const b = BOARDS[bi];
+  // كل شي بنفس ترتيبه في الورقة (بدون خلط) — عشان تحفظ شكل الورقة
+  const tray = (b.tray || []).map((t) => t.k);
+  run = {
+    mode, bi, b, tray, selected: null,
+    st: b.qs.map((q) => ({
+      done: false, put: null, pick: null, missed: false,
+      order: [], orderPool: q.kind === "order" ? q.pieces.map((p) => p.k) : null,
+      opts: q.kind === "pick" ? q.opts.map((o, i) => i) : null
+    })),
+    ...opts
+  };
+  renderBoard(true);
 }
 
-function studyNav(mainBtn) {
-  return `<div class="lnav">
-    ${prog.pos > 0 ? `<button class="btn ghost" data-act="sback">رجوع</button>` : "<span></span>"}
-    ${mainBtn}
+function boardInstr(b) {
+  const kinds = new Set(b.qs.map((q) => q.kind));
+  const lines = [];
+  if (kinds.has("slot")) lines.push("👆 اضغطي على الجواب من القطع اللي تحت، وبعدين اضغطي على المربع الفاضي");
+  if (kinds.has("pick")) lines.push("👆 اختاري القطعة الصح تحت كل سؤال");
+  if (kinds.has("order")) lines.push("✂️ اضغطي على الكلمات بالترتيب الصح");
+  return lines.map((l) => `<div class="do-line">${l}</div>`).join("");
+}
+
+function qCard(q, i) {
+  const s = run.st[i];
+  const test = run.mode === "test";
+  const showSolved = !test && s.done && q.solved;
+  const qimg = cutImg(showSolved ? q.solved : q.q, "q");
+  const ctx = q.ctx ? `<div class="ctx">${cutImg(q.ctx, "q")}</div>` : "";
+  let body = "";
+
+  if (q.kind === "slot") {
+    const tk = s.put;
+    const piece = tk ? run.b.tray.find((t) => t.k === tk) : null;
+    body = `<div class="drop ${piece ? (test ? "filled" : "ok") : ""} ${run.selected && !piece ? "ready" : ""}" data-drop="${i}">
+      ${piece ? `<button class="piece placed" data-placed="${i}">${cutImg(piece, "p")}</button>` : `<span class="drop-ph">⬇️ حطي الجواب هنا</span>`}
+    </div>`;
+  } else if (q.kind === "pick") {
+    body = `<div class="opts">${s.opts.map((oi) => {
+      const o = q.opts[oi];
+      const cls = test ? (s.pick === oi ? "chosen" : "") : (s.done && o.ok ? "ok" : s.wrong?.includes(oi) ? "no" : "");
+      return `<button class="piece opt ${cls}" data-opt="${i}:${oi}" ${!test && s.done ? "disabled" : ""}>${cutImg(o.img, "p")}</button>`;
+    }).join("")}</div>`;
+  } else if (q.kind === "order") {
+    const n = q.target.length;
+    const placed = s.order.map((k) => q.pieces.find((p) => p.k === k));
+    body = `<div class="order-line ${!test && s.done ? "ok" : ""}" data-drop="${i}">
+        ${Array.from({ length: n }, (_, k) => placed[k]
+          ? `<button class="piece placed" data-oplaced="${i}:${k}">${cutImg(placed[k], "p")}</button>`
+          : `<span class="oslot">${k + 1}</span>`).join("")}
+      </div>
+      ${s.done && !test ? "" : `<div class="order-pool">${s.orderPool.filter((k) => !s.order.includes(k)).map((k) => {
+        const p = q.pieces.find((x) => x.k === k);
+        return `<button class="piece" data-oword="${i}:${esc(k)}">${cutImg(p, "p")}</button>`;
+      }).join("")}</div>`}
+      ${test && s.order.length ? `<button class="linkbtn" data-oreset="${i}">↺ امسحي</button>` : ""}`;
+  }
+  return `<div class="cq ${!test && s.done ? "done" : ""}" id="cq${i}">
+    <div class="cq-n">${i + 1}</div>
+    ${ctx}<div class="qimg">${qimg}</div>${body}
   </div>`;
 }
 
-function showStudy(phase = "learn") {
-  const st = STEPS[prog.pos];
-  const studied = studiedCount();
-  const bar = `<div class="pbar thin"><div style="width:${Math.round((100 * studied) / Q_TOTAL)}%"></div></div>`;
+function renderBoard(top = false) {
+  const { b } = run;
+  const paper = paperOf(b), part = partOf(b);
+  const y = window.scrollY;
+  const test = run.mode === "test";
+  const allDone = run.st.every((s) => s.done);
+  const trayLeft = run.tray.filter((k) => !run.st.some((s) => s.put === k));
+  const paperBoards = BOARDS.filter((x) => x.paper === b.paper);
+  const pos = paperBoards.indexOf(b);
+  const isLastOfPaper = pos === paperBoards.length - 1;
 
-  if (st.k === "end") {
-    show(`
-      <div class="guide-card">
-        <div class="guide-ic">🎉</div>
-        <div class="guide-t">خلصتي مذاكرة كل الأوراق! ما شاء الله عليك</div>
-        <div class="guide-s">الحين جربي تحلين الورقة لحالك 💪</div>
-        <button class="btn big-go" data-act="testmenu">📝 اختبري نفسك</button>
-        <div style="margin-top:12px"><button class="linkbtn" data-act="home">🏠 البداية</button></div>
-      </div>`, "study");
-    speakAr("ما شاء الله! خلصتي المذاكرة. الحين اختبري نفسك");
-    return;
+  let footer;
+  if (test) {
+    footer = `<div class="lnav board-nav">
+      ${pos > 0 ? `<button class="btn ghost" data-act="tprev">رجوع</button>` : "<span></span>"}
+      <button class="btn big-go" data-act="${isLastOfPaper ? "tsubmit" : "tnext"}">${isLastOfPaper ? "سلّمي الورقة ✅" : "الفقرة الجاية ◀"}</button>
+    </div>`;
+  } else if (allDone) {
+    footer = `<div class="board-done">🎉 أحسنتِ! خلصتي الفقرة
+      <div class="lnav"><span></span><button class="btn big-go" data-act="snext">${run.bi === BOARDS.length - 1 ? "خلصت كل الأوراق 🎉" : "الفقرة الجاية ◀"}</button></div></div>`;
+  } else {
+    footer = `<div class="lnav board-nav">
+      ${run.bi > 0 ? `<button class="btn ghost" data-act="sprev">رجوع</button>` : "<span></span>"}
+      <button class="btn ghost" data-act="hint">💡 ساعديني</button>
+    </div>`;
   }
 
-  const paper = exam.papers[st.pi];
-
-  if (st.k === "paper") {
-    const n = paper.parts.reduce((a, p) => a + p.items.length, 0);
-    show(`${bar}
-      <div class="guide-card">
-        <div class="guide-ic">📄</div>
-        <div class="guide-t">${esc(paper.name)}</div>
-        <div class="guide-s">هذي نفس ${esc(paper.name)} اللي عندك في الملف.<br>فيها <b>${paper.parts.length}</b> فقرات و <b>${n}</b> سؤال.</div>
-        ${studyNav(`<button class="btn big-go" data-act="snext">يلا نبدأ ◀</button>`)}
-      </div>`, "study");
-    speakAr(`${paper.name}. يلا نبدأ`);
-    return;
-  }
-
-  const part = paper.parts[st.ri];
-
-  if (st.k === "part") {
-    show(`${bar}${crumbs(st)}
-      <div class="xcard part-card">
-        <div class="part-t">${esc(part.t)}</div>
-        <div class="st-label">📄 في الورقة مكتوب:</div>
-        <div class="paper mini">
-          ${part.h ? `<div class="exam-h en">${esc(part.h)}</div>` : ""}
-          ${part.sub ? `<div class="exam-sub en">${esc(part.sub)}</div>` : ""}
-        </div>
-        ${part.box ? `<div class="st-label">📦 المربع اللي في الورقة:</div><div class="wordbox-wrap"><div class="wordbox en">${part.box.map(esc).join(" – ")}</div></div>` : ""}
-        <div class="st-label">✍️ كيف أحلها؟</div>
-        <ol class="how-list">${part.how.map((h) => `<li>${esc(h)}</li>`).join("")}</ol>
-        <div class="xmean">فيها <b>${part.items.length}</b> أسئلة. يلا نشوفها واحد واحد 👇</div>
-      </div>
-      ${studyNav(`<button class="btn big-go" data-act="snext">فهمت ◀</button>`)}`, "study");
-    speakAr(`${part.t.replace(/[^؀-ۿ\s]/g, "")}. كيف أحلها؟ ${part.how.join(" ").replace(/[^؀-ۿ\s.،]/g, " ")}`);
-    return;
-  }
-
-  // سؤال
-  const it = idx.items[st.id];
-  const head = `${bar}${crumbs(st)}<div class="q-title">${esc(part.t)} · سؤال ${st.qi + 1} من ${part.items.length}</div>`;
-
-  if (phase === "learn") {
-    show(`${head}
-      <div class="xcard">${studyCardHtml(it)}</div>
-      ${studyNav(`<button class="btn big-go" data-act="stry">جربي بنفسك 👆</button>`)}`, "study");
-    speak(sayText(it), { rate: 0.7 });
-    return;
-  }
-
-  // جربي بنفسك
-  const q = paperQuestion(it, part, idx, false);
-  show(`${head}
-    <div class="try-title">يلا جربي! 👇</div>
-    <div class="qcard" id="qcard"></div>
-    <div id="fb"></div>
-    <div class="lnav"><button class="btn ghost" data-act="slearn">👀 شوفي الشرح مرة ثانية</button><span></span></div>`, "study");
-  renderQuestion($("qcard"), q, it, {
-    mock: false,
-    onAnswer: ({ ok }) => {
-      if (!(it.id in prog.first)) { prog.first[it.id] = ok; saveProg(); }
-      if (ok) {
-        const p = praise();
-        $("fb").innerHTML = `<div class="feedback ok">${p}</div>
-          <div class="lnav"><span></span><button class="btn big-go" data-act="snext">التالي ◀</button></div>`;
-        speakAr(p.replace(/[^؀-ۿ\s!]/g, ""));
-      } else {
-        $("fb").innerHTML = `<div class="feedback no">🙈 مو صح — عادي!<div class="fb-right">الجواب الصح: ${correctHtml(it)} ${sayBtn(sayText(it))}</div>
-          <div class="lnav"><span></span><button class="btn big-go" data-act="stry">حاولي مرة ثانية 🔁</button></div></div>`;
-        speakAr("مو صح، عادي. شوفي الجواب الأخضر وحاولي مرة ثانية");
-      }
-      $("fb").scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }
-  });
+  show(`
+    <div class="crumbs"><b>📄 ${esc(paper.name)}</b> · الفقرة ${b.part + 1} من ${paper.parts.length}
+      ${test ? `<span class="badge role" style="margin-inline-start:6px">📝 اختبار</span>` : ""}</div>
+    <div class="pbar thin"><div style="width:${test ? Math.round((100 * pos) / paperBoards.length) : Math.round((100 * run.bi) / BOARDS.length)}%"></div></div>
+    <div class="board-title">${esc(part.t)}</div>
+    ${boardInstr(b)}
+    <div class="paper head-paper">${cutImg(b.head, "h")}</div>
+    <div class="board">${b.qs.map((q, i) => qCard(q, i)).join("")}</div>
+    ${b.tray ? `<div class="tray ${trayLeft.length ? "" : "empty"}">
+      <div class="tray-t">${trayLeft.length ? (run.selected ? "👆 الحين اضغطي على المربع الفاضي" : "✂️ القطع: اضغطي على وحدة") : (test ? "حطيتي كل القطع ✅" : "")}</div>
+      <div class="tray-pieces">${trayLeft.map((k) => {
+        const t = b.tray.find((x) => x.k === k);
+        return `<button class="piece ${run.selected === k ? "sel" : ""} ${run.hint === k ? "hint" : ""}" data-tray="${esc(k)}">${cutImg(t, "t")}</button>`;
+      }).join("")}</div>
+    </div>` : ""}
+    ${footer}`, "board");
+  if (!top) window.scrollTo(0, y);
 }
+
+// ---------------- منطق الحل ----------------
+
+function markFirst(qi, ok) {
+  if (run.mode !== "study") return;
+  const q = run.b.qs[qi];
+  if (!(q.id in prog.first)) { prog.first[q.id] = ok; }
+  if (!ok) run.st[qi].missed = true;
+}
+
+function flash(sel, cls = "shake") {
+  const el = main.querySelector(sel);
+  if (!el) return;
+  el.classList.remove(cls);
+  void el.offsetWidth;
+  el.classList.add(cls);
+}
+
+function solved(qi) {
+  const s = run.st[qi];
+  s.done = true;
+  const q = run.b.qs[qi];
+  if (!(q.id in prog.first)) prog.first[q.id] = !s.missed;
+  run.hint = null;
+  saveProg();
+  toast(praise());
+  if (run.st.every((x) => x.done)) setTimeout(() => {
+    const el = main.querySelector(".board-done");
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 60);
+}
+
+function putInSlot(key, qi) {
+  const q = run.b.qs[qi], s = run.st[qi];
+  if (q.kind !== "slot") return;
+  if (run.mode === "test") {
+    s.put = key; s.done = true;
+    run.selected = null;
+    renderBoard();
+    return;
+  }
+  if (s.done) return;
+  if (key === q.ans) {
+    s.put = key;
+    run.selected = null;
+    solved(qi);
+    renderBoard();
+  } else {
+    markFirst(qi, false);
+    run.selected = null;
+    renderBoard();
+    flash(`#cq${qi} .drop`);
+    toast("🙈 مو هنا — جربي مكان ثاني");
+  }
+}
+
+function pickOpt(qi, oi) {
+  const q = run.b.qs[qi], s = run.st[qi];
+  if (run.mode === "test") { s.pick = oi; s.done = true; renderBoard(); return; }
+  if (s.done) return;
+  if (q.opts[oi].ok) {
+    solved(qi);
+    renderBoard();
+  } else {
+    markFirst(qi, false);
+    s.wrong = [...(s.wrong || []), oi];
+    renderBoard();
+    toast("🙈 مو هذي — جربي الثانية");
+  }
+}
+
+function orderWord(qi, k) {
+  const q = run.b.qs[qi], s = run.st[qi];
+  if (run.mode === "test") {
+    if (s.order.length < q.target.length) s.order.push(k);
+    s.done = s.order.length === q.target.length;
+    renderBoard();
+    return;
+  }
+  if (s.done) return;
+  if (q.target[s.order.length] === k) {
+    s.order.push(k);
+    if (s.order.length === q.target.length) solved(qi);
+    renderBoard();
+  } else {
+    markFirst(qi, false);
+    renderBoard();
+    flash(`#cq${qi} .order-line`);
+    toast("🙈 مو هذي اللي بعدها");
+  }
+}
+
+function giveHint() {
+  const qi = run.st.findIndex((s) => !s.done);
+  if (qi < 0) return;
+  const q = run.b.qs[qi];
+  markFirst(qi, false);
+  document.getElementById(`cq${qi}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+  if (q.kind === "slot") {
+    run.hint = q.ans;
+    renderBoard();
+    toast("💡 القطعة اللي تلمع هي جواب السؤال " + (qi + 1));
+  } else if (q.kind === "pick") {
+    renderBoard();
+    const oi = q.opts.findIndex((o) => o.ok);
+    main.querySelector(`[data-opt="${qi}:${oi}"]`)?.classList.add("hint");
+  } else {
+    renderBoard();
+    const k = q.target[run.st[qi].order.length];
+    main.querySelector(`[data-oword="${qi}:${CSS.escape(k)}"]`)?.classList.add("hint");
+  }
+}
+
+// ---------------- الضغط والسحب ----------------
+
+function onTap(el) {
+  if (el.dataset.tray != null) {
+    const k = el.dataset.tray;
+    run.selected = run.selected === k ? null : k;
+    renderBoard();
+    return;
+  }
+  if (el.dataset.drop != null) {
+    const qi = +el.dataset.drop;
+    if (run.selected && run.b.qs[qi].kind === "slot") putInSlot(run.selected, qi);
+    return;
+  }
+  if (el.dataset.opt) { const [qi, oi] = el.dataset.opt.split(":").map(Number); pickOpt(qi, oi); return; }
+  if (el.dataset.oword) { const [qi, ...rest] = el.dataset.oword.split(":"); orderWord(+qi, rest.join(":")); return; }
+  if (el.dataset.placed != null && run.mode === "test") {
+    // في الاختبار: القطعة الملصوقة ترجع للقطع
+    const s = run.st[+el.dataset.placed];
+    s.put = null; s.done = false;
+    renderBoard();
+    return;
+  }
+  if (el.dataset.oplaced && run.mode === "test") {
+    const [qi, k] = el.dataset.oplaced.split(":").map(Number);
+    const s = run.st[qi];
+    s.order.splice(k, 1); s.done = false;
+    renderBoard();
+  }
+}
+
+let drag = null;
+main.addEventListener("pointerdown", (e) => {
+  if (view !== "board") return;
+  const el = e.target.closest("[data-tray],[data-oword],[data-opt],[data-drop],[data-placed],[data-oplaced]");
+  if (!el || el.disabled) return;
+  drag = { el, x0: e.clientX, y0: e.clientY, moved: false, ghost: null, canDrag: el.dataset.tray != null || el.dataset.oword != null };
+});
+window.addEventListener("pointermove", (e) => {
+  if (!drag || !drag.canDrag) return;
+  const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+  if (!drag.moved && Math.hypot(dx, dy) > 10) {
+    drag.moved = true;
+    const g = drag.el.cloneNode(true);
+    g.classList.add("ghost");
+    g.style.width = drag.el.offsetWidth + "px";
+    document.body.appendChild(g);
+    drag.ghost = g;
+    drag.el.classList.add("dragging");
+  }
+  if (drag.moved) {
+    e.preventDefault();
+    drag.ghost.style.left = e.clientX - drag.ghost.offsetWidth / 2 + "px";
+    drag.ghost.style.top = e.clientY - drag.ghost.offsetHeight / 2 + "px";
+    main.querySelectorAll(".drop.over,.order-line.over").forEach((d) => d.classList.remove("over"));
+    drag.ghost.style.display = "none";
+    const under = document.elementFromPoint(e.clientX, e.clientY)?.closest("[data-drop]");
+    drag.ghost.style.display = "";
+    under?.classList.add("over");
+  }
+}, { passive: false });
+window.addEventListener("pointerup", (e) => {
+  if (!drag) return;
+  const d = drag;
+  drag = null;
+  if (!d.moved) { onTap(d.el); return; }
+  d.ghost.remove();
+  d.el.classList.remove("dragging");
+  const under = document.elementFromPoint(e.clientX, e.clientY)?.closest("[data-drop]");
+  main.querySelectorAll(".over").forEach((x) => x.classList.remove("over"));
+  if (!under) return;
+  const qi = +under.dataset.drop;
+  if (d.el.dataset.tray != null) putInSlot(d.el.dataset.tray, qi);
+  else if (d.el.dataset.oword) {
+    const [oq, ...rest] = d.el.dataset.oword.split(":");
+    if (+oq === qi) orderWord(qi, rest.join(":"));
+  }
+});
+window.addEventListener("pointercancel", () => {
+  if (drag?.ghost) { drag.ghost.remove(); drag.el.classList.remove("dragging"); }
+  drag = null;
+});
+
+// ---------------------------------------------------------------
+// المذاكرة: الفقرات وحدة وحدة بنفس ترتيب الأوراق
+// ---------------------------------------------------------------
 
 function studyNext() {
-  const st = STEPS[prog.pos];
-  // نهاية ورقة: نحفظ ملخصها لبابا
-  if (st.k === "q") {
-    const nxt = STEPS[prog.pos + 1];
-    if (!nxt || nxt.k === "paper" || nxt.k === "end") saveStudyResult(st.pi);
+  // آخر فقرة من الورقة: نحفظ ملخصها لبابا
+  const b = BOARDS[run.bi];
+  const nb = BOARDS[run.bi + 1];
+  if (!nb || nb.paper !== b.paper) saveStudyResult(b.paper);
+  if (!nb) {
+    prog.board = 0;
+    saveProg();
+    showStudyEnd();
+    return;
   }
-  prog.pos = Math.min(prog.pos + 1, STEPS.length - 1);
+  prog.board = run.bi + 1;
   saveProg();
-  showStudy("learn");
+  startBoard(prog.board, "study");
 }
 
-async function saveStudyResult(pi) {
-  const paper = exam.papers[pi];
-  const ids = paper.parts.flatMap((p) => p.items);
-  const done = ids.filter((id) => id in prog.first);
+function showStudyEnd() {
+  run = null;
+  show(`
+    <div class="guide-card">
+      <div class="guide-ic">🎉</div>
+      <div class="guide-t">خلصتي كل الأوراق! ما شاء الله عليك</div>
+      <div class="guide-s">الحين جربي تحلين الورقة لحالك 💪</div>
+      <button class="btn big-go" data-act="testmenu">📝 اختبري نفسك</button>
+      <div style="margin-top:12px"><button class="linkbtn" data-act="home">🏠 البداية</button></div>
+    </div>`, "end");
+}
+
+async function saveStudyResult(paperId) {
+  const qids = BOARDS.filter((b) => b.paper === paperId).flatMap((b) => b.qs.map((q) => q.id));
+  const done = qids.filter((id) => id in prog.first);
   if (!done.length) return;
   const correct = done.filter((id) => prog.first[id]).length;
+  const paper = exam.papers.find((p) => p.id === paperId);
   try {
     await saveQuizResult(session, clean({
       type: "examPractice", examId: exam.id, examTitle: exam.titleAr,
-      lessonId: paper.id, lessonName: `مذاكرة ${paper.name}`,
+      lessonId: paperId, lessonName: `مذاكرة ${paper.name}`,
       total: done.length, correct, pct: Math.round((100 * correct) / done.length), durationSec: 0,
-      details: done.map((id) => ({ letter: answerText(idx.items[id]), correct: !!prog.first[id], chosen: "" }))
+      details: done.map((id) => {
+        const it = idx.items[id.split("-").slice(1).join("-")];
+        return { letter: it ? answerText(it) : id, correct: !!prog.first[id], chosen: "" };
+      })
     }));
   } catch (e) { console.warn("تعذر حفظ ملخص المذاكرة:", e); }
 }
 
 // ---------------------------------------------------------------
-// عرض السؤال (بالضغط فقط)
-// ---------------------------------------------------------------
-
-function doLine(q, it) {
-  if (q.kind === "build") return "";
-  return {
-    qa: "👆 اختاري الجواب الصح",
-    tf: "👆 صح ✓ ولا خطأ ✗ ؟",
-    spell: "👆 اختاري الحرف الناقص",
-    complete: "👆 اختاري الكلمة اللي تكمّل الجملة",
-    choose: "👆 اختاري الكلمة الصح للفراغ"
-  }[it.type] || "";
-}
-
-function renderQuestion(box, q, it, { mock, onAnswer }) {
-  let answered = false;
-  const line = doLine(q, it);
-  box.innerHTML = `<div class="qhead">${q.head}</div>${line ? `<div class="do-line">${line}</div>` : ""}<div class="qbody"></div>`;
-  const body = box.querySelector(".qbody");
-
-  if (q.kind === "choice") {
-    const opts = q.keepOrder ? q.options : shuffle(q.options);
-    body.innerHTML = `<div class="opt-list ${q.row ? "row" : ""}">${opts.map((o, i) => `<button type="button" class="xopt ${o.cls}" data-i="${i}">${o.html}</button>`).join("")}</div>`;
-    const btns = [...body.querySelectorAll(".xopt")];
-    btns.forEach((b) => b.addEventListener("click", () => {
-      if (answered) return;
-      answered = true;
-      const o = opts[+b.dataset.i];
-      const ok = o.val === q.answer;
-      btns.forEach((x) => (x.disabled = true));
-      if (mock) b.classList.add("picked");
-      else {
-        b.classList.add(ok ? "correct" : "wrong");
-        if (!ok) btns.forEach((x, j) => { if (opts[j].val === q.answer) x.classList.add("correct"); });
-      }
-      onAnswer({ ok, chosen: o.cls.includes("tf") ? o.html : o.val });
-    }));
-    return;
-  }
-
-  // ترتيب الكلمات بالضغط
-  const joiner = q.joiner || " ";
-  let picked = [];
-  body.innerHTML = `
-    <div class="build-line" data-line></div>
-    <div class="chips" data-chips></div>
-    <div class="card-actions">
-      <button type="button" class="btn ghost small" data-clear>↺ امسحي</button>
-      <button type="button" class="btn" data-go disabled>${mock ? "التالي ◀" : "تأكدي ✓"}</button>
-    </div>`;
-  const lineEl = body.querySelector("[data-line]"), chips = body.querySelector("[data-chips]"), go = body.querySelector("[data-go]");
-  const draw = () => {
-    lineEl.innerHTML = picked.length
-      ? picked.map((ci, k) => `<button type="button" class="chip in" data-k="${k}">${esc(q.chips[ci])}</button>`).join("") + (picked.length === q.chips.length && q.end ? `<span class="chip-end">${esc(q.end)}</span>` : "")
-      : `<span class="build-ph">اضغطي على الكلمات اللي تحت بالترتيب 👇</span>`;
-    chips.innerHTML = q.chips.map((c, ci) => `<button type="button" class="chip ${picked.includes(ci) ? "used" : ""}" data-ci="${ci}" ${picked.includes(ci) ? "disabled" : ""}>${esc(c)}</button>`).join("");
-    go.disabled = answered || picked.length !== q.chips.length;
-  };
-  chips.addEventListener("click", (e) => {
-    const b = e.target.closest("[data-ci]");
-    if (!b || answered) return;
-    picked.push(+b.dataset.ci);
-    speak(q.chips[+b.dataset.ci], { rate: 0.8 });
-    draw();
-  });
-  lineEl.addEventListener("click", (e) => {
-    const b = e.target.closest("[data-k]");
-    if (!b || answered) return;
-    picked.splice(+b.dataset.k, 1);
-    draw();
-  });
-  body.querySelector("[data-clear]").addEventListener("click", () => { if (!answered) { picked = []; draw(); } });
-  go.addEventListener("click", () => {
-    if (answered || picked.length !== q.chips.length) return;
-    answered = true;
-    const words = picked.map((ci) => q.chips[ci]);
-    const ok = words.join(joiner) === q.target.join(joiner);
-    if (!mock) lineEl.classList.add(ok ? "ok" : "no");
-    draw();
-    onAnswer({ ok, chosen: words.join(joiner) + (q.end || "") });
-  });
-  draw();
-}
-
-// ---------------------------------------------------------------
-// اختبري نفسك
+// اختبري نفسك: نفس اللعبة بدون تصحيح، والدرجة في الآخر
 // ---------------------------------------------------------------
 
 let test = null;
 
 function showTestMenu() {
-  test = null;
-  window.speechSynthesis?.cancel();
+  run = null; test = null;
   show(`
     <div class="guide-card">
       <div class="guide-ic">📝</div>
       <div class="guide-t">اختاري الورقة اللي تبين تحلينها</div>
-      <div class="guide-s">حلي لحالك بدون مساعدة. الدرجة تطلع في الآخر 💪</div>
+      <div class="guide-s">نفس اللعبة بس بدون تصحيح. الدرجة تطلع في الآخر 💪</div>
     </div>
     <div class="mock-list">
       ${exam.papers.map((p) => {
-        const n = p.parts.reduce((a, x) => a + x.items.length, 0);
+        const n = BOARDS.filter((b) => b.paper === p.id).reduce((a, b) => a + b.qs.length, 0);
         const l = prog.mocks.filter((m) => m.kind === p.id).slice(-1)[0];
         return `<button class="big-choice paper-choice" data-act="test" data-k="${p.id}">
           <span class="bc-ic">📄</span>
@@ -484,126 +614,119 @@ function showTestMenu() {
     </div>`, "testmenu");
 }
 
-function startTest(kind) {
-  const mock = buildPaperMock(exam, idx, kind);
-  const flat = [];
-  mock.parts.forEach((p, pi) => p.qs.forEach((q) => flat.push({ q, pi })));
-  test = { mock, flat, i: 0, answers: [], startedAt: Date.now(), done: false };
-  showTestQ();
+function startTest(paperId) {
+  const bis = BOARDS.map((b, i) => (b.paper === paperId ? i : -1)).filter((i) => i >= 0);
+  test = { paperId, bis, pos: 0, states: {}, startedAt: Date.now() };
+  openTestBoard();
 }
 
-function showTestQ() {
-  const { q, pi } = test.flat[test.i];
-  const p = test.mock.parts[pi];
-  const it = idx.items[q.itemId];
-  show(`
-    <div class="crumbs"><b>📝 ${esc(test.mock.title)}</b> · سؤال ${test.i + 1} من ${test.flat.length}
-      <button class="linkbtn" data-act="testquit" style="float:left">✕ خروج</button></div>
-    <div class="pbar thin"><div style="width:${Math.round((100 * test.i) / test.flat.length)}%"></div></div>
-    <div class="paper">
-      <div class="part-t sm">${esc(p.t)}</div>
-      ${p.h ? `<div class="exam-h en">${esc(p.h)}</div>` : ""}
-      ${p.sub ? `<div class="exam-sub en">${esc(p.sub)}</div>` : ""}
-      <div class="qcard flat" id="qcard"></div>
-    </div>`, "test");
-  renderQuestion($("qcard"), q, it, {
-    mock: true,
-    onAnswer: ({ ok, chosen }) => {
-      test.answers.push({ part: pi, itemId: q.itemId, ok, chosen: String(chosen ?? "") });
-      setTimeout(() => {
-        test.i++;
-        if (test.i < test.flat.length) showTestQ(); else finishTest();
-      }, q.kind === "choice" ? 300 : 0);
-    }
+function openTestBoard() {
+  const bi = test.bis[test.pos];
+  if (test.states[bi]) {
+    run = test.states[bi];
+    renderBoard(true);
+  } else {
+    startBoard(bi, "test");
+    test.states[bi] = run;
+  }
+}
+
+function isRight(q, s) {
+  if (q.kind === "slot") return s.put === q.ans;
+  if (q.kind === "pick") return s.pick != null && q.opts[s.pick].ok;
+  return s.order.length === q.target.length && s.order.every((k, i) => k === q.target[i]);
+}
+
+async function submitTest() {
+  const paper = exam.papers.find((p) => p.id === test.paperId);
+  let total = 0;
+  const parts = [], wrong = [], details = [];
+  test.bis.forEach((bi) => {
+    const b = BOARDS[bi];
+    const st = test.states[bi]?.st || b.qs.map(() => ({ order: [] }));
+    const part = partOf(b);
+    const res = b.qs.map((q, i) => isRight(q, st[i]));
+    const c = res.filter(Boolean).length, n = b.qs.length;
+    const marks = part.marks ?? n;
+    const got = (c / n) * marks;
+    total += got;
+    parts.push({ h: part.h || part.sub, t: part.t, c, n, marks, got: Math.round(got * 100) / 100 });
+    b.qs.forEach((q, i) => {
+      const it = itemOf(q);
+      details.push({ letter: it ? answerText(it) : q.id, correct: res[i], chosen: "" });
+      if (!res[i]) wrong.push({ bi, qi: i });
+    });
   });
-}
-
-async function finishTest() {
-  test.done = true;
-  const res = scoreMock(test.mock, test.answers);
-  const wrong = test.answers.filter((a) => !a.ok);
-  const durationSec = Math.round((Date.now() - test.startedAt) / 1000);
+  const outOf = paper.marks ?? Q_TOTAL_OF(test.paperId);
+  const score = Math.round(total * 2) / 2;
+  const pct = Math.round((100 * total) / outOf);
   const entry = {
-    kind: test.mock.kind, title: test.mock.title, score: res.score, outOf: res.outOf, pct: res.pct,
-    parts: res.parts.map((p) => ({ h: p.h, t: p.t, c: p.c, n: p.n, got: p.got, marks: p.marks })),
-    wrong: [...new Set(wrong.map((a) => a.itemId))], ts: Date.now(), durationSec
+    kind: paper.id, title: paper.name, score, outOf, pct, parts,
+    wrong: wrong.map(({ bi, qi }) => BOARDS[bi].qs[qi].id), ts: Date.now(),
+    durationSec: Math.round((Date.now() - test.startedAt) / 1000)
   };
   prog.mocks = [...prog.mocks, entry].slice(-15);
   saveProg(true);
   showResult(entry, wrong);
-  speakAr(res.pct >= 90 ? "ما شاء الله! جاهزة للاختبار" : res.pct >= 70 ? "ممتاز! باقي شوي" : "أحسنتِ! شوفي أخطائك وذاكريها");
   try {
     await saveQuizResult(session, clean({
       type: "exam", examId: exam.id, examTitle: exam.titleAr,
-      mockKind: entry.kind, mockName: entry.title, score: entry.score, outOf: entry.outOf,
-      total: test.answers.length, correct: test.answers.filter((a) => a.ok).length, pct: entry.pct,
-      parts: entry.parts, durationSec,
-      details: test.answers.map((a) => ({ letter: answerText(idx.items[a.itemId]), correct: a.ok, chosen: a.chosen }))
+      mockKind: entry.kind, mockName: entry.title, score, outOf, pct,
+      total: details.length, correct: details.filter((d) => d.correct).length,
+      parts, durationSec: entry.durationSec, details
     }));
     const el = $("saveState"); if (el) el.textContent = "تم حفظ الدرجة ✅";
-  } catch (e) {
-    const el = $("saveState"); if (el) el.textContent = "";
-  }
+  } catch (e) { /* تجاهل */ }
+}
+function Q_TOTAL_OF(paperId) {
+  return BOARDS.filter((b) => b.paper === paperId).reduce((a, b) => a + b.qs.length, 0);
 }
 
-// كلام قصير يوصف السؤال (للأخطاء ولرسالة الواتساب)
-function promptOf(it) {
-  switch (it.type) {
-    case "qa": return it.q;
-    case "order": return it.words.join(" – ");
-    case "month": return `${it.m}- ?`;
-    case "monthOrder": return it.given.join(" – ");
-    case "pair": return it.kind === "opp" ? `${it.w} ≠ ?` : it.kind === "un" ? `un + ${it.w}` : it.dir === "rev" ? `? → ${it.w}` : `${it.w} → ?`;
-    case "tf": return it.s;
-    case "pick2": return it.opts.join(" / ");
-    case "complete": return it.s;
-    case "choose": return it.s.replace("___", "( " + it.opts.join(" / ") + " )");
-    case "word": return `صورة: ${it.ar}`;
-    case "spell": return it.shape;
-  }
-  return it.id;
-}
 function answerShort(it) {
+  if (!it) return "";
   if (it.type === "spell") return `${it.w} (${it.letter})`;
   if (it.type === "tf") return it.answer ? "✓" : "✗";
-  if (it.type === "month") return MONTHS[it.m - 1].en;
   return answerText(it);
+}
+function promptShort(it) {
+  if (!it) return "";
+  return { qa: it.q, order: it.words?.join(" – "), tf: it.s, choose: it.s?.replace("___", "…"), complete: it.s,
+    word: `صورة: ${it.ar}`, spell: it.shape, pick2: it.opts?.join(" / "), month: `${it.m}- ?`,
+    monthOrder: it.given?.join(" – "), pair: it.w }[it.type] || it.id;
 }
 
 function waText(entry) {
-  const p = session.profile || {};
   const lv = levelFor(entry.pct);
   const lines = [
-    `📚 ${firstName()} ${p.avatar || ""} — اختبار الإنجليزي`.trim(),
+    `📚 ${firstName()} ${session.profile?.avatar || ""} — اختبار الإنجليزي`.trim(),
     `📝 ${entry.title}: ${fmtNum(entry.score)} من ${entry.outOf} (${entry.pct}%)`,
     `المستوى: ${lv.icon} ${lv.label}`,
-    `📖 المذاكرة: خلصت ${studiedCount()} من ${Q_TOTAL} سؤال`
+    `✂️ المذاكرة: حلت ${Object.keys(prog.first).length} من ${Q_TOTAL} سؤال`
   ];
-  const wrongIds = entry.wrong || [];
-  if (wrongIds.length) {
-    lines.push("", `❌ غلطت في ${wrongIds.length} أسئلة — والصح:`);
-    wrongIds.slice(0, 12).forEach((id) => { const it = idx.items[id]; if (it) lines.push(`• ${promptOf(it)} ← ${answerShort(it)}`); });
-  } else {
-    lines.push("", "🎉 ولا غلطة!");
-  }
+  if (entry.wrong.length) {
+    lines.push("", `❌ غلطت في ${entry.wrong.length} — والصح:`);
+    entry.wrong.slice(0, 12).forEach((qid) => {
+      const it = idx.items[qid.split("-").slice(1).join("-")];
+      if (it) lines.push(`• ${promptShort(it)} ← ${answerShort(it)}`);
+    });
+  } else lines.push("", "🎉 ولا غلطة!");
   return lines.join("\n");
 }
-
 function waLink(text) {
   const num = String(PARENT_WHATSAPP || "").replace(/\D/g, "");
   return `https://wa.me/${num}?text=${encodeURIComponent(text)}`;
 }
 
 function showResult(entry, wrong) {
+  run = null;
   const lv = levelFor(entry.pct);
-  const seen = new Set();
-  const list = wrong.filter((a) => !seen.has(a.itemId) && seen.add(a.itemId)).map((a) => {
-    const it = idx.items[a.itemId];
-    const pic = it.pic ? `<img class="spic" src="${esc(it.pic)}" alt="">` : "";
+  const list = wrong.map(({ bi, qi }) => {
+    const q = BOARDS[bi].qs[qi];
     return `<div class="wrow">
-      <div class="wq">${pic}<span class="en">${esc(promptOf(it))}</span></div>
-      <div class="wyou">جوابك: <span class="bad en">${esc(a.chosen || "—")}</span></div>
-      ${explainHtml(it)}
+      <div class="wq">${cutImg(q.q, "q")}</div>
+      <div class="w-right">✅ الحل:</div>
+      <div class="wq">${cutImg(q.solved || q.q, "q")}</div>
+      ${q.kind === "slot" ? `<div class="wq">${cutImg(BOARDS[bi].tray.find((t) => t.k === q.ans), "p")}</div>` : ""}
     </div>`;
   }).join("");
   show(`
@@ -616,7 +739,7 @@ function showResult(entry, wrong) {
     <div class="card-actions">
       <a class="btn wa big-go" href="${waLink(waText(entry))}" target="_blank" rel="noopener">📤 أرسلي درجتك لبابا</a>
     </div>
-    ${seen.size ? `<div class="panel" style="margin-top:16px"><h2>❌ الأسئلة اللي غلطتي فيها — وهذا الصح 💚</h2>${list}</div>`
+    ${wrong.length ? `<div class="panel" style="margin-top:16px"><h2>❌ اللي غلطتي فيه — وتحته الحل 💚</h2>${list}</div>`
       : `<div class="alert ok" style="text-align:center; font-size:18px; margin-top:16px">🎉 ولا غلطة! ما شاء الله عليك</div>`}
     <div class="card-actions">
       <button class="btn ghost" data-act="testmenu">📝 ورقة ثانية</button>
@@ -634,23 +757,20 @@ const ACTS = {
   guidenext: () => showGuide(view.i + 1),
   guideprev: () => showGuide(view.i - 1),
   guidedone: () => { prog.guideSeen = true; saveProg(); showHome(); },
-  study: () => {
-    if (STEPS[prog.pos]?.k === "end") { prog.pos = 0; saveProg(); }
-    showStudy("learn");
-  },
-  restart: () => {
-    if (!confirm("تبين تبدين المذاكرة من أول سؤال؟")) return;
-    prog.pos = 0;
-    saveProg();
-    showStudy("learn");
-  },
+  study: () => startBoard(Math.min(prog.board, BOARDS.length - 1), "study"),
+  restart: () => { if (confirm("تبين تبدين من أول فقرة؟")) { prog.board = 0; saveProg(); startBoard(0, "study"); } },
   snext: () => studyNext(),
-  sback: () => { prog.pos = Math.max(0, prog.pos - 1); saveProg(); showStudy("learn"); },
-  stry: () => showStudy("try"),
-  slearn: () => showStudy("learn"),
+  sprev: () => { prog.board = Math.max(0, run.bi - 1); saveProg(); startBoard(prog.board, "study"); },
+  hint: () => giveHint(),
   testmenu: () => showTestMenu(),
   test: (d) => startTest(d.k),
-  testquit: () => { if (confirm("تبين تطلعين من الاختبار؟ الدرجة ما راح تنحفظ")) showTestMenu(); }
+  tnext: () => { test.pos++; openTestBoard(); },
+  tprev: () => { test.pos = Math.max(0, test.pos - 1); openTestBoard(); },
+  tsubmit: () => {
+    const left = test.bis.reduce((a, bi) => a + (test.states[bi]?.st.filter((s) => !s.done).length ?? BOARDS[bi].qs.length), 0);
+    if (left && !confirm(`باقي ${left} أسئلة ما حليتيها. تبين تسلمين؟`)) return;
+    submitTest();
+  }
 };
 
 main.addEventListener("click", (e) => {
@@ -658,9 +778,16 @@ main.addEventListener("click", (e) => {
   if (!b || !main.contains(b)) return;
   ACTS[b.dataset.act]?.(b.dataset, b);
 });
+main.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-oreset]");
+  if (!b || run?.mode !== "test") return;
+  const s = run.st[+b.dataset.oreset];
+  s.order = []; s.done = false;
+  renderBoard();
+});
 
 $("homeBtn").addEventListener("click", () => {
-  if (view === "test" && test && !test.done && !confirm("تبين تطلعين من الاختبار؟ الدرجة ما راح تنحفظ")) return;
+  if (run?.mode === "test" && !confirm("تبين تطلعين من الاختبار؟ الدرجة ما راح تنحفظ")) return;
   if (view === "home") { location.href = "/"; return; }
   showHome();
 });
