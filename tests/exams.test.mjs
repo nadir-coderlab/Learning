@@ -142,3 +142,54 @@ test('توحيد الإجابة المكتوبة متسامح مع الحروف 
   assert.ok(!E.accepts('tall', ['tallest']));
   assert.ok(!E.accepts('', ['a']));
 });
+
+// ---------- لعبة القص واللصق (exam-cuts.js) ----------
+const { BOARDS, CUT_BASE } = await import(path.join(pub, 'assets', 'js', 'exam-cuts.js'));
+
+test('لعبة القص: كل أسئلة الأوراق موجودة بنفس ترتيب الأوراق، وكل قطعة صورتها موجودة', () => {
+  const exam = EXAMS[0];
+  // نفس ترتيب الأوراق والفقرات
+  const expected = exam.papers.flatMap((p) => p.parts.map((_, i) => `${p.id}${i}`));
+  assert.deepEqual(BOARDS.map((b) => `${b.paper}${b.part}`), expected);
+  const imgDir = path.join(pub, CUT_BASE);
+  const exists = (e) => assert.ok(e && existsSync(path.join(imgDir, e.s)), `صورة مفقودة ${e?.s}`);
+  for (const b of BOARDS) {
+    const part = exam.papers.find((p) => p.id === b.paper).parts[b.part];
+    assert.equal(b.qs.length, part.items.length, `${b.paper}${b.part}: عدد الأسئلة`);
+    exists(b.head);
+    (b.tray || []).forEach(exists);
+    const keys = (b.tray || []).map((t) => t.k);
+    assert.equal(new Set(keys).size, keys.length, `${b.paper}${b.part}: قطع مكررة`);
+    b.qs.forEach((q, i) => {
+      assert.equal(q.id, `${b.paper}-${part.items[i]}`, `${b.paper}${b.part}: ترتيب الأسئلة`);
+      exists(q.q); exists(q.solved);
+      if (q.ctx) exists(q.ctx);
+      if (q.kind === 'slot') assert.ok(keys.includes(q.ans), `${q.id}: جوابه مو في القطع`);
+      if (q.kind === 'pick') {
+        q.opts.forEach((o) => exists(o.img));
+        assert.equal(q.opts.filter((o) => o.ok).length, 1, `${q.id}: لازم جواب صح واحد`);
+      }
+      if (q.kind === 'order') {
+        q.pieces.forEach(exists);
+        assert.deepEqual(q.pieces.map((p) => p.k).sort(), [...q.target].sort(), `${q.id}: كلمات الترتيب`);
+      }
+    });
+    // كل جواب له سؤال واحد بس، وكل قطعة لها سؤال
+    const answers = b.qs.filter((q) => q.kind === 'slot').map((q) => q.ans);
+    assert.equal(new Set(answers).size, answers.length, `${b.paper}${b.part}: جوابين لنفس القطعة`);
+    if (b.tray) assert.deepEqual([...answers].sort(), [...keys].sort(), `${b.paper}${b.part}: قطع زايدة أو ناقصة`);
+  }
+});
+
+test('لعبة القص: الأجوبة الصح تطابق حل الأوراق', () => {
+  const idx = E.indexExam(EXAMS[0]);
+  for (const b of BOARDS) for (const q of b.qs) {
+    const it = idx.items[q.id.split('-').slice(1).join('-')];
+    assert.ok(it, `${q.id}: مو موجود في المحتوى`);
+    if (q.kind === 'order') assert.equal(q.target.join(' ').toLowerCase(), (it.target || []).join(' ').toLowerCase(), q.id);
+    if (q.kind === 'slot') {
+      const right = { word: it.w, spell: it.letter, complete: it.answer, month: it.m && MONTHS[it.m - 1].en, pair: it.a, qa: null }[it.type];
+      if (right) assert.equal(q.ans.toLowerCase(), right.toLowerCase(), q.id);
+    }
+  }
+});
