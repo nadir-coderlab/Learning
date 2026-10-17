@@ -47,6 +47,7 @@
               <th>حروف استُعرضت</th>
               <th>الاختبارات</th>
               <th>متوسط النتيجة</th>
+              <th>📚 آخر اختبار تجريبي</th>
               <th>أصعب الحروف</th>
               <th>آخر نشاط</th>
               <th>الحالة</th>
@@ -102,6 +103,11 @@
   <div class="modal wide">
     <h3 id="dTitle"></h3>
     <div class="stat-cards" id="dCards"></div>
+
+    <div class="panel" id="dExamPanel" style="box-shadow:none; border:2px solid #fde68a; display:none">
+      <h2>📚 مذاكرة الاختبارات</h2>
+      <div id="dExams"></div>
+    </div>
 
     <div class="panel" id="dAreasPanel" style="box-shadow:none; border:2px solid var(--line)">
       <h2>📐 نتيجة قياس المستوى</h2>
@@ -173,12 +179,15 @@ import {
 } from "/assets/js/auth.js";
 import { fmtDuration } from "/assets/js/tracker.js";
 import { LETTERS } from "/assets/js/letters.js";
+import { EXAMS } from "/assets/js/exams-data.js";
 
 const $ = (id) => document.getElementById(id);
 let students = [], sessions = [], quizzes = [], skillsDocs = [];
 
-const ACTIVITY_NAMES = { letters: "تعلم الحروف", flashcards: "استعراض", quiz: "اختبار", sounds: "أصوات", vocab: "كلمات البيت", placement: "قياس مستوى" };
-const QUIZ_TYPE_NAMES = { match: "🔗 مطابقة", sound: "🔊 استماع", adaptive: "🧠 ذكي", phonics: "🗣️ أصوات", vocab: "🏠 كلمات", placement: "📐 قياس" };
+const ACTIVITY_NAMES = { letters: "تعلم الحروف", flashcards: "استعراض", quiz: "اختبار", sounds: "أصوات", vocab: "كلمات البيت", placement: "قياس مستوى", exams: "مذاكرة اختبار" };
+const QUIZ_TYPE_NAMES = { match: "🔗 مطابقة", sound: "🔊 استماع", adaptive: "🧠 ذكي", phonics: "🗣️ أصوات", vocab: "🏠 كلمات", placement: "📐 قياس", exam: "📝 اختبار تجريبي", examPractice: "🎯 تدريب اختبار" };
+// نتائج «مذاكرة الاختبارات» منفصلة عن مستوى الحروف
+const isExamQuiz = (q) => q.type === "exam" || q.type === "examPractice";
 const AREA_NAMES = { letters: "🔤 الحروف", casing: "🔠 كبير/صغير", phonics: "🗣️ الأصوات", vocab: "🏠 الكلمات" };
 
 let toastTimer;
@@ -222,22 +231,24 @@ function pctOf(q) { return q.pct ?? Math.round(100 * q.correct / q.total); }
 function statsOf(uid) {
   const ss = sessions.filter((s) => s.uid === uid);
   const qq = quizzes.filter((q) => q.uid === uid);
+  const lq = qq.filter((q) => !isExamQuiz(q));
+  const mocks = qq.filter((q) => q.type === "exam").sort((a, b) => tsMs(b.ts) - tsMs(a.ts));
   const totalSec = ss.reduce((a, s) => a + (s.seconds || 0), 0);
   const letters = ss.reduce((a, s) => a + (s.letters || 0), 0);
   const days = new Set(ss.filter((s) => (s.seconds || 0) > 0).map((s) => s.date)).size;
-  const avgPct = qq.length ? Math.round(qq.reduce((a, q) => a + pctOf(q), 0) / qq.length) : null;
+  const avgPct = lq.length ? Math.round(lq.reduce((a, q) => a + pctOf(q), 0) / lq.length) : null;
   const lastMs = Math.max(0, ...ss.map((s) => tsMs(s.lastTs)), ...qq.map((q) => tsMs(q.ts)));
-  return { ss, qq, totalSec, letters, days, avgPct, lastMs };
+  return { ss, qq, lq, mocks, totalSec, letters, days, avgPct, lastMs };
 }
 
 // المستوى: متوسط آخر 5 اختبارات
 function levelOf(st) {
-  if (!st.qq.length) {
+  if (!st.lq.length) {
     return st.letters > 0
       ? { label: "تتعلم الحروف", icon: "🌱", recentAvg: null }
       : { label: "لم تبدأ بعد", icon: "💤", recentAvg: null };
   }
-  const recent = [...st.qq].sort((a, b) => tsMs(b.ts) - tsMs(a.ts)).slice(0, 5);
+  const recent = [...st.lq].sort((a, b) => tsMs(b.ts) - tsMs(a.ts)).slice(0, 5);
   const avg = Math.round(recent.reduce((a, q) => a + pctOf(q), 0) / recent.length);
   if (avg >= 90) return { label: "بطلة", icon: "🏆", recentAvg: avg };
   if (avg >= 75) return { label: "متقدمة", icon: "⭐", recentAvg: avg };
@@ -318,7 +329,8 @@ function render() {
   girls.forEach((u) => {
     const st = statsOf(u.id);
     const lvl = levelOf(st);
-    const hardest = errorStats(st.qq).slice(0, 3).map((r) => r.letter).join(" ");
+    const hardest = errorStats(st.lq).slice(0, 3).map((r) => r.letter).join(" ");
+    const lm = st.mocks[0];
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td style="font-weight:800">${u.avatar || "👧"} ${esc(u.displayName)}<div class="en" style="font-size:11px; color:var(--muted)">${esc(u.username)}</div></td>
@@ -328,6 +340,7 @@ function render() {
       <td>${st.letters}</td>
       <td>${st.qq.length}</td>
       <td>${st.avgPct == null ? "—" : `<span class="${scoreClass(st.avgPct)}">${st.avgPct}%</span>`}</td>
+      <td>${lm ? `<span class="${scoreClass(lm.pct)}">${lm.score}/${lm.outOf}</span><div style="font-size:11px; color:var(--muted)">${fmtDate(tsMs(lm.ts))}</div>` : "—"}</td>
       <td class="en" style="font-weight:800; color:var(--err)">${hardest || "—"}</td>
       <td style="font-size:12px">${fmtDate(st.lastMs)}</td>
       <td>${u.disabled ? '<span class="badge off">معطّل</span>' : '<span class="badge ok">نشط</span>'}</td>
@@ -358,7 +371,7 @@ function render() {
 
 function openDetail(u, st) {
   $("dTitle").textContent = `${u.avatar || "👧"} ${u.displayName} — التفاصيل`;
-  const best = st.qq.length ? Math.max(...st.qq.map(pctOf)) : null;
+  const best = st.lq.length ? Math.max(...st.lq.map(pctOf)) : null;
   const lvl = levelOf(st);
   $("dCards").innerHTML = `
     <div class="stat-card"><div class="v">${lvl.icon} ${lvl.label}</div><div class="k">المستوى${lvl.recentAvg == null ? "" : ` (متوسط آخر 5: ${lvl.recentAvg}%)`}</div></div>
@@ -369,6 +382,47 @@ function openDetail(u, st) {
 
   // نتيجة قياس المستوى (من eduSkills.areas)
   const sklDoc = skillsDocs.find((s) => s.id === u.id);
+
+  // مذاكرة الاختبارات (من eduSkills.exams + نتائج الاختبارات التجريبية)
+  const examBlocks = EXAMS.map((ex) => {
+    const pr = sklDoc?.exams?.[ex.id];
+    const myMocks = st.mocks.filter((q) => q.examId === ex.id);
+    if (!pr && !myMocks.length) return "";
+    const lessons = ex.sections.flatMap((s) => s.lessons);
+    const done = lessons.filter((L) => pr?.lessons?.[L.id]?.done);
+    const pAvg = done.length ? Math.round(done.reduce((a, L) => a + (pr.lessons[L.id].acc || 0), 0) / done.length) : null;
+    const weakN = Object.values(pr?.weak || {}).filter((n) => n > 0).length;
+    const last = myMocks[0];
+    const lessonRows = lessons.map((L) => {
+      const x = pr?.lessons?.[L.id];
+      const v = x?.done ? `<span class="${scoreClass(x.acc)}">${x.acc}%</span>` : x?.learned ? "ذاكرته" : "—";
+      return `<span class="badge role" style="margin:2px">${L.icon} ${esc(L.title)}: ${v}</span>`;
+    }).join("");
+    const mockRows = myMocks.slice(0, 6).map((q) => `<tr><td style="font-size:12px">${fmtDate(tsMs(q.ts))}</td><td>${esc(q.mockName || "")}</td>
+      <td><span class="${scoreClass(q.pct)}">${q.score}/${q.outOf} (${q.pct}%)</span></td><td>${fmtDuration(q.durationSec)}</td></tr>`).join("");
+    const lastParts = (last?.parts || []).map((p) => {
+      const pc = p.marks ? Math.round(100 * p.got / p.marks) : 0;
+      const color = pc >= 80 ? "#16a34a" : pc >= 50 ? "#f59e0b" : "#dc2626";
+      return `<div style="display:flex; align-items:center; gap:10px; margin-bottom:6px; font-weight:800; font-size:13px">
+        <span class="en" style="width:150px; direction:ltr; text-align:left">${esc(p.h)}</span>
+        <div style="flex:1; background:var(--line); border-radius:99px; height:11px; overflow:hidden"><div style="width:${pc}%; height:100%; background:${color}"></div></div>
+        <span style="width:50px; text-align:left; color:${color}">${p.got}/${p.marks}</span></div>`;
+    }).join("");
+    return `<div style="margin-bottom:12px">
+      <div style="font-weight:900; margin-bottom:8px">${ex.icon} ${esc(ex.titleAr)} <span class="en" style="color:var(--muted); font-size:12px">${esc(ex.title)}</span></div>
+      <div class="stat-cards" style="margin-bottom:10px">
+        <div class="stat-card"><div class="v">${done.length}/${lessons.length}</div><div class="k">دروس خلصتها</div></div>
+        <div class="stat-card"><div class="v">${pAvg == null ? "—" : pAvg + "%"}</div><div class="k">دقة التدريب</div></div>
+        <div class="stat-card"><div class="v">${last ? `${last.score}/${last.outOf}` : "—"}</div><div class="k">آخر اختبار تجريبي</div></div>
+        <div class="stat-card"><div class="v">${weakN}</div><div class="k">أسئلة تحتاج مراجعة</div></div>
+      </div>
+      ${lastParts ? `<div style="margin-bottom:10px">${lastParts}</div>` : ""}
+      <div style="margin-bottom:10px">${lessonRows}</div>
+      ${mockRows ? `<div class="table-wrap"><table class="data" style="min-width:420px"><thead><tr><th>التاريخ</th><th>الاختبار</th><th>الدرجة</th><th>المدة</th></tr></thead><tbody>${mockRows}</tbody></table></div>` : ""}
+    </div>`;
+  }).join("");
+  $("dExamPanel").style.display = examBlocks ? "" : "none";
+  $("dExams").innerHTML = examBlocks;
   const areas = sklDoc?.areas;
   $("dNoAreas").style.display = areas ? "none" : "block";
   $("dFocus").style.display = "none";
@@ -403,12 +457,12 @@ function openDetail(u, st) {
   }).join("");
 
   // منحنى التطور + وصفه
-  const trend = trendOf(st.qq);
+  const trend = trendOf(st.lq);
   $("dTrendMsg").innerHTML = trend ? `<span class="${trend.cls}">${trend.text}</span>` : "";
-  $("dChart").innerHTML = progressChart(st.qq);
+  $("dChart").innerHTML = progressChart(st.lq);
 
   // أصعب الحروف
-  const errs = errorStats(st.qq);
+  const errs = errorStats(st.lq);
   $("dErrors").innerHTML = errs.slice(0, 10).map((r) => `
     <tr>
       <td class="en" style="font-weight:800; font-size:18px">${esc(r.letter)} ${esc(r.letter.toLowerCase())}</td>
@@ -440,8 +494,8 @@ function openDetail(u, st) {
     const wrong = (q.details || []).filter((d) => !d.correct).map((d) => d.letter).join(" ، ");
     return `<tr>
       <td style="font-size:12px">${fmtDate(tsMs(q.ts))}</td>
-      <td>${QUIZ_TYPE_NAMES[q.type] || "🧠 ذكي"}${q.roomName ? ` (${q.roomName})` : ""}${q.focus && q.focus !== "all" ? ` (${q.focus})` : ""}</td>
-      <td><span class="${scoreClass(pct)}">${q.correct}/${q.total} (${pct}%)</span></td>
+      <td>${QUIZ_TYPE_NAMES[q.type] || "🧠 ذكي"}${q.roomName ? ` (${q.roomName})` : ""}${q.focus && q.focus !== "all" ? ` (${q.focus})` : ""}${q.lessonName ? ` (${esc(q.lessonName)})` : ""}${q.mockName ? ` (${esc(q.mockName)})` : ""}</td>
+      <td><span class="${scoreClass(pct)}">${q.type === "exam" ? `${q.score}/${q.outOf}` : `${q.correct}/${q.total}`} (${pct}%)</span></td>
       <td>${fmtDuration(q.durationSec)}</td>
       <td class="en" style="font-weight:800">${esc(wrong) || "—"}</td>
     </tr>`;
