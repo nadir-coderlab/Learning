@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مذاكرة الاختبارات — مدرسة البنات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<body>
+
+<div class="loading-screen" id="loading">
+  <div class="spinner"></div>
+  <div>لحظة… 📚</div>
+</div>
+
+<div id="page" style="display:none">
+  <div class="top">
+    <div class="wrap">
+      <div>
+        <div class="brand">📚 مذاكرة الاختبارات</div>
+        <h1 id="topTitle">جاهزين للاختبار!</h1>
+        <div class="sub" id="topSub">نذاكر نفس أسئلة الأبلة — خطوة خطوة</div>
+      </div>
+      <div class="topbtns">
+        <button class="tbtn" id="planBtn" style="display:none">📋 الخطة</button>
+        <a class="tbtn" href="/">🏠 الرئيسية</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container ex-wrap" id="main"></div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+import {
+  requireSession, saveQuizResult, listMySessions, db, doc, getDoc, setDoc, serverTimestamp
+} from "/assets/js/auth.js";
+import { EXAMS, PARENT_WHATSAPP, MONTHS } from "/assets/js/exams-data.js";
+import {
+  esc, shuffle, accepts, indexExam, learnHtml, solvedHtml, makeQuestion, explainHtml,
+  answerText, sayText, sayBtn, buildPaperMock, scoreMock, levelFor
+} from "/assets/js/exam-engine.js";
+import { speak, speakAr } from "/assets/js/speech.js";
+import { startTracking, fmtDuration } from "/assets/js/tracker.js";
+
+const $ = (id) => document.getElementById(id);
+const main = $("main");
+const PRAISES = ["ممتاز!", "صح عليك!", "أحسنتِ!", "رائع!", "برافو عليك!", "شطورة!"];
+const praise = () => PRAISES[Math.floor(Math.random() * PRAISES.length)];
+const LOCALE = "ar-SA-u-ca-gregory-nu-latn";
+
+let session = null, tracker = null;
+let exam = null, idx = null, prog = null;
+let run = null;
+
+requireSession(async (s) => {
+  session = s;
+  tracker = startTracking(s, "exams");
+  $("loading").style.display = "none";
+  $("page").style.display = "block";
+  const wanted = new URLSearchParams(location.search).get("e");
+  const ex = EXAMS.find((e) => e.id === wanted) || (EXAMS.length === 1 ? EXAMS[0] : null);
+  if (ex) await openExam(ex); else renderList();
+});
+
+// ---------------------------------------------------------------
+// أدوات
+// ---------------------------------------------------------------
+
+let toastTimer;
+function toast(text, isErr = false) {
+  const t = $("toast");
+  t.textContent = text;
+  t.className = "show" + (isErr ? " err" : "");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => (t.className = ""), 3000);
+}
+
+function show(html) {
+  main.innerHTML = html;
+  window.scrollTo(0, 0);
+}
+
+const clean = (o) => JSON.parse(JSON.stringify(o)); // يشيل undefined قبل الحفظ في Firestore
+const fmtNum = (n) => (Math.round(n * 100) / 100).toString();
+const today = () => new Date().toLocaleDateString("en-CA");
+
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const d0 = new Date(today() + "T00:00:00"), d1 = new Date(dateStr + "T00:00:00");
+  return Math.round((d1 - d0) / 86400000);
+}
+
+function examDateLine() {
+  const d = daysUntil(exam.date);
+  if (d == null || d < 0) return "";
+  const when = new Date(exam.date + "T00:00:00").toLocaleDateString(LOCALE, { weekday: "long", day: "numeric", month: "long" });
+  const rel = d === 0 ? "اليوم! 💪" : d === 1 ? "بكرة! 🔥" : `بعد ${d} أيام`;
+  return `📅 الاختبار: ${when} — <b>${rel}</b>`;
+}
+
+// كلام قصير يوصف السؤال (للأخطاء والتقرير)
+function promptOf(it) {
+  switch (it.type) {
+    case "inst": return it.en;
+    case "qa": return it.q;
+    case "order": return it.words.join(" – ");
+    case "month": return `${it.m}- ? (${MONTHS[it.m - 1].ar})`;
+    case "monthOrder": return it.given.join(" – ") + " (Rearrange)";
+    case "pair": return it.kind === "opp" ? `${it.w} ≠ ?` : it.kind === "un" ? `un + ${it.w}` : it.dir === "rev" ? `? → ${it.w}` : `${it.w} → ?`;
+    case "tf": return it.s;
+    case "pick2": return it.opts.join(" / ");
+    case "complete": return it.s;
+    case "choose": return it.s.replace("___", "( " + it.opts.join(" / ") + " )");
+    case "word": return `صورة: ${it.ar}`;
+    case "spell": return it.shape;
+  }
+  return it.id;
+}
+function answerShort(it) {
+  if (it.type === "spell") return `${it.w} (${it.letter})`;
+  if (it.type === "tf") return it.answer ? "✓" : "✗";
+  if (it.type === "month") return MONTHS[it.m - 1].en;
+  return answerText(it);
+}
+
+// النطق عند الضغط على أي زر 🔊
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-say]");
+  if (!b) return;
+  e.preventDefault();
+  e.stopPropagation();
+  speak(b.dataset.say, { rate: 0.7 });
+}, true);
+
+// ---------------------------------------------------------------
+// قائمة الاختبارات (إذا صار فيه أكثر من اختبار)
+// ---------------------------------------------------------------
+
+function renderList() {
+  $("planBtn").style.display = "none";
+  show(`<div class="activities">${EXAMS.map((e) => `
+    <a class="activity-card" href="/exams?e=${encodeURIComponent(e.id)}">
+      <div class="ic">${e.icon}</div><h3>${esc(e.titleAr)}</h3><p class="en">${esc(e.title)} · ${esc(e.unit)}</p><p>${esc(e.grade)}</p>
+    </a>`).join("")}</div>`);
+}
+
+// ---------------------------------------------------------------
+// التقدم: محفوظ في الجهاز + في Firestore (eduSkills/{uid}.exams.{examId})
+// ---------------------------------------------------------------
+
+const emptyProg = () => ({ lessons: {}, weak: {}, mocks: [], updatedAt: 0 });
+const lsKey = () => `examprep:${session.user.uid}:${exam.id}`;
+const skillsRef = () => doc(db, "eduSkills", session.user.uid);
+
+async function loadProg() {
+  let local = null, remote = null;
+  try { local = JSON.parse(localStorage.getItem(lsKey()) || "null"); } catch (e) { /* تجاهل */ }
+  try {
+    const snap = await getDoc(skillsRef());
+    remote = snap.exists() ? snap.data().exams?.[exam.id] || null : null;
+  } catch (e) { console.warn("تعذر تحميل التقدم:", e); }
+  const best = [remote, local].filter(Boolean).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
+  prog = { ...emptyProg(), ...(best || {}) };
+  prog.lessons = prog.lessons || {};
+  prog.weak = prog.weak || {};
+  prog.mocks = Array.isArray(prog.mocks) ? prog.mocks : [];
+}
+
+let saveTimer = null;
+function saveProg(now = false) {
+  prog.updatedAt = Date.now();
+  try { localStorage.setItem(lsKey(), JSON.stringify(prog)); } catch (e) { /* تجاهل */ }
+  clearTimeout(saveTimer);
+  const go = () => setDoc(skillsRef(), {
+    uid: session.user.uid,
+    username: session.profile?.username || "",
+    displayName: session.profile?.displayName || "",
+    exams: { [exam.id]: clean(prog) },
+    updatedAt: serverTimestamp()
+  }, { merge: true }).catch((e) => console.warn("تعذر حفظ التقدم:", e));
+  if (now) return go();
+  saveTimer = setTimeout(go, 1500);
+}
+window.addEventListener("pagehide", () => { if (prog) saveProg(true); tracker?.stop(); });
+
+const weakIds = () => Object.entries(prog.weak).filter(([id, n]) => n > 0 && idx.items[id]).map(([id]) => id);
+const latestMock = () => prog.mocks[prog.mocks.length - 1] || null;
+const bestMock = () => [...prog.mocks].sort((a, b) => b.pct - a.pct)[0] || null;
+
+function practiceAvg(lessonIds = null) {
+  const list = idx.allLessons.filter((L) => (!lessonIds || lessonIds.includes(L.id)) && prog.lessons[L.id]?.done);
+  if (!list.length) return null;
+  return Math.round(list.reduce((a, L) => a + (prog.lessons[L.id].acc || 0), 0) / list.length);
+}
+
+// ---------------------------------------------------------------
+// فتح الاختبار + الخطة
+// ---------------------------------------------------------------
+
+async function openExam(ex) {
+  exam = ex;
+  idx = indexExam(exam);
+  show(`<div class="empty-state">لحظة… 📚</div>`);
+  await loadProg();
+  $("topTitle").textContent = exam.titleAr;
+  $("topSub").innerHTML = `<span class="en">${esc(exam.title)} · ${esc(exam.unit)}</span> — ${esc(exam.grade)}`;
+  $("planBtn").style.display = "";
+  renderHub();
+}
+
+function nextStep() {
+  for (const L of idx.allLessons) {
+    const st = prog.lessons[L.id] || {};
+    if (!st.learned) return { act: "learn", L, label: `▶ كمّلي: 📖 ذاكري «${L.title}»` };
+    if (!st.done) return { act: "practice", L, label: `▶ كمّلي: 🎯 تدربي على «${L.title}»` };
+  }
+  return { act: "mockmenu", L: null, label: "▶ يلا للاختبار التجريبي 📝" };
+}
+
+function renderHub() {
+  run = null;
+  window.speechSynthesis?.cancel();
+  const total = idx.allLessons.length;
+  const done = idx.allLessons.filter((L) => prog.lessons[L.id]?.done).length;
+  const pct = Math.round((100 * done) / total);
+  const ns = nextStep();
+  const lm = latestMock();
+  const weakN = weakIds().length;
+  const dateLine = examDateLine();
+
+  const tile = (L) => {
+    const st = prog.lessons[L.id] || {};
+    const status = st.done
+      ? `<span class="stars-sm">${"⭐".repeat(st.stars || 1)}</span> ${st.acc}%`
+      : st.learned ? "ذاكرتيه ✅ — باقي التدريب" : "ما بدأتي";
+    const cls = st.done ? "done" : ns.L?.id === L.id ? "next" : "";
+    return `<div class="lesson-tile ${cls}">
+      <div class="lt-top"><span class="lt-ic">${L.icon}</span>
+        <div><div class="lt-t">${esc(L.title)}</div><div class="lt-st">${status} · ${L.items.length} أسئلة</div></div></div>
+      <div class="lt-btns">
+        <button class="btn small ghost" data-act="learn" data-l="${L.id}">📖 ذاكري</button>
+        <button class="btn small ${st.learned ? "teal" : "ghost"}" data-act="practice" data-l="${L.id}">🎯 تدربي</button>
+      </div>
+    </div>`;
+  };
+
+  show(`
+    <div class="ex-hero">
+      <div class="ex-ic">${exam.icon}</div>
+      <div class="ex-t">${esc(exam.titleAr)}</div>
+      ${dateLine ? `<div class="ex-s">${dateLine}</div>` : ""}
+      <div class="pbar"><div style="width:${pct}%"></div></div>
+      <div class="ex-s">خلصتي <b>${done}</b> من <b>${total}</b> دروس${lm ? ` · آخر اختبار تجريبي: <b class="en">${fmtNum(lm.score)}/${lm.outOf}</b>` : ""}</div>
+      <button class="btn big-go" data-act="${ns.act}" data-l="${ns.L?.id || ""}">${esc(ns.label)}</button>
+    </div>
+
+    <div class="steps-note">📌 الطريقة: <b>📖 ذاكري</b> (الجواب ملوّن بالأخضر) ← <b>✋ أنا ذاكرت</b> ← <b>🎯 تدربي</b> (اختيار ثم كتابة) ← وآخر شي <b>📝 الاختبار التجريبي</b> (نفس الأوراق بالضبط)</div>
+    <div class="steps-note" style="margin-top:8px">✅ كل الأسئلة هنا <b>من أوراق الاختبار الثلاث فقط</b> — ولا سؤال من برا</div>
+
+    <h2 class="plan-h">📋 خطة المذاكرة — بنفس ترتيب ورقة الاختبار</h2>
+    ${exam.sections.map((sec) => `
+      <div class="sec-head">
+        <span class="rn en">${sec.n}</span>
+        <div><div class="sec-en en">${esc(sec.en)}</div><div class="sec-ar">${sec.icon} ${esc(sec.ar)}${sec.marks ? ` · ${sec.marks} درجات` : " · قبل كل شي"}</div></div>
+      </div>
+      <div class="lesson-grid">${sec.lessons.map(tile).join("")}</div>`).join("")}
+
+    <h2 class="plan-h">🧰 أدوات</h2>
+    <div class="activities ex-tools">
+      <div class="activity-card" data-act="mockmenu"><div class="ic">📝</div><h3>الاختبار التجريبي</h3><p>نفس الأوراق بالضبط — ويطلع مستواك</p></div>
+      <div class="activity-card" data-act="review"><div class="ic">🔁</div><h3>راجعي أخطاءك</h3><p>${weakN ? `${weakN} سؤال يبيله مراجعة` : "ما عندك أخطاء محفوظة 🎉"}</p></div>
+      <div class="activity-card" data-act="papers" data-p="A"><div class="ic">📄</div><h3>النماذج محلولة</h3><p>الأوراق الثلاث كاملة والإجابات ملوّنة</p></div>
+      <div class="activity-card" data-act="report"><div class="ic">📊</div><h3>مستواي + واتساب</h3><p>تقرير المذاكرة — أرسليه لبابا</p></div>
+    </div>
+  `);
+}
+
+// ---------------------------------------------------------------
+// المذاكرة: بطاقة بطاقة والإجابة ملونة
+// ---------------------------------------------------------------
+
+function monthsTable() {
+  return `<div class="months-tbl">
+    ${MONTHS.map((m, i) => `<div class="mrow"><span class="mn en">${i + 1}</span><span class="me en">${m.en}</span><span class="ma">${m.ar}</span><span class="ms">${m.say}</span>${sayBtn(m.en)}</div>`).join("")}
+    <div style="text-align:center; margin-top:10px">${`<button class="btn small" data-say="${MONTHS.map((m) => m.en).join(", ")}">🔊 اسمعي كل الشهور بالترتيب</button>`}</div>
+  </div>`;
+}
+
+function startLearn(L) {
+  run = { type: "learn", L, i: 0 };
+  renderLearn();
+}
+
+function renderLearn() {
+  const { L, i } = run;
+  const sec = idx.sectionOfLesson[L.id];
+  const n = L.items.length;
+  let body;
+  if (i === 0) {
+    body = `<div class="xcard intro">
+      <div class="xlabel">شكل السؤال في ورقة الاختبار 📄</div>
+      <div class="paper mini">
+        <div class="exam-h en">${sec.n !== "★" ? `${esc(sec.n)}. ${esc(sec.en)}:` : esc(sec.en)}</div>
+        <div class="exam-sub en">${esc(L.instr.en)} ${sayBtn(L.instr.en)}</div>
+      </div>
+      <div class="xmean">= ${esc(L.instr.ar)}</div>
+      ${L.instr.how ? `<div class="howto">✍️ وش تسوين في الورقة: ${esc(L.instr.how)}</div>` : ""}
+      <div class="trick big">🔑 <b>القاعدة الذهبية:</b><br>${L.rule}</div>
+      ${L.showMonths ? monthsTable() : ""}
+      <div class="xmean" style="margin-top:14px">فيه <b>${n}</b> أسئلة — الجواب <span class="ans">بالأخضر</span> والكلمة المهمة <span class="kw">بالأصفر</span>. اضغطي 🔊 عشان تسمعين</div>
+    </div>`;
+  } else if (i <= n) {
+    body = `<div class="xcard">${learnHtml(L.items[i - 1], exam)}</div>`;
+  } else {
+    body = `<div class="xcard finish">
+      <div class="xemoji">🎉</div>
+      <div class="word">خلصتي مذاكرة «${esc(L.title)}»!</div>
+      <div class="xmean">إذا حاسة إنك حفظتي الأجوبة اضغطي «أنا ذاكرت» — وبنغيّر شكل الأسئلة: اختيار وبعدها كتابة ✍️</div>
+      <div class="card-actions">
+        <button class="btn big-go" data-act="studied">✋ أنا ذاكرت — اختبريني 🎯</button>
+        <button class="btn ghost" data-act="lrestart">🔁 أعيد المذاكرة من البداية</button>
+      </div>
+    </div>`;
+  }
+  const dots = Array.from({ length: n + 2 }, (_, k) => `<span class="dot ${k === i ? "on" : k < i ? "past" : ""}"></span>`).join("");
+  show(`
+    <div class="lhead"><button class="btn ghost small" data-act="hub">→ الخطة</button><div class="lh-t">📖 ${esc(L.title)}</div>
+      <div class="progress-chip sm">${i === 0 ? "البداية" : i <= n ? `${i} / ${n}` : "خلصتي ✅"}</div></div>
+    <div class="dots">${dots}</div>
+    ${body}
+    <div class="lnav">
+      ${i > 0 ? `<button class="btn ghost" data-act="lprev">▶ السابق</button>` : "<span></span>"}
+      ${i <= n ? `<button class="btn" data-act="lnext">${i === 0 ? "يلا نبدأ ◀" : "فهمت — التالي ◀"}</button>` : ""}
+    </div>`);
+  if (i >= 1 && i <= n) speak(sayText(L.items[i - 1]), { rate: 0.7 });
+}
+
+// ---------------------------------------------------------------
+// عرض السؤال (مشترك بين التدريب والاختبار)
+// ---------------------------------------------------------------
+
+function renderQuestion(box, q, { mock, onAnswer }) {
+  let answered = false;
+  const boxHtml = q.box ? `<div class="wordbox-wrap"><div class="wordbox en">${q.box.map(esc).join(" – ")}</div></div>` : "";
+  box.innerHTML = `<div class="qhead">${q.head}</div>${boxHtml}<div class="qbody"></div>`;
+  const body = box.querySelector(".qbody");
+
+  if (q.kind === "choice") {
+    const opts = q.keepOrder ? q.options : shuffle(q.options);
+    body.innerHTML = `<div class="opt-list ${q.row ? "row" : ""}">${opts.map((o, i) => `<button type="button" class="xopt ${o.cls}" data-i="${i}">${o.html}</button>`).join("")}</div>`;
+    const btns = [...body.querySelectorAll(".xopt")];
+    btns.forEach((b) => b.addEventListener("click", () => {
+      if (answered) return;
+      answered = true;
+      const o = opts[+b.dataset.i];
+      const ok = o.val === q.answer;
+      btns.forEach((x) => (x.disabled = true));
+      if (mock) b.classList.add("picked");
+      else {
+        b.classList.add(ok ? "correct" : "wrong");
+        if (!ok) btns.forEach((x, j) => { if (opts[j].val === q.answer) x.classList.add("correct"); });
+      }
+      onAnswer({ ok, chosen: o.cls.includes("tf") ? o.html : o.val });
+    }));
+    return;
+  }
+
+  if (q.kind === "write") {
+    const letter = q.input === "letter";
+    body.innerHTML = `<div class="write-row">
+      <input class="ex-input ${letter ? "letter" : ""} ${q.input === "sentence" ? "sentence" : ""}" type="text" dir="ltr"
+        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" ${letter ? 'maxlength="2"' : ""}
+        placeholder="${letter ? "?" : "اكتبي هنا"}">
+      <button type="button" class="btn" data-go>${mock ? "التالي ◀" : "تحقق ✓"}</button>
+    </div>`;
+    const inp = body.querySelector("input");
+    const submit = () => {
+      if (answered) return;
+      const v = inp.value.trim();
+      if (!v) { inp.classList.add("shake"); setTimeout(() => inp.classList.remove("shake"), 400); return; }
+      answered = true;
+      inp.disabled = true;
+      body.querySelector("[data-go]").disabled = true;
+      const ok = accepts(v, q.accept);
+      if (!mock) inp.classList.add(ok ? "ok" : "no");
+      onAnswer({ ok, chosen: v });
+    };
+    body.querySelector("[data-go]").addEventListener("click", submit);
+    inp.addEventListener("keydown", (e) => { if (e.key === "Enter") submit(); });
+    setTimeout(() => inp.focus({ preventScroll: true }), 60);
+    return;
+  }
+
+  if (q.kind === "build") {
+    const joiner = q.joiner || " ";
+    let picked = [];
+    body.innerHTML = `
+      <div class="build-line" data-line></div>
+      <div class="chips" data-chips></div>
+      <div class="card-actions">
+        <button type="button" class="btn ghost small" data-clear>↺ مسح</button>
+        <button type="button" class="btn" data-go disabled>${mock ? "التالي ◀" : "تحقق ✓"}</button>
+      </div>`;
+    const line = body.querySelector("[data-line]"), chips = body.querySelector("[data-chips]"), go = body.querySelector("[data-go]");
+    const draw = () => {
+      line.innerHTML = picked.length
+        ? picked.map((ci, k) => `<button type="button" class="chip in" data-k="${k}">${esc(q.chips[ci])}</button>`).join("") + (picked.length === q.chips.length && q.end ? `<span class="chip-end">${esc(q.end)}</span>` : "")
+        : `<span class="build-ph">اضغطي على الكلمات تحت بالترتيب 👇</span>`;
+      chips.innerHTML = q.chips.map((c, ci) => `<button type="button" class="chip ${picked.includes(ci) ? "used" : ""}" data-ci="${ci}" ${picked.includes(ci) ? "disabled" : ""}>${esc(c)}</button>`).join("");
+      go.disabled = answered || picked.length !== q.chips.length;
+    };
+    chips.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-ci]");
+      if (!b || answered) return;
+      picked.push(+b.dataset.ci);
+      speak(q.chips[+b.dataset.ci], { rate: 0.8 });
+      draw();
+    });
+    line.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-k]");
+      if (!b || answered) return;
+      picked.splice(+b.dataset.k, 1);
+      draw();
+    });
+    body.querySelector("[data-clear]").addEventListener("click", () => { if (!answered) { picked = []; draw(); } });
+    go.addEventListener("click", () => {
+      if (answered || picked.length !== q.chips.length) return;
+      answered = true;
+      const words = picked.map((ci) => q.chips[ci]);
+      const ok = words.join(joiner) === q.target.join(joiner);
+      if (!mock) line.classList.add(ok ? "ok" : "no");
+      draw();
+      onAnswer({ ok, chosen: words.join(joiner) + (q.end || "") });
+    });
+    draw();
+  }
+}
+
+// ---------------------------------------------------------------
+// التدريب: جولة اختيار ← جولة كتابة (والأسئلة الغلط ترجع مرة ثانية)
+// ---------------------------------------------------------------
+
+function roundName(mode) {
+  return { choice: "🅰️ جولة الاختيار", write: "✍️ جولة الكتابة", build: "🧩 جولة الترتيب", again: "🔁 الجولة الثانية" }[mode] || mode;
+}
+
+function startPractice(L, opts = {}) {
+  const items = opts.items || L.items;
+  if (!items.length) { toast("ما فيه أسئلة للمراجعة 🎉"); return renderHub(); }
+  run = {
+    type: "practice", L, review: !!opts.review, title: opts.title || L.title,
+    items, rounds: opts.rounds || L?.rounds || ["choice", "write"],
+    r: -1, roundAcc: [], details: [], startedAt: Date.now()
+  };
+  nextRound();
+}
+
+function nextRound() {
+  run.r++;
+  if (run.r >= run.rounds.length) return finishPractice();
+  run.queue = shuffle(run.items).map((it) => ({ it, tries: 0 }));
+  run.roundFirst = {};
+  if (run.r > 0) return renderRoundIntro();
+  nextQuestion();
+}
+
+function renderRoundIntro() {
+  const prevAcc = run.roundAcc[run.r - 1];
+  const mode = run.rounds[run.r];
+  show(`
+    <div class="big-card" style="margin-top:10px">
+      <div style="font-size:60px">${prevAcc >= 80 ? "🌟" : "💪"}</div>
+      <div class="word">خلصتي ${roundName(run.rounds[run.r - 1])}!</div>
+      <div class="lname">من أول محاولة: <b>${prevAcc}%</b></div>
+      <div class="next-round">الحين: <b>${roundName(mode)}</b><br>
+        <small>${mode === "write" ? "نفس الأسئلة بس تكتبينها بنفسك ✍️" : mode === "build" ? "نفس الجمل — رتّبي الكلمات بالضغط عليها 🧩" : "نفس الأسئلة مرة ثانية بترتيب جديد 🔁"}</small></div>
+      <div class="card-actions"><button class="btn big-go" data-act="rgo">يلا ◀</button></div>
+    </div>`);
+}
+
+function nextQuestion() {
+  if (!run.queue.length) {
+    const vals = Object.values(run.roundFirst);
+    run.roundAcc.push(vals.length ? Math.round((100 * vals.filter(Boolean).length) / vals.length) : 0);
+    return nextRound();
+  }
+  const cur = run.queue.shift();
+  const mode = run.rounds[run.r];
+  const L = idx.lessonOfItem[cur.it.id];
+  run.cur = cur;
+  run.q = makeQuestion(cur.it, mode, { pool: L.items, clue: mode === "choice", box: L.box || null });
+  run.hintUsed = false;
+  renderPracticeQ();
+}
+
+function renderPracticeQ() {
+  const n = run.items.length;
+  const doneN = Object.keys(run.roundFirst).length;
+  show(`
+    <div class="lhead"><button class="btn ghost small" data-act="hub">→ الخطة</button><div class="lh-t">🎯 ${esc(run.title)}</div></div>
+    <div class="progress-chip">${roundName(run.rounds[run.r])} · ${Math.min(doneN + (run.cur.tries ? 0 : 1), n)}/${n}${run.cur.tries ? " · 🔁 مرة ثانية" : ""}</div>
+    <div class="pbar thin"><div style="width:${Math.round((100 * doneN) / n)}%"></div></div>
+    <div class="qcard" id="qcard"></div>
+    <div id="fb"></div>
+    <div class="hint-row" id="hintRow"><button class="btn ghost small" data-act="hint">💡 مساعدة</button></div>
+    <div id="hintBox"></div>`);
+  renderQuestion($("qcard"), run.q, { mock: false, onAnswer: onPracticeAnswer });
+}
+
+function onPracticeAnswer({ ok, chosen }) {
+  const it = run.cur.it;
+  const q = run.q;
+  if (!(it.id in run.roundFirst)) {
+    const firstOk = ok && !run.hintUsed;
+    run.roundFirst[it.id] = firstOk;
+    run.details.push({ itemId: it.id, letter: q.label, correct: firstOk, chosen: String(chosen ?? ""), round: run.rounds[run.r] });
+  }
+  $("hintRow").style.display = "none";
+  if (ok) {
+    const p = praise();
+    $("fb").innerHTML = `<div class="feedback ok">✅ ${p}${run.hintUsed ? " <small>(بمساعدة 💡)</small>" : ""}</div>`;
+    speakAr(p);
+    setTimeout(() => { if (run?.type === "practice" && run.q === q) nextQuestion(); }, 1200);
+  } else {
+    $("fb").innerHTML = `<div class="feedback no">❌ مو صح — عادي، هذي فرصة نحفظها! ${q.explain}
+      <div class="card-actions"><button class="btn" data-act="pnext">فهمت ◀</button></div></div>`;
+    speak(q.say, { rate: 0.7 });
+    if (run.cur.tries < 2) {
+      run.cur.tries++;
+      const pos = Math.min(run.queue.length, 2 + Math.floor(Math.random() * 2));
+      run.queue.splice(pos, 0, run.cur);
+    }
+    $("fb").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+}
+
+async function finishPractice() {
+  const acc = run.roundAcc.length ? Math.round(run.roundAcc.reduce((a, b) => a + b, 0) / run.roundAcc.length) : 0;
+  const stars = acc >= 90 ? 3 : acc >= 70 ? 2 : 1;
+  const L = run.L;
+
+  if (!run.review && L) {
+    const prev = prog.lessons[L.id] || {};
+    prog.lessons[L.id] = {
+      learned: true, done: true, acc, stars,
+      best: Math.max(prev.best || 0, acc), times: (prev.times || 0) + 1,
+      rounds: run.rounds.map((m, i) => ({ m, acc: run.roundAcc[i] })), ts: Date.now()
+    };
+  }
+  run.items.forEach((it) => {
+    const allOk = run.details.filter((d) => d.itemId === it.id).every((d) => d.correct);
+    if (allOk) prog.weak[it.id] = 0;
+    else prog.weak[it.id] = (prog.weak[it.id] || 0) + 1;
+  });
+  saveProg(true);
+
+  const allL = idx.allLessons;
+  const nextL = L ? allL[allL.findIndex((x) => x.id === L.id) + 1] : null;
+  show(`
+    <div class="big-card" style="margin-top:10px">
+      <div style="font-size:64px">${acc >= 90 ? "🏆" : acc >= 70 ? "🌟" : "💪"}</div>
+      <div class="stars">${"⭐".repeat(stars)}${"☆".repeat(3 - stars)}</div>
+      <div class="word">${acc}% من أول محاولة</div>
+      <div class="lname">${acc >= 90 ? "ما شاء الله! حافظة الدرس 👏" : acc >= 70 ? "حلو! راجعي الأخطاء مرة وتصيرين بطلة" : "عادي! ارجعي ذاكري الدرس مرة ثانية وبعدها تدربي"}</div>
+      <div class="rounds-sum">${run.rounds.map((m, i) => `<span>${roundName(m)}: <b>${run.roundAcc[i]}%</b></span>`).join("")}</div>
+      <div class="lname" id="saveState" style="font-size:13px">جارٍ الحفظ…</div>
+    </div>
+    <div class="card-actions">
+      ${acc < 70 && L ? `<button class="btn" data-act="learn" data-l="${L.id}">📖 أذاكره مرة ثانية</button>` : ""}
+      ${nextL ? `<button class="btn ${acc < 70 ? "ghost" : ""}" data-act="learn" data-l="${nextL.id}">الدرس الجاي: ${esc(nextL.title)} ◀</button>`
+        : `<button class="btn" data-act="mockmenu">📝 الاختبار التجريبي ◀</button>`}
+      ${L && !run.review ? `<button class="btn ghost" data-act="practice" data-l="${L.id}">🔁 عيدي التدريب</button>` : ""}
+      <button class="btn ghost" data-act="hub">→ الخطة</button>
+    </div>`);
+  speakAr(acc >= 90 ? "ما شاء الله! ممتاز" : acc >= 70 ? "أحسنتِ!" : "عادي! نراجع ونحاول مرة ثانية");
+
+  try {
+    await saveQuizResult(session, clean({
+      type: "examPractice", examId: exam.id, examTitle: exam.titleAr,
+      lessonId: L?.id || "review", lessonName: run.title,
+      total: run.details.length, correct: run.details.filter((d) => d.correct).length, pct: acc,
+      durationSec: Math.round((Date.now() - run.startedAt) / 1000),
+      details: run.details.map(({ letter, correct, chosen }) => ({ letter, correct, chosen }))
+    }));
+    const el = $("saveState"); if (el) el.textContent = "تم الحفظ ✅";
+  } catch (e) {
+    const el = $("saveState"); if (el) el.textContent = "تعذر حفظ النتيجة (التقدم محفوظ في الجهاز)";
+  }
+}
+
+// ---------------------------------------------------------------
+// الاختبار التجريبي
+// ---------------------------------------------------------------
+
+function renderMockMenu() {
+  run = null;
+  const last = (k) => prog.mocks.filter((m) => m.kind === k).slice(-1)[0];
+  const card = (k, ic, t, s, rec = false) => {
+    const l = last(k);
+    return `<div class="mock-card ${rec ? "rec" : ""}" data-act="mock" data-k="${k}">
+      <div class="mc-ic">${ic}</div>
+      <div><div class="mc-t">${t} ${rec ? '<span class="badge ok">مقترح ⭐</span>' : ""}</div>
+      <div class="mc-s">${s}</div>
+      ${l ? `<div class="mc-l">آخر نتيجة: <b class="en">${fmtNum(l.score)}/${l.outOf}</b> (${l.pct}%)</div>` : ""}</div>
+    </div>`;
+  };
+  const nB = exam.papers.find((p) => p.id === "B").parts.reduce((a, p) => a + p.items.length, 0);
+  show(`
+    <div class="lhead"><button class="btn ghost small" data-act="hub">→ الخطة</button><div class="lh-t">📝 الاختبار التجريبي</div></div>
+    <div class="alert info">📌 الاختبار هو <b>نفس الورقة بالضبط</b> — نفس الأسئلة ونفس الترتيب، ولا سؤال من برا.<br>
+      مثل الاختبار الحقيقي: <b>ما فيه مساعدة ولا تصحيح أثناء الحل</b>. التصحيح والدرجة في الآخر — وبعدها ترسلين النتيجة لبابا 📤</div>
+    <div class="mock-list">
+      ${card("A", "📄", "نموذج ١ — اختبار الفترة الأولى", "من 20 · 22 سؤال · نفس الورقة ونفس الترتيب", true)}
+      ${card("C", "📄", "نموذج ٢ — First Period Exam", "من 10 · 20 سؤال · ورقة مدرستي")}
+      ${card("B", "📝", "ورقة المراجعة — أ. تهاني", `${nB} سؤال · الورقة كاملة بترتيبها`)}
+    </div>`);
+}
+
+function startMock(kind) {
+  const mock = buildPaperMock(exam, idx, kind);
+  const flat = [];
+  mock.parts.forEach((p, pi) => p.qs.forEach((q) => flat.push({ q, pi })));
+  run = { type: "mock", mock, flat, i: 0, answers: [], startedAt: Date.now() };
+  renderMockQ();
+}
+
+function renderMockQ() {
+  const { q, pi } = run.flat[run.i];
+  const p = run.mock.parts[pi];
+  show(`
+    <div class="lhead"><button class="btn ghost small" data-act="mockquit">✕ إنهاء</button><div class="lh-t">📝 ${esc(run.mock.title)}</div></div>
+    <div class="progress-chip">سؤال ${run.i + 1} من ${run.flat.length}</div>
+    <div class="pbar thin"><div style="width:${Math.round((100 * run.i) / run.flat.length)}%"></div></div>
+    <div class="paper">
+      ${p.h ? `<div class="exam-h en">${esc(p.h)}</div>` : ""}
+      ${p.sub ? `<div class="exam-sub en">${esc(p.sub)}</div>` : ""}
+      <div class="xmean sm">${esc(p.subAr || "")}${p.marks ? ` · (${p.marks} درجات)` : ""}</div>
+      <div class="qcard flat" id="qcard"></div>
+    </div>`);
+  renderQuestion($("qcard"), q, {
+    mock: true,
+    onAnswer: ({ ok, chosen }) => {
+      run.answers.push({ part: pi, itemId: q.itemId, ok, chosen: String(chosen ?? ""), label: q.label });
+      setTimeout(() => {
+        run.i++;
+        if (run.i < run.flat.length) renderMockQ(); else finishMock();
+      }, q.kind === "choice" ? 280 : 0);
+    }
+  });
+}
+
+async function finishMock() {
+  const res = scoreMock(run.mock, run.answers);
+  const wrong = run.answers.filter((a) => !a.ok);
+  const durationSec = Math.round((Date.now() - run.startedAt) / 1000);
+  const entry = {
+    kind: run.mock.kind, title: run.mock.title, score: res.score, outOf: res.outOf, pct: res.pct,
+    parts: res.parts.map((p) => ({ h: p.h, c: p.c, n: p.n, got: p.got, marks: p.marks })),
+    wrong: [...new Set(wrong.map((a) => a.itemId))], ts: Date.now(), durationSec
+  };
+  prog.mocks = [...prog.mocks, entry].slice(-15);
+  wrong.forEach((a) => (prog.weak[a.itemId] = (prog.weak[a.itemId] || 0) + 1));
+  run.answers.filter((a) => a.ok).forEach((a) => { if (prog.weak[a.itemId] > 0) prog.weak[a.itemId]--; });
+  saveProg(true);
+  run.finished = true;
+  run.lastWrong = entry.wrong;
+  renderMockResult(entry, wrong);
+  speakAr(res.pct >= 90 ? "ما شاء الله! جاهزة للاختبار" : res.pct >= 75 ? "ممتاز! باقي شوي" : "أحسنتِ! نراجع الأخطاء ونعيد");
+
+  try {
+    await saveQuizResult(session, clean({
+      type: "exam", examId: exam.id, examTitle: exam.titleAr,
+      mockKind: entry.kind, mockName: entry.title, score: entry.score, outOf: entry.outOf,
+      total: run.answers.length, correct: run.answers.filter((a) => a.ok).length, pct: entry.pct,
+      parts: entry.parts, durationSec,
+      details: run.answers.map((a) => ({ letter: a.label, correct: a.ok, chosen: a.chosen }))
+    }));
+    const el = $("saveState"); if (el) el.textContent = "تم حفظ النتيجة ✅ — بابا يشوفها في لوحة المتابعة";
+  } catch (e) {
+    const el = $("saveState"); if (el) el.textContent = "تعذر حفظ النتيجة في السيرفر (محفوظة في الجهاز)";
+  }
+}
+
+function partBars(parts) {
+  return parts.map((p) => {
+    const pct = p.marks ? Math.round((100 * p.got) / p.marks) : 0;
+    const color = pct >= 80 ? "#16a34a" : pct >= 50 ? "#f59e0b" : "#dc2626";
+    return `<div class="pbar-row">
+      <span class="pb-l en">${esc(p.h)}</span>
+      <div class="pb-track"><div style="width:${pct}%; background:${color}"></div></div>
+      <span class="pb-v en" style="color:${color}">${fmtNum(p.got)}/${p.marks}</span>
+    </div>`;
+  }).join("");
+}
+
+function renderMockResult(entry, wrong) {
+  const lv = levelFor(entry.pct);
+  const seen = new Set();
+  const wrongList = wrong.filter((a) => !seen.has(a.itemId) && seen.add(a.itemId)).map((a) => {
+    const it = idx.items[a.itemId];
+    const pic = it.pic ? `<img class="spic" src="${esc(it.pic)}" alt="">` : "";
+    return `<div class="wrow">
+      <div class="wq">${pic}<span class="en">${esc(promptOf(it))}</span></div>
+      <div class="wyou">إجابتك: <span class="bad en">${esc(a.chosen || "—")}</span></div>
+      ${explainHtml(it)}
+    </div>`;
+  }).join("");
+  show(`
+    <div class="big-card result">
+      <div style="font-size:60px">${lv.icon}</div>
+      <div class="score-big en">${fmtNum(entry.score)} <small>/ ${entry.outOf}</small></div>
+      <div class="word">${entry.pct}% — ${lv.label}</div>
+      <div class="lname" id="saveState" style="font-size:13px">جارٍ حفظ النتيجة…</div>
+    </div>
+    <div class="card-actions">
+      <a class="btn wa" href="${waLink(reportText({ mock: entry }))}" target="_blank" rel="noopener">📤 أرسلي النتيجة لبابا (واتساب)</a>
+    </div>
+    <div class="panel" style="margin-top:16px"><h2>📊 درجتك في كل قسم</h2>${partBars(entry.parts)}</div>
+    ${wrong.length ? `<div class="panel"><h2>❌ أخطاؤك — وهذا الصح (${seen.size})</h2>${wrongList}</div>`
+      : `<div class="alert ok" style="text-align:center; font-size:18px">🎉 ولا غلطة! ما شاء الله عليك</div>`}
+    <div class="card-actions">
+      ${wrong.length ? `<button class="btn teal" data-act="drillwrong">🔁 تدربي على أخطائك الحين</button>` : ""}
+      <button class="btn ghost" data-act="mockmenu">📝 اختبار ثاني</button>
+      <button class="btn ghost" data-act="hub">→ الخطة</button>
+    </div>`);
+}
+
+// ---------------------------------------------------------------
+// النماذج محلولة
+// ---------------------------------------------------------------
+
+function renderPapers(pid) {
+  run = null;
+  const paper = exam.papers.find((p) => p.id === pid) || exam.papers[0];
+  show(`
+    <div class="lhead"><button class="btn ghost small" data-act="hub">→ الخطة</button><div class="lh-t">📄 النماذج محلولة</div></div>
+    <div class="tabs">${exam.papers.map((p) => `<button class="tab ${p.id === paper.id ? "on" : ""}" data-act="papers" data-p="${p.id}">${esc(p.title.split("—")[0].trim())}</button>`).join("")}</div>
+    <div class="paper-title"><b>${esc(paper.title)}</b><br><small>${esc(paper.sub)}</small></div>
+    ${paper.parts.map((p) => `
+      <div class="paper">
+        ${p.h ? `<div class="exam-h en">${esc(p.h)}</div>` : ""}
+        ${p.sub ? `<div class="exam-sub en">${esc(p.sub)}</div>` : ""}
+        <div class="xmean sm">${esc(p.subAr || "")}${p.marks ? ` · (${p.marks} درجات)` : ""}</div>
+        ${p.box ? `<div class="wordbox-wrap"><div class="wordbox en">${p.box.map(esc).join(" – ")}</div></div>` : ""}
+        ${p.items.map((id, i) => solvedHtml(idx.items[id], p.as, i + 1)).join("")}
+      </div>`).join("")}
+    <div class="card-actions"><button class="btn" data-act="mock" data-k="${paper.id}">📝 اختبري نفسك على هالنموذج</button></div>`);
+}
+
+// ---------------------------------------------------------------
+// التقرير + واتساب
+// ---------------------------------------------------------------
+
+function waLink(text) {
+  const num = String(PARENT_WHATSAPP || "").replace(/\D/g, "");
+  return `https://wa.me/${num}?text=${encodeURIComponent(text)}`;
+}
+
+let studyCache = null; // { total, today }
+
+function reportText({ mock = null } = {}) {
+  const p = session.profile || {};
+  const name = p.displayName || p.username || "";
+  const total = idx.allLessons.length;
+  const done = idx.allLessons.filter((L) => prog.lessons[L.id]?.done).length;
+  const now = new Date();
+  const lines = [];
+  lines.push(`📚 تقرير مذاكرة ${name} ${p.avatar || ""}`.trim());
+  lines.push(`${exam.titleAr} — ${exam.title} (${exam.unit})`);
+  lines.push(`🗓️ ${now.toLocaleDateString(LOCALE, { weekday: "long", day: "numeric", month: "long" })} — ${now.toLocaleTimeString(LOCALE, { hour: "numeric", minute: "2-digit" })}`);
+  lines.push("");
+  const m = mock || latestMock();
+  if (m) {
+    const lv = levelFor(m.pct);
+    lines.push(`📝 ${m.title}: ${fmtNum(m.score)} / ${m.outOf} (${m.pct}%)`);
+    lines.push(`المستوى: ${lv.icon} ${lv.label}`);
+    lines.push("");
+    lines.push("الدرجة في كل قسم:");
+    m.parts.forEach((x) => lines.push(`${x.c === x.n ? "✅" : x.c * 2 >= x.n ? "⚠️" : "❌"} ${String(x.h).replace(/:\s*$/, "")}: ${fmtNum(x.got)}/${x.marks}`));
+  } else {
+    const pa = practiceAvg();
+    lines.push("📝 لسه ما سوّت الاختبار التجريبي");
+    if (pa != null) lines.push(`المستوى من التدريب: ${levelFor(pa).icon} ${levelFor(pa).label}`);
+  }
+  lines.push("");
+  lines.push(`📖 الدروس: خلصت ${done} من ${total}`);
+  const pa = practiceAvg();
+  if (pa != null) lines.push(`🎯 دقة التدريب (من أول محاولة): ${pa}%`);
+  if (studyCache) lines.push(`⏱️ وقت المذاكرة: ${fmtDuration(studyCache.total)} (اليوم: ${fmtDuration(studyCache.today)})`);
+  if (prog.mocks.length > 1) {
+    const b = bestMock();
+    lines.push(`🏆 أفضل نتيجة: ${fmtNum(b.score)}/${b.outOf} · عدد الاختبارات التجريبية: ${prog.mocks.length}`);
+  }
+  const wrongIds = m?.wrong?.length ? m.wrong : weakIds();
+  if (wrongIds.length) {
+    lines.push("");
+    lines.push(m?.wrong?.length ? "❗ أخطاء الاختبار — والصح:" : "❗ تحتاج تراجع:");
+    wrongIds.slice(0, 10).forEach((id) => {
+      const it = idx.items[id];
+      if (it) lines.push(`• ${promptOf(it)} ← ${answerShort(it)}`);
+    });
+    if (wrongIds.length > 10) lines.push(`… و ${wrongIds.length - 10} غيرها`);
+  } else if (m) {
+    lines.push("");
+    lines.push("🎉 ولا غلطة!");
+  }
+  return lines.join("\n");
+}
+
+async function renderReport() {
+  run = null;
+  show(`<div class="empty-state">جارٍ تجهيز التقرير… 📊</div>`);
+  try {
+    const ss = (await listMySessions(session.user.uid)).filter((s) => s.activity === "exams");
+    const t = today();
+    studyCache = {
+      total: ss.reduce((a, s) => a + (s.seconds || 0), 0),
+      today: ss.filter((s) => s.date === t).reduce((a, s) => a + (s.seconds || 0), 0)
+    };
+  } catch (e) { studyCache = null; }
+
+  const total = idx.allLessons.length;
+  const done = idx.allLessons.filter((L) => prog.lessons[L.id]?.done).length;
+  const lm = latestMock();
+  const pa = practiceAvg();
+  const level = lm ? levelFor(lm.pct) : pa != null ? levelFor(pa) : null;
+  const secRows = exam.sections.map((sec) => {
+    const a = practiceAvg(sec.lessons.map((L) => L.id));
+    const d = sec.lessons.filter((L) => prog.lessons[L.id]?.done).length;
+    const color = a == null ? "#cbd5e1" : a >= 80 ? "#16a34a" : a >= 50 ? "#f59e0b" : "#dc2626";
+    return `<div class="pbar-row">
+      <span class="pb-l">${sec.icon} ${esc(sec.ar)}</span>
+      <div class="pb-track"><div style="width:${a || 0}%; background:${color}"></div></div>
+      <span class="pb-v" style="color:${color}">${a == null ? `${d}/${sec.lessons.length}` : a + "%"}</span>
+    </div>`;
+  }).join("");
+  const mocks = [...prog.mocks].reverse().slice(0, 6).map((m) => `<tr>
+      <td style="font-size:12px">${new Date(m.ts).toLocaleDateString(LOCALE, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}</td>
+      <td>${esc(m.title)}</td>
+      <td class="en"><b class="${m.pct >= 80 ? "score-good" : m.pct >= 50 ? "score-mid" : "score-bad"}">${fmtNum(m.score)}/${m.outOf}</b></td></tr>`).join("");
+  const weak = weakIds();
+  const text = reportText();
+
+  show(`
+    <div class="lhead"><button class="btn ghost small" data-act="hub">→ الخطة</button><div class="lh-t">📊 مستواي</div></div>
+    <div class="big-card result">
+      <div style="font-size:56px">${level ? level.icon : "🌱"}</div>
+      <div class="word">${level ? level.label : "لسه ما بدأنا — يلا نذاكر!"}</div>
+      <div class="lname">${lm ? `آخر اختبار تجريبي: <b class="en">${fmtNum(lm.score)}/${lm.outOf}</b> (${lm.pct}%)` : pa != null ? `دقة التدريب: ${pa}%` : ""}</div>
+    </div>
+    <div class="stat-cards" style="margin-top:16px">
+      <div class="stat-card"><div class="v">${done}/${total}</div><div class="k">دروس خلصت</div></div>
+      <div class="stat-card"><div class="v">${pa == null ? "—" : pa + "%"}</div><div class="k">دقة التدريب</div></div>
+      <div class="stat-card"><div class="v">${studyCache ? fmtDuration(studyCache.today) : "—"}</div><div class="k">مذاكرة اليوم</div></div>
+      <div class="stat-card"><div class="v">${prog.mocks.length}</div><div class="k">اختبارات تجريبية</div></div>
+    </div>
+    <div class="panel"><h2>🎯 التدريب حسب القسم</h2>${secRows}</div>
+    ${lm ? `<div class="panel"><h2>📝 آخر اختبار تجريبي — حسب القسم</h2>${partBars(lm.parts)}</div>` : ""}
+    ${mocks ? `<div class="panel"><h2>🗂️ الاختبارات التجريبية</h2><div class="table-wrap"><table class="data" style="min-width:0"><thead><tr><th>الوقت</th><th>الاختبار</th><th>الدرجة</th></tr></thead><tbody>${mocks}</tbody></table></div></div>` : ""}
+    ${weak.length ? `<div class="panel"><h2>❗ أسئلة تحتاج مراجعة (${weak.length})</h2>
+      ${weak.slice(0, 12).map((id) => { const it = idx.items[id]; return `<div class="weak-row"><span class="en">${esc(promptOf(it))}</span> ← <span class="ans en">${esc(answerShort(it))}</span></div>`; }).join("")}
+      <div class="card-actions"><button class="btn teal" data-act="review">🔁 راجعيها الحين</button></div></div>` : ""}
+    <div class="panel">
+      <h2>📤 أرسلي التقرير لبابا</h2>
+      <pre class="wa-preview">${esc(text)}</pre>
+      <div class="card-actions">
+        <a class="btn wa" href="${waLink(text)}" target="_blank" rel="noopener">📤 إرسال واتساب</a>
+        <button class="btn ghost" data-act="copyreport">📋 نسخ</button>
+      </div>
+    </div>`);
+}
+
+// ---------------------------------------------------------------
+// الأزرار
+// ---------------------------------------------------------------
+
+const ACTS = {
+  hub: () => renderHub(),
+  next: () => renderHub(),
+  learn: (d) => startLearn(idx.lessons[d.l]),
+  practice: (d) => startPractice(idx.lessons[d.l]),
+  lnext: () => { run.i++; renderLearn(); },
+  lprev: () => { run.i = Math.max(0, run.i - 1); renderLearn(); },
+  lrestart: () => { run.i = 0; renderLearn(); },
+  studied: () => {
+    const L = run.L;
+    prog.lessons[L.id] = { ...(prog.lessons[L.id] || {}), learned: true };
+    saveProg();
+    startPractice(L);
+  },
+  rgo: () => nextQuestion(),
+  pnext: () => nextQuestion(),
+  hint: () => {
+    if (!run?.q) return;
+    run.hintUsed = true;
+    $("hintBox").innerHTML = `<div class="trick">💡 ${run.q.hint || "ركزي على الكلمة المهمة"}</div>`;
+  },
+  mockmenu: () => renderMockMenu(),
+  mock: (d) => startMock(d.k),
+  mockquit: () => { if (confirm("تبين تطلعين من الاختبار؟ النتيجة ما راح تنحفظ")) renderMockMenu(); },
+  drillwrong: () => startPractice(null, {
+    items: (run?.lastWrong || []).map((id) => idx.items[id]).filter(Boolean),
+    review: true, title: "أخطاء الاختبار", rounds: ["choice", "write"]
+  }),
+  review: () => startPractice(null, {
+    items: weakIds().map((id) => idx.items[id]), review: true, title: "مراجعة الأخطاء", rounds: ["choice", "write"]
+  }),
+  papers: (d) => renderPapers(d.p || "A"),
+  report: () => renderReport(),
+  copyreport: async () => {
+    try { await navigator.clipboard.writeText(reportText()); toast("تم النسخ ✅"); }
+    catch (e) { toast("ما قدرت أنسخ — حددي النص وانسخيه", true); }
+  }
+};
+
+main.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-act]");
+  if (!b || !main.contains(b)) return;
+  const fn = ACTS[b.dataset.act];
+  if (!fn) return;
+  if (b.dataset.act === "next") {
+    const ns = nextStep();
+    return ns.act === "mockmenu" ? renderMockMenu() : ns.act === "learn" ? startLearn(ns.L) : startPractice(ns.L);
+  }
+  fn(b.dataset, b);
+});
+
+$("planBtn").addEventListener("click", () => {
+  if (run?.type === "mock" && !run.finished && !confirm("تبين تطلعين من الاختبار؟ النتيجة ما راح تنحفظ")) return;
+  if (exam) renderHub();
+});
+</script>
+</body>
+</html>

@@ -205,6 +205,12 @@ export async function listAllSkills() {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
+// جلسات المذاكرة الخاصة بالطالبة نفسها (لحساب وقت المذاكرة في تقريرها)
+export async function listMySessions(uid) {
+  const snap = await getDocs(query(collection(db, "eduSessions"), where("uid", "==", uid)));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
 export async function listMyQuizzes(uid) {
   const snap = await getDocs(query(collection(db, "eduQuizzes"), where("uid", "==", uid)));
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
