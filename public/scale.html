@@ -37,7 +37,7 @@
         <circle class="arc" cx="110" cy="110" r="96" pathLength="100"></circle>
       </svg>
       <div class="reading" aria-live="polite">
-        <span id="weight" class="weight">0.0</span>
+        <span id="weight" class="weight empty">0.0</span>
         <span class="unit">كجم</span>
         <svg class="check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>
       </div>
@@ -49,13 +49,29 @@
       <button id="btnAll" class="link" type="button">ميزانك ما طلع بالقائمة؟ اعرض كل الأجهزة</button>
     </div>
 
+    <form id="macCard" class="card mac" hidden>
+      <h2>عنوان ميزان هواوي (MAC)</h2>
+      <p id="macWhy" class="muted small">ميزان هواوي يشفّر بياناته بعنوانه (MAC)، وكروم ما يعطينا هذا العنوان. اكتبه مرة وحدة وبعدها يشتغل على طول.</p>
+      <label>العنوان<input id="macInput" dir="ltr" placeholder="5C:CA:D3:12:34:56" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text"></label>
+      <button class="btn primary" type="submit">احفظ وكمّل</button>
+      <details class="mac-help">
+        <summary>وين ألقى العنوان؟</summary>
+        <ol>
+          <li>نزّل تطبيق <b>nRF Connect</b> المجاني من Google Play.</li>
+          <li>اطلع على الميزان عشان يصحى، وافتح nRF Connect واضغط <b>SCAN</b>.</li>
+          <li>دوّر على <b>AH100</b> (أو CH100). العنوان مكتوب تحت الاسم، مثل <span dir="ltr">5C:CA:D3:12:34:56</span>.</li>
+          <li>انسخه واكتبه هنا. ما تحتاج nRF Connect بعدها.</li>
+        </ol>
+      </details>
+    </form>
+
     <div id="result" class="card result" hidden></div>
 
     <details class="card tips">
       <summary>طريقة الاستخدام</summary>
       <ol>
         <li>شغّل البلوتوث في الجوال، وسكّر تطبيق الميزان الرسمي (الميزان يتصل بتطبيق واحد بس).</li>
-        <li>اطلع على الميزان عشان يصحى، واضغط «اتصل بالميزان» واختر اسمه (مثل MIBFS أو MI SCALE2 أو QN-Scale).</li>
+        <li>اطلع على الميزان عشان يصحى، واضغط «اتصل بالميزان» واختر اسمه (مثل AH100 أو MIBFS أو QN-Scale).</li>
         <li>اثبت على الميزان حافي لين يطلع الصح ✓. الوزن ينحفظ لحاله، ولو فيه أكثر من شخص يختار اللي وزنه أقرب.</li>
         <li>المرة الجاية بس اطلع على الميزان واضغط «اتصل».</li>
       </ol>
@@ -109,7 +125,10 @@
     <div class="card">
       <h2>الميزان</h2>
       <p id="deviceInfo" class="muted"></p>
-      <button id="btnForget" class="btn small" type="button" hidden>انسَ الميزان</button>
+      <div class="btn-row">
+        <button id="btnMac" class="btn small" type="button">عنوان MAC (لميزان هواوي)</button>
+        <button id="btnForget" class="btn small" type="button" hidden>انسَ الميزان</button>
+      </div>
     </div>
 
     <div class="card">
@@ -147,6 +166,7 @@
     <details class="card">
       <summary>الموازين المدعومة</summary>
       <ul class="plain">
+        <li><b>هواوي:</b> Body Fat Scale AH100 و CH100 — الوزن ونسبة الدهون والمقاومة. يحتاج عنوان MAC الميزان مرة وحدة.</li>
         <li><b>شاومي:</b> Mi Smart Scale (الإصدار 1 و 2) و Mi Body Composition Scale 2 — الوزن والمقاومة.</li>
         <li><b>الموازين القياسية:</b> أي ميزان يدعم خدمة Weight Scale أو Body Composition الرسمية — الوزن ونسبة الدهون لو الميزان يرسلها.</li>
         <li><b>QN / Renpho / FITINDEX:</b> موازين تطبيقات Renpho و FITINDEX و QN-Scale.</li>
@@ -177,7 +197,12 @@
     <h2 id="pdTitle">شخص جديد</h2>
     <label>الاسم<input id="pdName" maxlength="24" required autocomplete="off"></label>
     <label>الطول (سم)<input id="pdHeight" inputmode="decimal" placeholder="170" autocomplete="off"></label>
+    <div class="fields">
+      <label>الجنس<select id="pdSex"><option value="">—</option><option value="m">ذكر</option><option value="f">أنثى</option></select></label>
+      <label>العمر<input id="pdAge" inputmode="numeric" placeholder="30" autocomplete="off"></label>
+    </div>
     <label>الوزن المطلوب (كجم) — اختياري<input id="pdGoal" inputmode="decimal" placeholder="70" autocomplete="off"></label>
+    <p class="muted small">العمر والجنس والطول يحتاجها ميزان هواوي عشان يحسب الدهون صح.</p>
     <div class="btn-row">
       <button class="btn primary" type="submit">احفظ</button>
       <button id="pdCancel" class="btn" type="button">إلغاء</button>

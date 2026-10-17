@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import crypto from 'node:crypto';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
@@ -205,4 +206,117 @@ test('BMI and its adult category', () => {
   assert.equal(P.bmiClass(27).key, 'over');
   assert.equal(P.bmiClass(31).key, 'obese');
   assert.equal(P.bmi(72, null), null);
+});
+
+/* ---------------- هواوي AH100 / CH100 ---------------- */
+// المراجع: اختبارات openScale (HuaweiAhCh100HandlerTest) — منها إطاران حقيقيان من ميزان CH100
+// فُكّا وطابقا شاشة الميزان (126.6 كجم / 33.8% / 306 Ω).
+const HW = P.Huawei;
+const CAPTURE_MAC = '5C:CA:D3:14:2B:B3';
+const CAPTURE_1 = 'bc110eabf78678303ba462fc93d1db4b348861';
+const CAPTURE_2 = 'bc110eabf48679303ba462fc93dce84b3f8861';
+const hwChars = [
+  { svc: P.S.HUAWEI, chr: P.C.HW_TX, props: { write: true } },
+  { svc: P.S.HUAWEI, chr: P.C.HW_RX, props: {} }
+];
+const scaleFrame = (op, payload, mac) => Uint8Array.from([0xBD, payload.length + 1, op, ...HW.xorMac(Uint8Array.from(payload), mac)]);
+
+test('AES-128 matches FIPS-197 and Node crypto in CTR mode', () => {
+  assert.equal(P.hex(HW.encryptBlock(H('00112233445566778899aabbccddeeff'), H('000102030405060708090a0b0c0d0e0f'))), '69 c4 e0 d8 6a 7b 04 30 d8 cd b7 80 70 b4 c5 5a');
+  for (let i = 0; i < 200; i++) {
+    const k = crypto.randomBytes(16), iv = crypto.randomBytes(16), d = crypto.randomBytes(1 + (i % 45));
+    const c = crypto.createCipheriv('aes-128-ctr', k, iv);
+    assert.equal(P.hex(HW.aesCtr(d, k, iv)), P.hex(Buffer.concat([c.update(d), c.final()])));
+  }
+});
+
+test('Huawei auth token and session key match the openScale reference', () => {
+  const mac = P.parseMac('5C:CA:D3:08:7B:4F');
+  assert.equal(P.hex(HW.authToken(1)).replace(/ /g, ''), '11223344551001');
+  assert.equal(P.hex(HW.magicKey(HW.authToken(1), mac)).replace(/ /g, ''), '4de8e04c2e5f5d2a980fde3456732156');
+});
+
+test('Huawei reference frame decodes to 97.0 kg, 28.0 % fat, 540 Ω', () => {
+  const mac = P.parseMac('5C:CA:D3:08:7B:4F');
+  const m = HW.decodeMeasurement(H('bc100edef702c9bbf2176c755b6eccdd5b92b0'), HW.magicKey(HW.authToken(1), mac), mac);
+  near(m.weightKg, 97.0); near(m.fatPct, 28.0); assert.equal(m.impedance, 540);
+  const d = new Date(m.ts);
+  assert.deepEqual([d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()], [2026, 5, 19, 8, 12, 33]);
+});
+
+test('Huawei REAL hardware frames decode to what the scale display showed', () => {
+  const mac = P.parseMac(CAPTURE_MAC);
+  const key = HW.magicKey(HW.authToken(1), mac);
+  const a = HW.decodeMeasurement(H(CAPTURE_1), key, mac);
+  near(a.weightKg, 126.6); near(a.fatPct, 33.8); assert.equal(a.impedance, 306); assert.equal(a.valid, true);
+  const b = HW.decodeMeasurement(H(CAPTURE_2), key, mac);
+  near(b.weightKg, 126.5); near(b.fatPct, 33.9); assert.equal(b.impedance, 313);
+  const d = new Date(b.ts);
+  assert.deepEqual([d.getHours(), d.getMinutes(), d.getSeconds()], [10, 12, 21]);
+});
+
+test('Huawei session: auth → config writes → real measurement → ack', () => {
+  const mac = P.parseMac(CAPTURE_MAC);
+  const s = P.createSession({ kind: 'huawei', chars: hwChars, mac, profile: { heightCm: 180, age: 35, sex: 'm' }, lastWeightKg: 126 });
+  assert.equal(s.needsMac, false);
+  const k = s.kick();
+  assert.equal(P.hex(k.writes[0].data), P.hex(Uint8Array.from([0xDB, 0x08, 36, ...HW.xorMac(HW.authToken(1), mac)])));
+  assert.equal(k.writes[0].chr, P.C.HW_TX);
+
+  const ok = s.onData(P.S.HUAWEI, P.C.HW_RX, scaleFrame(0x26, [0x01], mac));
+  assert.deepEqual(ok.writes.map(w => w.data[2]), [2, 8, 9, 12]); // وحدة، ساعة، بيانات الشخص، الإصدار
+  const ui = ok.writes[2].data;
+  assert.equal(ui[0], 0xDC); assert.equal(ui[1], 14); assert.equal(ui.length, 3 + 16);
+  const key = HW.magicKey(HW.authToken(1), mac);
+  const plain = HW.aesCtr(HW.xorMac(ui.slice(3), mac), key, HW.IV);
+  assert.equal(P.hex(plain), P.hex(Uint8Array.from([...HW.authToken(1), 35, 180, 0, 1260 & 0xFF, 1260 >> 8, 0xFF, 0xFF, 0x1C, 0xE2])));
+  assert.equal(s.onData(P.S.HUAWEI, P.C.HW_RX, scaleFrame(0x26, [0x01], mac)).writes.length, 0); // تحقق مكرر ← لا شي
+
+  const st = s.onData(P.S.HUAWEI, P.C.HW_RX, scaleFrame(0x0F, [0, 0, 0], mac));
+  assert.equal(st.status, 'measure');
+  const m = s.onData(P.S.HUAWEI, P.C.HW_RX, H(CAPTURE_1));
+  assert.equal(m.readings.length, 1);
+  near(m.readings[0].weightKg, 126.6); near(m.readings[0].fatPct, 33.8); assert.equal(m.readings[0].impedance, 306);
+  assert.equal(m.readings[0].stable, true);
+  assert.deepEqual([...m.writes[0].data], [0xDB, 0x02, 19, 0x00 ^ mac[0]]);
+  // النصف الثاني من نفس القياس ما يكرر القراءة
+  assert.equal(s.onData(P.S.HUAWEI, P.C.HW_RX, Uint8Array.from([0xBC, 0x11, 0x8E, 1, 2, 3])).readings.length, 0);
+  // المرأة: بت الجنس 0x80
+  const f = s.setProfile({ heightCm: 160, age: 30, sex: 'f' });
+  const fp = HW.aesCtr(HW.xorMac(f.writes[0].data.slice(3), mac), key, HW.IV);
+  assert.equal(fp[7], 30 | 0x80); assert.equal(fp[8], 160);
+});
+
+test('Huawei session: refused auth retries, then binds, then re-auths', () => {
+  const mac = P.parseMac(CAPTURE_MAC);
+  const s = P.createSession({ kind: 'huawei', chars: hwChars, mac });
+  const no = () => s.onData(P.S.HUAWEI, P.C.HW_RX, scaleFrame(0x26, [0x00], mac)).writes.map(w => w.data[2]);
+  assert.deepEqual(no(), [36]);
+  assert.deepEqual(no(), [36]);
+  assert.deepEqual(no(), [37]); // ربط
+  assert.deepEqual(s.onData(P.S.HUAWEI, P.C.HW_RX, scaleFrame(0x27, [0x01], mac)).writes.map(w => w.data[2]), [36]);
+});
+
+test('Huawei: no MAC → asks for it; wrong MAC → decode error instead of a bogus weight', () => {
+  const s = P.createSession({ kind: 'huawei', chars: hwChars });
+  assert.equal(s.needsMac, true);
+  assert.equal(s.onData(P.S.HUAWEI, P.C.HW_RX, Uint8Array.from([0xBD, 0x01, 0x00])).error, 'mac');
+  const wrong = P.parseMac('5C:CA:D3:14:2B:B4');
+  const s2 = P.createSession({ kind: 'huawei', chars: hwChars, mac: wrong });
+  s2.onData(P.S.HUAWEI, P.C.HW_RX, scaleFrame(0x26, [0x01], wrong));
+  const out = s2.onData(P.S.HUAWEI, P.C.HW_RX, H(CAPTURE_1));
+  assert.equal(out.readings.length, 0);
+  assert.equal(out.error, 'decode');
+});
+
+test('Huawei name detection and MAC parsing', () => {
+  assert.equal(P.detectKind('AH100', []), 'huawei');
+  assert.equal(P.detectKind('HUAWEI AH100', []), 'huawei');
+  assert.equal(P.detectKind('CH100-1234', []), 'huawei');
+  assert.equal(P.detectKind('CH100S', [P.S.HUAWEI]), 'unknown');
+  assert.equal(P.detectKind('Scale', [P.S.HUAWEI]), 'huawei');
+  assert.equal(P.macText(P.parseMac('5cca d314 2bb3')), '5C:CA:D3:14:2B:B3');
+  assert.equal(P.parseMac('5C:CA:D3'), null);
+  assert.equal(P.parseMac('00:00:00:00:00:00'), null);
+  assert.equal(P.macText(P.macFromAdvert([Uint8Array.from([0x01, 0xB3, 0x2B, 0x14, 0xD3, 0xCA, 0x5C, 0x09])])), '5C:CA:D3:14:2B:B3');
 });

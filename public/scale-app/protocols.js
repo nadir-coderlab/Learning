@@ -9,6 +9,7 @@
      • المعيار الرسمي للبلوتوث: Weight Scale 0x181D و Body Composition 0x181B
      • شاومي Mi Scale (الإصدار 1) و Mi Body Composition Scale (الإصدار 2)
      • موازين QN / Yolanda / Renpho / FITINDEX (خدمة 0xFFE0 أو 0xFFF0)
+     • هواوي Body Fat Scale AH100 / CH100 (خدمة 0xFAA0) — مشفّر، ويحتاج عنوان MAC الميزان
    وأي ميزان ثاني: البايتات تنعرض كما هي في «وضع الفحص» عشان نضيف دعمه.
 
    مراجع البروتوكولات: مواصفات Bluetooth SIG، وملاحظات مشروع openScale المفتوح
@@ -24,7 +25,8 @@
          .push(reading)          → [event]  (live | final | update | off | old)
      parseStdWeight, parseStdBodyComp, parseMiLive13, parseMi10, parseQN
      buildMiLive13, buildStdWeight  (لوضع التجربة والاختبارات)
-     bmi, bmiClass, toKg, hex
+     bmi, bmiClass, toKg, hex, parseMac, macFromAdvert
+     Huawei: {aesCtr, encryptBlock, decodeMeasurement, buildPlain, buildEncrypted, authToken, magicKey}
    ============================================================ */
 (function (root) {
   'use strict';
@@ -43,7 +45,8 @@
     QN1: uuid16(0xFFE0),
     QN2: uuid16(0xFFF0),
     QN_AE: uuid16(0xAE00),
-    MI_CFG: '00001530-0000-3512-2118-0009af100700'
+    MI_CFG: '00001530-0000-3512-2118-0009af100700',
+    HUAWEI: uuid16(0xFAA0)
   };
 
   const C = {
@@ -60,14 +63,16 @@
     QN_T1_CONFIG: uuid16(0xFFE3),
     QN_T1_TIME: uuid16(0xFFE4),
     QN_T2_NOTIFY: uuid16(0xFFF1),
-    QN_T2_WRITE: uuid16(0xFFF2)
+    QN_T2_WRITE: uuid16(0xFFF2),
+    HW_TX: uuid16(0xFAA1),   // من الجوال للميزان
+    HW_RX: uuid16(0xFAA2)    // من الميزان للجوال
   };
 
   // كروم ما يسمح نقرأ أي خدمة ما ذكرناها هنا — فنذكر المعروفة + خدمات شائعة في
   // الموازين الصينية عشان «وضع الفحص» يشوف بياناتها.
   const OPTIONAL_SERVICES = [
     S.WEIGHT, S.BODY, S.USER_DATA, S.DEVICE_INFO, S.BATTERY, S.CURRENT_TIME,
-    S.QN1, S.QN2, S.QN_AE, S.MI_CFG,
+    S.QN1, S.QN2, S.QN_AE, S.MI_CFG, S.HUAWEI,
     uuid16(0xFFA0), uuid16(0xFFB0), uuid16(0xFFC0), uuid16(0xFFD0),
     uuid16(0x1A10), uuid16(0xFEE7), uuid16(0xFFF5)
   ];
@@ -77,7 +82,8 @@
     { services: [S.WEIGHT] }, { services: [S.BODY] },
     { services: [S.QN1] }, { services: [S.QN2] },
     { namePrefix: 'MI' }, { namePrefix: 'QN' },
-    { namePrefix: 'Renpho' }, { namePrefix: 'RENPHO' }, { namePrefix: 'Yolanda' }
+    { namePrefix: 'Renpho' }, { namePrefix: 'RENPHO' }, { namePrefix: 'Yolanda' },
+    { services: [S.HUAWEI] }, { namePrefix: 'AH100' }, { namePrefix: 'CH100' }, { namePrefix: 'HUAWEI' }
   ];
 
   /* ---------- أدوات صغيرة ---------- */
@@ -86,7 +92,7 @@
   const u16be = (d, i) => ((d[i] & 0xFF) << 8) | (d[i + 1] & 0xFF);
   const round = (x, n) => { const p = Math.pow(10, n == null ? 2 : n); return Math.round(x * p) / p; };
   function hex(d) { return Array.from(d || [], b => (b & 0xFF).toString(16).padStart(2, '0')).join(' '); }
-  function fromHex(s) { return Uint8Array.from(String(s).trim().split(/[\s:,-]+/).filter(Boolean).map(h => parseInt(h, 16))); }
+  function fromHex(s) { const h = String(s || '').replace(/0x/gi, '').replace(/[^0-9a-fA-F]/g, ''); return Uint8Array.from(h.match(/../g) || [], x => parseInt(x, 16)); }
   function sum8(arr) { let s = 0; for (const b of arr) s = (s + (b & 0xFF)) & 0xFF; return s; }
 
   const LB = 0.45359237;
@@ -230,10 +236,129 @@
   function qnFrame(bytes) { const a = bytes.slice(); a.push(0); a[a.length - 1] = sum8(a.slice(0, -1)); return Uint8Array.from(a); }
   function le32(t) { return [t & 0xFF, (t >>> 8) & 0xFF, (t >>> 16) & 0xFF, (t >>> 24) & 0xFF]; }
 
+  /* ---------- AES-128 (للتشفير بوضع CTR فقط) ---------- */
+  // تطبيق صغير متزامن لأن فك البيانات يصير داخل حدث البلوتوث مباشرة.
+  const xtime = a => ((a << 1) ^ (a & 0x80 ? 0x1B : 0)) & 0xFF;
+  const SBOX = (() => {
+    const sb = new Uint8Array(256);
+    const rotl = (x, k) => ((x << k) | (x >>> (8 - k))) & 0xFF;
+    let p = 1, q = 1;
+    do {
+      p = (p ^ xtime(p)) & 0xFF;                       // p × 3
+      q = (q ^ (q << 1)) & 0xFF; q = (q ^ (q << 2)) & 0xFF; q = (q ^ (q << 4)) & 0xFF;
+      if (q & 0x80) q ^= 0x09;                          // q ÷ 3
+      sb[p] = (q ^ rotl(q, 1) ^ rotl(q, 2) ^ rotl(q, 3) ^ rotl(q, 4) ^ 0x63) & 0xFF;
+    } while (p !== 1);
+    sb[0] = 0x63;
+    return sb;
+  })();
+  function expandKey(key) {
+    const e = new Uint8Array(176);
+    e.set(key.slice(0, 16));
+    let rcon = 1;
+    for (let i = 16; i < 176; i += 4) {
+      let t = [e[i - 4], e[i - 3], e[i - 2], e[i - 1]];
+      if (i % 16 === 0) { t = [SBOX[t[1]] ^ rcon, SBOX[t[2]], SBOX[t[3]], SBOX[t[0]]]; rcon = xtime(rcon); }
+      for (let j = 0; j < 4; j++) e[i + j] = e[i - 16 + j] ^ t[j];
+    }
+    return e;
+  }
+  function encryptBlock(block, key) {
+    const k = key.length === 176 ? key : expandKey(key);
+    let st = Uint8Array.from(block.slice(0, 16));
+    for (let i = 0; i < 16; i++) st[i] ^= k[i];
+    for (let r = 1; r <= 10; r++) {
+      const sh = new Uint8Array(16);
+      for (let c = 0; c < 4; c++) for (let row = 0; row < 4; row++) sh[row + 4 * c] = SBOX[st[row + 4 * ((c + row) % 4)]];
+      if (r < 10) {
+        for (let c = 0; c < 4; c++) {
+          const a0 = sh[4 * c], a1 = sh[4 * c + 1], a2 = sh[4 * c + 2], a3 = sh[4 * c + 3];
+          sh[4 * c] = xtime(a0) ^ xtime(a1) ^ a1 ^ a2 ^ a3;
+          sh[4 * c + 1] = a0 ^ xtime(a1) ^ xtime(a2) ^ a2 ^ a3;
+          sh[4 * c + 2] = a0 ^ a1 ^ xtime(a2) ^ xtime(a3) ^ a3;
+          sh[4 * c + 3] = xtime(a0) ^ a0 ^ a1 ^ a2 ^ xtime(a3);
+        }
+      }
+      for (let i = 0; i < 16; i++) sh[i] ^= k[16 * r + i];
+      st = sh;
+    }
+    return st;
+  }
+  // AES/CTR/NoPadding — نفس العملية للتشفير وفكه
+  function aesCtr(data, key, iv) {
+    const k = expandKey(Uint8Array.from(key));
+    const ctr = Uint8Array.from(iv.slice(0, 16));
+    const out = new Uint8Array(data.length);
+    for (let off = 0; off < data.length; off += 16) {
+      const ks = encryptBlock(ctr, k);
+      for (let i = 0; i < 16 && off + i < data.length; i++) out[off + i] = data[off + i] ^ ks[i];
+      for (let i = 15; i >= 0; i--) { ctr[i] = (ctr[i] + 1) & 0xFF; if (ctr[i] !== 0) break; }
+    }
+    return out;
+  }
+
+  /* ---------- هواوي AH100 / CH100 ---------- */
+  // كل البيانات «مخلوطة» (XOR) بعنوان MAC الميزان، والقياسات فوقها AES-CTR.
+  const HW_KEY = fromHex('3D A2 78 4A FB 87 B1 2A 98 0F DE 34 56 73 21 56');
+  const HW_IV = fromHex('4E F7 64 32 2F DA 76 32 12 3D EB 87 90 FE A2 19');
+  function parseMac(s) {
+    const h = String(s || '').replace(/[^0-9a-fA-F]/g, '');
+    if (h.length !== 12) return null;
+    const b = fromHex(h);
+    return b.every(x => x === 0) || b.every(x => x === 0xFF) ? null : b;
+  }
+  function macText(b) { return Array.from(b, x => x.toString(16).padStart(2, '0').toUpperCase()).join(':'); }
+  function xorMac(data, mac) { const o = Uint8Array.from(data); if (!mac || !mac.length) return o; for (let i = 0; i < o.length; i++) o[i] ^= mac[i % mac.length]; return o; }
+  function hwAuthToken(userId) {
+    const a = [0x11, 0x22, 0x33, 0x44, 0x55, 0x00, userId & 0xFF];
+    a[5] = a.reduce((x, y) => x ^ y, 0);
+    return Uint8Array.from(a);
+  }
+  function hwMagicKey(auth, mac) { const k = new Uint8Array(16); k.set(xorMac(auth, mac), 0); k.set(HW_KEY.slice(7), 7); return k; }
+  function hwPlain(cmd, payload, mac, len) { return Uint8Array.from([0xDB, (len == null ? payload.length + 1 : len) & 0xFF, cmd].concat(Array.from(xorMac(payload, mac)))); }
+  function hwEncrypted(cmd, payload, key, mac, len) { return Uint8Array.from([0xDC, (len == null ? payload.length : len) & 0xFF, cmd].concat(Array.from(xorMac(aesCtr(payload, key, HW_IV), mac)))); }
+  // نص القياس بعد فك التشفير: [مستخدم][وزن/10 LE][دهون/10 LE][سنة LE][شهر][يوم][س][د][ث][يوم الأسبوع][مقاومة LE]
+  function hwDecode(frame, key, mac) {
+    const plain = aesCtr(xorMac(frame.slice(3), mac), key, HW_IV);
+    if (plain.length < 15) return null;
+    const y = u16le(plain, 5), mo = u8(plain, 7), da = u8(plain, 8), h = u8(plain, 9), mi = u8(plain, 10), se = u8(plain, 11);
+    const ok = y >= 2000 && y <= 2100 && mo >= 1 && mo <= 12 && da >= 1 && da <= 31 && h < 24 && mi < 60 && se < 60;
+    const imp = u16le(plain, 13);
+    return {
+      userId: u8(plain, 0),
+      weightKg: u16le(plain, 1) / 10,
+      fatPct: u16le(plain, 3) / 10,
+      impedance: imp >= 1 && imp <= 3999 ? imp : undefined,
+      ts: ok ? new Date(y, mo - 1, da, h, mi, se).getTime() : null,
+      valid: ok,
+      plain
+    };
+  }
+  // بعض المتصفحات تعطي بيانات الإعلان؛ موازين Chipsea تحط عنوانها فيها أحياناً
+  function macFromAdvert(chunks) {
+    const OUIS = [[0x5C, 0xCA, 0xD3]];
+    for (const d of chunks || []) {
+      const b = Array.from(d || []);
+      for (let i = 0; i + 6 <= b.length; i++) {
+        for (const o of OUIS) {
+          if (b[i] === o[0] && b[i + 1] === o[1] && b[i + 2] === o[2]) return Uint8Array.from(b.slice(i, i + 6));
+          if (b[i + 5] === o[0] && b[i + 4] === o[1] && b[i + 3] === o[2]) return Uint8Array.from(b.slice(i, i + 6).reverse());
+        }
+      }
+    }
+    return null;
+  }
+
   /* ---------- كشف نوع الميزان ---------- */
+  function huaweiName(name) {
+    const n = String(name || '').replace(/\u0000/g, '').trim().toUpperCase();
+    const c = [n, n.replace(/^HUAWEI /, '').trim(), n.replace(/^HONOR /, '').trim(), n.split('-')[0], n.split('_')[0], n.split(' ')[0]];
+    return c.indexOf('AH100') !== -1 || c.indexOf('CH100') !== -1;
+  }
   function detectKind(name, serviceUuids) {
     const n = String(name || '').toUpperCase();
     const has = u => (serviceUuids || []).indexOf(u) !== -1;
+    if (huaweiName(name) || (has(S.HUAWEI) && !/CH100S/.test(n))) return 'huawei';
     if (n.startsWith('MIBCS') || n.startsWith('MIBFS') || n === 'MI SCALE2' || n.startsWith('MI_SCALE') || has(S.MI_CFG)) return 'xiaomi';
     if (has(S.WEIGHT) || has(S.BODY)) return 'standard';
     if (has(S.QN1) || has(S.QN2)) return 'qn';
@@ -253,7 +378,7 @@
     const chars = opts.chars || [];
     const now = opts.now || (() => Date.now());
     const uniq = (opts.uniq || 0x1234) & 0xFFFF;
-    const profile = opts.profile || {};
+    let profile = opts.profile || {};
     const find = (chr, preferSvc) => {
       const all = chars.filter(c => c.chr === chr);
       return all.find(c => c.svc === preferSvc) || all[0] || null;
@@ -262,6 +387,8 @@
 
     let histBuf = [];
     let qnProto = null, qnFactor = 100, qnConfigured = false;
+    const mac = opts.mac || null;
+    const hw = { auth: hwAuthToken(opts.hwUser || 1), key: null, authorised: false, authSent: false, woke: false, tries: 0, binds: 0, pending: null, lastW: opts.lastWeightKg || null };
 
     function timePayload() {
       const t = new Date(now());
@@ -355,11 +482,88 @@
       return true;
     }
 
+    /* ----- هواوي ----- */
+    function hwSend(frame, label) { const tx = find(C.HW_TX, S.HUAWEI); return w(tx, frame, label); }
+    function hwAuth(out) { hw.authSent = true; out.writes.push(hwSend(hwPlain(36, hw.auth, mac), 'تحقق')); }
+    function hwUserInfo() {
+      const male = profile.sex !== 'f';
+      const age = Math.max(10, Math.min(99, Math.round(profile.age || 30)));
+      const hcm = Math.max(90, Math.min(220, Math.round(profile.heightCm || 170)));
+      const wkg = hw.lastW || (22 * (hcm / 100) * (hcm / 100));
+      const wt = Math.max(1, Math.round(wkg * 10));
+      const payload = Array.from(hw.auth).concat([(age & 0x7F) | (male ? 0 : 0x80), hcm, 0x00, wt & 0xFF, wt >> 8, 0xFF, 0xFF, 0x1C, 0xE2]);
+      return hwSend(hwEncrypted(9, payload, hw.key, mac, payload.length - 2), 'بيانات الشخص (للدهون)');
+    }
+    function hwTime() {
+      const t = new Date(now()); const y = t.getFullYear();
+      const dow = ((t.getDay() + 6) % 7) + 1; // الإثنين = 1
+      return hwSend(hwPlain(8, [y & 0xFF, y >> 8, t.getMonth() + 1, t.getDate(), t.getHours(), t.getMinutes(), t.getSeconds(), dow], mac), 'ضبط الساعة');
+    }
+    function hwMeasurement(frame, op, out) {
+      const m = hwDecode(frame, hw.key, mac);
+      if (!m || !m.valid || !plausibleKg(m.weightKg)) { out.error = 'decode'; out.note = 'فك التشفير طلع أرقام غلط — غالباً عنوان MAC غلط'; return; }
+      hw.lastW = m.weightKg;
+      out.readings.push({ kind: 'huawei', source: op === 0x10 ? 'history' : 'live', weightKg: m.weightKg, fatPct: m.fatPct > 0 && m.fatPct < 75 ? m.fatPct : undefined, impedance: m.impedance, ts: m.ts, stable: true, final: true });
+      out.writes.push(hwSend(hwPlain(19, [0x00], mac), 'تأكيد استلام القياس'));
+      if (op === 0x10) out.writes.push(hwSend(hwPlain(11, [0x01], mac), 'السجل التالي'));
+    }
+    function huawei(d, out) {
+      if (!mac) { out.error = 'mac'; out.note = 'يحتاج عنوان MAC الميزان'; return; }
+      if (d.length < 3) return;
+      const op = d[2], tail = xorMac(d.slice(3), mac);
+      if (op === 0x00) { // صحى
+        hw.woke = true; out.note = 'الميزان صحى';
+        if (!hw.authorised) hwAuth(out);
+      } else if (op === 0x26) { // نتيجة التحقق
+        if (tail[0] === 1 && hw.authorised) { out.note = 'تحقق مكرر'; }
+        else if (tail[0] === 1) {
+          hw.authorised = true;
+          hw.key = hwMagicKey(hw.auth, mac);
+          out.note = 'تم التحقق ✓'; out.hint = 'متصل ✓ اطلع على الميزان واثبت';
+          out.writes.push(hwSend(hwPlain(2, [0x01], mac), 'الوحدة كجم'), hwTime(), hwUserInfo(), hwSend(hwPlain(12, [], mac), 'رقم الإصدار'));
+        } else if (hw.tries++ < 2) { out.note = 'رفض التحقق، نحاول مرة ثانية'; hwAuth(out); }
+        else if (hw.binds++ < 2) { out.note = 'نربط الميزان بالتطبيق'; out.hint = 'نربط الميزان أول مرة… خلك واقف عليه'; out.writes.push(hwSend(hwPlain(37, hw.auth, mac), 'ربط')); }
+        else { out.error = 'auth'; out.note = 'الميزان رفض التحقق — تأكد من عنوان MAC'; }
+      } else if (op === 0x27) { // تم الربط
+        out.note = 'تم الربط ✓'; hw.tries = 0; hwAuth(out);
+      } else if (op === 0x20) { // يطلب بيانات الشخص
+        if (hw.authorised) out.writes.push(hwUserInfo());
+      } else if (op === 0x0F) {
+        out.note = 'الوزن ثبت، يحلل الدهون'; out.hint = 'ثبت الوزن… لا تنزل، يحلل الدهون'; out.status = 'measure';
+      } else if ((op === 0x0E || op === 0x10) && d[0] === 0xBC) {
+        if (!hw.key) { out.note = 'قياس وصل قبل التحقق'; return; }
+        if (tail.length >= 15) { hw.pending = null; hwMeasurement(d, op, out); } else hw.pending = { d, op };
+      } else if ((op === 0x8E || op === 0x90) && d[0] === 0xBC) {
+        if (hw.pending && hw.key) { const p = hw.pending; hw.pending = null; hwMeasurement(p.d, p.op, out); }
+      } else if (op === 0x01) { out.note = 'الميزان بينام'; }
+      else if (op === 0x02 || op === 0x08 || op === 0x0C || op === 0x19) { out.note = 'رد من الميزان'; }
+      else if (op === 0x13) { out.note = 'الوزن فوق حد الميزان'; out.hint = 'الوزن أكثر من حد الميزان'; }
+      else if (op === 0x14) { out.note = 'بطارية الميزان ضعيفة'; out.hint = 'بطارية الميزان ضعيفة — غيّرها'; }
+      else if (op === 0x15) { out.note = 'خطأ قياس من الميزان'; out.hint = 'الميزان ما قدر يقيس. اطلع حافي وثابت'; }
+    }
+    // لو ما وصلت إشارة «صحى» بعد الاتصال بشوي، نبدأ التحقق بنفسنا
+    function kick() {
+      const out = { readings: [], writes: [], note: '' };
+      if (kind === 'huawei' && mac && !hw.authorised && !hw.authSent) { out.note = 'نبدأ التحقق'; hwAuth(out); }
+      out.writes = out.writes.filter(Boolean);
+      return out;
+    }
+
+    // تغيّر الشخص المختار وهو متصل ← هواوي يحتاج بياناته عشان يحسب الدهون له
+    function setProfile(p) {
+      profile = p || {};
+      const out = { readings: [], writes: [], note: '' };
+      if (kind === 'huawei' && hw.authorised) out.writes.push(hwUserInfo());
+      out.writes = out.writes.filter(Boolean);
+      return out;
+    }
+
     function onData(svc, chr, data) {
       const d = data instanceof Uint8Array ? data : Uint8Array.from(data || []);
       const out = { readings: [], writes: [], note: '' };
       if (!d.length) return out;
-      if (chr === C.MI_HISTORY) { miHistory(d, out); }
+      if (chr === C.HW_RX) { huawei(d, out); }
+      else if (chr === C.MI_HISTORY) { miHistory(d, out); }
       else if (chr === C.WEIGHT_MEAS) {
         const r = parseStdWeight(d);
         if (r) {
@@ -380,7 +584,7 @@
       return out;
     }
 
-    return { kind, variant, start, onData };
+    return { kind, variant, start, onData, kick, setProfile, needsMac: kind === 'huawei' && !mac };
   }
 
   /* ---------- المجمّع: يحوّل القراءات إلى «قياس واحد» لكل وقفة ---------- */
@@ -478,6 +682,8 @@
     detectKind, miVariant, createSession, createAssembler,
     parseStdWeight, parseStdBodyComp, parseMiLive13, parseMi10, parseQN, looksMiLive13,
     buildMiLive13, buildStdWeight, qnFrame,
+    parseMac, macText, macFromAdvert, huaweiName,
+    Huawei: { aesCtr, encryptBlock, expandKey, xorMac, authToken: hwAuthToken, magicKey: hwMagicKey, buildPlain: hwPlain, buildEncrypted: hwEncrypted, decodeMeasurement: hwDecode, IV: HW_IV, KEY: HW_KEY, SBOX },
     bmi, bmiClass, toKg, hex, fromHex, plausibleKg, round
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API;

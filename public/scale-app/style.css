@@ -138,7 +138,7 @@ section { display: flex; flex-direction: column; gap: 14px; }
   font-variant-numeric: tabular-nums;
   transition: color .3s;
 }
-.dial[data-mode="idle"] .weight { color: var(--muted); opacity: .45; }
+.dial[data-mode="idle"] .weight, .weight.empty { color: var(--muted); opacity: .45; }
 .dial[data-mode="idle"] .arc { opacity: 0; }
 .unit { margin-top: 6px; color: var(--ink-2); font-size: 1rem; }
 .check { width: 30px; height: 30px; margin-top: 8px; opacity: 0; transform: scale(.6); transition: .3s; }
@@ -249,11 +249,22 @@ details.card[open] > summary { margin-bottom: 10px; }
 /* ---------- نماذج ---------- */
 .fields { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; margin-bottom: 10px; }
 label { display: flex; flex-direction: column; gap: 4px; font-size: .86rem; color: var(--ink-2); }
+select,
 input:not([type="checkbox"]):not([type="file"]) {
   width: 100%; padding: 10px 12px; border-radius: 12px;
   border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); min-height: 44px;
 }
-input:focus { outline: 2px solid var(--primary); outline-offset: 0; border-color: transparent; }
+input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: 0; border-color: transparent; }
+select { appearance: none; -webkit-appearance: none; }
+
+/* ---------- عنوان هواوي ---------- */
+.mac { display: flex; flex-direction: column; gap: 10px; border-color: color-mix(in srgb, var(--primary) 35%, var(--line)); }
+.mac h2 { margin: 0; }
+.mac p { margin: 0; }
+#macInput { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .04em; text-align: left; font-size: 1.05rem; }
+.mac-help summary { cursor: pointer; color: var(--primary); font-size: .9rem; }
+.mac-help ol { margin: 8px 0 0; padding-inline-start: 20px; color: var(--ink-2); font-size: .9rem; }
+.mac-help li { margin-bottom: 4px; }
 .switch { flex-direction: row; align-items: center; gap: 10px; font-size: .95rem; color: var(--ink); cursor: pointer; }
 .switch input { width: 20px; height: 20px; accent-color: var(--primary); }
 

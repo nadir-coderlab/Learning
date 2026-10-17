@@ -118,7 +118,7 @@
   }
   function setHint(t) { $('#hint').textContent = t; }
   function setRing(mode) { $('#dial').dataset.mode = mode; }
-  function showNumber(w) { $('#weight').textContent = fmtW(w); }
+  function showNumber(w) { const n = $('#weight'); n.textContent = fmtW(w); n.classList.toggle('empty', w == null); }
 
   /* ---------- البلوتوث ---------- */
   const ble = { device: null, chars: [], session: null, want: false, timer: null, until: 0, queue: Promise.resolve(), kind: null, battery: null };
@@ -159,7 +159,9 @@
     if (ble.device && ble.device !== dev) ble.device.removeEventListener('gattserverdisconnected', onDisconnected);
     ble.device = dev;
     dev.addEventListener('gattserverdisconnected', onDisconnected);
-    db.device = { name: dev.name || 'الميزان', id: dev.id };
+    const prev = db.device;
+    const same = prev && (prev.id === dev.id || (prev.name && prev.name === dev.name));
+    db.device = { name: dev.name || 'الميزان', id: dev.id, mac: same ? prev.mac || null : null };
     save();
     renderDevice();
   }
@@ -171,6 +173,7 @@
     if (first) ble.until = Date.now() + 3 * 60000;
     setConn(first ? 'connecting' : 'sleep');
     log('الاتصال بـ ' + (ble.device.name || ble.device.id) + ' …');
+    sniffMac();
     try {
       const server = await ble.device.gatt.connect();
       const services = await server.getPrimaryServices();
@@ -185,13 +188,9 @@
       log('الخصائص: ' + chars.map(c => short(c.svc) + '/' + short(c.chr) + '[' + propsText(c.props) + ']').join(' '));
       ble.chars = chars;
       ble.kind = P.detectKind(ble.device.name, svcUuids);
-      const variant = P.miVariant(ble.device.name, svcUuids);
-      log('نوع الميزان: ' + kindLabel(ble.kind) + (ble.kind === 'xiaomi' ? ' (الإصدار ' + variant + ')' : ''));
-      ble.session = P.createSession({
-        kind: ble.kind, variant,
-        chars: chars.map(c => ({ svc: c.svc, chr: c.chr, props: { write: c.props.write, writeWithoutResponse: c.props.writeWithoutResponse } })),
-        uniq: active().uniq, profile: active()
-      });
+      ble.variant = P.miVariant(ble.device.name, svcUuids);
+      log('نوع الميزان: ' + kindLabel(ble.kind) + (ble.kind === 'xiaomi' ? ' (الإصدار ' + ble.variant + ')' : ''));
+      makeSession();
       assembler.reset();
       const plan = ble.session.start();
       for (const w of plan.before) await write(w);
@@ -207,6 +206,10 @@
       for (const w of plan.after) await write(w);
       readInfo();
       setConn('connected');
+      if (ble.kind === 'huawei') {
+        if (ble.session.needsMac) showMac('ميزان هواوي يشفّر بياناته بعنوانه (MAC)، وكروم ما يعطينا هذا العنوان. اكتبه مرة وحدة وبعدها يشتغل على طول.');
+        else { clearTimeout(ble.kickTimer); ble.kickTimer = setTimeout(() => { if (ble.session) applyOut(ble.session.kick()); }, 1200); }
+      }
       if (!subs) setHint('اتصلت، بس الميزان هذا ما يرسل بيانات بطريقة أعرفها. افتح «وضع الفحص» من الإعدادات وأرسل السجل.');
       else if (ble.kind === 'unknown') setHint('اتصلت بجهاز ما أعرف نوعه. اطلع على الميزان، ولو ما طلع وزن افتح «وضع الفحص» من الإعدادات.');
       keepAwake(true);
@@ -252,10 +255,79 @@
   function handleData(svc, chr, bytes) {
     if (!demo) log('← ' + short(chr) + '  ' + P.hex(bytes));
     if (!ble.session) return;
-    const out = ble.session.onData(svc, chr, bytes);
+    applyOut(ble.session.onData(svc, chr, bytes));
+  }
+  function applyOut(out) {
+    if (!out) return;
     if (out.note && !demo) log('   ' + out.note);
     for (const w of out.writes) write(w);
+    if (out.hint) setHint(out.hint);
+    if (out.status === 'measure') setRing('measure');
+    if (out.error === 'mac') showMac('ميزان هواوي يحتاج عنوانه (MAC) عشان نفك بياناته. اكتبه تحت.');
+    else if (out.error === 'auth') showMac('الميزان رفض الاتصال. غالباً العنوان غلط — تأكد منه. ولو هو صح: اطفي البلوتوث وشغله، وجرب مرة ثانية.');
+    else if (out.error === 'decode') showMac('وصل قياس بس الأرقام طلعت غلط، يعني العنوان غالباً غلط. تأكد منه.');
     for (const r of out.readings) for (const ev of assembler.push(r)) onEvent(ev);
+  }
+  function makeSession() {
+    const last = recordsOf(db.activeId).slice(-1)[0];
+    ble.session = P.createSession({
+      kind: ble.kind, variant: ble.variant,
+      chars: ble.chars.map(c => ({ svc: c.svc, chr: c.chr, props: { write: c.props.write, writeWithoutResponse: c.props.writeWithoutResponse } })),
+      uniq: active().uniq, profile: active(),
+      mac: db.device && P.parseMac(db.device.mac), lastWeightKg: last ? last.w : null
+    });
+  }
+
+  /* ---------- عنوان ميزان هواوي (MAC) ---------- */
+  function showMac(why) {
+    const card = $('#macCard');
+    if (why) $('#macWhy').textContent = why;
+    $('#macInput').value = db.device && db.device.mac ? db.device.mac : '';
+    card.hidden = false;
+    setHint('اكتب عنوان الميزان تحت عشان نكمّل');
+    try { card.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { /* */ }
+  }
+  function formatMacInput() {
+    const i = $('#macInput');
+    const h = i.value.toUpperCase().replace(/[^0-9A-F]/g, '').slice(0, 12);
+    i.value = (h.match(/.{1,2}/g) || []).join(':');
+  }
+  function saveMac(e) {
+    e.preventDefault();
+    const b = P.parseMac($('#macInput').value);
+    if (!b) { toast('العنوان 12 خانة، مثل 5C:CA:D3:12:34:56'); $('#macInput').focus(); return; }
+    setMac(P.macText(b), 'انحفظ العنوان ✓');
+  }
+  function setMac(text, msg) {
+    if (!db.device) db.device = { name: (ble.device && ble.device.name) || 'الميزان', id: ble.device ? ble.device.id : null };
+    db.device.mac = text; save();
+    $('#macCard').hidden = true;
+    renderDevice();
+    toast(msg);
+    log('عنوان الميزان: ' + text);
+    if (ble.device && ble.device.gatt.connected && ble.kind === 'huawei') {
+      makeSession();
+      assembler.reset();
+      applyOut(ble.session.kick());
+      setHint('متصل ✓ نتحقق من الميزان…');
+    }
+  }
+  // بعض نسخ كروم تسمح نقرأ إعلانات الجهاز؛ نحاول نلقى العنوان فيها
+  async function sniffMac() {
+    const dev = ble.device;
+    if (!dev || !dev.watchAdvertisements || (db.device && db.device.mac)) return;
+    if (!dev._mizaniSniff) {
+      dev._mizaniSniff = true;
+      dev.addEventListener('advertisementreceived', ev => {
+        const chunks = [];
+        const add = (label, dv) => { const b = new Uint8Array(dv.buffer, dv.byteOffset, dv.byteLength); chunks.push(Uint8Array.from(b)); log('إعلان ' + label + ': ' + P.hex(b)); };
+        if (ev.manufacturerData) ev.manufacturerData.forEach((dv, id) => add('0x' + id.toString(16), dv));
+        if (ev.serviceData) ev.serviceData.forEach((dv, u) => add(short(u), dv));
+        const mac = P.macFromAdvert(chunks);
+        if (mac && db.device && !db.device.mac) setMac(P.macText(mac), 'لقيت عنوان الميزان تلقائي ✓');
+      });
+    }
+    try { await dev.watchAdvertisements(); } catch (e) { log('قراءة إعلانات الجهاز غير متاحة: ' + (e && e.message)); }
   }
 
   async function write(w) {
@@ -288,7 +360,7 @@
   function propsText(p) {
     return ['read', 'write', 'writeWithoutResponse', 'notify', 'indicate'].filter(k => p[k]).map(k => ({ read: 'R', write: 'W', writeWithoutResponse: 'w', notify: 'N', indicate: 'I' })[k]).join('');
   }
-  function kindLabel(k) { return ({ xiaomi: 'شاومي', standard: 'قياسي (Bluetooth SIG)', qn: 'QN / Renpho / FITINDEX', unknown: 'غير معروف' })[k] || k; }
+  function kindLabel(k) { return ({ huawei: 'هواوي AH100 / CH100', xiaomi: 'شاومي', standard: 'قياسي (Bluetooth SIG)', qn: 'QN / Renpho / FITINDEX', unknown: 'غير معروف' })[k] || k; }
 
   /* ---------- إبقاء الشاشة شغالة أثناء الوزن ---------- */
   let wake = null;
@@ -342,8 +414,13 @@
   }
   function toRecord(m) {
     const pid = pickProfile(m.weightKg);
-    return Object.assign({ id: rid('r'), pid, t: m.at || Date.now(), w: P.round(m.weightKg, 2), src: m.source || 'live' }, extrasOf(m));
+    const rec = Object.assign({ id: rid('r'), pid, t: m.at || Date.now(), w: P.round(m.weightKg, 2), src: m.source || 'live' }, extrasOf(m));
+    // ميزان هواوي يحسب الدهون بعمر وطول وجنس الشخص المختار؛ نحفظ لمن انحسبت
+    if (ble.kind === 'huawei' && !demo) { rec.dev = 'huawei'; rec.fatFor = db.activeId; }
+    return rec;
   }
+  // الدهون تنعرض بس لو انحسبت لنفس صاحب القياس
+  const fatOf = r => (r.fat != null && (!r.fatFor || r.fatFor === r.pid) ? r.fat : null);
   // لو فيه أكثر من شخص: نختار اللي آخر وزن له أقرب (فرق 3 كجم أو أقل)، وإلا الشخص المختار
   function pickProfile(w) {
     if (db.profiles.length < 2) return db.activeId;
@@ -446,7 +523,8 @@
       const left = rec.w - p.goalKg;
       tiles.append(tile('الهدف ' + fmtW(p.goalKg), Math.abs(left) < 0.05 ? 'وصلت 🎉' : (left > 0 ? 'باقي ' + left.toFixed(1) : 'تحت بـ ' + Math.abs(left).toFixed(1)), el('span', { class: 'muted small', text: Math.abs(left) < 0.05 ? '' : 'كجم' })));
     }
-    if (rec.fat != null) tiles.append(tile('الدهون', rec.fat.toFixed(1) + '%', el('span', { class: 'muted small', text: 'من الميزان' })));
+    if (fatOf(rec) != null) tiles.append(tile('الدهون', fatOf(rec).toFixed(1) + '%', el('span', { class: 'muted small', text: 'من الميزان' })));
+    else if (rec.fat != null) tiles.append(tile('الدهون', '—', el('span', { class: 'muted small', text: 'انحسبت لـ ' + ((profile(rec.fatFor) || {}).name || 'شخص ثاني') })));
     if (rec.mus != null) tiles.append(tile('العضل', rec.mus.toFixed(1) + '%', null));
     if (rec.wat != null) tiles.append(tile('الماء', rec.wat.toFixed(1) + '%', null));
     if (rec.imp != null) tiles.append(tile('مقاومة الجسم', Math.round(rec.imp) + ' Ω', el('span', { class: 'muted small', text: 'تُستخدم لحساب الدهون' })));
@@ -474,7 +552,10 @@
       for (const p of db.profiles) {
         box.append(el('button', {
           class: 'chip' + (p.id === db.activeId ? ' on' : ''), type: 'button', 'aria-pressed': String(p.id === db.activeId), text: p.name,
-          onclick: () => { db.activeId = p.id; save(); renderWho(); renderHistory(); }
+          onclick: () => {
+            db.activeId = p.id; save(); renderWho(); renderHistory();
+            if (ble.session && ble.session.setProfile && conn === 'connected') applyOut(ble.session.setProfile(p));
+          }
         }));
       }
       box.append(el('button', { class: 'chip add', type: 'button', 'aria-label': 'أضف شخص', text: '+ شخص', onclick: () => editProfile(null) }));
@@ -521,7 +602,7 @@
         el('div', { class: 'row-side' }, [
           d == null ? null : el('span', { class: 'delta ' + (d > 0.05 ? 'up' : d < -0.05 ? 'down' : 'same'), text: signed(d) }),
           b == null ? null : el('span', { class: 'muted small', text: 'BMI ' + b.toFixed(1) }),
-          r.fat != null ? el('span', { class: 'muted small', text: 'دهون ' + r.fat.toFixed(1) + '%' }) : null
+          fatOf(r) != null ? el('span', { class: 'muted small', text: 'دهون ' + fatOf(r).toFixed(1) + '%' }) : null
         ]),
         el('button', { class: 'icon-btn', type: 'button', 'aria-label': 'احذف', title: 'احذف', text: '✕', onclick: () => { if (confirm('تحذف قياس ' + fmtW(r.w) + ' كجم؟')) deleteRecord(r.id); } })
       ]));
@@ -619,6 +700,8 @@
     $('#pdName').value = p ? p.name : '';
     $('#pdHeight').value = p && p.heightCm ? p.heightCm : '';
     $('#pdGoal').value = p && p.goalKg ? p.goalKg : '';
+    $('#pdSex').value = p && p.sex ? p.sex : '';
+    $('#pdAge').value = p && p.age ? p.age : '';
     $('#pdDelete').hidden = !p || db.profiles.length < 2;
     dlg.dataset.id = id || '';
     if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
@@ -635,6 +718,10 @@
     p.name = name.slice(0, 24);
     p.heightCm = numOrNull($('#pdHeight').value, 50, 250);
     p.goalKg = numOrNull($('#pdGoal').value, 10, 300);
+    p.sex = $('#pdSex').value || null;
+    const age = numOrNull($('#pdAge').value, 5, 110);
+    p.age = age == null ? null : Math.round(age);
+    if (p.id === db.activeId && ble.session && ble.session.setProfile) applyOut(ble.session.setProfile(p));
     save(); dlg.close();
     renderAll();
   }
@@ -657,7 +744,7 @@
       box.append(el('li', { class: 'row' }, [
         el('div', { class: 'row-main' }, [
           el('div', { class: 'row-title', text: p.name }),
-          el('div', { class: 'muted small', text: [p.heightCm ? 'الطول ' + p.heightCm + ' سم' : 'الطول غير محدد', p.goalKg ? 'الهدف ' + fmtW(p.goalKg) : null, n + ' قياس'].filter(Boolean).join(' · ') })
+          el('div', { class: 'muted small', text: [p.heightCm ? 'الطول ' + p.heightCm + ' سم' : 'الطول غير محدد', p.sex ? (p.sex === 'f' ? 'أنثى' : 'ذكر') : null, p.age ? p.age + ' سنة' : null, p.goalKg ? 'الهدف ' + fmtW(p.goalKg) : null, n + ' قياس'].filter(Boolean).join(' · ') })
         ]),
         el('button', { class: 'btn small', type: 'button', text: 'تعديل', onclick: () => editProfile(p.id) })
       ]));
@@ -668,7 +755,7 @@
   function renderDevice() {
     const box = $('#deviceInfo');
     if (!db.device) { box.textContent = 'ما ربطت ميزان للحين.'; $('#btnForget').hidden = true; return; }
-    box.textContent = db.device.name + (ble.kind ? ' · ' + kindLabel(ble.kind) : '') + (ble.battery != null ? ' · البطارية ' + ble.battery + '%' : '');
+    box.textContent = db.device.name + (ble.kind ? ' · ' + kindLabel(ble.kind) : '') + (ble.battery != null ? ' · البطارية ' + ble.battery + '%' : '') + (db.device.mac ? ' · ' + db.device.mac : '');
     $('#btnForget').hidden = false;
   }
   async function forgetDevice() {
@@ -712,7 +799,7 @@
     for (const r of db.records.slice().sort((a, b) => a.t - b.t)) {
       const p = profile(r.pid) || {};
       const b = P.bmi(r.w, p.heightCm);
-      rows.push([p.name || '', new Date(r.t).toISOString().replace('T', ' ').slice(0, 16), r.w, b == null ? '' : b, r.fat == null ? '' : r.fat, r.mus == null ? '' : r.mus, r.wat == null ? '' : r.wat, r.imp == null ? '' : r.imp, r.src]);
+      rows.push([p.name || '', new Date(r.t).toISOString().replace('T', ' ').slice(0, 16), r.w, b == null ? '' : b, fatOf(r) == null ? '' : fatOf(r), r.mus == null ? '' : r.mus, r.wat == null ? '' : r.wat, r.imp == null ? '' : r.imp, r.src]);
     }
     const csv = '﻿' + rows.map(r => r.map(c => /[",\n]/.test(String(c)) ? '"' + String(c).replace(/"/g, '""') + '"' : c).join(',')).join('\n');
     download('mizani-' + new Date().toISOString().slice(0, 10) + '.csv', csv, 'text/csv;charset=utf-8');
@@ -775,6 +862,9 @@
     $('#btnJson').addEventListener('click', exportJson);
     $('#fileImport').addEventListener('change', e => { if (e.target.files[0]) importJson(e.target.files[0]); e.target.value = ''; });
     $('#btnForget').addEventListener('click', forgetDevice);
+    $('#btnMac').addEventListener('click', () => { showTab('scale'); showMac(null); $('#macInput').focus(); });
+    $('#macCard').addEventListener('submit', saveMac);
+    $('#macInput').addEventListener('input', formatMacInput);
     const voice = $('#optVoice');
     voice.checked = db.settings.voice !== false;
     voice.addEventListener('change', () => { db.settings.voice = voice.checked; save(); if (voice.checked) speak(70.5); });
