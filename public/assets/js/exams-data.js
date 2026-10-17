@@ -2,6 +2,7 @@
 //
 // كل اختبار = أقسام بنفس ترتيب ورقة الأبلة، وكل قسم فيه دروس، وكل درس فيه عناصر (أسئلة محلولة).
 // لكل عنصر: الإجابة + معناها بالعربي + طريقة نطقها بالحروف العربية + «حيلة» تساعد على الحفظ.
+// ⚠️ الأسئلة والخيارات كلها من أوراق الاختبار نفسها فقط — لا نضيف أسئلة من برا (الهدف الحفظ).
 //
 // لإضافة اختبار جديد لأي بنت: أضف كائنًا جديدًا في EXAMS بنفس الشكل
 // (والصور في /assets/img/exams/<مجلد الاختبار>/).
@@ -48,40 +49,6 @@ const TG2 = {
   },
 
   sections: [
-    // ------------------------------------------------------------------
-    {
-      id: "inst", n: "★", en: "Instructions", ar: "افهمي التعليمات أول", icon: "🧭", marks: 0,
-      lessons: [{
-        id: "inst", title: "تعليمات الاختبار", icon: "🧭",
-        instr: { en: "Read the instruction first!", ar: "قبل أي سؤال: اقري التعليمات وافهمي وش المطلوب" },
-        rule: `كل تعليمات فيها <b>كلمة وحدة مهمة</b> — احفظيها وتفهمين السؤال:<br>
-          <b>Match</b> = وصّلي 🔗<br>
-          <b>Rearrange</b> = رتّبي 🔀<br>
-          <b>Choose</b> = اختاري 👆<br>
-          <b>Write</b> = اكتبي ✍️<br>
-          <b>Complete</b> / <b>Fill</b> = كمّلي<br>
-          <b>opposite</b> = عكس ↔️<br>
-          <b>True</b> ✓ = صح · <b>False</b> ✗ = خطأ`,
-        rounds: ["choice", "write"],
-        items: [
-          { id: "i1", type: "inst", src: ["A", "B"], emoji: "🔗", en: "Match the questions with the correct answers.", ar: "وصّلي كل سؤال بالجواب الصحيح", kw: "Match", kwAr: "وصّلي", how: "اكتبي رقم السؤال في المربع اللي جنب جوابه" },
-          { id: "i2", type: "inst", src: ["A", "B"], emoji: "🔀", en: "Rearrange the words to form sentences.", ar: "رتّبي الكلمات وكوّني جملة", kw: "Rearrange", kwAr: "رتّبي", how: "انسخي الكلمات بالترتيب الصحيح على السطر" },
-          { id: "i3", type: "inst", src: ["B"], emoji: "↔️", en: "Write the opposite of the following words.", ar: "اكتبي عكس الكلمات", kw: "opposite", kwAr: "عكس", how: "اكتبي الكلمة العكسية بعد علامة ≠" },
-          { id: "i4", type: "inst", src: ["B", "C"], emoji: "📌", en: "Do as shown between brackets.", ar: "سوّي المطلوب اللي بين القوسين ( )", kw: "brackets", kwAr: "القوسين", how: "اقري اللي داخل القوسين ( ) وسوّيه بالضبط" },
-          { id: "i5", type: "inst", src: ["B"], emoji: "📅", en: "Write the months of the year in the correct order.", ar: "اكتبي شهور السنة بالترتيب الصحيح", kw: "months", kwAr: "شهور", how: "كمّلي الشهور الناقصة حسب رقمها" },
-          { id: "i6", type: "inst", src: ["B"], emoji: "📋", en: "Complete the chart.", ar: "كمّلي الجدول", kw: "chart", kwAr: "الجدول", how: "اكتبي الفعل أو الماضي في المربع الفاضي" },
-          { id: "i7", type: "inst", src: ["C"], emoji: "✏️", en: "Rewrite the words using un.", ar: "اكتبي الكلمات مرة ثانية وحطي un في أولها", kw: "un", kwAr: "حطي un", how: "un + lucky = unlucky" },
-          { id: "i8", type: "inst", src: ["A", "C"], emoji: "✅", en: "Read and choose True or False.", ar: "اقري واختاري صح أو خطأ ( ✓ أو ✗ )", kw: "True or False", kwAr: "صح أو خطأ", how: "حوطي ✓ إذا الجملة تطابق الصورة، و ✗ إذا ما تطابق" },
-          { id: "i9", type: "inst", src: ["B"], emoji: "🖼️", en: "Read the sentences then match them with the correct pictures.", ar: "اقري الجمل ووصّليها بالصورة الصحيحة", kw: "pictures", kwAr: "الصور", how: "اختاري الجملة (a أو b) اللي توصف الصورة" },
-          { id: "i10", type: "inst", src: ["B"], emoji: "📦", en: "Read and complete. Use the words in the box.", ar: "اقري وكمّلي بالكلمات اللي في المربع", kw: "box", kwAr: "المربع", how: "انسخي الكلمة المناسبة من المربع" },
-          { id: "i11", type: "inst", src: ["A", "B", "C"], emoji: "👆", en: "Choose the correct answer.", ar: "اختاري الإجابة الصحيحة", kw: "Choose", kwAr: "اختاري", how: "حوطي الإجابة الصحيحة (ونفسها: Choose the correct word = اختاري الكلمة الصحيحة)" },
-          { id: "i12", type: "inst", src: ["A", "B"], emoji: "✍️", en: "Write the words under the correct pictures.", ar: "اكتبي الكلمات تحت الصور الصحيحة", kw: "under", kwAr: "تحت", how: "انسخي كل كلمة من المربع تحت صورتها" },
-          { id: "i13", type: "inst", src: ["A", "B"], emoji: "🔤", en: "Fill in the missing letters.", ar: "كمّلي الحروف الناقصة", kw: "missing letters", kwAr: "الحروف الناقصة", how: "اكتبي الحرف الناقص في مكان الشرطة _" },
-          { id: "i14", type: "inst", src: ["C"], emoji: "🔡", en: "Choose the correct letter to fill in the blank.", ar: "اختاري الحرف الصحيح للفراغ", kw: "letter", kwAr: "الحرف", how: "حوطي الحرف الصحيح من الحرفين اللي تحت الكلمة" }
-        ]
-      }]
-    },
-
     // ------------------------------------------------------------------
     {
       id: "general", n: "I", en: "General Questions", ar: "أسئلة عامة", icon: "💬", marks: 4,
@@ -240,6 +207,7 @@ const TG2 = {
             11 <b>November</b> نوفمبر`,
           rounds: ["choice", "write"],
           showMonths: true,
+          box: ["August", "November", "March", "June", "April"],
           items: [
             { id: "mo1", type: "month", src: ["B", "C"], m: 3, trick: "<b>March</b> = مارس — نفس الاسم بالعربي! تبدأ بـ M" },
             { id: "mo2", type: "month", src: ["B", "C"], m: 4, trick: "<b>April</b> = أبريل — نفس الاسم! تبدأ بـ A" },
@@ -265,11 +233,11 @@ const TG2 = {
             <b>lucky → unlucky</b><br><b>clean → unclean</b>`,
           rounds: ["choice", "write"],
           items: [
-            { id: "op1", type: "pair", kind: "opp", src: ["B"], w: "early", wAr: "بدري", a: "late", aAr: "متأخر", aSay: "ليت", distract: ["easy", "big", "tidy"], trick: "<b>early</b> ☀️ بدري ↔ <b>late</b> 🌙 متأخر — late قصيرة: l-a-t-e" },
-            { id: "op2", type: "pair", kind: "opp", src: ["B"], w: "difficult", wAr: "صعب", a: "easy", aAr: "سهل", aSay: "إيزي", distract: ["late", "big", "small"], trick: "<b>difficult</b> كلمة طويلة وصعبة 😣 ↔ <b>easy</b> قصيرة وسهلة 😊" },
-            { id: "op3", type: "pair", kind: "opp", src: ["B"], w: "small", wAr: "صغير", a: "big", aAr: "كبير", aSay: "بِق", accept: ["big", "large"], distract: ["easy", "late", "tall"], trick: "<b>small</b> 🐭 ↔ <b>big</b> 🐘 — big ثلاث حروف بس: b-i-g" },
-            { id: "un1", type: "pair", kind: "un", src: ["C"], w: "lucky", wAr: "محظوظ", a: "unlucky", aAr: "مو محظوظ", aSay: "أنلَكي", distract: ["inlucky", "lucky", "nolucky"], trick: "<b>un</b> + lucky = <b>unlucky</b> — انسخي الكلمة وحطي un قبلها" },
-            { id: "un2", type: "pair", kind: "un", src: ["C"], w: "clean", wAr: "نظيف", a: "unclean", aAr: "مو نظيف", aSay: "أنكلين", distract: ["inclean", "clean", "noclean"], trick: "<b>un</b> + clean = <b>unclean</b>" }
+            { id: "op1", type: "pair", kind: "opp", src: ["B"], w: "early", wAr: "بدري", a: "late", aAr: "متأخر", aSay: "ليت", trick: "<b>early</b> ☀️ بدري ↔ <b>late</b> 🌙 متأخر — late قصيرة: l-a-t-e" },
+            { id: "op2", type: "pair", kind: "opp", src: ["B"], w: "difficult", wAr: "صعب", a: "easy", aAr: "سهل", aSay: "إيزي", trick: "<b>difficult</b> كلمة طويلة وصعبة 😣 ↔ <b>easy</b> قصيرة وسهلة 😊" },
+            { id: "op3", type: "pair", kind: "opp", src: ["B"], w: "small", wAr: "صغير", a: "big", aAr: "كبير", aSay: "بِق", accept: ["big", "large"], trick: "<b>small</b> 🐭 ↔ <b>big</b> 🐘 — big ثلاث حروف بس: b-i-g" },
+            { id: "un1", type: "pair", kind: "un", src: ["C"], w: "lucky", wAr: "محظوظ", a: "unlucky", aAr: "مو محظوظ", aSay: "أنلَكي", trick: "<b>un</b> + lucky = <b>unlucky</b> — انسخي الكلمة وحطي un قبلها" },
+            { id: "un2", type: "pair", kind: "un", src: ["C"], w: "clean", wAr: "نظيف", a: "unclean", aAr: "مو نظيف", aSay: "أنكلين", trick: "<b>un</b> + clean = <b>unclean</b>" }
           ]
         },
         {
@@ -285,12 +253,12 @@ const TG2 = {
             ⚠️ الجدول أحيانًا يعطيك الماضي ويبي الفعل: <b>went</b> ← <b>go</b>`,
           rounds: ["choice", "write"],
           items: [
-            { id: "p1", type: "pair", kind: "past", dir: "fwd", src: ["B"], w: "buy", wAr: "يشتري", a: "bought", aAr: "اشترى", aSay: "بوت", distract: ["buyed", "buying", "took"], trick: "buy ← <b>bought</b> (تتغير كلها) — تذكري: b...ought" },
-            { id: "p2", type: "pair", kind: "past", dir: "rev", src: ["B"], w: "went", wAr: "راح", a: "go", aAr: "يروح", aSay: "قو", distract: ["goes", "take", "make"], trick: "<b>went</b> هي ماضي <b>go</b> (يروح) — go ← went" },
-            { id: "p3", type: "pair", kind: "past", dir: "fwd", src: ["B"], w: "wake up", wAr: "يصحى", a: "woke up", aAr: "صحى", aSay: "ووك أب", accept: ["woke up", "woke"], distract: ["waked up", "wake up", "made"], trick: "wake up ← <b>woke up</b>: حرف a يصير o" },
-            { id: "p4", type: "pair", kind: "past", dir: "fwd", src: ["B"], w: "take", wAr: "ياخذ", a: "took", aAr: "أخذ", aSay: "توك", distract: ["taked", "taking", "bought"], trick: "take ← <b>took</b>: نفس بداية t — و ook" },
-            { id: "p5", type: "pair", kind: "past", dir: "rev", src: ["B"], w: "made", wAr: "سوّى", a: "make", aAr: "يسوي", aSay: "ميك", distract: ["go", "take", "buy"], trick: "<b>made</b> هي ماضي <b>make</b> — بس d صارت k" },
-            { id: "p6", type: "pair", kind: "past", dir: "rev", src: ["B"], w: "was/were", wAr: "كان/كانوا", a: "is/am/are", aAr: "يكون", aSay: "إز / آم / آر", accept: ["is/am/are", "is am are", "be", "is", "am", "are", "am/is/are", "is / am / are"], distract: ["go", "make", "buy"], trick: "<b>was</b> ← is و am · <b>were</b> ← are — اكتبي: is/am/are" }
+            { id: "p1", type: "pair", kind: "past", dir: "fwd", src: ["B"], w: "buy", wAr: "يشتري", a: "bought", aAr: "اشترى", aSay: "بوت", trick: "buy ← <b>bought</b> (تتغير كلها) — تذكري: b...ought" },
+            { id: "p2", type: "pair", kind: "past", dir: "rev", src: ["B"], w: "went", wAr: "راح", a: "go", aAr: "يروح", aSay: "قو", trick: "<b>went</b> هي ماضي <b>go</b> (يروح) — go ← went" },
+            { id: "p3", type: "pair", kind: "past", dir: "fwd", src: ["B"], w: "wake up", wAr: "يصحى", a: "woke up", aAr: "صحى", aSay: "ووك أب", accept: ["woke up", "woke"], trick: "wake up ← <b>woke up</b>: حرف a يصير o" },
+            { id: "p4", type: "pair", kind: "past", dir: "fwd", src: ["B"], w: "take", wAr: "ياخذ", a: "took", aAr: "أخذ", aSay: "توك", trick: "take ← <b>took</b>: نفس بداية t — و ook" },
+            { id: "p5", type: "pair", kind: "past", dir: "rev", src: ["B"], w: "made", wAr: "سوّى", a: "make", aAr: "يسوي", aSay: "ميك", trick: "<b>made</b> هي ماضي <b>make</b> — بس d صارت k" },
+            { id: "p6", type: "pair", kind: "past", dir: "rev", src: ["B"], w: "was/were", wAr: "كان/كانوا", a: "is/am/are", aAr: "يكون", aSay: "إز / آم / آر", accept: ["is/am/are", "is am are", "be", "is", "am", "are", "am/is/are", "is / am / are"], trick: "<b>was</b> ← is و am · <b>were</b> ← are — اكتبي: is/am/are" }
           ]
         }
       ]
@@ -306,7 +274,7 @@ const TG2 = {
           rule: `١) شوفي <b>الصورة</b> أول 👀<br>
             ٢) دوري <b>الكلمة المهمة</b> في الجملة (الملونة)<br>
             ٣) إذا الكلمة تطابق الصورة ← <b>✓ صح</b> · إذا ما تطابق ← <b>✗ خطأ</b>`,
-          rounds: ["choice", "write"],
+          rounds: ["choice", "again"],
           items: [
             { id: "t1", type: "tf", src: ["A"], pic: img("origami"), s: "Origami is an art of making soaps.", sAr: "الأوريغامي فن صناعة الصابون.", say: "أوريقامي إز أن آرت أوف ميكِنق سوبس", key: "soaps", keyAr: "صابون", answer: false, why: "Origami = فن <b>طي الورق</b> 📄🦢 مو صابون 🧼" },
             { id: "t2", type: "tf", src: ["A"], pic: img("cal7"), s: "There are 7 months in the year.", sAr: "فيه 7 شهور في السنة.", say: "ذير آر سِفِن مَنثس إن ذا يير", key: "7 months", keyAr: "7 شهور", answer: false, why: "السنة فيها <b>12</b> شهر مو 7 ← ✗" },
@@ -476,24 +444,12 @@ const TG2 = {
   ],
 
   // ------------------------------------------------------------------
-  // الاختبار التجريبي المنوّع: نفس ترتيب ورقة الأبلة (نموذج ١) ونفس الدرجات (من 20)
-  // في كل مرة أسئلة مختلفة من النماذج الثلاثة.
-  mock: [
-    { sec: "general", h: "I. General Questions:", sub: "A- Match the questions with the correct answers:", subAr: "وصّلي السؤال بالجواب", marks: 4, draw: [{ lessons: ["gen"], n: 4, as: "match" }] },
-    { sec: "writing", h: "II. Controlled Writing:", sub: "A. Rearrange the words to form sentences:", subAr: "رتّبي الكلمات + سوّي المطلوب", marks: 2, draw: [{ lessons: ["order"], n: 2, as: "build" }, { lessons: ["months", "opp", "past"], n: 2, as: "write" }] },
-    { sec: "reading", h: "III. Reading:", sub: "A. Read and choose True or False.", subAr: "صح أو خطأ + الجملة والصورة", marks: 4, draw: [{ lessons: ["tf"], n: 3, as: "choice" }, { lessons: ["pics"], n: 1, as: "choice" }] },
-    { sec: "grammar", h: "IV. Grammar:", sub: "A- Choose the correct answer:", subAr: "اختاري الإجابة الصحيحة", marks: 4, draw: [{ lessons: ["how"], n: 1, as: "choice" }, { lessons: ["time"], n: 2, as: "choice" }, { lessons: ["compare"], n: 1, as: "choice" }] },
-    { sec: "vocab", h: "V. Vocabulary:", sub: "B- Write the words under the correct pictures:", subAr: "اكتبي الكلمة تحت الصورة (انسخيها من المربع)", marks: 4, draw: [{ lessons: ["voc1", "voc2"], n: 4, as: "box" }] },
-    { sec: "ortho", h: "VI. Orthography:", sub: "C- Fill in the missing letters:", subAr: "كمّلي الحرف الناقص", marks: 2, draw: [{ lessons: ["spell1", "spell2"], n: 4, as: "box" }] }
-  ],
-
-  // ------------------------------------------------------------------
   // النماذج كما هي (بنفس ترتيبها وأسئلتها) — للحل المعروض وللاختبار «بالضبط»
   papers: [
     {
       id: "A", title: "نموذج ١ — اختبار الفترة الأولى", sub: "وزارة التعليم · الخامس الابتدائي · من 20", marks: 20,
       parts: [
-        { h: "I. General Questions:", sub: "A- Match the questions with the correct answers:", subAr: "وصّلي السؤال بالجواب", marks: 4, as: "match", items: ["g1", "g2", "g3", "g5"] },
+        { h: "I. General Questions:", sub: "A- Match the questions with the correct answers:", subAr: "وصّلي السؤال بالجواب", marks: 4, as: "match", items: ["g1", "g2", "g3", "g5"], matchOrder: ["g3", "g1", "g5", "g2"] },
         { h: "II. Controlled Writing:", sub: "A. Rearrange the words to form sentences:", subAr: "رتّبي الكلمات", marks: 2, as: "build", items: ["o1", "o2"] },
         { h: "III. Reading:", sub: "A. Read and choose True or False.", subAr: "صح أو خطأ", marks: 4, as: "choice", items: ["t1", "t2", "t3", "t4"] },
         { h: "IV. Grammar:", sub: "A- Choose the correct answer:", subAr: "اختاري الإجابة الصحيحة", marks: 4, as: "choice", items: ["tm1", "tm2", "tm3", "cp1"] },
@@ -515,10 +471,10 @@ const TG2 = {
     {
       id: "B", title: "ورقة المراجعة — Welcome!", sub: "Ms. Tahani · كل سؤال بدرجة", marks: null,
       parts: [
-        { h: "I. General Questions:", sub: "A- Match the questions with the correct answers:", subAr: "وصّلي السؤال بالجواب", as: "match", items: ["g6", "g4", "g7", "g8", "g9", "g10"] },
+        { h: "I. General Questions:", sub: "A- Match the questions with the correct answers:", subAr: "وصّلي السؤال بالجواب", as: "match", items: ["g6", "g4", "g7", "g8", "g9", "g10"], matchOrder: ["g4", "g9", "g8", "g10", "g6", "g7"] },
         { h: "II. Controlled Writing:", sub: "A- Rearrange the words to form sentences:", subAr: "رتّبي الكلمات", as: "build", items: ["o3", "o4", "o5"] },
         { h: "", sub: "B- Write the opposite of the following words:", subAr: "اكتبي العكس", as: "write", items: ["op1", "op2", "op3"] },
-        { h: "", sub: "C- 1. Write the months of the year in the correct order:", subAr: "كمّلي الشهور", as: "write", items: ["mo1", "mo2", "mo3", "mo4", "mo5"] },
+        { h: "", sub: "C- 1. Write the months of the year in the correct order:", subAr: "كمّلي الشهور الناقصة من المربع", as: "box", box: ["August", "November", "March", "June", "April"], items: ["mo1", "mo2", "mo3", "mo4", "mo5"] },
         { h: "", sub: "C- 2. Complete the chart:", subAr: "كمّلي جدول الماضي", as: "write", items: ["p1", "p2", "p3", "p4", "p5", "p6"] },
         { h: "IV. Reading Short Sentence:", sub: "A- Read the sentences then match them with the correct pictures:", subAr: "اختاري الجملة اللي تطابق الصورة", as: "choice", items: ["s1", "s2", "s3", "s4"] },
         { h: "", sub: "B- Read and complete. Use the words in the box:", subAr: "كمّلي من المربع", as: "box", box: ["comic book", "calendar", "lion", "snail"], items: ["c1", "c2", "c3", "c4"] },

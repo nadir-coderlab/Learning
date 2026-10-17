@@ -1,7 +1,8 @@
 // محرك «مذاكرة الاختبارات»: يحوّل كل سؤال محلول إلى
 //   - بطاقة مذاكرة (الإجابة ملونة + المعنى + طريقة النطق + الحيلة)
 //   - أسئلة تدريب بأشكال مختلفة (اختيار / كتابة / ترتيب كلمات)
-//   - أسئلة اختبار تجريبي بنفس شكل ورقة الأبلة
+//   - أسئلة اختبار تجريبي = الأوراق نفسها بالضبط
+// كل الأسئلة والخيارات من أوراق الاختبار فقط — ما نضيف شي من برا.
 import { MONTHS } from "./exams-data.js";
 
 // ---------------------------------------------------------------
@@ -19,10 +20,6 @@ export function shuffle(arr) {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
-}
-
-export function sample(arr, n) {
-  return shuffle(arr).slice(0, n);
 }
 
 // توحيد الإجابة المكتوبة: بدون فرق حروف كبيرة/صغيرة أو نقاط أو مسافات زائدة
@@ -377,7 +374,6 @@ export function solvedHtml(it, as, n) {
 // ctx:  { pool: عناصر نفس الدرس, group: عناصر مجموعة الاختبار, box: كلمات المربع, mock: true/false, clue: true/false }
 // ---------------------------------------------------------------
 
-const LETTERS = "abcdefghijklmnopqrstuvwxyz".split("");
 const opt = (val, cls = "en", html = null) => ({ val, html: html ?? esc(val), cls });
 
 function othersFrom(ctx, it, f, n) {
@@ -473,9 +469,10 @@ export function makeQuestion(it, mode, ctx = {}) {
       const head = `<div class="qtitle">وش الشهر الناقص؟</div>
         <div class="xen seq">${it.m - 1}- ${esc(prev.en)} &nbsp; <b>${it.m}- <span class="blank">&nbsp;?&nbsp;</span></b> &nbsp; ${next ? `${it.m + 1}- ${esc(next.en)}` : ""}</div>`;
       const hint = `الشهر رقم ${it.m} = <b>${esc(m.ar)}</b>`;
-      if (mode === "write" || mode === "box") return q({ kind: "write", head, accept: [m.en], input: "word", hint });
-      const pool = MONTHS.filter((x, i) => i !== it.m - 1 && i !== it.m - 2 && i !== it.m).map((x) => x.en);
-      return q({ kind: "choice", head, hint, options: shuffle([m.en, ...sample(pool, 3)]).map((v) => opt(v)), answer: m.en });
+      // نفس مربع الشهور اللي في ورقة المراجعة
+      const box = ctx.box || (ctx.pool || []).filter((x) => x.type === "month").map((x) => monthOf(x).en);
+      if (mode === "write" || mode === "box") return q({ kind: "write", head, box, accept: [m.en], input: "word", hint });
+      return q({ kind: "choice", head, hint, options: shuffle(box.includes(m.en) ? box : [m.en, ...box]).map((v) => opt(v)), answer: m.en });
     }
 
     case "monthOrder": {
@@ -504,18 +501,11 @@ export function makeQuestion(it, mode, ctx = {}) {
       }
       const hint = `${esc(it.w)} = ${esc(it.wAr)} · المطلوب معناه: <b>${esc(it.aAr)}</b>`;
       if (mode === "write" || mode === "box") return q({ kind: "write", head, accept: it.accept || [it.a], input: "word", hint });
-      return q({ kind: "choice", head, hint, options: shuffle([it.a, ...it.distract.slice(0, 3)]).map((v) => opt(v)), answer: it.a });
+      return q({ kind: "choice", head, hint, options: shuffle([it.a, ...othersFrom(ctx, it, (x) => x.a, 3)]).map((v) => opt(v)), answer: it.a });
     }
 
     // ----- صح / خطأ -----
     case "tf": {
-      if (mode === "write") {
-        return q({
-          kind: "choice", head: `${picHtml(it)}<div class="xen">${hl(it.s, it.key)} ${sayBtn(it.s)}</div><div class="qtitle">وش معنى الكلمة الملونة؟</div>`,
-          options: shuffle([it.keyAr, ...othersFrom(ctx, it, (x) => x.keyAr, 3)]).map((v) => opt(v, "ar")), answer: it.keyAr,
-          hint: esc(it.sAr)
-        });
-      }
       return q({
         kind: "choice", head: `${picHtml(it)}<div class="xen">${esc(it.s)} ${ctx.mock ? "" : sayBtn(it.s)}</div>`,
         options: [opt("T", "tf ok", "✓"), opt("F", "tf no", "✗")], answer: it.answer ? "T" : "F", keepOrder: true, row: true,
@@ -566,7 +556,8 @@ export function makeQuestion(it, mode, ctx = {}) {
       const head = `${picHtml(it)}`;
       const hint = `معناها: <b>${esc(it.ar)}</b> — تبدأ بحرف <b class="en">${esc(it.w[0])}</b>`;
       if (mode === "write" || mode === "box") {
-        const box = ctx.box || shuffle(uniqueWords([it, ...sample((ctx.pool || []).filter((x) => x.id !== it.id), 3)]));
+        // مربع الكلمات = كلمات نفس الورقة (مثل الاختبار)
+        const box = ctx.box || shuffle(uniqueWords((ctx.pool || [it]).filter((x) => x.type === "word" && x.src[0] === it.src[0])));
         return q({ kind: "write", head: `${head}<div class="qtitle">اكتبي اسم الصورة (انسخيه من المربع)</div>`, box, accept: [it.w, ...(it.accept || [])], input: "word", hint });
       }
       if (mode === "pair" && it.alt) {
@@ -584,11 +575,7 @@ export function makeQuestion(it, mode, ctx = {}) {
       if (mode === "write" || mode === "box") {
         return q({ kind: "write", head, box: mode === "box" ? ctx.box || it.opts : null, accept: [it.letter], input: "letter", hint });
       }
-      let options = it.opts ? [...it.opts] : null;
-      if (!options) {
-        const extra = sample(LETTERS.filter((l) => l !== it.letter && "aeioubcdgkmnprst".includes(l)), 3);
-        options = shuffle([it.letter, ...extra]);
-      }
+      const options = it.opts ? [...it.opts] : shuffle([it.letter, ...othersFrom(ctx, it, (x) => x.letter, 3)]);
       return q({ kind: "choice", head, hint, options: options.map((v) => opt(v, "en letter")), answer: it.letter, keepOrder: !!it.opts });
     }
   }
@@ -614,16 +601,16 @@ function mockMode(it, as) {
     if (["pick2", "tf", "choose"].includes(it.type)) return "choice";
     return "write";
   }
-  if (as === "box") return ["word", "spell", "complete"].includes(it.type) ? "box" : "choice";
+  if (as === "box") return ["word", "spell", "complete", "month"].includes(it.type) ? "box" : "choice";
   if (as === "cfmt") return "cfmt";
   if (as === "pair") return "pair";
   return "choice";
 }
 
-function partQuestions(items, as, idx, box) {
+function partQuestions(items, as, idx, box, matchOrder) {
   const ctxBase = { mock: true };
   let group = null, boxWords = box || null;
-  if (as === "match") group = shuffle(items);
+  if (as === "match") group = matchOrder ? matchOrder.map((id) => idx.items[id]) : shuffle(items);
   if (as === "box" && !boxWords) {
     if (items.every((x) => x.type === "spell")) boxWords = shuffle([...new Set(items.map((x) => x.letter))]);
     else if (items.every((x) => x.type === "word")) boxWords = shuffle(uniqueWords(items));
@@ -635,40 +622,13 @@ function partQuestions(items, as, idx, box) {
   });
 }
 
-// اختبار منوّع بنفس ترتيب ورقة الأبلة (أقسام exam.mock)
-export function buildVariantMock(exam, idx) {
-  const parts = exam.mock.map((m) => {
-    let items = [];
-    m.draw.forEach((d) => {
-      let pool = d.lessons.flatMap((lid) => idx.lessons[lid].items);
-      // بدون تكرار نفس الكلمة في المربع
-      const key = (x) => x.dup || norm(x.w || x.id);
-      const seen = new Set(items.map(({ it }) => key(it)));
-      pool = shuffle(pool).filter((x) => {
-        const k = key(x);
-        if (seen.has(k)) return false;
-        seen.add(k);
-        return true;
-      });
-      const chosen = pool.slice(0, d.n);
-      items = items.concat(chosen.map((it) => ({ it, as: d.as })));
-    });
-    // نجمع حسب الطريقة حتى تكون المجموعة (المطابقة/المربع) صحيحة
-    const byAs = {};
-    items.forEach(({ it, as }) => (byAs[as] = byAs[as] || []).push(it));
-    const qs = Object.entries(byAs).flatMap(([as, list]) => partQuestions(list, as, idx));
-    return { h: m.h, sub: m.sub, subAr: m.subAr, marks: m.marks, sec: m.sec, qs, box: qs.find((x) => x.box)?.box || null };
-  });
-  return { kind: "variant", title: "اختبار منوّع — نفس ترتيب الأبلة", outOf: exam.marks, parts };
-}
-
 // نموذج كما هو بالضبط
 export function buildPaperMock(exam, idx, paperId) {
   const paper = exam.papers.find((p) => p.id === paperId);
   const parts = paper.parts.map((p) => {
     const items = p.items.map((id) => idx.items[id]);
-    const qs = partQuestions(items, p.as, idx, p.box);
-    // في المطابقة نحافظ على ترتيب الأسئلة كما في الورقة، والأجوبة ملخبطة
+    // نفس ترتيب الأسئلة في الورقة، وأجوبة المطابقة بنفس ترتيبها في الورقة
+    const qs = partQuestions(items, p.as, idx, p.box, p.matchOrder);
     return { h: p.h, sub: p.sub || "", subAr: p.subAr, marks: p.marks ?? null, qs, box: p.box || qs.find((x) => x.box)?.box || null };
   });
   const outOf = paper.marks ?? parts.reduce((a, p) => a + p.qs.length, 0);

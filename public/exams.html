@@ -42,7 +42,7 @@ import {
 import { EXAMS, PARENT_WHATSAPP, MONTHS } from "/assets/js/exams-data.js";
 import {
   esc, shuffle, accepts, indexExam, learnHtml, solvedHtml, makeQuestion, explainHtml,
-  answerText, sayText, sayBtn, buildVariantMock, buildPaperMock, scoreMock, levelFor
+  answerText, sayText, sayBtn, buildPaperMock, scoreMock, levelFor
 } from "/assets/js/exam-engine.js";
 import { speak, speakAr } from "/assets/js/speech.js";
 import { startTracking, fmtDuration } from "/assets/js/tracker.js";
@@ -259,7 +259,8 @@ function renderHub() {
       <button class="btn big-go" data-act="${ns.act}" data-l="${ns.L?.id || ""}">${esc(ns.label)}</button>
     </div>
 
-    <div class="steps-note">📌 الطريقة: <b>📖 ذاكري</b> (الجواب ملوّن بالأخضر) ← <b>✋ أنا ذاكرت</b> ← <b>🎯 تدربي</b> (اختيار ثم كتابة) ← وآخر شي <b>📝 الاختبار التجريبي</b> بنفس ترتيب الأبلة</div>
+    <div class="steps-note">📌 الطريقة: <b>📖 ذاكري</b> (الجواب ملوّن بالأخضر) ← <b>✋ أنا ذاكرت</b> ← <b>🎯 تدربي</b> (اختيار ثم كتابة) ← وآخر شي <b>📝 الاختبار التجريبي</b> (نفس الأوراق بالضبط)</div>
+    <div class="steps-note" style="margin-top:8px">✅ كل الأسئلة هنا <b>من أوراق الاختبار الثلاث فقط</b> — ولا سؤال من برا</div>
 
     <h2 class="plan-h">📋 خطة المذاكرة — بنفس ترتيب ورقة الاختبار</h2>
     ${exam.sections.map((sec) => `
@@ -271,7 +272,7 @@ function renderHub() {
 
     <h2 class="plan-h">🧰 أدوات</h2>
     <div class="activities ex-tools">
-      <div class="activity-card" data-act="mockmenu"><div class="ic">📝</div><h3>الاختبار التجريبي</h3><p>نفس ترتيب اختبار الأبلة — ويطلع مستواك</p></div>
+      <div class="activity-card" data-act="mockmenu"><div class="ic">📝</div><h3>الاختبار التجريبي</h3><p>نفس الأوراق بالضبط — ويطلع مستواك</p></div>
       <div class="activity-card" data-act="review"><div class="ic">🔁</div><h3>راجعي أخطاءك</h3><p>${weakN ? `${weakN} سؤال يبيله مراجعة` : "ما عندك أخطاء محفوظة 🎉"}</p></div>
       <div class="activity-card" data-act="papers" data-p="A"><div class="ic">📄</div><h3>النماذج محلولة</h3><p>الأوراق الثلاث كاملة والإجابات ملوّنة</p></div>
       <div class="activity-card" data-act="report"><div class="ic">📊</div><h3>مستواي + واتساب</h3><p>تقرير المذاكرة — أرسليه لبابا</p></div>
@@ -444,10 +445,8 @@ function renderQuestion(box, q, { mock, onAnswer }) {
 // التدريب: جولة اختيار ← جولة كتابة (والأسئلة الغلط ترجع مرة ثانية)
 // ---------------------------------------------------------------
 
-function roundName(mode, L) {
-  if (mode === "write" && L?.id === "inst") return "🔁 جولة العكس";
-  if (mode === "write" && L?.id === "tf") return "📖 جولة المعاني";
-  return { choice: "🅰️ جولة الاختيار", write: "✍️ جولة الكتابة", build: "🧩 جولة الترتيب" }[mode] || mode;
+function roundName(mode) {
+  return { choice: "🅰️ جولة الاختيار", write: "✍️ جولة الكتابة", build: "🧩 جولة الترتيب", again: "🔁 الجولة الثانية" }[mode] || mode;
 }
 
 function startPractice(L, opts = {}) {
@@ -476,10 +475,10 @@ function renderRoundIntro() {
   show(`
     <div class="big-card" style="margin-top:10px">
       <div style="font-size:60px">${prevAcc >= 80 ? "🌟" : "💪"}</div>
-      <div class="word">خلصتي ${roundName(run.rounds[run.r - 1], run.L)}!</div>
+      <div class="word">خلصتي ${roundName(run.rounds[run.r - 1])}!</div>
       <div class="lname">من أول محاولة: <b>${prevAcc}%</b></div>
-      <div class="next-round">الحين: <b>${roundName(mode, run.L)}</b><br>
-        <small>${mode === "write" ? "نفس الأسئلة بس تكتبينها بنفسك ✍️" : mode === "build" ? "رتّبي الكلمات بالضغط عليها 🧩" : ""}</small></div>
+      <div class="next-round">الحين: <b>${roundName(mode)}</b><br>
+        <small>${mode === "write" ? "نفس الأسئلة بس تكتبينها بنفسك ✍️" : mode === "build" ? "نفس الجمل — رتّبي الكلمات بالضغط عليها 🧩" : "نفس الأسئلة مرة ثانية بترتيب جديد 🔁"}</small></div>
       <div class="card-actions"><button class="btn big-go" data-act="rgo">يلا ◀</button></div>
     </div>`);
 }
@@ -494,7 +493,7 @@ function nextQuestion() {
   const mode = run.rounds[run.r];
   const L = idx.lessonOfItem[cur.it.id];
   run.cur = cur;
-  run.q = makeQuestion(cur.it, mode, { pool: L.items, clue: mode === "choice" });
+  run.q = makeQuestion(cur.it, mode, { pool: L.items, clue: mode === "choice", box: L.box || null });
   run.hintUsed = false;
   renderPracticeQ();
 }
@@ -504,7 +503,7 @@ function renderPracticeQ() {
   const doneN = Object.keys(run.roundFirst).length;
   show(`
     <div class="lhead"><button class="btn ghost small" data-act="hub">→ الخطة</button><div class="lh-t">🎯 ${esc(run.title)}</div></div>
-    <div class="progress-chip">${roundName(run.rounds[run.r], run.L)} · ${Math.min(doneN + (run.cur.tries ? 0 : 1), n)}/${n}${run.cur.tries ? " · 🔁 مرة ثانية" : ""}</div>
+    <div class="progress-chip">${roundName(run.rounds[run.r])} · ${Math.min(doneN + (run.cur.tries ? 0 : 1), n)}/${n}${run.cur.tries ? " · 🔁 مرة ثانية" : ""}</div>
     <div class="pbar thin"><div style="width:${Math.round((100 * doneN) / n)}%"></div></div>
     <div class="qcard" id="qcard"></div>
     <div id="fb"></div>
@@ -568,7 +567,7 @@ async function finishPractice() {
       <div class="stars">${"⭐".repeat(stars)}${"☆".repeat(3 - stars)}</div>
       <div class="word">${acc}% من أول محاولة</div>
       <div class="lname">${acc >= 90 ? "ما شاء الله! حافظة الدرس 👏" : acc >= 70 ? "حلو! راجعي الأخطاء مرة وتصيرين بطلة" : "عادي! ارجعي ذاكري الدرس مرة ثانية وبعدها تدربي"}</div>
-      <div class="rounds-sum">${run.rounds.map((m, i) => `<span>${roundName(m, L)}: <b>${run.roundAcc[i]}%</b></span>`).join("")}</div>
+      <div class="rounds-sum">${run.rounds.map((m, i) => `<span>${roundName(m)}: <b>${run.roundAcc[i]}%</b></span>`).join("")}</div>
       <div class="lname" id="saveState" style="font-size:13px">جارٍ الحفظ…</div>
     </div>
     <div class="card-actions">
@@ -613,17 +612,17 @@ function renderMockMenu() {
   const nB = exam.papers.find((p) => p.id === "B").parts.reduce((a, p) => a + p.items.length, 0);
   show(`
     <div class="lhead"><button class="btn ghost small" data-act="hub">→ الخطة</button><div class="lh-t">📝 الاختبار التجريبي</div></div>
-    <div class="alert info">📌 مثل الاختبار الحقيقي: <b>ما فيه مساعدة ولا تصحيح أثناء الحل</b>. التصحيح والدرجة في الآخر — وبعدها ترسلين النتيجة لبابا 📤</div>
+    <div class="alert info">📌 الاختبار هو <b>نفس الورقة بالضبط</b> — نفس الأسئلة ونفس الترتيب، ولا سؤال من برا.<br>
+      مثل الاختبار الحقيقي: <b>ما فيه مساعدة ولا تصحيح أثناء الحل</b>. التصحيح والدرجة في الآخر — وبعدها ترسلين النتيجة لبابا 📤</div>
     <div class="mock-list">
-      ${card("variant", "🔀", "اختبار منوّع — نفس ترتيب الأبلة", "من 20 · كل مرة أسئلة جديدة من النماذج الثلاثة", true)}
-      ${card("A", "📄", "نموذج ١ بالضبط", "من 20 · نفس الورقة ونفس الترتيب")}
-      ${card("C", "📄", "نموذج ٢ بالضبط", "من 10 · ورقة مدرستي")}
-      ${card("B", "📝", "ورقة المراجعة كاملة", `${nB} سؤال · أطول اختبار`)}
+      ${card("A", "📄", "نموذج ١ — اختبار الفترة الأولى", "من 20 · 22 سؤال · نفس الورقة ونفس الترتيب", true)}
+      ${card("C", "📄", "نموذج ٢ — First Period Exam", "من 10 · 20 سؤال · ورقة مدرستي")}
+      ${card("B", "📝", "ورقة المراجعة — أ. تهاني", `${nB} سؤال · الورقة كاملة بترتيبها`)}
     </div>`);
 }
 
 function startMock(kind) {
-  const mock = kind === "variant" ? buildVariantMock(exam, idx) : buildPaperMock(exam, idx, kind);
+  const mock = buildPaperMock(exam, idx, kind);
   const flat = [];
   mock.parts.forEach((p, pi) => p.qs.forEach((q) => flat.push({ q, pi })));
   run = { type: "mock", mock, flat, i: 0, answers: [], startedAt: Date.now() };

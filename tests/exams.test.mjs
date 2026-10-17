@@ -1,5 +1,5 @@
 // «مذاكرة الاختبارات»: كل سؤال محلول يتحول لأسئلة تدريب واختبار صحيحة —
-// الجواب الصحيح موجود ومقبول، الخيارات فريدة، المربع فيه الجواب، والدرجة الكاملة = درجة الورقة.
+// الجواب الصحيح موجود ومقبول، الخيارات فريدة ومن الأوراق نفسها، المربع فيه الجواب، والدرجة الكاملة = درجة الورقة.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
@@ -9,7 +9,7 @@ import path from 'node:path';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const pub = path.join(here, '..', 'public');
 const E = await import(path.join(pub, 'assets', 'js', 'exam-engine.js'));
-const { EXAMS } = await import(path.join(pub, 'assets', 'js', 'exams-data.js'));
+const { EXAMS, MONTHS } = await import(path.join(pub, 'assets', 'js', 'exams-data.js'));
 
 const MODES = ['choice', 'write', 'build', 'box', 'match', 'cfmt', 'pair'];
 
@@ -55,19 +55,39 @@ for (const exam of EXAMS) {
     }
   });
 
-  test(`${exam.id}: الاختبار المنوّع بنفس ترتيب الأبلة ودرجته الكاملة ${exam.marks}`, () => {
-    for (let k = 0; k < 200; k++) {
-      const m = E.buildVariantMock(exam, idx);
-      assert.deepEqual(m.parts.map((p) => p.sec), exam.mock.map((x) => x.sec), 'ترتيب الأقسام');
-      for (const p of m.parts) {
-        for (const q of p.qs) checkQuestion(q, `mock/${q.itemId}`);
-        const ids = p.qs.map((q) => q.itemId);
-        assert.ok(!(ids.includes('g3') && ids.includes('g4')), 'سؤالا اليوم الوطني مع بعض');
+  test(`${exam.id}: كل الخيارات من أوراق الاختبار نفسها — ولا كلمة من برا`, () => {
+    const allowed = new Set(['T', 'F', ...MONTHS.map((m) => m.en)]);
+    for (const L of idx.allLessons) for (const it of L.items) {
+      [it.a, it.w, it.alt, it.answer, it.letter, ...(it.also || []), ...(it.wrong || []), ...(it.cfmt?.opts || []), ...(it.opts || [])]
+        .filter((v) => typeof v === 'string').forEach((v) => allowed.add(v));
+    }
+    for (const L of idx.allLessons) for (const it of L.items) {
+      for (const mode of MODES) for (let k = 0; k < 20; k++) {
+        const q = E.makeQuestion(it, mode, { pool: L.items, group: L.items.slice(0, 4), box: L.box || null });
+        if (q.kind !== 'choice') continue;
+        if (it.type === 'order' || it.type === 'monthOrder') {
+          // خيارات الترتيب = نفس كلمات الجملة بترتيب ثاني
+          const words = (it.target || []).join(' ');
+          for (const o of q.options) assert.equal(o.val.replace(/ – /g, ' ').replace(/[.]$/, '').split(' ').sort().join(' '), words.split(' ').sort().join(' '), `${it.id}: خيار ترتيب غريب`);
+          continue;
+        }
+        for (const o of q.options) assert.ok(allowed.has(o.val), `${it.id}/${mode}: خيار مو من الأوراق «${o.val}»`);
       }
-      const all = m.parts.flatMap((p, pi) => p.qs.map(() => ({ part: pi, ok: true })));
-      assert.equal(E.scoreMock(m, all).score, exam.marks);
-      const none = m.parts.flatMap((p, pi) => p.qs.map(() => ({ part: pi, ok: false })));
-      assert.equal(E.scoreMock(m, none).score, 0);
+    }
+  });
+
+  test(`${exam.id}: الدروس فيها كل أسئلة الأوراق الثلاث بس`, () => {
+    const inPapers = new Set(exam.papers.flatMap((p) => p.parts.flatMap((x) => x.items)));
+    assert.deepEqual([...inPapers].sort(), Object.keys(idx.items).sort());
+  });
+
+  test(`${exam.id}: أجوبة المطابقة في الاختبار بنفس ترتيبها في الورقة`, () => {
+    for (const paper of exam.papers) for (const [pi, part] of paper.parts.entries()) {
+      if (!part.matchOrder) continue;
+      const m = E.buildPaperMock(exam, idx, paper.id);
+      const want = part.matchOrder.map((id) => idx.items[id].a);
+      for (const q of m.parts[pi].qs) assert.deepEqual(q.options.map((o) => o.val), want);
+      assert.deepEqual(m.parts[pi].qs.map((q) => q.itemId), part.items, 'ترتيب الأسئلة');
     }
   });
 
