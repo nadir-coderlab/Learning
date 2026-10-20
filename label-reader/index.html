@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Label Reader</title>
+<style>
+:root{
+  --bg:#0B1220; --panel:#131C2E; --line:#26324A; --ink:#F1F5F9; --muted:#8C9AB3;
+  --accent:#34D399; --accent-ink:#052E22; --warn:#FCD34D; --bad:#F87171;
+  --f-ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --f-num:ui-monospace,"SF Mono","Roboto Mono",Menlo,Consolas,monospace;
+  --guide-w:min(88vw,520px);
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-ui);overflow:hidden}
+button{font:inherit;color:inherit}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+#stage{position:fixed;inset:0}
+video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
+#mask{position:absolute;inset:0;pointer-events:none}
+#guide{position:absolute;left:50%;top:38%;width:var(--guide-w);aspect-ratio:2.2/1;transform:translate(-50%,-50%);
+  border-radius:12px;box-shadow:0 0 0 200vmax rgba(5,10,20,.62);pointer-events:none;transition:box-shadow .2s}
+#guide::before,#guide::after{content:"";position:absolute;inset:-3px;border-radius:14px;border:3px solid transparent}
+#guide::before{border-color:rgba(255,255,255,.9);
+  -webkit-mask:linear-gradient(#000 0 0) top left/26px 26px no-repeat,linear-gradient(#000 0 0) top right/26px 26px no-repeat,linear-gradient(#000 0 0) bottom left/26px 26px no-repeat,linear-gradient(#000 0 0) bottom right/26px 26px no-repeat;
+          mask:linear-gradient(#000 0 0) top left/26px 26px no-repeat,linear-gradient(#000 0 0) top right/26px 26px no-repeat,linear-gradient(#000 0 0) bottom left/26px 26px no-repeat,linear-gradient(#000 0 0) bottom right/26px 26px no-repeat}
+#guide.locked::after{border-color:var(--accent)}
+#scanline{position:absolute;left:6%;right:6%;height:2px;top:50%;background:var(--accent);opacity:.75;border-radius:2px;animation:scan 1.6s ease-in-out infinite alternate}
+#guide.locked #scanline,#guide.idle #scanline{display:none}
+@keyframes scan{from{top:12%}to{top:88%}}
+@media (prefers-reduced-motion:reduce){#scanline{animation:none}}
+
+#top{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:calc(env(safe-area-inset-top,0px) + 12px) max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px))}
+.pill{display:inline-flex;align-items:center;gap:8px;background:rgba(11,18,32,.75);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.dot.live{background:var(--accent);box-shadow:0 0 0 4px rgba(52,211,153,.18)}
+.dot.err{background:var(--bad)}
+.icon-btn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:rgba(11,18,32,.75);display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.icon-btn[aria-pressed="true"]{background:var(--warn);color:#1F1300;border-color:var(--warn)}
+.icon-btn svg{width:22px;height:22px}
+.top-r{display:flex;gap:10px}
+
+#live{position:absolute;left:50%;transform:translateX(-50%);top:calc(38% + var(--guide-w)/4.4 + 18px);width:var(--guide-w);
+  display:grid;gap:6px;font-size:13px}
+.lv{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;background:rgba(11,18,32,.72);border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-height:34px}
+.lv b{font-weight:600;overflow-wrap:anywhere;min-width:0}
+.lv .n{font-family:var(--f-num)}
+.lv .ar{direction:rtl;text-align:left}
+.ticks{display:flex;gap:3px}
+.ticks i{width:7px;height:7px;border-radius:2px;background:var(--line)}
+.ticks i.on{background:var(--accent)}
+
+/* result sheet */
+#sheet{position:absolute;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);border-radius:20px 20px 0 0;
+  padding:14px max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 16px) max(16px,env(safe-area-inset-left,0px));
+  transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);max-height:78%;overflow:auto}
+#sheet.open{transform:none}
+@media (prefers-reduced-motion:reduce){#sheet{transition:none}}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
+.label{background:#FAFAF7;color:#111827;border-radius:12px;padding:8px}
+.label .rows{border:1.5px solid #2F3747}
+.row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;padding:9px 10px;border-top:1.5px solid #2F3747;min-height:54px}
+.row:first-child{border-top:0}
+.val{text-align:center;min-width:0;overflow-wrap:anywhere}
+.v-loc{font-size:19px;direction:rtl}
+.v-name{font-family:Georgia,"Times New Roman",serif;font-size:20px;letter-spacing:.02em}
+.v-num{font-family:var(--f-num);font-size:23px;font-weight:700;letter-spacing:.05em;font-variant-numeric:tabular-nums}
+.cp{border:1px solid #C9CFDA;background:#EEF1F6;color:#1B2A4E;border-radius:8px;padding:7px 11px;font-size:13px;font-weight:700;cursor:pointer;min-width:62px}
+.meta{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin:10px 2px 0;font-variant-numeric:tabular-nums}
+.acts{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;margin-top:14px}
+.btn{border-radius:14px;border:1px solid var(--line);background:transparent;padding:14px;font-weight:700;font-size:16px;cursor:pointer;min-height:52px}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+.hist{margin-top:16px}
+.hist summary{color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;padding:6px 2px;list-style:none}
+.hist summary::-webkit-details-marker{display:none}
+.hist ul{list-style:none;margin:6px 0 0;padding:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.hist li{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:9px 12px;border-top:1px solid var(--line);font-size:13px}
+.hist li:first-child{border-top:0}
+.hist .hn{font-family:var(--f-num);font-weight:700;font-size:14px}
+.hist .hs{color:var(--muted);overflow-wrap:anywhere}
+.hist .cp{background:transparent;color:var(--ink);border-color:var(--line)}
+.hist-tools{display:flex;justify-content:space-between;margin-top:6px}
+.link{background:none;border:0;color:var(--accent);font-weight:700;font-size:13px;padding:8px 2px;cursor:pointer}
+
+#gate{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center}
+#gate[hidden]{display:none}
+#gate .box{display:grid;gap:14px;justify-items:center;max-width:320px}
+#gate .big{width:84px;height:84px;border-radius:50%;background:var(--accent);color:var(--accent-ink);border:0;display:grid;place-items:center;cursor:pointer}
+#gate .big svg{width:38px;height:38px}
+#gate p{margin:0;color:var(--muted);font-size:14px}
+#toast{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);transform:translateX(-50%);background:#E2E8F0;color:#0B1220;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;opacity:0;transition:opacity .2s;pointer-events:none;z-index:5}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div id="stage">
+  <video id="video" playsinline muted autoplay></video>
+  <div id="mask"><div id="guide" class="idle"><div id="scanline"></div></div></div>
+
+  <div id="top">
+    <span class="pill"><span class="dot" id="dot"></span><span id="state">Ready</span></span>
+    <div class="top-r">
+      <button class="icon-btn" id="torch" type="button" aria-label="Flashlight" aria-pressed="false" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2h10l-2 6H9z"/><path d="M9 8v12a3 3 0 0 0 6 0V8"/><path d="M12 13v2"/></svg>
+      </button>
+      <button class="icon-btn" id="histBtn" type="button" aria-label="History">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="live" hidden>
+    <div class="lv"><b class="ar" id="lLoc">—</b><span class="ticks" id="tLoc"></span></div>
+    <div class="lv"><b id="lName">—</b><span class="ticks" id="tName"></span></div>
+    <div class="lv"><b class="n" id="lNum">—</b><span class="ticks" id="tNum"></span></div>
+  </div>
+
+  <div id="gate">
+    <div class="box">
+      <button class="big" id="startBtn" type="button" aria-label="Start camera">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+      </button>
+      <p id="gateMsg">Tap to start</p>
+    </div>
+  </div>
+
+  <div id="sheet" aria-live="polite">
+    <div class="grab"></div>
+    <div id="result">
+      <div class="label"><div class="rows">
+        <div class="row"><div class="val v-loc" id="rLoc">—</div><button class="cp" type="button" data-k="loc">Copy</button></div>
+        <div class="row"><div class="val v-name" id="rName">—</div><button class="cp" type="button" data-k="name">Copy</button></div>
+        <div class="row"><div class="val v-num" id="rNum">—</div><button class="cp" type="button" data-k="num">Copy</button></div>
+      </div></div>
+      <div class="meta"><span id="mConf">—</span><span id="mTime">—</span></div>
+      <div class="acts">
+        <button class="btn" id="copyAll" type="button">Copy all</button>
+        <button class="btn pri" id="again" type="button">Scan next</button>
+      </div>
+    </div>
+    <details class="hist" id="hist">
+      <summary id="histSum">History (0)</summary>
+      <ul id="histList"></ul>
+      <div class="hist-tools"><button class="link" id="copyHist" type="button">Copy list</button><button class="link" id="clearHist" type="button">Clear</button></div>
+    </details>
+  </div>
+  <div id="toast"></div>
+</div>
+
+<script src="tess/tesseract.min.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const video = $("video"), guide = $("guide");
+  const NEED = 2;           // identical reads required to confirm each field
+  const WINDOW = 12;        // frames kept for voting
+  let engW = null, engW2 = null, araW = null, stream = null, track = null;
+  let scanning = false, busy = false, frames = [], t0 = 0, current = null, frameCount = 0, readyFrame = -1;
+
+  const setState = (t, mode) => { $("state").textContent = t; $("dot").className = "dot" + (mode ? " " + mode : ""); };
+  const toast = t => { const e=$("toast"); e.textContent=t; e.classList.add("show"); clearTimeout(e._t); e._t=setTimeout(()=>e.classList.remove("show"),1300); };
+
+  // ---------- engines ----------
+  const base = new URL(".", location.href).href;
+  async function loadEngines(){
+    const opts = { workerPath: base+"tess/worker.min.js", corePath: base+"tess/core", langPath: base+"tess/lang", workerBlobURL: false };
+    const WL = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ";
+    const [e, e2, a] = await Promise.all([Tesseract.createWorker("eng",1,opts), Tesseract.createWorker("eng",1,opts), Tesseract.createWorker("ara",1,opts)]);
+    await Promise.all([
+      e.setParameters({ tessedit_pageseg_mode: "6", tessedit_char_whitelist: WL }),
+      e2.setParameters({ tessedit_pageseg_mode: "6", tessedit_char_whitelist: WL }),
+      a.setParameters({ tessedit_pageseg_mode: "6" })
+    ]);
+    engW = e; engW2 = e2; araW = a;
+  }
+
+  // ---------- camera ----------
+  async function startCamera(){
+    stream = await navigator.mediaDevices.getUserMedia({ audio:false, video:{ facingMode:{ideal:"environment"}, width:{ideal:1920}, height:{ideal:1080} } });
+    video.srcObject = stream; await video.play();
+    track = stream.getVideoTracks()[0];
+    try {
+      const caps = track.getCapabilities ? track.getCapabilities() : {};
+      if (caps.torch) $("torch").hidden = false;
+      if (caps.focusMode && caps.focusMode.includes("continuous")) track.applyConstraints({ advanced:[{focusMode:"continuous"}] }).catch(()=>{});
+    } catch(_){}
+  }
+  $("torch").addEventListener("click", async e => {
+    const b = e.currentTarget, on = b.getAttribute("aria-pressed") !== "true";
+    try { await track.applyConstraints({ advanced:[{ torch:on }] }); b.setAttribute("aria-pressed", String(on)); } catch(_){}
+  });
+
+  // ---------- crop the guide area out of the video ----------
+  function grab(width){
+    const vw = video.videoWidth, vh = video.videoHeight; if (!vw || !vh) return null;
+    const sr = video.getBoundingClientRect(), gr = guide.getBoundingClientRect();
+    const s = Math.max(sr.width / vw, sr.height / vh);              // object-fit: cover
+    const ox = (sr.width - vw * s) / 2, oy = (sr.height - vh * s) / 2;
+    const sx = (gr.left - sr.left - ox) / s, sy = (gr.top - sr.top - oy) / s;
+    const sw = gr.width / s, sh = gr.height / s;
+    const c = document.createElement("canvas");
+    c.width = width; c.height = Math.round(width * sh / sw);
+    const g = c.getContext("2d", { willReadFrequently:true });
+    g.filter = "grayscale(1)";
+    g.drawImage(video, sx, sy, sw, sh, 0, 0, c.width, c.height);
+    return c;
+  }
+
+  // black/white copy with the label's ruled lines removed
+  function cleaned(src){
+    const W = src.width, H = src.height;
+    const im = src.getContext("2d").getImageData(0, 0, W, H), d = im.data;
+    const hist = new Uint32Array(256), gray = new Uint8Array(W*H);
+    for (let i=0, j=0; i<d.length; i+=4, j++){ gray[j] = d[i]; hist[d[i]]++; }
+    const pct = q => { let acc=0, lim=q*W*H; for (let v=0; v<256; v++){ acc+=hist[v]; if (acc>=lim) return v; } return 255; };
+    const thr = (pct(0.90) + pct(0.03)) / 2;
+    const dark = new Uint8Array(W*H); for (let j=0; j<W*H; j++) dark[j] = gray[j] < thr ? 1 : 0;
+    const keep = dark.slice();
+    const hl = Math.max(40, W>>3), vl = Math.max(30, (H/5)|0);
+    for (let y=0; y<H; y++){ let x=0; while (x<W){ if (dark[y*W+x]){ const s0=x; while (x<W && dark[y*W+x]) x++;
+      if (x-s0 >= hl) for (let yy=Math.max(0,y-1); yy<=Math.min(H-1,y+1); yy++) for (let xx=s0; xx<x; xx++) keep[yy*W+xx]=0; } else x++; } }
+    for (let x=0; x<W; x++){ let y=0; while (y<H){ if (dark[y*W+x]){ const s0=y; while (y<H && dark[y*W+x]) y++;
+      if (y-s0 >= vl) for (let yy=s0; yy<y; yy++) for (let xx=Math.max(0,x-1); xx<=Math.min(W-1,x+1); xx++) keep[yy*W+xx]=0; } else y++; } }
+    for (let i=0, j=0; i<d.length; i+=4, j++){ const v = keep[j] ? 0 : 255; d[i]=d[i+1]=d[i+2]=v; d[i+3]=255; }
+    const c = document.createElement("canvas"); c.width = W; c.height = H; c.getContext("2d").putImageData(im, 0, 0);
+    return c;
+  }
+
+  // ---------- parsing ----------
+  // A read only counts when every word is confident and fully inside the frame (no cut-off text)
+  function parseEng(data, W){
+    const inside = w => w.bbox.x0 > W*0.03 && w.bbox.x1 < W*0.97;
+    let num = "", name = "";
+    for (const line of (data.lines || [])) {
+      const ws = (line.words || []).map(w => ({...w, t: w.text.trim()})).filter(w => w.t);
+      for (const w of ws) if (/^\d{8,13}$/.test(w.t) && w.confidence >= 80 && inside(w) && (!num || w.t.length === 11)) num = w.t;
+      const letters = ws.filter(w => /^[A-Z]{2,}$/.test(w.t));
+      if (letters.length >= 2 && letters.length === ws.filter(w => !/^\d+$/.test(w.t) && w.t.length > 1).length
+          && letters.every(w => w.confidence >= 75 && inside(w))) {
+        const cand = letters.map(w => w.t).join(" ");
+        if (cand.length > name.length) name = cand;
+      }
+    }
+    return { num, name };
+  }
+  function parseAra(data){
+    // keep only confident Arabic words from the first line that has any
+    for (const line of (data.lines || [])) {
+      const ws = (line.words || []).filter(w => w.confidence >= 86 && /^[ء-ي]{3,}$/.test(w.text.trim()));
+      if (ws.length) return ws.map(w => w.text.trim()).join(" ");
+    }
+    return "";
+  }
+
+  // ---------- voting ----------
+  // a name or number is confirmed only when two different reading methods produced the same value
+  const METHODS = ["R", "C", "S", "Q"];
+  function tally(key){
+    const c = {};
+    frames.forEach(f => {
+      if (key === "loc") { if (f.loc) { const v = c[f.loc] = c[f.loc] || {m:new Set(["x","y"]), n:0}; v.n++; } return; }
+      METHODS.forEach(m => { const val = f[key+m]; if (val) { const v = c[val] = c[val] || {m:new Set(), n:0}; v.m.add(m); v.n++; } });
+    });
+    const e = Object.entries(c).sort((x,y) => y[1].n - x[1].n);
+    const [best, v] = e[0] || ["", {m:new Set(), n:0}]; const second = e[1] ? e[1][1].n : 0;
+    return { best, n: v.n, clear: v.m.size >= 2 && v.n >= NEED && v.n > second };
+  }
+  function ticks(el, n){
+    el.textContent = ""; for (let i=0;i<NEED+1;i++){ const x=document.createElement("i"); if (i<n) x.className="on"; el.append(x); }
+  }
+
+  async function loop(){
+    if (!scanning) return;
+    if (!busy && video.readyState >= 2){
+      busy = true;
+      try{
+        const imgE = grab(440), imgA = grab(380);
+        if (imgE){
+          // four views of the same frame: plain and line-free, at two sizes
+          const imgQ = grab(360), imgC = cleaned(imgE), imgS = cleaned(imgQ);
+          const [[rR, rS], [rC, rQ], rA] = await Promise.all([
+            engW.recognize(imgE).then(async a => [a, await engW.recognize(imgS)]),
+            engW2.recognize(imgC).then(async a => [a, await engW2.recognize(imgQ)]),
+            araW.recognize(imgA)
+          ]);
+          if (!scanning) { busy = false; return; }
+          const R = parseEng(rR.data, 440), C = parseEng(rC.data, 440), S = parseEng(rS.data, 360), Q = parseEng(rQ.data, 360);
+          const p = { numR:R.num, nameR:R.name, numC:C.num, nameC:C.name, numS:S.num, nameS:S.name, numQ:Q.num, nameQ:Q.name, loc: parseAra(rA.data) };
+          frames.push(p); if (frames.length > WINDOW) frames.shift(); frameCount++;
+          const N = tally("num"), M = tally("name"), L = tally("loc");
+          $("lNum").textContent = N.best || "—"; $("lName").textContent = M.best || "—"; $("lLoc").textContent = L.best || "—";
+          ticks($("tNum"), N.n); ticks($("tName"), M.n); ticks($("tLoc"), L.n);
+          if (N.clear && M.clear && readyFrame < 0) readyFrame = frameCount;
+          const locReady = L.clear || (readyFrame >= 0 && frameCount - readyFrame >= 4);
+          if (N.clear && M.clear && locReady) lock({ num:N.best, name:M.best, loc:L.clear ? L.best : "", votes:Math.min(N.n,M.n) });
+        }
+      }catch(err){ console.warn(err); }
+      busy = false;
+    }
+    requestAnimationFrame(loop);
+  }
+
+  window.__lr = () => frames;
+  function beginScan(){
+    frames = []; current = null; t0 = performance.now(); frameCount = 0; readyFrame = -1;
+    ["lNum","lName","lLoc"].forEach(id => $(id).textContent = "—");
+    ["tNum","tName","tLoc"].forEach(id => ticks($(id), 0));
+    $("sheet").classList.remove("open"); $("live").hidden = false;
+    guide.className = ""; setState("Scanning", "live");
+    scanning = true; requestAnimationFrame(loop);
+  }
+
+  function lock(r){
+    scanning = false; current = r;
+    const secs = ((performance.now() - t0) / 1000).toFixed(1);
+    guide.className = "locked"; setState("Confirmed", "live");
+    if (navigator.vibrate) navigator.vibrate(60);
+    $("rLoc").textContent = r.loc || "—"; $("rName").textContent = r.name; $("rNum").textContent = r.num;
+    $("mConf").textContent = "✓ " + r.votes + " matching reads" + (r.num.length === 11 ? " · 11 digits" : " · " + r.num.length + " digits");
+    $("mTime").textContent = secs + " s";
+    $("live").hidden = true; $("sheet").classList.add("open");
+    addHist(r);
+  }
+
+  // ---------- history ----------
+  const KEY = "label-reader-history";
+  let hist = []; try { hist = JSON.parse(localStorage.getItem(KEY) || "[]"); if (!Array.isArray(hist)) hist = []; } catch(_){ hist = []; }
+  const saveHist = () => { try { localStorage.setItem(KEY, JSON.stringify(hist.slice(0,100))); } catch(_){} };
+  function addHist(r){ hist.unshift({ ...r, t: Date.now() }); hist = hist.slice(0,100); saveHist(); drawHist(); }
+  function drawHist(){
+    $("histSum").textContent = "History (" + hist.length + ")";
+    const ul = $("histList"); ul.textContent = "";
+    hist.forEach(r => {
+      const li = document.createElement("li"), m = document.createElement("div");
+      const n = document.createElement("div"); n.className = "hn"; n.textContent = r.num;
+      const s = document.createElement("div"); s.className = "hs";
+      s.textContent = [r.name, r.loc, new Date(r.t).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})].filter(Boolean).join(" · ");
+      m.append(n, s);
+      const b = document.createElement("button"); b.className = "cp"; b.type = "button"; b.textContent = "Copy";
+      b.onclick = () => copy(r.num);
+      li.append(m, b); ul.append(li);
+    });
+  }
+  drawHist();
+
+  // ---------- copy ----------
+  async function copy(text){
+    try { await navigator.clipboard.writeText(text); toast("Copied"); }
+    catch(_){
+      const ta = document.createElement("textarea"); ta.value = text; ta.setAttribute("readonly",""); ta.style.position="fixed"; ta.style.opacity="0";
+      document.body.append(ta); ta.select(); try { document.execCommand("copy"); toast("Copied"); } catch(__){ toast("Copy failed"); } ta.remove();
+    }
+  }
+  document.querySelectorAll(".row .cp").forEach(b => b.addEventListener("click", () => current && copy(current[b.dataset.k] || "")));
+  $("copyAll").onclick = () => current && copy([current.loc, current.name, current.num].filter(Boolean).join("\n"));
+  $("copyHist").onclick = () => hist.length && copy(hist.map(r => [r.num, r.name, r.loc].filter(Boolean).join("\t")).join("\n"));
+  let armed = false;
+  $("clearHist").onclick = e => {
+    const b = e.currentTarget;
+    if (!armed){ armed = true; b.textContent = "Tap again to clear"; setTimeout(() => { armed = false; b.textContent = "Clear"; }, 3000); return; }
+    armed = false; b.textContent = "Clear"; hist = []; saveHist(); drawHist();
+  };
+  $("again").onclick = beginScan;
+  $("histBtn").onclick = () => {
+    const sh = $("sheet");
+    if (sh.classList.contains("open") && !current){ sh.classList.remove("open"); return; }
+    $("result").hidden = !current; $("hist").open = true; sh.classList.add("open");
+  };
+  $("again").addEventListener("click", () => { $("result").hidden = false; });
+
+  // ---------- start ----------
+  $("startBtn").onclick = async () => {
+    $("startBtn").disabled = true; $("gateMsg").textContent = "Loading…"; setState("Loading", "");
+    try {
+      await Promise.all([startCamera(), loadEngines()]);
+      $("gate").hidden = true; beginScan();
+    } catch (err) {
+      console.error(err);
+      $("startBtn").disabled = false; setState("Error", "err");
+      $("gateMsg").textContent = (err && err.name === "NotAllowedError") ? "Camera access denied" : "Could not start: " + (err && (err.message || err.name) || err);
+    }
+  };
+})();
+</script>
+</body>
+</html>
